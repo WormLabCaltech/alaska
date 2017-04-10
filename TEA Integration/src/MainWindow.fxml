@@ -8,7 +8,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane id="WrappingNode" gridLinesVisible="true" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<GridPane id="WrappingNode" gridLinesVisible="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainWindowController">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="120.0" />
     <ColumnConstraints hgrow="SOMETIMES" />
@@ -16,7 +16,7 @@
   <rowConstraints>
     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="70.0" vgrow="SOMETIMES" />
     <RowConstraints vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="-Infinity" minHeight="50.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <ImageView fitHeight="70.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
@@ -24,7 +24,7 @@
             <Image url="@banner.jpg" />
          </image>
       </ImageView>
-      <FlowPane id="ContentPane" minHeight="50.0" minWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <FlowPane id="ContentPane" fx:id="contentPane" minHeight="50.0" minWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>

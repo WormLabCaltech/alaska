@@ -2,6 +2,7 @@
  * Created by lioscro on 4/7/17.
  */
 
+import com.sun.javafx.fxml.builder.JavaFXSceneBuilder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -35,19 +36,36 @@ public class MainWindow extends Application {
 
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }
 
-    private void changeContentPane(String fxmlFile) throws Exception{
+    public void changeContentPane(String fxmlFile) throws Exception{
         /*
         Changes node on changingPane.
          */
+        Parent wrappingNode = FXMLLoader.load(getClass().getResource("MainWindow.fxml"));
         Parent contentNode = FXMLLoader.load(getClass().getResource(fxmlFile));
-        this.wrappingNode = FXMLLoader.load(getClass().getResource("MainWindow.fxml"));
-        Scene newScene = new Scene(wrappingNode);
-        ((FlowPane) newScene.lookup("#ContentPane")).getChildren().setAll(contentNode);
-        this.primaryStage.setScene(newScene);
+
+        //Inject content to FlowPane
+        ((FlowPane) wrappingNode.lookup("#ContentPane")).getChildren().setAll(contentNode);
+
+        //Temporary Stage to calculate required window height & width
+        Stage tempStage = new Stage();
+        tempStage.setScene(new Scene(wrappingNode));
+        //Should not be seen by user
+        tempStage.setOpacity(0);
+        tempStage.show();
+
+        double tempHeight = tempStage.getHeight();
+        double tempWidth = tempStage.getWidth();
+
+        tempStage.close();
+
+        //Set appropriate window size and inject content to FlowPane
+        this.primaryStage.setHeight(tempHeight);
+        this.primaryStage.setWidth(tempWidth);
+        this.contentPane.getChildren().setAll(contentNode);
+
     }
 }

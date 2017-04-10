@@ -5,18 +5,18 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane id="MainContent" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane id="Content" gridLinesVisible="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="358.0" prefWidth="547.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TeaInputWindowController">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="147.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity" prefWidth="400.0" />
   </columnConstraints>
   <rowConstraints>
     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES" />
-    <RowConstraints minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-    <RowConstraints minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="110.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="90.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="116.0" minHeight="90.0" prefHeight="91.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <FlowPane prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2147483647">
@@ -32,16 +32,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <Label text="Gene List" />
-         </children>
-      </FlowPane>
-      <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-         <children>
-            <TextField />
-            <Button mnemonicParsing="false" text="Browse..." />
+            <Label fx:id="geneList_label" text="Gene List" />
          </children>
       </FlowPane>
       <FlowPane alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
@@ -49,7 +40,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <Label text="Title" />
+            <Label fx:id="title_label" text="Title" />
          </children>
       </FlowPane>
       <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
@@ -57,7 +48,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <TextField />
+            <TextField fx:id="title_textField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
          </children>
       </FlowPane>
       <FlowPane alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
@@ -65,7 +56,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <Label text="Type" />
+            <Label fx:id="type_label" text="Type" />
          </children>
       </FlowPane>
       <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
@@ -73,7 +64,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <ChoiceBox prefWidth="150.0" />
+            <ChoiceBox fx:id="type_choiceBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="150.0" />
          </children>
       </FlowPane>
       <TitledPane prefHeight="132.0" prefWidth="640.0" text="Optional Attributes" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" GridPane.valignment="TOP">
@@ -93,9 +84,9 @@
                <children>
                   <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
                      <children>
-                        <CheckBox mnemonicParsing="false" />
-                        <Label text="Q-value Threshold" />
-                        <TextField>
+                        <CheckBox fx:id="qValue_checkBox" mnemonicParsing="false" />
+                        <Label fx:id="qValue_label" text="Q-value Threshold" />
+                        <TextField fx:id="qValue_textField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="80.0">
                            <FlowPane.margin>
                               <Insets left="20.0" />
                            </FlowPane.margin>
@@ -111,7 +102,7 @@
                   <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                   <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                      <children>
-                        <CheckBox mnemonicParsing="false" text="Save Graph" />
+                        <CheckBox fx:id="saveGraph_checkBox" mnemonicParsing="false" text="Save Graph" />
                      </children>
                      <padding>
                         <Insets left="10.0" />
@@ -127,7 +118,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <Label text="Output Directory" />
+            <Label fx:id="output_label" text="Output Directory" />
          </children>
       </FlowPane>
       <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
@@ -135,9 +126,40 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-            <TextField />
-            <Button mnemonicParsing="false" text="Browse..." />
+            <TextField fx:id="output_textField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
+            <Button fx:id="output_browseBtn" mnemonicParsing="false" onAction="#buttonHandler" text="Browse..." />
          </children>
       </FlowPane>
+      <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <children>
+            <FlowPane>
+               <children>
+                  <Label text="File Name: " />
+                  <Label fx:id="geneList_fileName" />
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </FlowPane>
+            <FlowPane>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+               <children>
+                  <Label text="Size: " />
+                  <Label fx:id="geneList_fileSize" />
+               </children>
+            </FlowPane>
+            <FlowPane alignment="CENTER_LEFT">
+               <children>
+                  <TextField fx:id="geneList_textField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
+                  <Button fx:id="geneList_browseBtn" mnemonicParsing="false" onAction="#buttonHandler" text="Browse..." />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </FlowPane>
+         </children>
+      </VBox>
    </children>
 </GridPane>
