@@ -60,6 +60,7 @@ public class TeaInputWindowController implements Initializable{
                 directoryChooser.setTitle("Choose Output Directory");
                 File outputPath = directoryChooser.showDialog(new Stage());
                 output_textField.setText(outputPath.getPath());
+                break;
         }
     }
 
