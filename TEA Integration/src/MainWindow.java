@@ -32,6 +32,13 @@ public class MainWindow extends Application {
         this.primaryStage.show();
 
         //set first content node
+
+
+        String[] args = {"-h"};
+        PythonScriptExecutor tea = new PythonScriptExecutor("C:\\Github\\Repos\\alaska\\TEA Integration\\src\\hypergeometricTests.py", args);
+        Thread thread = new Thread(tea, "TEA");
+        thread.start();
+
         changeContentPane("TeaInputWindow.fxml");
 
     }
