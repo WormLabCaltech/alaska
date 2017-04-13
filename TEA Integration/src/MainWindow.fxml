@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+MainWindow.fxml
+This .fxml file is the JavaFX layout file for the main Alaska window.
+The FlowPane with id "ContentPane" dynamically changes according to the task.
+
+Generated with Scene Builder 2.0
+ -->
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.image.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <GridPane id="WrappingNode" gridLinesVisible="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainWindowController">
@@ -16,7 +22,6 @@
   <rowConstraints>
     <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="70.0" vgrow="SOMETIMES" />
     <RowConstraints vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <ImageView fitHeight="70.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">

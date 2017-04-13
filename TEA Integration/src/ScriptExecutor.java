@@ -7,6 +7,10 @@ import java.io.InputStream;
  * Created by phoen on 4/10/2017.
  */
 public abstract class ScriptExecutor implements Runnable {
+    /**
+     * Abstract class that is inherited by all classes for executing scripts.
+     * All classes inheriting ScriptExecutor must be run as an independent Thread.
+     */
     String scriptName;
     String scriptPath;
     String[] args;
