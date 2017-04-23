@@ -6,6 +6,7 @@ package alaska; /**
 import alaska.enrichment_analysis.TeaInputWindow;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -29,7 +30,7 @@ public class MainWindow extends Application {
     Button before_button;
     Button next_button;
     Label currentStep;
-    ArrayList<Scene> previousScenes = new ArrayList<Scene>();
+
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -46,18 +47,22 @@ public class MainWindow extends Application {
         this.next_button = (Button) this.wrappingNode.lookup("#next_button");
         this.primaryScene = new Scene(this.wrappingNode);
 
+        // Set and
+
         this.primaryStage.setTitle("Alaska");
         this.primaryStage.setScene(this.primaryScene);
         this.primaryStage.show();
 
-        // What to show right after the window is opened
-        changeContentPane(new TeaInputWindow());
 
     }
 
-    public static void main(String[] args) {
+    public static void launch(String[] args) {
         launch(args);
     }
+
+    /*public static void main(String[] args) {
+        launch(args);
+    }*/
 
     public void changeContentPane(ContentWindow contentWindow) throws Exception {
         /**
@@ -91,5 +96,29 @@ public class MainWindow extends Application {
         this.before_button.setText(contentWindow.BEFORE_BUTTON_TEXT);
         this.next_button.setText(contentWindow.NEXT_BUTTON_TEXT);
         this.currentStep.setText(contentWindow.LABEL_TEXT);
+    }
+
+    public void beforeBtnHandler() {
+        /**
+         * PLACEHOLDER
+         * Button handler for the button to go back a step.
+         * This method can not be placed in the Controller class due to the inability to change content pane
+         * from the Controller class.
+         */
+
+    }
+
+    public void nextBtnHandler() {
+        /**
+         * PLACEHOLDER
+         * Button handler for the button to proceed a step.
+         * This method can not be placed in the Controller class due to the inability to change content pane
+         * from the Controller class.
+         */
+
+    }
+
+    public Node lookup(String selector) {
+        return this.primaryScene.lookup("#" + selector);
     }
 }

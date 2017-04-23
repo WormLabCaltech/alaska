@@ -1,6 +1,6 @@
 package alaska.enrichment_analysis;
 
-import alaska.PythonScriptExecutor;
+import alaska.ScriptExecutor;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import sun.font.Script;
 
 import java.io.File;
 import java.net.URL;
@@ -88,9 +89,8 @@ public class TeaInputWindowController implements Initializable{
             System.out.println(args[i]);
         }
 
-        PythonScriptExecutor tea = new PythonScriptExecutor("C:\\Github\\Repos\\alaska\\TEA Integration\\src\\hypergeometricTests.py", args);
-        Thread thread = new Thread(tea, "Enrichment Analysis");
-        thread.start();
+        ScriptExecutor tea = new ScriptExecutor("C:\\Github\\Repos\\alaska\\TEA Integration\\src\\hypergeometricTests.py", args);
+        tea.runScript();
     }
 
     @FXML
@@ -118,15 +118,7 @@ public class TeaInputWindowController implements Initializable{
 
                 // Automatically add subdirectories to save analysis
                 String outputDirectory = outputPath.getPath();
-                outputDirectory += title_textField.getText() + "\\";
-                String choice = type_choiceBox.getValue().toString();
-                if(choice.equals("Tissue")) {
-                outputDirectory += "TEA\\";
-                } else if(choice.equals("Phenotype")) {
-                    outputDirectory += "PEA\\";
-                } else if(choice.equals("Gene Ontology (GO)")) {
-                    outputDirectory += "GEA\\";
-                }
+                outputDirectory += "\\" + title_textField.getText() + "\\";
                 output_textField.setText(outputDirectory);
                 break;
         }
