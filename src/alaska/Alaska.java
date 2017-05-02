@@ -9,10 +9,10 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.rosuda.JRI.Rengine;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by phoen on 4/20/2017.
@@ -24,6 +24,11 @@ public class Alaska extends Application {
     // Alaska window
     static MainWindow alaska = new MainWindow();
     static String workingDir = new File("").getAbsolutePath();
+
+    final String KALLISTO_PATH = "";
+    final String SLEUTH_PATH = "";
+    final String ENRICHMENT_ANALYSIS_PATH = "";
+
 
 
     public static void main(String[] args) {
@@ -73,7 +78,7 @@ public class Alaska extends Application {
 
     }
 
-    private void scriptPopup(ScriptExecutor script, String title, String text, boolean left_visible, boolean right_visible, String left_text, String right_text) throws Exception {
+    private void scriptPopup(String title, String text, boolean left_visible, boolean right_visible, String left_text, String right_text) throws Exception {
         /**
          * Method to open a new popup window for running scripts.
          * TODO: WORK IN PROGRESS
@@ -81,26 +86,6 @@ public class Alaska extends Application {
 
         PopupWindow popupWindow = new PopupWindow(title, text, left_visible, right_visible, left_text, right_text);
 
-        Task updateTask = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
-                long startTime = System.nanoTime();
-                //script.runScript();
-                while(!script.terminated) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            long elapsedTime = System.nanoTime() - startTime;
-                            popupWindow.changeText(Long.toString(elapsedTime));
-                        }
-                    });
-                }
-                return null;
-            }
-        };
-        Thread updateThread = new Thread(updateTask);
-        updateThread.setDaemon(true);
-        updateThread.start();
 
 
     }
@@ -111,9 +96,44 @@ public class Alaska extends Application {
          * Uses JRI library to run R script in a separate thread
          * TODO: DOESN'T WORK, CHANGE BACK TO SCRIPTEXECUTOR
          */
-        String[] r_args = {"--vanilla"};
-        Rengine rengine = new Rengine(r_args, false, null);
-        rengine.eval("source(\"/src/alaska/sleuth/cmd_line_diff_exp_analyzer.R\")");
+        // Open popup to ask whether Shiny server should be started
+        PopupWindow shinyPopup = new PopupWindow("Shiny?", "Would you like to open a shiny web server?",
+                true, true, "Yes", "No");
+
+        /* Start Sleuth Arguments ArrayList */
+        ArrayList<String> args = new ArrayList<>();
+        args.add("Rscript");
+        args.add("src/alaska/sleuth/diff_exp_analyzer.R");
+        args.add("-d");
+        args.add("src/alaska/sleuth/kallisto");
+        args.add("-o");
+        args.add("src/alaska/sleuth/kallisto/sleuth_output");
+        /* End Sleuth Arguments ArrayList */
+
+
+        // Event Handlers for yes and no buttons on popup
+        EventHandler<ActionEvent> yes = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                args.add("-s"); // Add shiny option argument to Sleuth arguments
+                shinyPopup.popupStage.close();
+                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args.toArray(new String[0]));
+                ProgressWindow progressWindow = new ProgressWindow(sleuth);
+                progressWindow.output_label.setText("Starting Sleuth");
+            }
+        };
+        EventHandler<ActionEvent> no = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                shinyPopup.popupStage.close();
+                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args.toArray(new String[0]));
+                ProgressWindow progressWindow = new ProgressWindow(sleuth);
+                progressWindow.output_label.setText("Starting Sleuth");
+            }
+        };
+        // Assign Event Handlers
+        shinyPopup.left_button.setOnAction(yes);
+        shinyPopup.right_button.setOnAction(no);
     }
 
     private void runEnrichmentAnalysis() {

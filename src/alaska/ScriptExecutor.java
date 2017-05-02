@@ -1,5 +1,6 @@
 package alaska;
 
+import javafx.concurrent.Task;
 import sun.font.Script;
 
 import java.io.BufferedReader;
@@ -20,8 +21,9 @@ public class ScriptExecutor implements Runnable {
     String[] args;
     String output_line;
     String output_all;
-    String error_line;
-    String error_all;
+
+    Process process;
+    Thread scriptThread;
     boolean terminated = false;
 
     public ScriptExecutor(String scriptName, String[] args) {
@@ -30,7 +32,7 @@ public class ScriptExecutor implements Runnable {
     }
 
     public void runScript() {
-        Thread scriptThread = new Thread(this, scriptName);
+        scriptThread = new Thread(this, scriptName);
         scriptThread.start();
     }
 
@@ -43,29 +45,26 @@ public class ScriptExecutor implements Runnable {
 
             // Run command in commandline
             ProcessBuilder builder = new ProcessBuilder(commands);
-            Process process = builder.start();
+            builder.redirectErrorStream(true); // Redirects error stream to standard input stream
+            process = builder.start();
 
             /* Separate streams to capture output (called InputStream for some reason)
             and errors while executing command */
             InputStream inputStream = process.getInputStream();
-            InputStream errorStream = process.getErrorStream();
 
             // Capturing output and error must be buffered, otherwise all lines will be printed after execution.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream), 1);
-            BufferedReader bufferedError = new BufferedReader(new InputStreamReader(errorStream), 1);
 
             // Print output to standard out
             String line;
-            String error;
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
-                this.output_line = line;
-                this.output_all += line;
-            }
-            while ((error = bufferedError.readLine()) != null) {
-                System.out.println(error);
-                this.error_line = error;
-                this.error_all += error;
+            String prev_line = "";
+            while((line = bufferedReader.readLine()) != null) {
+                if(!line.equals(prev_line)) {
+                    output_all += line;
+                    output_line = line;
+                    prev_line = line;
+                    System.out.println(output_line);
+                }
             }
 
             inputStream.close();
@@ -79,5 +78,12 @@ public class ScriptExecutor implements Runnable {
     public void run() {
         exec();
     };
+
+    public String getOutput() {
+        if(output_line == null) {
+            return "";
+        }
+        return output_line;
+    }
 
 }

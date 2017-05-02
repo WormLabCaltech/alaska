@@ -26,9 +26,9 @@ if(length(opt$d) == 0) {
   stop('Directory cannot be empty')
 }
 
-if(lenght(opt$o) == 0) {
-  stop('Output directory cannot be empty')
-}
+#if(lenght(opt$o) == 0) {
+#  stop('Output directory cannot be empty')
+#}
 
 if(!file.exists(opt$d)) {
   stop('Directory must exist')
