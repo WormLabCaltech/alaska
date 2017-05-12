@@ -115,8 +115,8 @@ write.csv(results_table, paste(output_dir, 'betas.csv', sep='/'))
 results_table <- sleuth_results(so, genovar, 'full', test_type= 'wt')
 write.csv(results_table, paste(output_dir, 'betas.csv', sep='/'))
 
-print('Correcting batch effects')
 if (opt$batch == TRUE) {
+  print('#Correcting batch effects')
   so <- sleuth_wt(so, which_beta = '(Intercept)', which_model = 'full')
   so <- sleuth_wt(so, which_beta = batchvar, which_model = 'full')
   results_table <- sleuth_results(so, '(Intercept)','full', test_type= 'wt')

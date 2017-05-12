@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  */
 
 
-public class TeaInputWindowController implements Initializable{
+public class TeaInputWindowController {
     /**
      * Controller class for TeaInputWindow.
      * Manages all operations related to TEA.
@@ -38,11 +38,12 @@ public class TeaInputWindowController implements Initializable{
 
     @FXML Label type_label;
     @FXML ChoiceBox type_choiceBox;
-    @FXML String[] choices = {"Tissue", "Phenotype", "Gene Ontology (GO)"};
 
     @FXML Label output_label;
     @FXML TextField output_textField;
     @FXML Button output_browseBtn;
+
+    @FXML TitledPane optional_pane;
 
     @FXML CheckBox qValue_checkBox;
     @FXML Label qValue_label;
@@ -51,47 +52,49 @@ public class TeaInputWindowController implements Initializable{
     @FXML CheckBox saveGraph_checkBox;
 
     @FXML
-    public void run() {
-        /**
-         * On Action for Run Enrichment Analysis button.
-         * Runs enrichment analysis using parameters entered in the window.
-         *
-         * TODO: Add meaningful notification when field(s) are not completed. (popup?)
-         * TODO: change absolute path to tea script into relative path
-         */
-        System.out.println("Running");
-        String choice = type_choiceBox.getValue().toString();
-        String analysisType = "";
-        System.out.println(choice);
-        if(choice.equals("Tissue")) {
-            analysisType = "tissue";
-        } else if(choice.equals("Phenotype")) {
-            analysisType = "phenotype";
-        } else if(choice.equals("Gene Ontology (GO)")) {
-            analysisType = "go";
+    public void geneListFilled() {
+        if(!geneList_textField.getText().equals("")) {
+            // Enable title text field
+            title_textField.setDisable(false);
+        } else {
+            title_textField.setDisable(true);
         }
-
-        // Create specified output directory if it doesn't exist (which is most likely).
-        File outputDirectory = new File(output_textField.getText());
-        System.out.println(outputDirectory.getPath());
-        System.out.println(outputDirectory.exists());
-        if (!outputDirectory.exists()) {
-            try {
-                outputDirectory.mkdirs();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Run TEA in thread to prevent blocking
-        String[] args = {geneList_textField.getText(), output_textField.getText() + "result", analysisType, "-s"};
-        for(int i = 0; i<args.length; i++) {
-            System.out.println(args[i]);
-        }
-
-        ScriptExecutor tea = new ScriptExecutor("C:\\Github\\Repos\\alaska\\TEA Integration\\src\\hypergeometricTests.py", args);
-        tea.runScript();
     }
+
+    @FXML
+    public void titleChanged() {
+        if(!title_textField.getText().equals("")) {
+            // Enable output text field and browse button
+            output_textField.setDisable(false);
+            output_browseBtn.setDisable(false);
+
+            File output = new File(geneList_textField.getText());
+            String outputDir = output.getParentFile().getPath();
+            outputDir += "/" + title_textField.getText() + "/enrichment_analysis/";
+            output_textField.setText(outputDir);
+            optional_pane.setDisable(false);
+            optional_pane.setExpanded(true);
+        } else {
+            output_textField.setDisable(true);
+            output_browseBtn.setDisable(true);
+            output_textField.setText("");
+            optional_pane.setDisable(true);
+            optional_pane.setExpanded(false);
+        }
+    }
+
+    @FXML
+    public void outputFilled() {
+        if(!output_textField.getText().equals("")) {
+            optional_pane.setDisable(false);
+            optional_pane.setExpanded(true);
+        } else {
+            optional_pane.setExpanded(false);
+            optional_pane.setDisable(true);
+        }
+    }
+
+
 
     @FXML
     public void buttonHandler(ActionEvent ae) {
@@ -108,28 +111,25 @@ public class TeaInputWindowController implements Initializable{
                 // Set labels & text field according to selected file
                 geneList_fileName.setText(geneFile.getName());
                 geneList_fileSize.setText(Long.toString(geneFile.length()) + " bytes");
-                geneList_textField.setText(geneFile.getPath());
+
+                // Set paths for genelist
+                String geneFilePath = geneFile.getPath();
+                geneList_textField.setText(geneFilePath);
+                title_textField.setDisable(false);
                 break;
             case "output_browseBtn":
                 // Open browse window
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 directoryChooser.setTitle("Choose Output Directory");
-                File outputPath = directoryChooser.showDialog(new Stage());
+                File output = directoryChooser.showDialog(new Stage());
 
                 // Automatically add subdirectories to save analysis
-                String outputDirectory = outputPath.getPath();
-                outputDirectory += "\\" + title_textField.getText() + "\\";
+                String outputDirectory = output.getPath();
+                outputDirectory += "/" + title_textField.getText() + "/";
                 output_textField.setText(outputDirectory);
+                optional_pane.setDisable(false);
+                optional_pane.setExpanded(true);
                 break;
         }
-    }
-
-    @Override
-    public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        /**
-         * Automatically called once the scene is initialized.
-         */
-        // Add enrichment analysis types to choice box
-        type_choiceBox.setItems(FXCollections.observableArrayList(choices));
     }
 }

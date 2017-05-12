@@ -72,6 +72,7 @@ public class PopupWindow {
         popupStage.setScene(popupScene);
 
         popupStage.setTitle(TITLE);
+        popupStage.centerOnScreen();
         popupStage.show();
     }
 

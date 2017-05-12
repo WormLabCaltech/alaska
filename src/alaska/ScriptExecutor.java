@@ -16,9 +16,8 @@ public class ScriptExecutor implements Runnable {
      * Abstract class that is inherited by all classes for executing scripts.
      * All classes inheriting ScriptExecutor must be run as an independent Thread.
      */
-    ArrayList<String> commands = new ArrayList<String>();
     String scriptName;
-    String[] args;
+    ArrayList<String> args;
     String output_line;
     String output_all;
 
@@ -26,25 +25,21 @@ public class ScriptExecutor implements Runnable {
     Thread scriptThread;
     boolean terminated = false;
 
-    public ScriptExecutor(String scriptName, String[] args) {
+    public ScriptExecutor(String scriptName, ArrayList<String> args) {
         this.scriptName = scriptName;
         this.args = args;
     }
 
     public void runScript() {
         scriptThread = new Thread(this, scriptName);
+        scriptThread.setDaemon(true);
         scriptThread.start();
     }
 
     public void exec() {
         try {
-            // ArrayList to store all the arguments of the command
-            for (int i = 0; i < this.args.length; i++) {
-                commands.add(this.args[i]);
-            }
-
             // Run command in commandline
-            ProcessBuilder builder = new ProcessBuilder(commands);
+            ProcessBuilder builder = new ProcessBuilder(args);
             builder.redirectErrorStream(true); // Redirects error stream to standard input stream
             process = builder.start();
 

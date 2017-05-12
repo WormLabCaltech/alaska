@@ -8,7 +8,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
 <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView cache="true" fitHeight="103.0" fitWidth="155.0" pickOnBounds="true" preserveRatio="true">
@@ -17,6 +16,7 @@
          </image>
       </ImageView>
       <Label text="Running..." />
+      <Label fx:id="time_label" text="Elapsed Time: " />
       <Label id="output_label" fx:id="output_label" text="Text" />
    </children>
 </VBox>

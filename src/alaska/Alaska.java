@@ -11,7 +11,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 /**
@@ -74,7 +76,7 @@ public class Alaska extends Application {
         alaska.before_button.setOnAction(beforeButtonHandler);
         alaska.next_button.setOnAction(nextButtonHandler);
 
-        alaska.changeContentPane(new SleuthInputWindow());
+        alaska.changeContentPane(new TeaInputWindow());
 
     }
 
@@ -110,14 +112,13 @@ public class Alaska extends Application {
         args.add("src/alaska/sleuth/kallisto/sleuth_output");
         /* End Sleuth Arguments ArrayList */
 
-
         // Event Handlers for yes and no buttons on popup
         EventHandler<ActionEvent> yes = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 args.add("-s"); // Add shiny option argument to Sleuth arguments
                 shinyPopup.popupStage.close();
-                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args.toArray(new String[0]));
+                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args);
                 ProgressWindow progressWindow = new ProgressWindow(sleuth);
                 progressWindow.output_label.setText("Starting Sleuth");
             }
@@ -126,7 +127,7 @@ public class Alaska extends Application {
             @Override
             public void handle(ActionEvent event) {
                 shinyPopup.popupStage.close();
-                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args.toArray(new String[0]));
+                ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args);
                 ProgressWindow progressWindow = new ProgressWindow(sleuth);
                 progressWindow.output_label.setText("Starting Sleuth");
             }
@@ -142,14 +143,14 @@ public class Alaska extends Application {
          */
 
         // Get important information from nodes
-        String geneListPath = ((TextField) alaska.lookup("geneList_textField")).getText();
-        String title = ((TextField) alaska.lookup("title_textField")).getText();
-        String outputPath = ((TextField) alaska.lookup("output_textField")).getText();
+        String geneListPath = ((TextField) alaska.lookup("#geneList_textField")).getText();
+        String title = ((TextField) alaska.lookup("#title_textField")).getText();
+        String outputPath = ((TextField) alaska.lookup("#output_textField")).getText();
 
         // Create specified output directories if they do not exist
-        File teaOutput = new File(outputPath + "\\TEA\\");
-        File peaOutput = new File(outputPath + "\\PEA\\");
-        File goOutput = new File(outputPath + "\\GO\\");
+        File teaOutput = new File(outputPath + "/TEA/");
+        File peaOutput = new File(outputPath + "/PEA/");
+        File goOutput = new File(outputPath + "/GO/");
         if(!teaOutput.exists()) {
             try {
                 teaOutput.mkdirs();
@@ -173,13 +174,34 @@ public class Alaska extends Application {
         }
 
         // Run TEA in new thread
-        String[] teaArgs = {geneListPath, teaOutput.getPath() + "result", "tissue", "-s"};
-        String[] peaArgs = {geneListPath, teaOutput.getPath() + "result", "phenotype", "-s"};
-        String[] goArgs = {geneListPath, teaOutput.getPath() + "result", "go", "-s"};
+        ArrayList<String> teaArgs = new ArrayList<String>();
+        ArrayList<String> peaArgs = new ArrayList<String>();
+        ArrayList<String> goArgs = new ArrayList<String>();
 
-        ScriptExecutor tea = new ScriptExecutor(workingDir.replace("\\","/") + "/enrichment_analysis/hypergeometrictest.py", teaArgs);
-        ScriptExecutor pea = new ScriptExecutor("/alaska/enrichment_analysis/hypergeometricTests.py", peaArgs);
-        ScriptExecutor go = new ScriptExecutor("/alaska/enrichment_analysis/hypergeometricTests.py", goArgs);
+        teaArgs.add("python");
+        teaArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
+        teaArgs.add(geneListPath);
+        teaArgs.add(teaOutput.getPath());
+        teaArgs.add("tissue");
+        teaArgs.add("-s");
+
+        peaArgs.add("python");
+        peaArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
+        peaArgs.add(geneListPath);
+        peaArgs.add(peaOutput.getPath());
+        peaArgs.add("phenotype");
+        peaArgs.add("-s");
+
+        goArgs.add("python");
+        goArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
+        goArgs.add(geneListPath);
+        goArgs.add(teaOutput.getPath() + "result");
+        goArgs.add("go");
+        goArgs.add("-s");
+
+        ScriptExecutor tea = new ScriptExecutor("Tea", teaArgs);
+        ScriptExecutor pea = new ScriptExecutor("Pea", peaArgs);
+        ScriptExecutor go = new ScriptExecutor("Go", goArgs);
 
         tea.runScript();
         pea.runScript();

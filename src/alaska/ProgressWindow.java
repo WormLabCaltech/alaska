@@ -12,6 +12,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.awt.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by phoen on 4/16/2017.
  */
@@ -50,6 +55,7 @@ public class ProgressWindow {
 
 
         progressStage.setTitle("Running...");
+        progressStage.centerOnScreen();
         progressStage.show();
 
 
@@ -86,7 +92,7 @@ public class ProgressWindow {
          * Starts output listener to capture script output
          */
         // Task that will loop while script is running (!script.terminated)
-        Task<Void> task = new Task<Void>() {
+        Task<Void> outputTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 String output_old = output_label.getText();
@@ -102,16 +108,98 @@ public class ProgressWindow {
                             }
                         });
                         output_old = output;
+                    }else if((output.split(" ")[0].contains("ing") || output.startsWith("shrink"))
+                                && !output.equals(output_old)) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                setOutputText(output);
+                            }
+                        });
+
+                        // If -s option was selected and Shiny server has started, open web browser to url
+                        /* TODO: Multi-platform browser support */
+                        if(script.args.contains("-s") && output.startsWith("Listening")) {
+                            String url = output.substring(output.indexOf("http"));
+                            ArrayList<String> args = new ArrayList<String>();
+                            args.add("google-chrome");
+                            args.add(url);
+                            ProcessBuilder builder = new ProcessBuilder();
+                            builder.start();
+                            /*
+                            if(Desktop.isDesktopSupported()) {
+                                try {
+                                    Desktop desktop = Desktop.getDesktop();
+                                    desktop.browse(new URI(url));
+                                }catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            */
+                        }
                     }
                     // Interval to run task in order to capture output
                     // Without this, GUI will overflow with requests
-                    Thread.sleep(100);
+                    Thread.sleep(200);
+                    System.out.println(output);
                 }
+
                 return null;
             }
         };
 
-        new Thread(task).start();
+        // Task for elapsed time
+        Task<Void> timeTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                long startTime = System.nanoTime();
+                while(!script.terminated) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            long elapsedTime = System.nanoTime() - startTime;
+                            long inSeconds = TimeUnit.NANOSECONDS.toSeconds(elapsedTime);
+                            long minutes = inSeconds / 60;
+                            long seconds = inSeconds % 60;
+                            String formatted_min = String.format("%02d", minutes);
+                            String formatted_sec = String.format("%02d", seconds);
+                            setTimeText(formatted_min + ":" + formatted_sec);
+                        }
+                    });
+                    Thread.sleep(1000);
+                }
+
+                // Close progress window when script has finished running
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        setOutputText(script.scriptName + " finished");
+                        progressStage.close();
+                    }
+                });
+
+                return null;
+            }
+        };
+
+        // Start threads
+        Thread outputThread = new Thread(outputTask);
+        outputThread.setDaemon(true);
+
+        Thread timeThread = new Thread(timeTask);
+        timeThread.setDaemon(true);
+
+        outputThread.start();
+        timeThread.start();
+
+
+    }
+
+    private void setTimeText(String time) {
+        /**
+         * Sets the elapsed time on the window
+         */
+        time_label.setText("Elapsed Time: " + time);
     }
 
     private void setOutputText(String output) {

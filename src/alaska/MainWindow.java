@@ -51,6 +51,7 @@ public class MainWindow extends Application {
 
         this.primaryStage.setTitle("Alaska");
         this.primaryStage.setScene(this.primaryScene);
+        this.primaryStage.centerOnScreen();
         this.primaryStage.show();
 
 
@@ -82,6 +83,8 @@ public class MainWindow extends Application {
         // Set new content
         ((FlowPane) this.primaryScene.lookup("#content_flowpane"))
                 .getChildren().setAll(contentWindow.getContentNode());
+
+        this.primaryStage.centerOnScreen();
     }
 
     public void setElements(ContentWindow contentWindow) {
@@ -119,6 +122,6 @@ public class MainWindow extends Application {
     }
 
     public Node lookup(String selector) {
-        return this.primaryScene.lookup("#" + selector);
+        return this.primaryScene.lookup(selector);
     }
 }
