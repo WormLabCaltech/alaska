@@ -29,7 +29,9 @@ public class MainWindow extends Application {
     FlowPane content_flowpane;
     Button before_button;
     Button next_button;
+    Button next_button_1;
     Label currentStep;
+    FXMLLoader contentLoader;
 
 
     @Override
@@ -39,15 +41,15 @@ public class MainWindow extends Application {
          * Sets the primary stage (primary application window) and sets the initial scene.
          */
         // Initiate References
-        this.wrappingNode = FXMLLoader.load(getClass().getResource("MainWindow.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
+        this.wrappingNode = loader.load();
         this.primaryStage = primaryStage;
         this.content_flowpane = (FlowPane) this.wrappingNode.lookup("#content_flowpane");
         this.currentStep = (Label) this.wrappingNode.lookup("#currentStep_label");
         this.before_button = (Button) this.wrappingNode.lookup("#before_button");
         this.next_button = (Button) this.wrappingNode.lookup("#next_button");
+        this.next_button_1 = (Button) this.wrappingNode.lookup("#next_button_1");
         this.primaryScene = new Scene(this.wrappingNode);
-
-        // Set and
 
         this.primaryStage.setTitle("Alaska");
         this.primaryStage.setScene(this.primaryScene);
@@ -84,6 +86,7 @@ public class MainWindow extends Application {
         ((FlowPane) this.primaryScene.lookup("#content_flowpane"))
                 .getChildren().setAll(contentWindow.getContentNode());
 
+        this.contentLoader = contentWindow.contentLoader;
         this.primaryStage.centerOnScreen();
     }
 
@@ -99,6 +102,19 @@ public class MainWindow extends Application {
         this.before_button.setText(contentWindow.BEFORE_BUTTON_TEXT);
         this.next_button.setText(contentWindow.NEXT_BUTTON_TEXT);
         this.currentStep.setText(contentWindow.LABEL_TEXT);
+    }
+
+    public void saveInput() {
+        /**
+         * Saves all input
+         * TODO: FIGURE OUT A WAY TO GET THIS TO WORK
+         */
+        String currentStep = this.currentStep.getText();
+        if(currentStep.contains("Sleuth")) {
+
+        }else if(currentStep.contains("Enrichment")) {
+            //TeaInputWindow.gene_list_path =
+        }
     }
 
     public void beforeBtnHandler() {

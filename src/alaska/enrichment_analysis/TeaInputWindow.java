@@ -17,6 +17,14 @@ public class TeaInputWindow extends alaska.ContentWindow {
      *  IMPORTANT: DO NOT CALL TeaInputWindow.fxml WITHOUT USING THIS CLASS
      */
 
+    // static variables to remember input
+    public static String gene_list_path;
+    public static String title;
+    public static String output_directory;
+    public static boolean q_value;
+    public static String q_value_threshold;
+    public static boolean save_graph;
+
     public TeaInputWindow() throws Exception {
         /**
          * Creating TeaInputWindow object will automatically launch a new window

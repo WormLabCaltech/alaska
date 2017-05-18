@@ -1,6 +1,7 @@
 package alaska;
 
 import javafx.application.Application;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,6 +27,9 @@ public class ContentWindow {
     protected double HEIGHT;
     protected double WIDTH;
 
+    FXMLLoader wrapperLoader;
+    FXMLLoader contentLoader;
+
 
     public void start() throws Exception {
         /**
@@ -34,14 +38,18 @@ public class ContentWindow {
          */
 
         Stage primaryStage = new Stage();
-        Parent wrappingNode = FXMLLoader.load(getClass().getResource(WRAPPER_PATH));
-        Parent contentNode = FXMLLoader.load(getClass().getResource(FXML_PATH));
+        wrapperLoader = new FXMLLoader(getClass().getResource(WRAPPER_PATH));
+        contentLoader = new FXMLLoader(getClass().getResource(FXML_PATH));
+        Parent wrappingNode = wrapperLoader.load();
+        Parent contentNode = contentLoader.load();
 
         // Inject content
         ((FlowPane) wrappingNode.lookup("#content_flowpane")).getChildren().setAll(contentNode);
 
+        primaryStage.setOpacity(0.0);
+        primaryStage.hide();
+        primaryStage.setX(999999.9);
         primaryStage.setScene(new Scene(wrappingNode));
-        primaryStage.setOpacity(0);
         primaryStage.show();
 
         HEIGHT = primaryStage.getHeight();
@@ -51,6 +59,7 @@ public class ContentWindow {
     }
 
     public Parent getContentNode() throws Exception {
-        return FXMLLoader.load(getClass().getResource((FXML_PATH)));
+        contentLoader = new FXMLLoader(getClass().getResource(FXML_PATH));
+        return contentLoader.load();
     }
 }

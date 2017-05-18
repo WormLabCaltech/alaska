@@ -26,6 +26,14 @@ public class TeaInputWindowController {
      * Manages all operations related to TEA.
      */
 
+    // static variables to remember input
+    public static String gene_list_path;
+    public static String title;
+    public static String output_directory;
+    public static boolean q_value;
+    public static String q_value_threshold;
+    public static boolean save_graph;
+
     // @FXML tag indicates target for injections according to fx:id in the .fxml file
     @FXML Label geneList_label;
     @FXML Label geneList_fileName;

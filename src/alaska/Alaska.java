@@ -1,12 +1,14 @@
 package alaska;
 
 import alaska.enrichment_analysis.TeaInputWindow;
+import alaska.error.Logger;
 import alaska.sleuth.SleuthInputWindow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -25,11 +27,15 @@ public class Alaska extends Application {
      */
     // Alaska window
     static MainWindow alaska = new MainWindow();
+    static ArrayList<ContentWindow> order = new ArrayList<ContentWindow>();
     static String workingDir = new File("").getAbsolutePath();
 
     final String KALLISTO_PATH = "";
     final String SLEUTH_PATH = "";
     final String ENRICHMENT_ANALYSIS_PATH = "";
+
+    // Logger
+    static Logger logger = new Logger();
 
 
 
@@ -44,13 +50,26 @@ public class Alaska extends Application {
         /**
          * Called by launch(args) in main().
          */
+        order.add(new SleuthInputWindow());
+        order.add(new TeaInputWindow());
+
         alaska.start(stage);
+        changeContentPane(order.get(1));
+    }
+
+    private void changeContentPane(ContentWindow contentWindow) throws Exception {
+        /**
+         * Manages content & button functions
+         */
+        // Change content
+        alaska.changeContentPane(contentWindow);
 
         // Create event handler for before button
         EventHandler<ActionEvent> beforeButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 /* Handle changing content panel */
+                System.out.println("before pressed");
             }
         };
 
@@ -59,9 +78,10 @@ public class Alaska extends Application {
             @Override
             public void handle(ActionEvent event) {
                 // Handle changing content panel
-                if(alaska.currentStep.getText().contains("Enrichment")) {
+                String currentStep = alaska.currentStep.getText();
+                if(currentStep.contains("Enrichment")) {
                     runEnrichmentAnalysis();
-                }else if(alaska.currentStep.getText().contains("Sleuth")) {
+                }else if(currentStep.contains("Sleuth")) {
                     try {
                         runSleuth();
                     } catch(Exception e) {
@@ -72,11 +92,19 @@ public class Alaska extends Application {
             }
         };
 
+        EventHandler<ActionEvent> nextButton_1Handler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                String currentStep = alaska.currentStep.getText();
+                if(currentStep.contains("Sleuth")) {
+
+                }
+            }
+        };
+
         // Bind event handlers to each button
         alaska.before_button.setOnAction(beforeButtonHandler);
         alaska.next_button.setOnAction(nextButtonHandler);
-
-        alaska.changeContentPane(new TeaInputWindow());
 
     }
 
@@ -141,6 +169,7 @@ public class Alaska extends Application {
         /**
          * Runs Enrichment Analysis
          */
+        System.out.println("Running enrichment analysis");
 
         // Get important information from nodes
         String geneListPath = ((TextField) alaska.lookup("#geneList_textField")).getText();
