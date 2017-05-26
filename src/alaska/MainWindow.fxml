@@ -37,13 +37,13 @@ Generated with Scene Builder 2.0
       </FlowPane>
       <FlowPane alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
-            <Button fx:id="before_button" mnemonicParsing="false" onAction="#beforeBtnHandler" text="Button" />
-            <Button fx:id="next_button_1" layoutX="266.0" layoutY="23.0" mnemonicParsing="false" text="Button">
+            <Button fx:id="before_button" mnemonicParsing="false" onAction="#beforeBtnHandler" text="Back" />
+            <Button fx:id="next_button" layoutX="266.0" layoutY="23.0" mnemonicParsing="false" text="Next">
                <FlowPane.margin>
                   <Insets left="20.0" />
                </FlowPane.margin>
             </Button>
-            <Button fx:id="next_button" mnemonicParsing="false" onAction="#nextBtnHandler" text="Button">
+            <Button fx:id="run_button" mnemonicParsing="false" onAction="#nextBtnHandler" text="Button">
                <FlowPane.margin>
                   <Insets left="50.0" />
                </FlowPane.margin>

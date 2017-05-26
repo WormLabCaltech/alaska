@@ -1,5 +1,6 @@
 package alaska.enrichment_analysis;
 
+import alaska.Alaska;
 import alaska.ScriptExecutor;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -139,5 +140,9 @@ public class TeaInputWindowController {
                 optional_pane.setExpanded(true);
                 break;
         }
+    }
+
+    @FXML public void initialize() {
+        title_textField.setText(Alaska.title);
     }
 }

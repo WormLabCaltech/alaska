@@ -30,12 +30,14 @@ public class ProgressWindow {
     Label time_label;
     Label text_label;
     Label output_label;
+    String title;
 
     Stage progressStage;
     ScriptExecutor script;
 
-    public ProgressWindow(ScriptExecutor script) {
+    public ProgressWindow(ScriptExecutor script, String title) {
         this.script = script;
+        this.title = title;
         try {
             showWindow();
         } catch (Exception e) {
@@ -54,7 +56,7 @@ public class ProgressWindow {
         progressStage.setScene(progressScene);
 
 
-        progressStage.setTitle("Running...");
+        progressStage.setTitle(title);
         progressStage.centerOnScreen();
         progressStage.show();
 
@@ -167,6 +169,7 @@ public class ProgressWindow {
                         }
                     });
                     Thread.sleep(1000);
+                    System.out.println(script.terminated);
                 }
 
                 // Close progress window when script has finished running
@@ -202,7 +205,7 @@ public class ProgressWindow {
         time_label.setText("Elapsed Time: " + time);
     }
 
-    private void setOutputText(String output) {
+    public void setOutputText(String output) {
         /**
          * Sets the output text on the window
          */

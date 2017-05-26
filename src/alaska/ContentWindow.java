@@ -29,6 +29,8 @@ public class ContentWindow {
 
     FXMLLoader wrapperLoader;
     FXMLLoader contentLoader;
+    Parent contentNode;
+    boolean loaded = false;
 
 
     public void start() throws Exception {
@@ -48,7 +50,7 @@ public class ContentWindow {
 
         primaryStage.setOpacity(0.0);
         primaryStage.hide();
-        primaryStage.setX(999999.9);
+        primaryStage.setX(99999.9);
         primaryStage.setScene(new Scene(wrappingNode));
         primaryStage.show();
 
@@ -59,7 +61,11 @@ public class ContentWindow {
     }
 
     public Parent getContentNode() throws Exception {
-        contentLoader = new FXMLLoader(getClass().getResource(FXML_PATH));
-        return contentLoader.load();
+        if(!loaded) {
+            contentLoader = new FXMLLoader(getClass().getResource(FXML_PATH));
+            contentNode = contentLoader.load();
+            loaded = true;
+        }
+        return contentNode;
     }
 }

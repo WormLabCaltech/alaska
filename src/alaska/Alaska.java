@@ -8,11 +8,14 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import javax.swing.*;
+import javax.xml.soap.Text;
 import java.awt.*;
 import java.io.File;
 import java.net.URI;
@@ -26,9 +29,13 @@ public class Alaska extends Application {
      * Main Wrapper class for all windows & functionality of Alaska
      */
     // Alaska window
-    static MainWindow alaska = new MainWindow();
-    static ArrayList<ContentWindow> order = new ArrayList<ContentWindow>();
-    static String workingDir = new File("").getAbsolutePath();
+    public static MainWindow alaska = new MainWindow();
+    public static ArrayList<ContentWindow> order = new ArrayList<ContentWindow>();
+
+    // Static variables for project title and home directory
+    public static String title;
+    public static String homeDir;
+    public static File home;
 
     final String KALLISTO_PATH = "";
     final String SLEUTH_PATH = "";
@@ -50,11 +57,12 @@ public class Alaska extends Application {
         /**
          * Called by launch(args) in main().
          */
+        order.add(new InfoWindow());
         order.add(new SleuthInputWindow());
         order.add(new TeaInputWindow());
 
         alaska.start(stage);
-        changeContentPane(order.get(1));
+        changeContentPane(order.get(0));
     }
 
     private void changeContentPane(ContentWindow contentWindow) throws Exception {
@@ -69,12 +77,27 @@ public class Alaska extends Application {
             @Override
             public void handle(ActionEvent event) {
                 /* Handle changing content panel */
-                System.out.println("before pressed");
+                String currentStep = alaska.currentStep.getText();
+                if(currentStep.contains("Enrichment")) {
+                    try{
+                        // go to sleuth
+                        changeContentPane(order.get(1));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }else if(currentStep.contains("Sleuth")) {
+                    try{
+                        // go to project information
+                        changeContentPane(order.get(0));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         };
 
-        // Create event handler for next button
-        EventHandler<ActionEvent> nextButtonHandler = new EventHandler<ActionEvent>() {
+        // Create event handler for run button
+        EventHandler<ActionEvent> runButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 // Handle changing content panel
@@ -92,33 +115,46 @@ public class Alaska extends Application {
             }
         };
 
-        EventHandler<ActionEvent> nextButton_1Handler = new EventHandler<ActionEvent>() {
+        // Create event handler for next button
+        EventHandler<ActionEvent> nextButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 String currentStep = alaska.currentStep.getText();
-                if(currentStep.contains("Sleuth")) {
+                if(currentStep.contains("Info")) {
+                    try {
+                        // Static variables for project title and home directory
+                        title = ((TextField) alaska.lookup("#title_textField")).getText();
+                        homeDir = ((TextField) alaska.lookup("#home_textField")).getText();
+                        home = new File(homeDir);
+                        if(!home.exists()) {
+                            home.mkdirs();
+                        }
 
+                        // go to sleuth
+                        changeContentPane(order.get(1));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }else if(currentStep.contains("Sleuth")) {
+                    try {
+                        // go to enrichment analysis
+                        changeContentPane(order.get(2));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }else if(currentStep.contains("Enrichment")) {
+                    // Do something
                 }
             }
         };
 
         // Bind event handlers to each button
         alaska.before_button.setOnAction(beforeButtonHandler);
+        alaska.run_button.setOnAction(runButtonHandler);
         alaska.next_button.setOnAction(nextButtonHandler);
 
     }
 
-    private void scriptPopup(String title, String text, boolean left_visible, boolean right_visible, String left_text, String right_text) throws Exception {
-        /**
-         * Method to open a new popup window for running scripts.
-         * TODO: WORK IN PROGRESS
-         */
-
-        PopupWindow popupWindow = new PopupWindow(title, text, left_visible, right_visible, left_text, right_text);
-
-
-
-    }
 
     private void runSleuth() throws Exception {
         /**
@@ -147,7 +183,7 @@ public class Alaska extends Application {
                 args.add("-s"); // Add shiny option argument to Sleuth arguments
                 shinyPopup.popupStage.close();
                 ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args);
-                ProgressWindow progressWindow = new ProgressWindow(sleuth);
+                ProgressWindow progressWindow = new ProgressWindow(sleuth, "Running Sleuth...");
                 progressWindow.output_label.setText("Starting Sleuth");
             }
         };
@@ -156,7 +192,7 @@ public class Alaska extends Application {
             public void handle(ActionEvent event) {
                 shinyPopup.popupStage.close();
                 ScriptExecutor sleuth = new ScriptExecutor("Sleuth", args);
-                ProgressWindow progressWindow = new ProgressWindow(sleuth);
+                ProgressWindow progressWindow = new ProgressWindow(sleuth, "Running Sleuth...");
                 progressWindow.output_label.setText("Starting Sleuth");
             }
         };
@@ -202,7 +238,7 @@ public class Alaska extends Application {
             }
         }
 
-        // Run TEA in new thread
+        // Enrichment analysis arguments
         ArrayList<String> teaArgs = new ArrayList<String>();
         ArrayList<String> peaArgs = new ArrayList<String>();
         ArrayList<String> goArgs = new ArrayList<String>();
@@ -210,23 +246,41 @@ public class Alaska extends Application {
         teaArgs.add("python");
         teaArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
         teaArgs.add(geneListPath);
-        teaArgs.add(teaOutput.getPath());
+        teaArgs.add(teaOutput.getPath() + "/" + title + "_tea");
         teaArgs.add("tissue");
-        teaArgs.add("-s");
 
         peaArgs.add("python");
         peaArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
         peaArgs.add(geneListPath);
-        peaArgs.add(peaOutput.getPath());
+        peaArgs.add(peaOutput.getPath() + "/" + title + "_pea");
         peaArgs.add("phenotype");
-        peaArgs.add("-s");
 
         goArgs.add("python");
         goArgs.add("src/alaska/enrichment_analysis/hypergeometricTests.py");
         goArgs.add(geneListPath);
-        goArgs.add(teaOutput.getPath() + "result");
+        goArgs.add(goOutput.getPath() + "/" + title + "_go");
         goArgs.add("go");
-        goArgs.add("-s");
+
+        // if Q-value
+        if(((CheckBox) alaska.lookup("#qValue_checkBox")).isSelected()) {
+            String qValue = ((TextField) alaska.lookup("#qValue_textField")).getText();
+
+            teaArgs.add("-q");
+            teaArgs.add(qValue);
+
+            peaArgs.add("-q");
+            peaArgs.add(qValue);
+
+            goArgs.add("-q");
+            goArgs.add(qValue);
+        }
+
+        // if save graph
+        if(((CheckBox) alaska.lookup("#saveGraph_checkBox")).isSelected()) {
+            teaArgs.add("-s");
+            peaArgs.add("-s");
+            goArgs.add("-s");
+        }
 
         ScriptExecutor tea = new ScriptExecutor("Tea", teaArgs);
         ScriptExecutor pea = new ScriptExecutor("Pea", peaArgs);
@@ -234,6 +288,8 @@ public class Alaska extends Application {
 
         tea.runScript();
         pea.runScript();
-        go.runScript();
+
+        ProgressWindow enrichmentProgress = new ProgressWindow(go, "Running enrichment analyses...");
+        enrichmentProgress.setOutputText("This won't take long.");
     }
 }

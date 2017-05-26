@@ -28,8 +28,8 @@ public class MainWindow extends Application {
     Scene primaryScene;
     FlowPane content_flowpane;
     Button before_button;
+    Button run_button;
     Button next_button;
-    Button next_button_1;
     Label currentStep;
     FXMLLoader contentLoader;
 
@@ -47,16 +47,14 @@ public class MainWindow extends Application {
         this.content_flowpane = (FlowPane) this.wrappingNode.lookup("#content_flowpane");
         this.currentStep = (Label) this.wrappingNode.lookup("#currentStep_label");
         this.before_button = (Button) this.wrappingNode.lookup("#before_button");
+        this.run_button = (Button) this.wrappingNode.lookup("#run_button");
         this.next_button = (Button) this.wrappingNode.lookup("#next_button");
-        this.next_button_1 = (Button) this.wrappingNode.lookup("#next_button_1");
         this.primaryScene = new Scene(this.wrappingNode);
 
         this.primaryStage.setTitle("Alaska");
         this.primaryStage.setScene(this.primaryScene);
         this.primaryStage.centerOnScreen();
         this.primaryStage.show();
-
-
     }
 
     public static void launch(String[] args) {
@@ -73,9 +71,8 @@ public class MainWindow extends Application {
          * Dynamically resizes window to accomodate new content.
          * Changes labels on buttons to match content.
          */
-
         // Erase content
-        ((FlowPane) this.primaryScene.lookup("#content_flowpane")).getChildren().removeAll();
+        //((FlowPane) this.primaryScene.lookup("#content_flowpane")).getChildren().removeAll();
 
         // Set new window size & change button text & change label text
         this.primaryStage.setHeight(contentWindow.HEIGHT);
@@ -96,11 +93,11 @@ public class MainWindow extends Application {
          */
         // Set visibility
         this.before_button.setVisible(contentWindow.BEFORE_BUTTON_VISIBLE);
-        this.next_button.setVisible(contentWindow.NEXT_BUTTON_VISIBLE);
+        this.run_button.setVisible(contentWindow.NEXT_BUTTON_VISIBLE);
 
         // Set text
         this.before_button.setText(contentWindow.BEFORE_BUTTON_TEXT);
-        this.next_button.setText(contentWindow.NEXT_BUTTON_TEXT);
+        this.run_button.setText(contentWindow.NEXT_BUTTON_TEXT);
         this.currentStep.setText(contentWindow.LABEL_TEXT);
     }
 

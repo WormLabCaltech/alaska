@@ -15,7 +15,6 @@
             <Image url="@spinner.gif" />
          </image>
       </ImageView>
-      <Label text="Running..." />
       <Label fx:id="time_label" text="Elapsed Time: " />
       <Label id="output_label" fx:id="output_label" text="Text" />
    </children>
