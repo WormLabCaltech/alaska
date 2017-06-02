@@ -88,8 +88,7 @@ for (genotype in genotypes) {
     # String for current progress
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
     print(paste('#Computing Wald test on genotype', substring(genotype, 2), progress))
-
-    so <- sleuth_wt(so, which_beta = paste('genotype', genotype), which_model = 'full')
+    so <- sleuth_wt(so, which_beta = paste('genotype', genotype, sep=''), which_model = 'full')
   }
 }
 
@@ -104,7 +103,7 @@ for (genotype in genotypes) {
     output_file <- paste('betas', substring(genotype, 2), '.csv', sep='')
 
     print(paste('#Writing genotype', substring(genotype, 2), 'results to', output_file, progress))
-    results_table <- sleuth_results(so, paste('genotype', genotype), 'full', test_type='wt')
+    results_table <- sleuth_results(so, paste('genotype', genotype, sep=''), 'full', test_type='wt')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
