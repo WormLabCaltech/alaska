@@ -88,5 +88,10 @@ public class SleuthInputWindowController {
 
     @FXML public void initialize() {
         title_textField.setText(Alaska.title);
+        matrix_textField.setText(Alaska.homeDir + "rna_seq_info.txt");
+        output_textField.setText(Alaska.homeDir + "sleuth");
+        matrix_textField.setDisable(false);
+        matrix_browseBtn.setDisable(false);
+        output_browseBtn.setDisable(false);
     }
 }

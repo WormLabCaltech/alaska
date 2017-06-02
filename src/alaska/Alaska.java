@@ -8,10 +8,12 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 
 import javax.swing.*;
@@ -123,15 +125,25 @@ public class Alaska extends Application {
                 if(currentStep.contains("Info")) {
                     try {
                         // Static variables for project title and home directory
-                        title = ((TextField) alaska.lookup("#title_textField")).getText();
-                        homeDir = ((TextField) alaska.lookup("#home_textField")).getText();
-                        home = new File(homeDir);
-                        if(!home.exists()) {
-                            home.mkdirs();
+                        TextField title_textField = ((TextField) alaska.lookup("#title_textField"));
+                        TextField homeDir_textField = ((TextField) alaska.lookup("#home_textField"));
+
+                        if(title_textField.getText().equals("")) {
+                            Tooltip title_error = new Tooltip("Please input a valid project title!");
+                            title_textField.setTooltip(title_error);
+                        }else if(homeDir_textField.getText().equals("")) {
+                            Tooltip homeDir_error = new Tooltip("Please select a valid home directory!");
+
+                        }else {
+                            home = new File(homeDir);
+                            if(!home.exists()) {
+                                home.mkdirs();
+                            }
+                            // go to sleuth
+                            changeContentPane(order.get(1));
                         }
 
-                        // go to sleuth
-                        changeContentPane(order.get(1));
+
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -291,5 +303,12 @@ public class Alaska extends Application {
 
         ProgressWindow enrichmentProgress = new ProgressWindow(go, "Running enrichment analyses...");
         enrichmentProgress.setOutputText("This won't take long.");
+    }
+
+    public void showToolTip(String content, int delay, int show, double X, double Y) {
+        /**
+         *  Shows tooltip with specified parameters
+         *  TODO: work in progress...
+         */
     }
 }
