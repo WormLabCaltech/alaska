@@ -17,49 +17,33 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * Created by phoen on 4/8/2017.
+ * Controller class for TeaInputWindow.
+ * Manages all operations related to TEA.
  */
-
-
 public class TeaInputWindowController {
+    @FXML Label geneList_fileName;          // gene list file name text
+    @FXML Label geneList_fileSize;          // gene list file size text
+    @FXML TextField geneList_textField;     // gene list file path textfield
+    @FXML Button geneList_browseBtn;        // gene list browse button
+
+    @FXML TextField title_textField;        // project title textfield
+
+    @FXML TextField output_textField;       // output directory textfield
+    @FXML Button output_browseBtn;          // output direcgtory browse button
+
+    @FXML TitledPane optional_pane;         // additional options pane
+
+    @FXML CheckBox qValue_checkBox;         // q value checkbox
+    @FXML Label qValue_label;               // q value text
+    @FXML TextField qValue_textField;       // q value textfield
+
+    @FXML CheckBox saveGraph_checkBox;      // save graph checkbox
+
     /**
-     * Controller class for TeaInputWindow.
-     * Manages all operations related to TEA.
+     * Called when gene list file path textfield changes.
+     * Enables/disables project title textfield accordingly.
+     * TODO: is there a better way to do this?
      */
-
-    // static variables to remember input
-    public static String gene_list_path;
-    public static String title;
-    public static String output_directory;
-    public static boolean q_value;
-    public static String q_value_threshold;
-    public static boolean save_graph;
-
-    // @FXML tag indicates target for injections according to fx:id in the .fxml file
-    @FXML Label geneList_label;
-    @FXML Label geneList_fileName;
-    @FXML Label geneList_fileSize;
-    @FXML TextField geneList_textField;
-    @FXML Button geneList_browseBtn;
-
-    @FXML Label title_label;
-    @FXML TextField title_textField;
-
-    @FXML Label type_label;
-    @FXML ChoiceBox type_choiceBox;
-
-    @FXML Label output_label;
-    @FXML TextField output_textField;
-    @FXML Button output_browseBtn;
-
-    @FXML TitledPane optional_pane;
-
-    @FXML CheckBox qValue_checkBox;
-    @FXML Label qValue_label;
-    @FXML TextField qValue_textField;
-
-    @FXML CheckBox saveGraph_checkBox;
-
     @FXML
     public void geneListFilled() {
         if(!geneList_textField.getText().equals("")) {
@@ -70,6 +54,11 @@ public class TeaInputWindowController {
         }
     }
 
+    /**
+     * Called when project title changes.
+     * Enables/disables downstream fields accordingly.
+     * TODO: is there a better way to do this?
+     */
     @FXML
     public void titleChanged() {
         if(!title_textField.getText().equals("")) {
@@ -92,6 +81,10 @@ public class TeaInputWindowController {
         }
     }
 
+    /**
+     * Called when output directory changes.
+     * TODO: is there a better way to do this?
+     */
     @FXML
     public void outputFilled() {
         if(!output_textField.getText().equals("")) {
@@ -104,12 +97,12 @@ public class TeaInputWindowController {
     }
 
 
-
+    /**
+     * Handles browse buttons.
+     * @param   ae  (ActionEvent) related to event
+     */
     @FXML
     public void buttonHandler(ActionEvent ae) {
-        /**
-         * Handles all buttons in the TeaInputWindow.
-         */
         switch(((Button) ae.getSource()).getId()) {
             case "geneList_browseBtn":
                 // Open browse window
@@ -142,6 +135,10 @@ public class TeaInputWindowController {
         }
     }
 
+    /**
+     * Automatically occupy project title field with the title
+     * TODO: is there a better way to do this?
+     */
     @FXML public void initialize() {
         title_textField.setText(Alaska.title);
     }

@@ -1,7 +1,4 @@
-package alaska; /**
- * Created by lioscro on 4/7/17.
- * Main application window.
- */
+package alaska;
 
 import alaska.enrichment_analysis.TeaInputWindow;
 import javafx.application.Application;
@@ -16,64 +13,66 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
+/**
+ * Class handling window operations.
+ * Called by Alaska class to open window.
+ */
 public class MainWindow extends Application {
+    Parent wrappingNode;        // node that wraps content + sidebar + navigation buttons
+    Stage primaryStage;         // window
+    Scene primaryScene;         // scene in that window
+    FlowPane content_flowpane;  // content is injected into this flowpane
+    Button before_button;       // before button
+    Button run_button;          // run button
+    Button next_button;         // next button
+    Label currentStep;          // sidebar text that indicates current step
+    FXMLLoader contentLoader;   // loads FXML content
+
+
     /**
-     * MainWindow Class: deals with content changing & before and after buttons
+     * Called by launch(args) in the main(String[] args) method.
+     * Sets the primary stage (primary application window) and sets the initial scene.
      *
-     * TODO: add before button functionality
+     * @param   primaryStage  the window
+     * @throws  Exception
      */
-
-    Parent wrappingNode;
-    Stage primaryStage;
-    Scene primaryScene;
-    FlowPane content_flowpane;
-    Button before_button;
-    Button run_button;
-    Button next_button;
-    Label currentStep;
-    FXMLLoader contentLoader;
-
-
     @Override
     public void start(Stage primaryStage) throws Exception{
-        /**
-         * Called by launch(args) in the main(String[] args) method.
-         * Sets the primary stage (primary application window) and sets the initial scene.
-         */
         // Initiate References
         FXMLLoader loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
-        this.wrappingNode = loader.load();
+        wrappingNode = loader.load();
         this.primaryStage = primaryStage;
-        this.content_flowpane = (FlowPane) this.wrappingNode.lookup("#content_flowpane");
-        this.currentStep = (Label) this.wrappingNode.lookup("#currentStep_label");
-        this.before_button = (Button) this.wrappingNode.lookup("#before_button");
-        this.run_button = (Button) this.wrappingNode.lookup("#run_button");
-        this.next_button = (Button) this.wrappingNode.lookup("#next_button");
-        this.primaryScene = new Scene(this.wrappingNode);
+        content_flowpane = (FlowPane) wrappingNode.lookup("#content_flowpane");
+        currentStep = (Label) wrappingNode.lookup("#currentStep_label");
+        before_button = (Button) wrappingNode.lookup("#before_button");
+        run_button = (Button) wrappingNode.lookup("#run_button");
+        next_button = (Button) wrappingNode.lookup("#next_button");
+        primaryScene = new Scene(wrappingNode);
 
         this.primaryStage.setTitle("Alaska");
-        this.primaryStage.setScene(this.primaryScene);
+        this.primaryStage.setScene(primaryScene);
         this.primaryStage.centerOnScreen();
         this.primaryStage.show();
     }
 
+    /**
+     * Launches window
+     * @param   args
+     */
     public static void launch(String[] args) {
         launch(args);
     }
 
-    /*public static void main(String[] args) {
-        launch(args);
-    }*/
 
+    /**
+     * Changes what is shown on the content pane.
+     * Dynamically resizes window to accomodate new content.
+     * Changes labels on buttons to match properties specified.
+     *
+     * @param   contentWindow
+     * @throws  Exception
+     */
     public void changeContentPane(ContentWindow contentWindow) throws Exception {
-        /**
-         * Changes what is shown on the content pane.
-         * Dynamically resizes window to accomodate new content.
-         * Changes labels on buttons to match content.
-         */
-        // Erase content
-        //((FlowPane) this.primaryScene.lookup("#content_flowpane")).getChildren().removeAll();
-
         // Set new window size & change button text & change label text
         this.primaryStage.setHeight(contentWindow.HEIGHT);
         this.primaryStage.setWidth((contentWindow.WIDTH));
@@ -87,10 +86,12 @@ public class MainWindow extends Application {
         this.primaryStage.centerOnScreen();
     }
 
+    /**
+     * Changes labels on before and next buttons.
+     * Changes current step text on sidebar.
+     * @param   contentWindow
+     */
     public void setElements(ContentWindow contentWindow) {
-        /**
-         * Changes labels on before and next buttons.
-         */
         // Set visibility
         this.before_button.setVisible(contentWindow.BEFORE_BUTTON_VISIBLE);
         this.run_button.setVisible(contentWindow.NEXT_BUTTON_VISIBLE);
@@ -101,39 +102,11 @@ public class MainWindow extends Application {
         this.currentStep.setText(contentWindow.LABEL_TEXT);
     }
 
-    public void saveInput() {
-        /**
-         * Saves all input
-         * TODO: FIGURE OUT A WAY TO GET THIS TO WORK
-         */
-        String currentStep = this.currentStep.getText();
-        if(currentStep.contains("Sleuth")) {
-
-        }else if(currentStep.contains("Enrichment")) {
-            //TeaInputWindow.gene_list_path =
-        }
-    }
-
-    public void beforeBtnHandler() {
-        /**
-         * PLACEHOLDER
-         * Button handler for the button to go back a step.
-         * This method can not be placed in the Controller class due to the inability to change content pane
-         * from the Controller class.
-         */
-
-    }
-
-    public void nextBtnHandler() {
-        /**
-         * PLACEHOLDER
-         * Button handler for the button to proceed a step.
-         * This method can not be placed in the Controller class due to the inability to change content pane
-         * from the Controller class.
-         */
-
-    }
-
+    /**
+     * Function to lookup certain element in the window with a selector string.
+     * @param   selector    (string) selector string
+     * @return  Node        that matches the given selector string
+     */
     public Node lookup(String selector) {
         return this.primaryScene.lookup(selector);
     }

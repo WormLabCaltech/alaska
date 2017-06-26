@@ -15,17 +15,22 @@ import java.io.File;
 import java.security.Key;
 
 /**
- * Created by phoen on 4/20/2017.
+ * Controller class for SleuthInputWindow
  */
 public class SleuthInputWindowController {
-    @FXML TextField title_textField;
+    @FXML TextField title_textField;    // project title
 
-    @FXML TextField matrix_textField;
-    @FXML Button matrix_browseBtn;
+    @FXML TextField matrix_textField;   // rna seq matrix path
+    @FXML Button matrix_browseBtn;      // rna seq matrix browse button
 
-    @FXML TextField output_textField;
-    @FXML Button output_browseBtn;
+    @FXML TextField output_textField;   // output directory path
+    @FXML Button output_browseBtn;      // output directory browse button
 
+    /**
+     * Called when project title changes.
+     * Enables/disables downstream input accordingly.
+     * TODO: is there a better way to do this?
+     */
     @FXML
     public void titleChanged() {
         if (!title_textField.getText().equals("")) {
@@ -39,6 +44,11 @@ public class SleuthInputWindowController {
         }
     }
 
+    /**
+     * Called when rna seq matrix path changes.
+     * Enables/disables downstream input accordingly.
+     * TODO: is there a better way to do this?
+     */
     @FXML
     public void matrixFilled() {
         if(!matrix_textField.getText().equals("")) {
@@ -51,11 +61,15 @@ public class SleuthInputWindowController {
         }
     }
 
+    /**
+     * Hanles all browse buttons.
+     *
+     * @param   ae  (ActionEvent) related to event
+     *
+     * TODO: is there a better way to do this?
+     */
     @FXML
     public void buttonHandler(ActionEvent ae) {
-        /**
-         * Handles all buttons in the Sleuth Input Window.
-         */
         switch(((Button) ae.getSource()).getId()) {
             case "matrix_browseBtn":
                 // Open browse window
@@ -86,6 +100,10 @@ public class SleuthInputWindowController {
         }
     }
 
+    /**
+     * Automatically populate fields.
+     * TODO: is there a better way to do this?
+     */
     @FXML public void initialize() {
         title_textField.setText(Alaska.title);
         matrix_textField.setText(Alaska.homeDir + "rna_seq_info.txt");

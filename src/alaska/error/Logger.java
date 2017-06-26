@@ -6,19 +6,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Created by phoen on 5/16/2017.
+ * Class that handles event logging
+ * ONLY TO BE CALLED BY Alaska CLASS AS STATIC OBJECT
  */
 public class Logger {
+    private File log;                                               // log file
+    private String logPath;                                         // log file path
+    private final LocalDateTime START_TIME = LocalDateTime.now();   // time Alaska was launched
+    private final String DATE_FORMAT = "yyyy-MM-dd-HH-mm";          // date, time format
+
     /**
-     * Class that handles event logging
-     * ONLY TO BE CALLED BY Alaska CLASS AS STATIC OBJECT
+     * Constructor.
+     * Creates log file.
      */
-    private File log;
-    private String logPath;
-    private final LocalDateTime START_TIME = LocalDateTime.now();
-    private final String DATE_FORMAT = "yyyy-MM-dd-HH-mm";
-
-
     public Logger() {
         logPath = "log-" + formatDate(START_TIME, DATE_FORMAT) + ".log";
         log = new File(logPath);
@@ -29,15 +29,36 @@ public class Logger {
         }
     }
 
+    /**
+     * Write message to log.
+     * @param   message (String) log output
+     *
+     * TODO: work in progress...
+     */
     public void write(String message) {
         //log.wr
     }
 
+    /**
+     * Get current time as string.
+     * Used as timestamp for log output.
+     *
+     * @return  String
+     *
+     * TODO: work in progress...
+     */
     private String getCurrentTime() {
         LocalDateTime currentTime = LocalDateTime.now();
         return formatDate(currentTime, DATE_FORMAT);
     }
 
+    /**
+     * Format date, time.
+     *
+     * @param   localDateTime   (LocalDateTime) current date and time
+     * @param   format          (String) how to format
+     * @return  String          formatted date and time
+     */
     private String formatDate(LocalDateTime localDateTime, String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return localDateTime.format(formatter);

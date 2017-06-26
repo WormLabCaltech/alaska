@@ -1,5 +1,6 @@
 package alaska.enrichment_analysis;
 
+import alaska.ContentWindow;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,28 +10,21 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 /**
- * Created by phoen on 4/16/2017.
+ * Child of ContentWindow
+ * Class to be called when Enrichment Analysis wants to be shown.
+ * IMPORTANT: DO NOT LOAD TeaInputWindow.fxml WITHOUT USING THIS CLASS
  */
-public class TeaInputWindow extends alaska.ContentWindow {
-    /**
-     *  Class to be called when Enrichment Analysis wants to be shown.
-     *  IMPORTANT: DO NOT CALL TeaInputWindow.fxml WITHOUT USING THIS CLASS
-     */
-
-    // static variables to remember input
-    public static String gene_list_path;
+public class TeaInputWindow extends ContentWindow {
     public static String title;
-    public static String output_directory;
-    public static boolean q_value;
-    public static String q_value_threshold;
-    public static boolean save_graph;
 
+    /**
+     * Creating TeaInputWindow object will automatically launch a new window
+     * to calculate required width & height.
+     * See alaska.ContentWindow for details.
+     *
+     * @throws Exception
+     */
     public TeaInputWindow() throws Exception {
-        /**
-         * Creating TeaInputWindow object will automatically launch a new window
-         * to calculate required width & height.
-         * See alaska.ContentWindow for details.
-         */
         BEFORE_BUTTON_VISIBLE = true;
         BEFORE_BUTTON_TEXT = "Back";
         NEXT_BUTTON_VISIBLE = true;

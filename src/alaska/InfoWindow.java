@@ -1,7 +1,8 @@
 package alaska;
 
 /**
- * Created by lioscro on 5/25/17.
+ * Child of ContentWindow.
+ * Only contains necessary properties of the window.
  */
 public class InfoWindow extends ContentWindow {
     public InfoWindow() throws Exception {

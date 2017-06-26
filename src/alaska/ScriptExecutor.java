@@ -9,33 +9,46 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
- * Created by phoen on 4/10/2017.
+ * Class to execute third-party (python, R) scripts.
  */
 public class ScriptExecutor implements Runnable {
+    String scriptName;          // script name
+    ArrayList<String> args;     // command line arguments
+    String output_line;         // most recent script output
+    String output_all;          // total script output
+
+    Process process;            // script execution process
+    Thread scriptThread;        // script execution thread
+    boolean terminated = false; // whether the script has finished
+
     /**
-     * Abstract class that is inherited by all classes for executing scripts.
-     * All classes inheriting ScriptExecutor must be run as an independent Thread.
+     * Constructor.
+     * Saves argument variables.
+     *
+     * @param   scriptName  (String) script name
+     * @param   args        (ArrayList<String>) command line arguments
      */
-    String scriptName;
-    ArrayList<String> args;
-    String output_line;
-    String output_all;
-
-    Process process;
-    Thread scriptThread;
-    boolean terminated = false;
-
     public ScriptExecutor(String scriptName, ArrayList<String> args) {
+        /* begin initializing references */
         this.scriptName = scriptName;
         this.args = args;
+        /* end initializing references */
     }
 
+    /**
+     * Executes the script using the provided arguments (from the constructor).
+     * THIS IS THE FUNCTION TO USE TO RUN THE SCRIPT
+     */
     public void runScript() {
         scriptThread = new Thread(this, scriptName);
         scriptThread.setDaemon(true);
         scriptThread.start();
     }
 
+    /**
+     * Called by run() to execute script.
+     * DO NOT USE THIS FUNCTION. USE runScript().
+     */
     public void exec() {
         try {
             // Run command in commandline
@@ -67,13 +80,23 @@ public class ScriptExecutor implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        terminated = true;
+        terminated = true;  // script is finished
     }
 
+    /**
+     * Automatically called when thread is started.
+     * DO NOT USE THIS FUNCTION. USE runScript().
+     */
     public void run() {
         exec();
     };
 
+    /**
+     * Returns the most recent output.
+     * @return  String  output text
+     *
+     * TODO: depreciated?
+     */
     public String getOutput() {
         if(output_line == null) {
             return "";

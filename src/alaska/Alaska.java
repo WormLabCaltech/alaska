@@ -24,57 +24,80 @@ import java.net.URI;
 import java.util.ArrayList;
 
 /**
- * Created by phoen on 4/20/2017.
+ * Alaska main class.
+ * Contains main(String[] args) to run the program.
+ *
+ *
+ * TODO: handle exceptions with AlaskaException
+ * TODO: logger functionality
+ * TODO: directory structure
+ * TODO: better way to pre-populate fields
+ * TODO: better input validation
+ *
+ * TODO: kallisto
+ * TODO: design matrix
  */
 public class Alaska extends Application {
-    /**
-     * Main Wrapper class for all windows & functionality of Alaska
-     */
-    // Alaska window
-    public static MainWindow alaska = new MainWindow();
-    public static ArrayList<ContentWindow> order = new ArrayList<ContentWindow>();
+    public static MainWindow alaska = new MainWindow(); // Alaska window
+    public static ArrayList<ContentWindow> order = new ArrayList<>(); // order of windows
 
     // Static variables for project title and home directory
     public static String title;
     public static String homeDir;
     public static File home;
 
+    // TODO: define script paths here
     final String KALLISTO_PATH = "";
     final String SLEUTH_PATH = "";
     final String ENRICHMENT_ANALYSIS_PATH = "";
 
-    // Logger
+    // TODO: add logger functionallity. 6/26: only creates log file without any output
     static Logger logger = new Logger();
 
 
 
+    /**
+     * Launches Alaska with args
+     *
+     * @param   args
+     * @return  none
+     */
     public static void main(String[] args) {
-        /**
-         * Launches application
-         */
         launch(args);
     }
 
+    /**
+     * Function called by launch(args) in main() to start the application.
+     *
+     * @param   stage   JavaFX stage corresponding to Alaska window
+     * @throws  Exception
+     * @return  none
+     */
     public void start(Stage stage) throws Exception {
-        /**
-         * Called by launch(args) in main().
-         */
+        // add windows in order
+        // TODO: is there a cleaner way to do this?
         order.add(new InfoWindow());
         order.add(new SleuthInputWindow());
         order.add(new TeaInputWindow());
 
         alaska.start(stage);
-        changeContentPane(order.get(0));
+        changeContentPane(order.get(0)); // set content to see right after opening application
     }
 
+    /**
+     * Changes the content displayed in the window.
+     * Used to switch between displays.
+     *
+     * @param   contentWindow   (ContentWindow) to show
+     * @throws  Exception
+     * @return  none
+     */
     private void changeContentPane(ContentWindow contentWindow) throws Exception {
-        /**
-         * Manages content & button functions
-         */
         // Change content
         alaska.changeContentPane(contentWindow);
 
         // Create event handler for before button
+        // TODO: simplify button handlers
         EventHandler<ActionEvent> beforeButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -167,16 +190,17 @@ public class Alaska extends Application {
 
     }
 
-
+    /**
+     * Runs Sleuth.
+     *
+     * @throws  Exception
+     *
+     */
     private void runSleuth() throws Exception {
-        /**
-         * Runs Sleuth
-         * Uses JRI library to run R script in a separate thread
-         * TODO: DOESN'T WORK, CHANGE BACK TO SCRIPTEXECUTOR
-         */
         // Open popup to ask whether Shiny server should be started
         PopupWindow shinyPopup = new PopupWindow("Shiny?", "Would you like to open a shiny web server?",
                 true, true, "Yes", "No");
+
 
         /* Start Sleuth Arguments ArrayList */
         ArrayList<String> args = new ArrayList<>();
@@ -187,6 +211,7 @@ public class Alaska extends Application {
         args.add("-o");
         args.add("src/alaska/sleuth/kallisto/sleuth_output");
         /* End Sleuth Arguments ArrayList */
+
 
         // Event Handlers for yes and no buttons on popup
         EventHandler<ActionEvent> yes = new EventHandler<ActionEvent>() {
@@ -213,13 +238,15 @@ public class Alaska extends Application {
         shinyPopup.right_button.setOnAction(no);
     }
 
+
+    /**
+     * Runs tissue, phenotype, and GO enrichment analyses.
+     */
     private void runEnrichmentAnalysis() {
-        /**
-         * Runs Enrichment Analysis
-         */
         System.out.println("Running enrichment analysis");
 
-        // Get important information from nodes
+        // Get important information from inputs
+        // TODO: is there a better way to do this?
         String geneListPath = ((TextField) alaska.lookup("#geneList_textField")).getText();
         String title = ((TextField) alaska.lookup("#title_textField")).getText();
         String outputPath = ((TextField) alaska.lookup("#output_textField")).getText();
@@ -305,10 +332,17 @@ public class Alaska extends Application {
         enrichmentProgress.setOutputText("This won't take long.");
     }
 
+    /**
+     * Shows tooltip at a given location with delay.
+     * TODO: work in progress...
+     *
+     * @param content
+     * @param delay
+     * @param show
+     * @param X
+     * @param Y
+     */
     public void showToolTip(String content, int delay, int show, double X, double Y) {
-        /**
-         *  Shows tooltip with specified parameters
-         *  TODO: work in progress...
-         */
+
     }
 }

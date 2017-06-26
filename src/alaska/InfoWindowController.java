@@ -10,18 +10,21 @@ import javafx.stage.Stage;
 import java.io.File;
 
 /**
- * Created by lioscro on 5/25/17.
+ * Controller class of InfoWindow
  */
 public class InfoWindowController {
-    /**
-     * Manages project information window
-     */
-    @FXML TextField title_textField;
-    @FXML TextField home_textField;
-    @FXML Button home_browseBtn;
+    @FXML TextField title_textField;    // project title
+    @FXML TextField home_textField;     // home directory
+    @FXML Button home_browseBtn;        // home directory browse button
 
+    /**
+     * Function to enable/disable home directory & browse button.
+     * Project title field must be occupied for home directory text field and
+     * home directory browse button to be enabled.
+     * TODO: is there a better way to do this?
+     */
     @FXML
-    public void titleFileld() {
+    public void titleField() {
         if(!title_textField.getText().equals("")) {
             home_textField.setDisable(false);
             home_browseBtn.setDisable(false);
@@ -32,6 +35,11 @@ public class InfoWindowController {
         }
     }
 
+    /**
+     * Handles home directory browse button.
+     *
+     * @param ae
+     */
     @FXML
     public void buttonHandler(ActionEvent ae) {
         // Open browse window
