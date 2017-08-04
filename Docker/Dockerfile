@@ -1,6 +1,7 @@
 # Alaska dependencies
 # Ubuntu 16.04 (xenial)
 # should we change to a more lightweight linux?
+# IMPORTANT: sleuth_install.R needs to be in same folder for image to build!!!
 FROM ubuntu:xenial
 ENV WORKDIR=/Alaska
 WORKDIR ${WORKDIR}
@@ -22,7 +23,8 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    ruby-full
+    ruby-full \
+    curl
 
 ############ R INSTALLATION #################
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
