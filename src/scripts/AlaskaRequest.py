@@ -8,69 +8,76 @@ Bridge between browser and server.
 """
 
 import zmq
+from Alaska import Alaska
 
-class AlaskaRequest():
+class AlaskaRequest(Alaska):
     """
     AlaskaRequest
     """
-    VERSION = 'dev'
+    # messeging codes
+    CODES = {
+        'new_project':          b'\x01',
+        'load_project':         b'\x02',
+        'save_project':         b'\x03',
+        'get_raw_reads':        b'\x04',
+        'set_proj_metadata':    b'\x05',
+        'set_sample_metadata':  b'\x06',
+        'read_quant':           b'\x07',
+        'diff_exp':             b'\x08'
+    }
 
     def __init__(self, port=8888):
         """
         AlaskaRequest constructor. Connects to given port.
         """
-        self.id = ''
+        self.id = '_{}'.format(self.rand_str(4))
 
         # connect to server
+        self.PORT = port
         self.CONTEXT = zmq.Context()
         self.SOCKET = self.CONTEXT.socket(zmq.REQ)
-        self.SOCKET.connect('tcp://localhost:{}'.format(port))
-        # TODO: how to set new project ID?
 
-    def new_project(self):
+    def send(self, msg):
         """
-        Sends request to AlaskaServer to create a new project.
+        Sends message to server.
         """
-        # TODO: implement
+        # encode message to byte
+        _id = self.id.encode()
+        m = self.CODES[msg]
 
-    def load_project(self, id):
-        """
-        Sends request to AlaskaServer to load a project.
-        """
-        # TODO: implement
+        print('Connecting to server on port {}'.format(self.PORT))
+        self.SOCKET.setsockopt(zmq.IDENTITY, _id)
+        self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
+        self.SOCKET.send(m)
 
-    def save_project(self, id):
-        """
-        Sends request to AlaskaServer to save project to JSON.
-        """
-        # TODO: implement
+        print('Waiting for response')
+        response = self.SOCKET.recv_string()
+        print('Here is the response:')
+        print(response)
 
-    def get_raw_reads(self, id):
-        """
-        Sends request to AlaskaServer to retrieve list of uploaded samples.
-        """
-        # TODO: implement
 
-    def set_proj_metadata(self, id):
-        """
-        Sends request to AlaskaServer to set project metadata.
-        """
-        # TODO: implement
+if __name__ == '__main__':
+    import argparse
 
-    def set_sample_metadata(self, id):
-        """
-        Sends request to AlaskaServer to set sample metadata.
-        """
-        # TODO: implement
+    request = AlaskaRequest()
+    choices = request.CODES.keys()
 
-    def read_quant(self, id):
-        """
-        Sends request to AlaskaServer to perform read quantification.
-        """
-        # TODO: implement
+    # command line arguments
+    parser = argparse.ArgumentParser(description='Send request to AlaskaServer.')
+    parser.add_argument('action',
+                        type=str,
+                        choices=choices)
+    parser.add_argument('--id',
+                        type=str,
+                        default=None)
 
-    def diff_exp(self, id):
-        """
-        Sends request to AlaskaServer to perform differential expression analysis.
-        """
-        # TODO: implement
+    args = parser.parse_args()
+
+    # assign ID if given
+    if args.id is not None:
+        print('ID: {}'.format(args.id))
+        request.id = args.id
+
+    print('Creating {} request'.format(args.action))
+    # gate for actions
+    request.send(args.action)

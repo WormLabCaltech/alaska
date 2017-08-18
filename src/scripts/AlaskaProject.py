@@ -9,26 +9,29 @@ Managed by AlaskaServer.
 """
 import os
 import datetime as dt
-import AlaskaSample.AlaskaSample as AS
+from AlaskaSample import AlaskaSample
+from Alaska import Alaska
 
-class AlaskaProject():
+class AlaskaProject(Alaska):
     """
     AlaskaProject. Class to wrap all project data.
     """
-    VERSION = 'dev'
 
     def __init__(self, _id):
         """
         AlaskaProject constructor. Must receive id.
         """
         self.id = _id
-        self.name = ''
-        self.meta = {} # variable for all metadata
-        self.meta['date created'] = dt.datetime.now().strftime('%Y-%m-%d')
-        self.meta['time created'] = dt.datetime.now().strftime('%H:%M:%S')
         self.raw_reads = []
         self.samples = []
+        self.design = 1 # 1: single-factor, 2: two-factor
         self.progress = 0
+
+        self.meta = {} # variable for all metadata
+        self.meta['name'] = ''
+        self.meta['date created'] = dt.datetime.now().strftime('%Y-%m-%d')
+        self.meta['time created'] = dt.datetime.now().strftime('%H:%M:%S')
+
 
     def get_raw_reads(self):
         """
