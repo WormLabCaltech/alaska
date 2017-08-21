@@ -15,12 +15,14 @@ class Alaska():
     Including: directory structure, messaging codes, etc.
     """
     VERSION = 'dev'
-    ROOT_DIR = '../root/' # root directory relative to where scripts are located
+    ENCODING = 'utf-8'
+    ROOT_DIR = '../root' # root directory relative to where scripts are located
     IDX_DIR = 'idx' # index directory name
     LOG_DIR = 'log' # log directory name
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
     RAW_DIR = '0_raw_reads'# raw reads directory name
+    RAW_EXT = ('.fastq.gz') # extensions for raw reads (needs to be tuple)
     ALIGN_DIR = '1_alignment'# alignment directory name
     DIFF_DIR = '2_diff_exp'# differential expression directory name
 
@@ -46,3 +48,9 @@ class Alaska():
                 return rand
 
         return False
+
+    def save(self):
+        """
+        Saves object state to JSON.
+        """
+        pass

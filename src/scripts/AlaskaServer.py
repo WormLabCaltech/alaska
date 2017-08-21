@@ -18,6 +18,7 @@ AlaskaServer handles all requests, manages the job queue and projects/samples.
 import os
 import zmq
 import time
+import json
 import queue
 import datetime as dt
 from Alaska import Alaska
@@ -102,26 +103,30 @@ class AlaskaServer(Alaska):
         Method to decode messages received from AlaskaRequest.
         """
         self.out('RECEIVED: {}'.format(request))
-        # must be valid code
+        # must be valid codet
         if request[2] in self.CODES:
-            self.CODES[request[2]](request[0])
+            response = self.CODES[request[2]](request[0].decode(self.ENCODING))
         else:
             self.out('ERROR: code {} was not recognized'.format(request[2]))
+
+        self.respond(request[0], response)
 
     def respond(self, to, msg):
         """
         Respond to given REQ with message.
         """
-        response = [to, b'', msg.encode()]
+        if isinstance(msg, str):
+            msg = msg.encode()
+
+        response = [to, b'', msg]
         self.out('RESPONSE: {}'.format(response))
         self.SOCKET.send_multipart(response)
 
-    def new_project(self, to):
+    def new_project(self, _id):
         """
         Creates a new project.
         """
-        if not to.startswith(b'_'): # ensure id starts with underscore
-            self.out('ERROR: first frame in new_project request does not start with _')
+        # TODO: check if _id starts with underscore
 
         self.out('ACTION: creating new AlaskaProject')
         _id = self.rand_str_except(self.PROJECT_L, self.projects.keys())
@@ -139,50 +144,106 @@ class AlaskaServer(Alaska):
         os.makedirs(f)
         self.out('ACTION: {} created'.format(f))
 
-        # send response with new id
-        self.respond(to, 'AlaskaProject created with ID {}'.format(_id))
+        return 'AlaskaProject created with ID {}'.format(_id)
 
 
-    def load_project(self, id):
+    def load_project(self, _id):
         """
         Loads project.
         """
-        # TODO: implement
+        # TODO: change checking to catching exceptions
+        self.out('ACTION: loading Alaskaproject {}'.format(_id))
 
-    def save_project(self, id):
+        # check if given project id is already loaded
+        if _id in self.projects:
+            msg = 'Alaskaproject {} already exists and is loaded'.format(_id)
+            self.out('ERROR: {}'.format(msg))
+            return msg
+
+        # check if directory exists
+        path = './{}/{}/'.format(self.PROJECTS_DIR, _id)
+        if not os.path.exists(path) and os.path.isdir(path):
+            msg = 'Alaskaproject {} could not be found'.format(_id)
+            self.out('ERROR: {}'.format(msg))
+            return msg
+
+        # if project is not loaded but exists, load it
+        self.projects[_id] = AlaskaProject(_id)
+        self.projects[_id].load()
+
+        msg = 'AlaskaProject {} successfully loaded'.format(_id)
+        self.out('ACTION: {}'.format(msg))
+
+        return msg
+
+
+    def save_project(self, _id):
         """
         Saves project to JSON.
         """
-        # TODO: implement
+        # TODO: change checking to catching exceptions
+        self.out('ACTION: saving AlaskaProject {}'.format(_id))
 
-    def get_raw_reads(self, id):
+        # check if it exists
+        if _id not in self.projects:
+            msg = 'AlaskaProject {} does not exist'.format(_id)
+            self.out('ERROR: {}'.format(msg))
+            return msg
+
+        # if project exists, save it
+        self.projects[_id].save()
+
+        msg = 'AlaskaProject {} saved'.format(_id)
+        self.out('ACTION: {}'.format(msg))
+
+        return msg
+
+    def get_raw_reads(self, _id):
         """
         Retrieves list of uploaded sample files.
         """
-        # TODO: implmement on 8/21
+        # TODO: change checking to catching exceptions
+        self.out('ACTION: getting raw reads for AlaskaProject {}'.format(_id))
 
-    def set_proj_metadata(self, id, data):
+        # check if it exists
+        if _id not in self.projects:
+            msg = 'AlaskaProject {} does not exist'.format(_id)
+            self.out('ERROR: {}'.format(msg))
+            return msg
+
+        # TODO: figure out way to output meaningful error when no read file is
+        #       uploaded
+        # if project exists, check if raw reads have already been calculated
+        if len(self.projects[_id].raw_reads) == 0:
+            self.out('ACTION: extracting raw reads for AlaskaProject {}'.format(_id))
+            self.projects[_id].get_raw_reads()
+        self.out('ACTION: retrieved raw reads for AlaskaProject {}'.format(_id))
+
+        return json.dumps(self.projects[_id].raw_reads)
+
+
+    def set_proj_metadata(self, _id, data):
         """
         Sets project metadata.
         """
         # TODO: implement
         # TODO: pass as argument from AlaskaRequest or read a JSON??
 
-    def set_sample_metadata(self, id, data):
+    def set_sample_metadata(self, _id, data):
         """
         Sets sample metadata.
         """
         # TODO: implement
         # TODO: pass as argument from AlaskaRequest or read a JSON??
 
-    def read_quant(self, id):
+    def read_quant(self, _id):
         """
         Checks if another analysis is running,
         then performs read quantification.
         """
         # TODO: implement
 
-    def diff_exp(self, id):
+    def diff_exp(self, _id):
         """
         Perform differential expression analysis.
         """
@@ -203,6 +264,19 @@ class AlaskaServer(Alaska):
         """
         Saves its current state.
         """
+        datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        with open('{}.json'.format(datetime), 'w') as f:
+            json.dump(self.__dict__, f, indent=4)
+
+    def load(self):
+        """
+        Loads state from JSON.
+        """
+        # TODO: get list of jsons and load most recent
+        with open('{}{}.json'.format(self.path, self.id), 'r') as f:
+            loaded = json.load(f)
+        self.__dict__ = loaded
 
 if __name__ == '__main__':
     server = AlaskaServer()
