@@ -29,7 +29,7 @@ class AlaskaProject(Alaska):
         self.align_dir = '{}/{}'.format(self.dir, self.ALIGN_DIR)
         self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
         self.raw_reads = {}
-        self.samples = []
+        self.samples = {}
         self.design = 1 # 1: single-factor, 2: two-factor
         self.progress = 0
 
@@ -43,13 +43,20 @@ class AlaskaProject(Alaska):
         """
         Retrieves list of uploaded sample files. Unpacks archive if detected.
         """
-        # TODO: implement
         # get list of files/directories in raw reads directory
         flist = os.listdir(self.raw_dir)
         unpack = all(not os.path.isdir(d) for d in flist)
 
-        for fname in flist:
-            self.unpack_reads(fname)
+        # if files need to be unpack_reads
+        if unpack:
+            self.out('{}: unpacking required'.format(self.id))
+            for fname in flist:
+                self.out('{}: unpacking {}'.format(self.id, fname))
+                try:
+                    self.unpack_reads(fname)
+                except:
+                    self.out('{}: exception occured while unpacking {}'.format(self.id, fname))
+            self.out('{}: unpacking finished'.format(self.id))
 
         # walk through raw reads directory
         for root, dirs, files in os.walk(self.raw_dir):
@@ -64,19 +71,41 @@ class AlaskaProject(Alaska):
             if not len(reads) == 0:
                 self.raw_reads[root.replace(self.raw_dir, '')] = reads
 
+        self.out('{}: successfully retrieved raw reads'.format(self.id))
+
 
     def unpack_reads(self, fname):
         """
         Unpacks read archive.
         """
-        # TODO: implement
         Archive('{}/{}'.format(self.raw_dir, fname)).extractall(self.raw_dir)
 
-    def set_metadata(self):
+    def infer_samples(self, f):
         """
-        Sets project metadata by reading JSON.
+        Infers samples from raw reads.
+        Assumes each sample is in separate folders.
+        Only to be called when raw reads is not empty.
         """
-        # TODO: implement
+        # TODO: add way to infer single- or pair-end read
+
+        self.out('{}: infering samples'.format(self.id))
+        # loop through each folder with sample
+        for folder, reads in self.raw_reads.items():
+            _id = 'AS{}'.format(f())
+            sample = AlaskaSample(_id)
+            self.out('{}: new sample created with id {}'.format(self.id, _id))
+
+            for read in reads:
+                sample.reads.append('{}/{}'.format(folder, read))
+
+            self.samples[_id] = sample
+
+    def reset_samples(self):
+        """
+        Resets samples.
+        """
+        for _id, sample in self.samples:
+            sample.reset()
 
     def check_metadata(self):
         """
@@ -96,17 +125,39 @@ class AlaskaProject(Alaska):
         """
         # TODO: implement
 
-    def save(self):
+    def save(self, folder=None):
         """
         Save project to JSON.
         """
-        with open('{}/{}.json'.format(self.dir, self.id), 'w') as f:
-            json.dump(self.__dict__, f, indent=4)
+        if folder is None:
+            path = self.dir
+        else:
+            path = '{}/{}'.format(self.dir, folder)
 
-    def load(self):
+        with open('{}/{}.json'.format(path, self.id), 'w') as f:
+            json.dump(self.__dict__, f, default=self.encode_json, indent=4)
+
+    def load(self, folder=None):
         """
         Loads project from JSON.
         """
-        with open('{}/{}.json'.format(self.dir, self.id), 'r') as f:
+        if folder is None:
+            path = self.dir
+        else:
+            path = '{}/{}'.format(self.dir, folder)
+
+        with open('{}/{}.json'.format(path, self.id), 'r') as f:
             loaded = json.load(f)
-        self.__dict__ = loaded
+
+        for key, item in loaded.items():
+            if key == 'samples':
+                # AlaskaSample object must be created for samples
+                samples = {}
+                for _id, vals in item.items():
+                    sample = AlaskaSample(_id)
+                    sample.__dict__ = vals
+                    samples[_id] = sample
+                # set samples
+                self.samples = samples
+            else:
+                setattr(self, key, item)

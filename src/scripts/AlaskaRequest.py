@@ -16,12 +16,12 @@ class AlaskaRequest(Alaska):
     """
     # messeging codes
     CODES = {
-        'new_project':          b'\x01',
-        'load_project':         b'\x02',
-        'save_project':         b'\x03',
-        'get_raw_reads':        b'\x04',
-        'set_proj_metadata':    b'\x05',
-        'set_sample_metadata':  b'\x06',
+        'new_proj':             b'\x01',
+        'load_proj':            b'\x02',
+        'save_proj':            b'\x03',
+        'infer_samples':        b'\x04',
+        'set_proj':             b'\x05',
+        'finalize_proj':        b'\x06',
         'read_quant':           b'\x07',
         'diff_exp':             b'\x08'
     }

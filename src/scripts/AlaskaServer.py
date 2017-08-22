@@ -50,7 +50,7 @@ class AlaskaServer(Alaska):
 
         self.indices = []
         self.projects = {}
-        self.samples = []
+        self.samples = {}
         self.queue = queue.Queue()
         self.current_proj = None
 
@@ -61,12 +61,12 @@ class AlaskaServer(Alaska):
         self.SOCKET.bind('tcp://*:{}'.format(port))
 
         self.CODES = {
-            b'\x01': self.new_project,
-            b'\x02': self.load_project,
-            b'\x03': self.save_project,
-            b'\x04': self.get_raw_reads,
-            b'\x05': self.set_proj_metadata,
-            b'\x06': self.set_sample_metadata,
+            b'\x01': self.new_proj,
+            b'\x02': self.load_proj,
+            b'\x03': self.save_proj,
+            b'\x04': self.infer_samples,
+            b'\x05': self.set_proj,
+            b'\x06': self.finalize_proj,
             b'\x07': self.read_quant,
             b'\x08': self.diff_exp
         }
@@ -122,79 +122,83 @@ class AlaskaServer(Alaska):
         self.out('RESPONSE: {}'.format(response))
         self.SOCKET.send_multipart(response)
 
-    def new_project(self, _id):
+    def new_proj(self, _id):
         """
         Creates a new project.
         """
         # TODO: check if _id starts with underscore
 
-        self.out('ACTION: creating new AlaskaProject')
+        self.out('{}: creating new AlaskaProject'.format(_id))
         _id = self.rand_str_except(self.PROJECT_L, self.projects.keys())
+        _id = 'AP{}'.format(_id)
         self.projects[_id] = AlaskaProject(_id)
-        self.out('ACTION: AlaskaProject {} created'.format(_id))
+        self.out('{}: created'.format(_id))
 
         # make directories
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR)
+        os.makedirs(f)
+        self.out('{}: {} created'.format(_id, f))
         f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.RAW_DIR)
         os.makedirs(f)
-        self.out('ACTION: {} created'.format(f))
+        self.out('{}: {} created'.format(_id, f))
         f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR)
         os.makedirs(f)
-        self.out('ACTION: {} created'.format(f))
+        self.out('{}: {} created'.format(_id, f))
         f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.DIFF_DIR)
         os.makedirs(f)
-        self.out('ACTION: {} created'.format(f))
+        self.out('{}: {} created'.format(_id, f))
 
-        return 'AlaskaProject created with ID {}'.format(_id)
+        return '{}: created'.format(_id)
 
 
-    def load_project(self, _id):
+    def load_proj(self, _id):
         """
         Loads project.
         """
         # TODO: change checking to catching exceptions
-        self.out('ACTION: loading Alaskaproject {}'.format(_id))
+        self.out('{}: loading'.format(_id))
 
         # check if given project id is already loaded
         if _id in self.projects:
-            msg = 'Alaskaproject {} already exists and is loaded'.format(_id)
-            self.out('ERROR: {}'.format(msg))
+            msg = '{}: already exists and is loaded'.format(_id)
+            self.out(msg)
             return msg
 
         # check if directory exists
         path = './{}/{}/'.format(self.PROJECTS_DIR, _id)
         if not os.path.exists(path) and os.path.isdir(path):
-            msg = 'Alaskaproject {} could not be found'.format(_id)
-            self.out('ERROR: {}'.format(msg))
+            msg = '{}: could not be found'.format(_id)
+            self.out(msg)
             return msg
 
         # if project is not loaded but exists, load it
+        # TODO: what if project id or sample id exists?
         self.projects[_id] = AlaskaProject(_id)
         self.projects[_id].load()
 
-        msg = 'AlaskaProject {} successfully loaded'.format(_id)
-        self.out('ACTION: {}'.format(msg))
+        msg = '{}: successfully loaded'.format(_id)
+        self.out(msg)
 
         return msg
 
-
-    def save_project(self, _id):
+    def save_proj(self, _id):
         """
         Saves project to JSON.
         """
         # TODO: change checking to catching exceptions
-        self.out('ACTION: saving AlaskaProject {}'.format(_id))
+        self.out('{}: saving'.format(_id))
 
         # check if it exists
         if _id not in self.projects:
-            msg = 'AlaskaProject {} does not exist'.format(_id)
-            self.out('ERROR: {}'.format(msg))
+            msg = '{}: does not exist'.format(_id)
+            self.out(msg)
             return msg
 
         # if project exists, save it
         self.projects[_id].save()
 
-        msg = 'AlaskaProject {} saved'.format(_id)
-        self.out('ACTION: {}'.format(msg))
+        msg = '{}: saved'.format(_id)
+        self.out(msg)
 
         return msg
 
@@ -203,38 +207,82 @@ class AlaskaServer(Alaska):
         Retrieves list of uploaded sample files.
         """
         # TODO: change checking to catching exceptions
-        self.out('ACTION: getting raw reads for AlaskaProject {}'.format(_id))
+        self.out('{}: getting raw reads'.format(_id))
 
         # check if it exists
         if _id not in self.projects:
-            msg = 'AlaskaProject {} does not exist'.format(_id)
-            self.out('ERROR: {}'.format(msg))
+            msg = '{}: does not exist'.format(_id)
+            self.out(msg)
             return msg
 
-        # TODO: figure out way to output meaningful error when no read file is
-        #       uploaded
         # if project exists, check if raw reads have already been calculated
         if len(self.projects[_id].raw_reads) == 0:
-            self.out('ACTION: extracting raw reads for AlaskaProject {}'.format(_id))
             self.projects[_id].get_raw_reads()
-        self.out('ACTION: retrieved raw reads for AlaskaProject {}'.format(_id))
 
-        return json.dumps(self.projects[_id].raw_reads)
+        return json.dumps(self.projects[_id].raw_reads, default=self.encode_json, indent=4)
 
+    def infer_samples(self, _id):
+        """
+        Infers samples from raw reads.
+        """
+        self.get_raw_reads(_id) # make sure raw reads have been extracted
 
-    def set_proj_metadata(self, _id, data):
-        """
-        Sets project metadata.
-        """
-        # TODO: implement
-        # TODO: pass as argument from AlaskaRequest or read a JSON??
+        # TODO: check data with exception catching
+        # TODO: have to check: project exists, have non-empty raw_reads
+        self.out('{}: infering samples from raw reads'.format(_id))
 
-    def set_sample_metadata(self, _id, data):
+        # function to get new sample ids
+        f = lambda : self.rand_str_except(self.PROJECT_L, self.samples.keys())
+
+        self.projects[_id].infer_samples(f)
+
+        # output project JSON to temp folder
+        self.projects[_id].save(self.TEMP_DIR)
+        self.out('{}: saved to temp folder'.format(_id))
+
+        return json.dumps(self.projects[_id].samples, default=self.encode_json, indent=4)
+
+    def set_proj(self, _id):
         """
-        Sets sample metadata.
+        Sets project params.
+        Only to be called after the project has been created.
         """
-        # TODO: implement
-        # TODO: pass as argument from AlaskaRequest or read a JSON??
+        self.out('{}: setting project data')
+
+        # TODO: what if sample id exists?
+        self.projects[_id].load(self.TEMP_DIR)
+        # add samples to dictionary
+        # IMPORTANT: ASSUMING THERE IS NO OVERLAP
+        self.samples = {**self.samples, **self.projects[_id].samples}
+
+        msg = '{}: project data successfully set'.format(_id)
+        self.out(msg)
+
+        return msg
+
+    def finalize_proj(self, _id):
+        """
+        Finalizes project and samples by creating appropriate json and
+        sample directories
+        """
+        self.out('{}: finalizing'.format(_id))
+        self.projects[_id].save()
+
+        # make directories
+        for sample in self.projects[_id].samples:
+            f = './{}/{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR, sample)
+            os.makedirs(f)
+            self.out('{}: {} created'.format(_id, f))
+
+        # remove temporary files
+        f = './{}/{}/{}/{}.json'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR, _id)
+        os.remove(f)
+        self.out('{}: {} removed'.format(_id, f))
+
+        msg = '{}: successfully finalized'.format(_id)
+        self.out(msg)
+
+        return msg
 
     def read_quant(self, _id):
         """
@@ -248,17 +296,6 @@ class AlaskaServer(Alaska):
         Perform differential expression analysis.
         """
         # TODO: implement
-
-    def out(self, out):
-        """
-        Prints message to terminal and log with appropriate prefix.
-        """
-        datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        prefix = '[{}]'.format(datetime)
-        # TODO: implement
-        line = '{} {}'.format(prefix, out)
-        print(line)
-        # self.log.write(line + '\n')
 
     def save(self):
         """
