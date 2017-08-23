@@ -18,13 +18,15 @@ class Alaska():
     VERSION = 'dev'
     ENCODING = 'utf-8'
     ROOT_DIR = '../root' # root directory relative to where scripts are located
+    SCRIPT_DIR = 'scripts'
+    TRANS_DIR = 'transcripts' # transcripts directory
     IDX_DIR = 'idx' # index directory name
     LOG_DIR = 'log' # log directory name
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
     RAW_DIR = '0_raw_reads'# raw reads directory name
-    RAW_EXT = ('.fastq.gz') # extensions for raw reads (needs to be tuple)
+    RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
     ALIGN_DIR = '1_alignment'# alignment directory name
     DIFF_DIR = '2_diff_exp'# differential expression directory name
 

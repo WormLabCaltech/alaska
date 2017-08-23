@@ -23,6 +23,7 @@ import queue
 import datetime as dt
 from Alaska import Alaska
 from AlaskaProject import AlaskaProject
+from BashWriter import BashWriter
 
 class AlaskaServer(Alaska):
     """
@@ -48,6 +49,7 @@ class AlaskaServer(Alaska):
         self.date = dt.datetime.now().strftime('%Y-%m-%d')
         self.time = dt.datetime.now().strftime('%H:%M:%S')
 
+        self.transcripts = []
         self.indices = []
         self.projects = {}
         self.samples = {}
@@ -121,6 +123,30 @@ class AlaskaServer(Alaska):
         response = [to, b'', msg]
         self.out('RESPONSE: {}'.format(response))
         self.SOCKET.send_multipart(response)
+
+    def update_idx(self):
+        """
+        Writes bash script to update indices.
+        """
+        self.out('INFO: starting index update')
+        self.transcripts = os.listdir(self.TRANS_DIR)
+        self.indices = os.listdir(self.IDX_DIR)
+        sh = BashWriter('update_idx', folder=self.SCRIPT_DIR)
+
+        for trans in self.transcripts:
+            name = trans.split('.')[:-2] # remove extension
+            name = ''.join(name)
+            if all(not idx.startswith(name) for idx in self.indices):
+                self.out('INFO: index must be built for {}'.format(trans))
+                sh.add('kallisto index -i {}/{}.idx {}/{}'.format(self.IDX_DIR,
+                                                name, self.TRANS_DIR, trans))
+
+        if not len(sh.commands) == 0:
+            self.out('INFO: writing update script')
+            sh.write() # write script
+        else:
+            self.out('INFO: indices up to date. no update required')
+
 
     def new_proj(self, _id):
         """
@@ -266,9 +292,14 @@ class AlaskaServer(Alaska):
         sample directories
         """
         self.out('{}: finalizing'.format(_id))
+        self.out('{}: checking samples'.format(_id))
+        self.projects[_id].check()
+
+        self.out('{}: saving'.format(_id))
         self.projects[_id].save()
 
         # make directories
+        self.out('{}: making directories for read alignment'.format(_id))
         for sample in self.projects[_id].samples:
             f = './{}/{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR, sample)
             os.makedirs(f)
@@ -290,6 +321,9 @@ class AlaskaServer(Alaska):
         then performs read quantification.
         """
         # TODO: implement
+        self.out('{}: begin alignment'.format(_id))
+        
+        self.projects[_id].read_quant()
 
     def diff_exp(self, _id):
         """
@@ -317,4 +351,5 @@ class AlaskaServer(Alaska):
 
 if __name__ == '__main__':
     server = AlaskaServer()
+    server.update_idx()
     server.start()

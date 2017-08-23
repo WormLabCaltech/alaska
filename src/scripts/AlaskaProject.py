@@ -11,6 +11,7 @@ import os
 import json
 from pyunpack import Archive
 import datetime as dt
+from BashWriter import BashWriter
 from AlaskaSample import AlaskaSample
 from Alaska import Alaska
 
@@ -30,7 +31,13 @@ class AlaskaProject(Alaska):
         self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
         self.raw_reads = {}
         self.samples = {}
+        self.bootstrap_n = 300
+        self.idx = ''
         self.design = 1 # 1: single-factor, 2: two-factor
+        self.ctrl_ids = [] # control ids
+        self.ctrl_ftrs = {} # if single-factor, key and value
+                            # if two-factor, key: value, key: value
+                            # (refers to keys of self.meta)
         self.progress = 0
 
         self.meta = {} # variable for all metadata
@@ -100,6 +107,12 @@ class AlaskaProject(Alaska):
 
             self.samples[_id] = sample
 
+    def analyze_reads(self):
+        """
+        Analyzes reads to infer whether samples are single or paired end.
+        """
+        # TODO: implement
+
     def reset_samples(self):
         """
         Resets samples.
@@ -107,17 +120,64 @@ class AlaskaProject(Alaska):
         for _id, sample in self.samples:
             sample.reset()
 
-    def check_metadata(self):
+    def check(self):
         """
-        Checks metadata for sanity.
+        Checks all data.
         """
-        # TODO: implement
+        # Have to check: design vs sample
+
+        # first check controls have matching control factors
+        # then check if non-controls have different factors
+        # TODO: check other data and ensure other factors are the same
+        for _id, sample in self.samples.items():
+            # check controls have matching control factors
+            if _id in self.ctrl_ids:
+                for key, item in self.ctrl_ftrs.items():
+                    val = self.samples[_id].meta[key]
+                    if not val == item:
+                        msg = '{}: control sample {} does not have {}:{}. \
+                            instead, has {}'.format(self.id, _id, key, item, val)
+                        self.out(msg)
+                        return msg
+            else:
+                # check if non-controls have different factors
+                for key, item in self.ctrl_ftrs.items():
+                    val = self.samples[_id].meta[key]
+                    if val == item:
+                        msg = '{}: non-control sample {} has {}:{}'.format(self.id, _id, key, item)
+                        self.out(msg)
+                        return msg
 
     def read_quant(self):
         """
-        Performs read quantification.
+        Writes bash script that will perform read quantification.
         """
-        # TODO: implement
+        sh = BashWriter('align', self.align_dir)
+        for _id, sample in self.samples.items():
+            sh.add('# align sample {}'.format(_id))
+            if sample.type == 1: # single-end
+                sh.add('kallisto quant -i {} -o {} -b {} --single -l {} -s {} {}'.format(
+                        '{}/{}'.format(self.IDX_DIR, self.idx),
+                        '{}/{}'.format(self.align_dir, _id),
+                        self.bootstrap_n,
+                        sample.length,
+                        sample.stdev,
+                        ' '.join(sample.reads)
+                ))
+
+            elif sample.type == 2: #paired-end
+                sh.add('kallisto quant -i {} -o {} -b {} {}'.format(
+                        '{}/{}'.format(self.IDX_DIR, self.idx),
+                        '{}/{}'.format(self.align_dir, sample.id),
+                        ' '.join([item for sublist in sample.reads for item in sublist])
+                ))
+
+        sh.write()
+
+        msg = '{}: wrote alignment script'.format(self.id)
+        self.out(msg)
+
+        return msg
 
     def diff_exp(self):
         """
@@ -129,7 +189,7 @@ class AlaskaProject(Alaska):
         """
         Save project to JSON.
         """
-        if folder is None:
+        if folder is None: # if folder not given, save to project root
             path = self.dir
         else:
             path = '{}/{}'.format(self.dir, folder)
@@ -141,7 +201,8 @@ class AlaskaProject(Alaska):
         """
         Loads project from JSON.
         """
-        if folder is None:
+        # TODO: check if object id and JSON id matches
+        if folder is None: # if folder not given, load from project root
             path = self.dir
         else:
             path = '{}/{}'.format(self.dir, folder)

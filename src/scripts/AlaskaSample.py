@@ -45,6 +45,7 @@ class AlaskaSample(Alaska):
         for key, item in loaded.items():
             self.meta[key] = item
 
+
     def save(self):
         """
         Save sample to JSON.
