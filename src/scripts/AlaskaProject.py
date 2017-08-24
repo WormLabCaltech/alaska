@@ -62,7 +62,7 @@ class AlaskaProject(Alaska):
                 try:
                     self.unpack_reads(fname)
                 except:
-                    self.out('{}: exception occured while unpacking {}'.format(self.id, fname))
+                    raise Exception('{}: exception occured while unpacking {}'.format(self.id, fname))
             self.out('{}: unpacking finished'.format(self.id))
 
         # walk through raw reads directory
@@ -77,8 +77,6 @@ class AlaskaProject(Alaska):
             # assign list to dictionary
             if not len(reads) == 0:
                 self.raw_reads[root.replace(self.raw_dir, '')] = reads
-
-        self.out('{}: successfully retrieved raw reads'.format(self.id))
 
 
     def unpack_reads(self, fname):
@@ -95,7 +93,6 @@ class AlaskaProject(Alaska):
         """
         # TODO: add way to infer single- or pair-end read
 
-        self.out('{}: infering samples'.format(self.id))
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
@@ -137,16 +134,15 @@ class AlaskaProject(Alaska):
                     if not val == item:
                         msg = '{}: control sample {} does not have {}:{}. \
                             instead, has {}'.format(self.id, _id, key, item, val)
-                        self.out(msg)
-                        return msg
+                        raise Exception(msg)
             else:
                 # check if non-controls have different factors
                 for key, item in self.ctrl_ftrs.items():
                     val = self.samples[_id].meta[key]
                     if val == item:
                         msg = '{}: non-control sample {} has {}:{}'.format(self.id, _id, key, item)
-                        self.out(msg)
-                        return msg
+                        raise Exception(msg)
+
 
     def read_quant(self):
         """
@@ -173,11 +169,6 @@ class AlaskaProject(Alaska):
                 ))
 
         sh.write()
-
-        msg = '{}: wrote alignment script'.format(self.id)
-        self.out(msg)
-
-        return msg
 
     def diff_exp(self):
         """

@@ -63,6 +63,7 @@ class AlaskaServer(Alaska):
         self.SOCKET.bind('tcp://*:{}'.format(port))
 
         self.CODES = {
+            b'\x00': self.check,
             b'\x01': self.new_proj,
             b'\x02': self.load_proj,
             b'\x03': self.save_proj,
@@ -70,13 +71,15 @@ class AlaskaServer(Alaska):
             b'\x05': self.set_proj,
             b'\x06': self.finalize_proj,
             b'\x07': self.read_quant,
-            b'\x08': self.diff_exp
+            b'\x08': self.diff_exp,
+            b'\x98': self.start,
+            b'\x99': self.stop,
         }
 
         # switch working directory to root
         os.chdir(self.ROOT_DIR)
 
-    def start(self):
+    def start(self, _id=None):
         """
         Starts the server.
         """
@@ -88,11 +91,19 @@ class AlaskaServer(Alaska):
         while self.RUNNING:
             request = self.SOCKET.recv_multipart()
 
-            self.decode(request)
+            # TODO: error & exception handling
+            try:
+                self.decode(request)
+            except Exception as e:
+                _id = request[0]
+                self.broadcast(_id, 'ERROR: {}'.format(request))
+                self.broadcast(_id, str(e))
+                self.close(_id)
+
 
         self.stop()
 
-    def stop(self):
+    def stop(self, _id=None):
         """
         Stops the server.
         """
@@ -104,25 +115,50 @@ class AlaskaServer(Alaska):
         """
         Method to decode messages received from AlaskaRequest.
         """
-        self.out('RECEIVED: {}'.format(request))
+        # TODO: remove return statements from functions
+        # TODO: instead, send messages directly
+        self.out('{}: received {}'.format(request[0], request[1]))
         # must be valid codet
-        if request[2] in self.CODES:
-            response = self.CODES[request[2]](request[0].decode(self.ENCODING))
+        if request[1] in self.CODES:
+            self.CODES[request[1]](request[0].decode(self.ENCODING))
         else:
-            self.out('ERROR: code {} was not recognized'.format(request[2]))
+            raise Exception('ERROR: code {} was not recognized')
 
-        self.respond(request[0], response)
+        # self.respond(request[0], response)
 
     def respond(self, to, msg):
         """
         Respond to given REQ with message.
         """
+        # make sure id and message are byte literals
         if isinstance(msg, str):
             msg = msg.encode()
+        if isinstance(to, str):
+            to = to.encode()
 
-        response = [to, b'', msg]
-        self.out('RESPONSE: {}'.format(response))
+        response = [to, msg]
+        # self.out('RESPONSE: {}'.format(response))
         self.SOCKET.send_multipart(response)
+
+    def broadcast(self, to, msg):
+        """
+        Print to console, save to log, and respond.
+        """
+        self.out(msg)
+        self.respond(to, msg)
+
+    def close(self, to):
+        """
+        Closes connection to AlaskaRequest.
+        """
+        self.respond(to, 'END')
+
+    def check(self, to):
+        """
+        Responds to check request.
+        Check request is sent to check if server is up and running.
+        """
+        self.respond(to, to)
 
     def update_idx(self):
         """
@@ -154,28 +190,37 @@ class AlaskaServer(Alaska):
         """
         # TODO: check if _id starts with underscore
 
-        self.out('{}: creating new AlaskaProject'.format(_id))
-        _id = self.rand_str_except(self.PROJECT_L, self.projects.keys())
-        _id = 'AP{}'.format(_id)
-        self.projects[_id] = AlaskaProject(_id)
-        self.out('{}: created'.format(_id))
+        self.broadcast(_id, '{}: creating new AlaskaProject'.format(_id))
+        __id = self.rand_str_except(self.PROJECT_L, self.projects.keys())
+        __id = 'AP{}'.format(__id)
+        self.projects[__id] = AlaskaProject(__id)
+        self.broadcast(_id, '{}: creating'.format(__id))
 
         # make directories
-        f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR)
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.TEMP_DIR)
         os.makedirs(f)
-        self.out('{}: {} created'.format(_id, f))
-        f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.RAW_DIR)
+        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.RAW_DIR)
         os.makedirs(f)
-        self.out('{}: {} created'.format(_id, f))
-        f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR)
+        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.ALIGN_DIR)
         os.makedirs(f)
-        self.out('{}: {} created'.format(_id, f))
-        f = './{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.DIFF_DIR)
+        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.DIFF_DIR)
         os.makedirs(f)
-        self.out('{}: {} created'.format(_id, f))
+        self.broadcast(_id, '{}: {} created'.format(__id, f))
 
-        return '{}: created'.format(_id)
+        self.broadcast(_id, '{}: created successfully'.format(__id))
+        self.close(_id)
 
+    def exists(self, _id):
+        """
+        Checks if project with id exists.
+        """
+        if _id in self.projects:
+            return True
+        else:
+            return False
 
     def load_proj(self, _id):
         """
@@ -185,17 +230,13 @@ class AlaskaServer(Alaska):
         self.out('{}: loading'.format(_id))
 
         # check if given project id is already loaded
-        if _id in self.projects:
-            msg = '{}: already exists and is loaded'.format(_id)
-            self.out(msg)
-            return msg
+        if self.exists(_id):
+            raise Exception('{}: already exists and is loaded'.format(_id))
 
         # check if directory exists
         path = './{}/{}/'.format(self.PROJECTS_DIR, _id)
         if not os.path.exists(path) and os.path.isdir(path):
-            msg = '{}: could not be found'.format(_id)
-            self.out(msg)
-            return msg
+            raise Exception('{}: could not be found'.format(_id))
 
         # if project is not loaded but exists, load it
         # TODO: what if project id or sample id exists?
@@ -203,49 +244,47 @@ class AlaskaServer(Alaska):
         self.projects[_id].load()
 
         msg = '{}: successfully loaded'.format(_id)
-        self.out(msg)
 
-        return msg
+        self.broadcast(_id, msg)
+        self.close(_id)
 
     def save_proj(self, _id):
         """
         Saves project to JSON.
         """
         # TODO: change checking to catching exceptions
-        self.out('{}: saving'.format(_id))
+        self.broadcast(_id, '{}: saving'.format(_id))
 
         # check if it exists
-        if _id not in self.projects:
-            msg = '{}: does not exist'.format(_id)
-            self.out(msg)
-            return msg
+        if not self.exists(_id):
+            raise Exception('{}: does not exist'.format(_id))
 
         # if project exists, save it
         self.projects[_id].save()
 
         msg = '{}: saved'.format(_id)
-        self.out(msg)
-
-        return msg
+        self.broadcast(_id, msg)
+        self.close(_id)
 
     def get_raw_reads(self, _id):
         """
         Retrieves list of uploaded sample files.
         """
         # TODO: change checking to catching exceptions
-        self.out('{}: getting raw reads'.format(_id))
+        self.broadcast(_id, '{}: getting raw reads'.format(_id))
 
         # check if it exists
-        if _id not in self.projects:
-            msg = '{}: does not exist'.format(_id)
-            self.out(msg)
-            return msg
+        if not self.exists(_id):
+            raise Exception('{}: does not exist'.format(_id))
 
         # if project exists, check if raw reads have already been calculated
         if len(self.projects[_id].raw_reads) == 0:
             self.projects[_id].get_raw_reads()
 
-        return json.dumps(self.projects[_id].raw_reads, default=self.encode_json, indent=4)
+        self.broadcast(_id, '{}: successfully retrieved raw reads'.format(_id))
+
+        self.respond(_id, json.dumps(self.projects[_id].raw_reads, default=self.encode_json, indent=4))
+        self.close(_id)
 
     def infer_samples(self, _id):
         """
@@ -255,25 +294,27 @@ class AlaskaServer(Alaska):
 
         # TODO: check data with exception catching
         # TODO: have to check: project exists, have non-empty raw_reads
-        self.out('{}: infering samples from raw reads'.format(_id))
+        self.broadcast(_id, '{}: infering samples from raw reads'.format(_id))
 
         # function to get new sample ids
         f = lambda : self.rand_str_except(self.PROJECT_L, self.samples.keys())
 
         self.projects[_id].infer_samples(f)
+        self.broadcast(_id, '{}: samples successfully inferred'.format(_id))
 
         # output project JSON to temp folder
         self.projects[_id].save(self.TEMP_DIR)
-        self.out('{}: saved to temp folder'.format(_id))
+        self.broadcast(_id, '{}: saved to temp folder'.format(_id))
 
-        return json.dumps(self.projects[_id].samples, default=self.encode_json, indent=4)
+        self.respond(_id, json.dumps(self.projects[_id].samples, default=self.encode_json, indent=4))
+        self.close(_id)
 
     def set_proj(self, _id):
         """
         Sets project params.
         Only to be called after the project has been created.
         """
-        self.out('{}: setting project data')
+        self.broadcast(_id, '{}: setting project data')
 
         # TODO: what if sample id exists?
         self.projects[_id].load(self.TEMP_DIR)
@@ -282,38 +323,37 @@ class AlaskaServer(Alaska):
         self.samples = {**self.samples, **self.projects[_id].samples}
 
         msg = '{}: project data successfully set'.format(_id)
-        self.out(msg)
+        self.broadcast(_id, msg)
+        self.close(_id)
 
-        return msg
 
     def finalize_proj(self, _id):
         """
         Finalizes project and samples by creating appropriate json and
         sample directories
         """
-        self.out('{}: finalizing'.format(_id))
-        self.out('{}: checking samples'.format(_id))
+        self.broadcast(_id, '{}: finalizing'.format(_id))
+        self.broadcast(_id, '{}: checking samples'.format(_id))
         self.projects[_id].check()
 
-        self.out('{}: saving'.format(_id))
+        self.broadcast(_id, '{}: saving'.format(_id))
         self.projects[_id].save()
 
         # make directories
-        self.out('{}: making directories for read alignment'.format(_id))
+        self.broadcast(_id, '{}: making directories for read alignment'.format(_id))
         for sample in self.projects[_id].samples:
             f = './{}/{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR, sample)
             os.makedirs(f)
-            self.out('{}: {} created'.format(_id, f))
+            self.broadcast(_id, '{}: {} created'.format(_id, f))
 
         # remove temporary files
         f = './{}/{}/{}/{}.json'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR, _id)
         os.remove(f)
-        self.out('{}: {} removed'.format(_id, f))
+        self.broadcast(_id, '{}: {} removed'.format(_id, f))
 
         msg = '{}: successfully finalized'.format(_id)
-        self.out(msg)
-
-        return msg
+        self.broadcast(_id, msg)
+        self.close(_id)
 
     def read_quant(self, _id):
         """
@@ -321,9 +361,12 @@ class AlaskaServer(Alaska):
         then performs read quantification.
         """
         # TODO: implement
-        self.out('{}: begin alignment'.format(_id))
-        
+        self.broadcast(_id, '{}: beginning alignment sequence'.format(_id))
+
         self.projects[_id].read_quant()
+        self.broadcast(_id, '{}: wrote alignment script'.format(self.id))
+
+        self.close(_id)
 
     def diff_exp(self, _id):
         """

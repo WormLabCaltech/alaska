@@ -16,6 +16,7 @@ class AlaskaRequest(Alaska):
     """
     # messeging codes
     CODES = {
+        'check':                b'\x00',
         'new_proj':             b'\x01',
         'load_proj':            b'\x02',
         'save_proj':            b'\x03',
@@ -23,7 +24,9 @@ class AlaskaRequest(Alaska):
         'set_proj':             b'\x05',
         'finalize_proj':        b'\x06',
         'read_quant':           b'\x07',
-        'diff_exp':             b'\x08'
+        'diff_exp':             b'\x08',
+        'start':                b'\x98',
+        'stop':                 b'\x99'
     }
 
     def __init__(self, port=8888):
@@ -35,7 +38,7 @@ class AlaskaRequest(Alaska):
         # connect to server
         self.PORT = port
         self.CONTEXT = zmq.Context()
-        self.SOCKET = self.CONTEXT.socket(zmq.REQ)
+        self.SOCKET = self.CONTEXT.socket(zmq.DEALER)
 
     def send(self, msg):
         """
@@ -45,15 +48,49 @@ class AlaskaRequest(Alaska):
         _id = self.id.encode()
         m = self.CODES[msg]
 
+        # TODO: how to tell if server is online?
         print('Connecting to server on port {}'.format(self.PORT))
         self.SOCKET.setsockopt(zmq.IDENTITY, _id)
         self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
-        self.SOCKET.send(m)
 
+        if self.check():
+            self.SOCKET.send(m)
+            print('Connected successfully')
+            self.listen()
+        else:
+            print('Error connecting to server')
+
+    def check(self):
+        """
+        Check if server is responding correctly.
+        """
+        self.SOCKET.send(self.CODES['check'])
+
+        # use poller for timeout
+        poller = zmq.Poller()
+        poller.register(self.SOCKET, zmq.POLLIN)
+
+        if poller.poll(3*1000): # wait for 5 seconds
+            response = self.SOCKET.recv_string()
+            if response == self.id:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def listen(self):
+        """
+        Listen for responses.
+        """
         print('Waiting for response')
-        response = self.SOCKET.recv_string()
-        print('Here is the response:')
-        print(response)
+        while True:
+            response = self.SOCKET.recv_string()
+            print(response)
+
+            # stop listening if message starts with END
+            if response.endswith('END'):
+                break
 
 
 if __name__ == '__main__':
