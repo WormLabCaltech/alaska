@@ -17,7 +17,7 @@ class Alaska():
     """
     VERSION = 'dev'
     ENCODING = 'utf-8'
-    ROOT_DIR = '../root' # root directory relative to where scripts are located
+    ROOT_DIR = 'D:/Github/alaska/src/root'
     SCRIPT_DIR = 'scripts'
     TRANS_DIR = 'transcripts' # transcripts directory
     IDX_DIR = 'idx' # index directory name

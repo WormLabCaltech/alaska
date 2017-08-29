@@ -1,3 +1,4 @@
+import io
 from Alaska import Alaska
 
 class BashWriter(Alaska):
@@ -6,7 +7,7 @@ class BashWriter(Alaska):
     Writes bash scripts.
     """
     SHEBANG = '#!/usr/bin/env bash\n#'
-    PREFIX = '#\n# This is where some meaningful message about Alaska and\n\
+    PREFIX = '# This is where some meaningful message about Alaska and\n \
                 # this script is written.\n#'
     SUFFIX = '# end of bash script'
 
@@ -31,13 +32,14 @@ class BashWriter(Alaska):
         Writes bash script.
         """
         if len(self.commands) > 0:
-            with open('{}/{}.sh'.format(self.dir, self.fname), 'w') as sh:
+            with io.open('{}/{}.sh'.format(self.dir, self.fname), 'w', newline='\n') as sh:
                 # write shebang and prefix
                 sh.write(self.SHEBANG + '\n')
                 sh.write(self.PREFIX + '\n')
 
                 # write commands
                 for command in self.commands:
+                    # TODO: linebreak for long lines
                     sh.write(command + '\n')
 
                 # write suffix

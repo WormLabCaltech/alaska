@@ -148,24 +148,24 @@ class AlaskaProject(Alaska):
         """
         Writes bash script that will perform read quantification.
         """
-        sh = BashWriter('align', self.align_dir)
+        sh = BashWriter('align', self.dir)
         for _id, sample in self.samples.items():
             sh.add('# align sample {}'.format(_id))
             if sample.type == 1: # single-end
-                sh.add('kallisto quant -i {} -o {} -b {} --single -l {} -s {} {}'.format(
-                        '{}/{}'.format(self.IDX_DIR, self.idx),
+                sh.add('kallisto quant -i {} -o {} -b {} --single -l {} -s {} {}\n'.format(
+                        './{}/{}'.format(self.IDX_DIR, self.idx),
                         '{}/{}'.format(self.align_dir, _id),
                         self.bootstrap_n,
                         sample.length,
                         sample.stdev,
-                        ' '.join(sample.reads)
+                        ' '.join(['{}{}'.format(self.raw_dir, read) for read in sample.reads])
                 ))
 
             elif sample.type == 2: #paired-end
                 sh.add('kallisto quant -i {} -o {} -b {} {}'.format(
-                        '{}/{}'.format(self.IDX_DIR, self.idx),
-                        '{}/{}'.format(self.align_dir, sample.id),
-                        ' '.join([item for sublist in sample.reads for item in sublist])
+                        './{}/{}'.format(self.IDX_DIR, self.idx),
+                        '{}/{}'.format(self.align_dir, _id),
+                        ' '.join(['{}{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
                 ))
 
         sh.write()

@@ -54,7 +54,7 @@ class AlaskaServer(Alaska):
         self.projects = {}
         self.samples = {}
         self.queue = queue.Queue()
-        self.current_proj = None
+        self.current_proj = None # project undergoing analysis
 
         # set up server
         self.PORT = port
@@ -101,15 +101,14 @@ class AlaskaServer(Alaska):
                 self.close(_id)
 
 
-        self.stop()
-
     def stop(self, _id=None):
         """
         Stops the server.
         """
         # TODO: implement
-
         self.log.close()
+        self.CONTEXT.term()
+        self.RUNNING = False
 
     def decode(self, request):
         """
@@ -171,7 +170,7 @@ class AlaskaServer(Alaska):
 
         for trans in self.transcripts:
             name = trans.split('.')[:-2] # remove extension
-            name = ''.join(name)
+            name = '.'.join(name)
             if all(not idx.startswith(name) for idx in self.indices):
                 self.out('INFO: index must be built for {}'.format(trans))
                 sh.add('kallisto index -i {}/{}.idx {}/{}'.format(self.IDX_DIR,
@@ -343,13 +342,14 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: making directories for read alignment'.format(_id))
         for sample in self.projects[_id].samples:
             f = './{}/{}/{}/{}'.format(self.PROJECTS_DIR, _id, self.ALIGN_DIR, sample)
-            os.makedirs(f)
+            os.makedirs(f, exist_ok=True)
             self.broadcast(_id, '{}: {} created'.format(_id, f))
 
         # remove temporary files
         f = './{}/{}/{}/{}.json'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR, _id)
-        os.remove(f)
-        self.broadcast(_id, '{}: {} removed'.format(_id, f))
+        if os.path.isfile(f):
+            os.remove(f)
+            self.broadcast(_id, '{}: {} removed'.format(_id, f))
 
         msg = '{}: successfully finalized'.format(_id)
         self.broadcast(_id, msg)
@@ -364,7 +364,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: beginning alignment sequence'.format(_id))
 
         self.projects[_id].read_quant()
-        self.broadcast(_id, '{}: wrote alignment script'.format(self.id))
+        self.broadcast(_id, '{}: wrote alignment script'.format(_id))
 
         self.close(_id)
 
