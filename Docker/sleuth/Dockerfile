@@ -26,3 +26,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD5
 # copy r script for installing packages
 COPY install_sleuth.R ./sleuth/install_sleuth.R
 RUN Rscript ./sleuth/install_sleuth.R
+
+##### COPY DIFFERENTIAL EXPRESSION SCRIPT #####
+COPY sleuth.R ./sleuth/sleuth.R
+ENV PATH="/sleuth:${PATH}"
