@@ -182,7 +182,7 @@ class AlaskaProject(Alaska):
             # write design matrix txt
             ctrl_ftr = list(self.ctrl_ftrs.keys())[0]
             ctrl_id = self.ctrl_ids[0]
-            head = ['sample', ctrl_ftr]
+            head = ['sample', 'condition']
             data = []
             for _id, sample in self.samples.items():
                 if _id == ctrl_id:
@@ -203,11 +203,10 @@ class AlaskaProject(Alaska):
         """
         if self.design == 1: #single-factor
             sh = BashWriter('sleuth', self.dir)
-            sh.add('sleuth.R -d {} -k {} -o {} -g {}\n'.format(
+            sh.add('sleuth.R -d {} -k {} -o {}\n'.format(
                     self.dir,
                     self.align_dir,
-                    self.diff_dir,
-                    list(self.ctrl_ftrs.keys())[0]
+                    self.diff_dir
             ))
         elif self.design == 2:
             pass

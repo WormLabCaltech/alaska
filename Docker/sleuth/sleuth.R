@@ -14,8 +14,6 @@ option_list <- list(
               help='Please specify the directory of kallisto quantifications'),
   make_option(c('-o', '--output'), type='character', default=character(0),
               help='Please specify the output directory'),
-  make_option(c('-g', '--genovar'), type='character', default=character(0),
-              help='Please specify the genotype variable name'),
   make_option(c('-ba', '--batch'), action='store_true', default=FALSE,
               help='Batch correction method'),
   make_option(c('-bv', '--batchvar'), type='character', default=character(0),
@@ -59,27 +57,36 @@ kallisto <- opt$k
 # directory to save results
 output_dir <- opt$o
 
+
 #get ids
 print('#Reading analysis matrix')
 sample_id <- dir(file.path(kallisto))
-print(sample_id)
 kal_dirs <- sapply(sample_id, function(id) file.path(kallisto, id))
-print(kal_dirs)
 s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+print(sample_id)
+print(kal_dirs)
 print(s2c)
 
 # Unique, sorted genotype list
-genotypes <- sort(unique(s2c[, opt$g]))
+genotypes <- sort(unique(s2c[, 'condition']))
 print(genotypes)
 
 print('#Reading Kallisto results')
-s2c <- dplyr::select(s2c, sample= sample, opt$g, batch)
+s2c <- dplyr::select(s2c, sample= sample, condition)
+print(s2c)
+s2c <- dplyr::arrange(s2c, sample)
+print(s2c)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
-so <- sleuth_prep(s2c, ~ opt$g+batch, target_mapping= t2g)
-so <- sleuth_fit(so,~ opt$g+batch, fit_name = 'full')
-so <- sleuth_fit(so, ~batch, 'reduced')
+print(s2c)
+# so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE)
+# so <- sleuth_fit(so, ~genotype+batch, 'full')
+# so <- sleuth_fit(so, ~batch, 'reduced')
+# so <- sleuth_lrt(so, 'reduced', 'full')
+so <- sleuth_prep(s2c, ~ condition, target_mapping= t2g)
+so <- sleuth_fit(so, ~ condition, fit_name = 'full')
+so <- sleuth_fit(so, ~1, 'reduced')
 so <- sleuth_lrt(so, 'reduced', 'full')
-
+print(so)
 #print(s2c)
 
 #prepend and make object, state maximum model here
@@ -92,26 +99,26 @@ so <- sleuth_lrt(so, 'reduced', 'full')
 #no interactions
 for (genotype in genotypes) {
   # Ignore WT geneotype
-  if (!grepl('WT', genotype)) {
+  if (!grepl(genotypes[1], genotype)) {
     # String for current progress
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
     print(paste('#Computing Wald test on ', substring(genotype, 2), progress))
-    so <- sleuth_wt(so, which_beta = genotype, which_model = 'full')
+    so <- sleuth_wt(so, which_beta = paste('condition', genotype, sep=''), which_model = 'full')
   }
 }
 
 
 #write results to csv
 for (genotype in genotypes) {
-  if(!grepl('WT', genotype)) {
+  if(!grepl(genotypes[1], genotype)) {
     # '(current index/total length)'
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
 
     # 'betasX.csv'
-    output_file <- paste('betas', substring(genotype, 2), '.csv', sep='')
+    output_file <- paste(substring(genotype, 2), '.csv', sep='')
 
-    print(paste('#Writing genotype', substring(genotype, 2), 'results to', output_file, progress))
-    results_table <- sleuth_results(so, paste('genotype', genotype, sep=''), 'full', test_type='wt')
+    print(paste('#Writing ', substring(genotype, 2), 'results to', output_file, progress))
+    results_table <- sleuth_results(so, paste('condition', genotype, sep=''), 'full', test_type='wt')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
