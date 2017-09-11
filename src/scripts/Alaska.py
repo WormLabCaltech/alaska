@@ -17,7 +17,7 @@ class Alaska():
     """
     VERSION = 'dev'
     ENCODING = 'utf-8'
-    ROOT_DIR = 'D:/Github/alaska/src/root'
+    ROOT_DIR = '/media/sf_Github/alaska/src/root'
     SCRIPT_DIR = 'scripts'
     TRANS_DIR = 'transcripts' # transcripts directory
     IDX_DIR = 'idx' # index directory name
@@ -25,10 +25,12 @@ class Alaska():
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
-    RAW_DIR = '0_raw_reads'# raw reads directory name
+    RAW_DIR = '0_raw_reads' # raw reads directory name
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
-    ALIGN_DIR = '1_alignment'# alignment directory name
-    DIFF_DIR = '2_diff_exp'# differential expression directory name
+    ALIGN_DIR = '1_alignment' # alignment directory name
+    DIFF_DIR = '2_diff_exp' # differential expression directory name
+    CPUS = '1-3' # processing CPUs
+    THREADS = 3 # number of threads for processing
 
     def rand_str(self, l):
         """
@@ -62,7 +64,7 @@ class Alaska():
 
         # shorten output if too long
         if len(out) > 90:
-            out = '{}...'.format(out[:100])
+            out = '{}...'.format(out[:90])
 
         line = '{} {}'.format(prefix, out)
         print(line)

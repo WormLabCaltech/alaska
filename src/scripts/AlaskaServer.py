@@ -20,6 +20,7 @@ import zmq
 import time
 import json
 import queue
+import docker
 import datetime as dt
 from Alaska import Alaska
 from AlaskaProject import AlaskaProject
@@ -76,6 +77,8 @@ class AlaskaServer(Alaska):
             b'\x99': self.stop,
         }
 
+        self.DOCKER = docker.from_env()
+
         # switch working directory to root
         os.chdir(self.ROOT_DIR)
 
@@ -86,8 +89,18 @@ class AlaskaServer(Alaska):
         # make log file
         # self.log = open('{}-{}.log'.format(self.date, self.time))
 
-        self.out('Starting AlaskaServer {}'.format(self.VERSION))
+        self.out('INFO: Starting AlaskaServer {}'.format(self.VERSION))
         self.RUNNING = True
+
+        self.out('INFO: checking admin privilages')
+        try:
+            if not os.getuid() == 0:
+                raise Exception('ERROR: AlaskaServer requires admin rights')
+        except Exception as e:
+            self.out(str(e))
+            self.stop()
+        self.out('INFO: AlaskaServer running as root')
+
         while self.RUNNING:
             request = self.SOCKET.recv_multipart()
 
@@ -106,9 +119,19 @@ class AlaskaServer(Alaska):
         Stops the server.
         """
         # TODO: implement
-        self.log.close()
+        # self.log.close()
+        self.out('INFO: terminating ZeroMQ')
+        self.SOCKET.close()
         self.CONTEXT.term()
+
         self.RUNNING = False
+
+        # stop all containers
+        for cont in self.DOCKER.containers.list():
+            self.out('INFO: terminating container {}'.format(cont.short_id))
+            cont.remove(force=True)
+
+        quit()
 
     def decode(self, request):
         """
@@ -360,11 +383,47 @@ class AlaskaServer(Alaska):
         Checks if another analysis is running,
         then performs read quantification.
         """
-        # TODO: implement
         self.broadcast(_id, '{}: beginning alignment sequence'.format(_id))
 
-        self.projects[_id].read_quant()
+        self.projects[_id].write_kallisto()
         self.broadcast(_id, '{}: wrote alignment script'.format(_id))
+
+        self.out('{}: {}'.format(_id, self.DOCKER.images.list()))
+
+        # TODO: error when docker image doesn't exist
+
+        # source and target mounting points
+        src_proj = os.path.abspath(self.projects[_id].dir)
+        tgt_proj = '/projects/{}'.format(_id)
+        src_idx = os.path.abspath(self.IDX_DIR)
+        tgt_idx = '/{}'.format(self.IDX_DIR)
+        # volumes to mount to container
+        volumes = {
+            src_proj: {'bind': tgt_proj, 'mode': 'rw'},
+            src_idx: {'bind': tgt_idx, 'mode': 'ro'}
+        }
+
+        self.broadcast(_id, '{}: starting docker container with {} core allocation'.format(_id, self.CPUS))
+        cont = self.DOCKER.containers.run('kallisto:latest',
+                                'bash {}/kallisto.sh'.format(tgt_proj),
+                                volumes=volumes,
+                                cpuset_cpus=self.CPUS,
+                                detach=True)
+        self.broadcast(_id, '{}: container started with id {}'.format(_id, cont.short_id))
+
+        # TODO: use worker to fetch output
+
+        for l in cont.attach(stream=True):
+            l = l.decode(self.ENCODING).strip()
+
+            # since kallisto output can be multiple lines
+            if '\n' in l:
+                outs = l.split('\n')
+            else:
+                outs = [l]
+
+            for out in outs:
+                self.broadcast(_id, '{}: Kallisto: {}'.format(_id, out))
 
         self.close(_id)
 
@@ -372,7 +431,45 @@ class AlaskaServer(Alaska):
         """
         Perform differential expression analysis.
         """
-        # TODO: implement
+        self.broadcast(_id, '{}: beginning diff. exp. sequence'.format(_id))
+        self.projects[_id].write_matrix()
+        self.broadcast(_id, '{}: wrote sleuth design matrix'.format(_id))
+        self.projects[_id].write_sleuth()
+        self.broadcast(_id, '{}: wrote sleuth script'.format(_id))
+
+        self.out('{}: {}'.format(_id, self.DOCKER.images.list()))
+
+        # TODO: error when docker image doesn't exist
+
+        # source and target mouting points
+        src_proj = os.path.abspath(self.projects[_id].dir)
+        tgt_proj = '/projects/{}'.format(_id)
+        # volumes to mount to container
+        volumes = {
+            src_proj: {'bind': tgt_proj, 'mode': 'rw'},
+        }
+
+        self.broadcast(_id, '{}: starting docker container with {} core allocation'.format(_id, self.CPUS))
+        cont = self.DOCKER.containers.run('sleuth:latest',
+                                'bash {}/sleuth.sh'.format(tgt_proj),
+                                volumes=volumes,
+                                cpuset_cpus=self.CPUS,
+                                detach=True)
+        self.broadcast(_id, '{}: container started with id {}'.format(_id, cont.short_id))
+
+        for l in cont.attach(stream=True):
+            l = l.decode(self.ENCODING).strip()
+
+            # since kallisto output can be multiple lines
+            if '\n' in l:
+                outs = l.split('\n')
+            else:
+                outs = [l]
+
+            for out in outs:
+                self.broadcast(_id, '{}: Sleuth: {}'.format(_id, out))
+
+        self.close(_id)
 
     def save(self):
         """
@@ -393,6 +490,11 @@ class AlaskaServer(Alaska):
         self.__dict__ = loaded
 
 if __name__ == '__main__':
-    server = AlaskaServer()
-    server.update_idx()
-    server.start()
+    try:
+        server = AlaskaServer()
+        server.update_idx()
+        server.start()
+    except KeyboardInterrupt:
+        print('\nINFO: interrupt received, stopping...')
+    finally:
+        server.stop()

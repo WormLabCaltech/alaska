@@ -9,6 +9,7 @@ Managed by AlaskaServer.
 """
 import os
 import json
+import pandas as pd
 from pyunpack import Archive
 import datetime as dt
 from BashWriter import BashWriter
@@ -144,37 +145,74 @@ class AlaskaProject(Alaska):
                         raise Exception(msg)
 
 
-    def read_quant(self):
+    def write_kallisto(self):
         """
-        Writes bash script that will perform read quantification.
+        Writes bash script that will perform read quantification using Kallisto.
         """
-        sh = BashWriter('align', self.dir)
+        sh = BashWriter('kallisto', self.dir)
         for _id, sample in self.samples.items():
             sh.add('# align sample {}'.format(_id))
             if sample.type == 1: # single-end
-                sh.add('kallisto quant -i {} -o {} -b {} --single -l {} -s {} {}\n'.format(
+                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
                         './{}/{}'.format(self.IDX_DIR, self.idx),
                         '{}/{}'.format(self.align_dir, _id),
                         self.bootstrap_n,
+                        self.THREADS,
                         sample.length,
                         sample.stdev,
                         ' '.join(['{}{}'.format(self.raw_dir, read) for read in sample.reads])
                 ))
 
             elif sample.type == 2: #paired-end
-                sh.add('kallisto quant -i {} -o {} -b {} {}'.format(
+                sh.add('kallisto quant -i {} -o {} -b {} --threads={} {}\n'.format(
                         './{}/{}'.format(self.IDX_DIR, self.idx),
                         '{}/{}'.format(self.align_dir, _id),
+                        self.bootstrap_n,
+                        self.THREADS,
                         ' '.join(['{}{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
                 ))
 
         sh.write()
 
-    def diff_exp(self):
+    def write_matrix(self):
         """
-        Performs differential expression analysis.
+        Writes rna_seq_info.txt
         """
-        # TODO: implement
+        if self.design == 1: # single-factor
+            # write design matrix txt
+            ctrl_ftr = list(self.ctrl_ftrs.keys())[0]
+            ctrl_id = self.ctrl_ids[0]
+            head = ['sample', ctrl_ftr]
+            data = []
+            for _id, sample in self.samples.items():
+                if _id == ctrl_id:
+                    ftr = 'a_{}'.format(sample.meta[ctrl_ftr])
+                else:
+                    ftr = 'b_{}'.format(sample.meta[ctrl_ftr])
+                data.append([_id, ftr]) # TODO: batch??
+            # convert to dataframe and save with space as delimiter
+            df = pd.DataFrame(data, columns=head)
+        elif self.design == 2: # two-factor
+            pass # TODO: implement
+
+        df.to_csv('{}/rna_seq_info.txt'.format(self.dir), sep=' ', index=False)
+
+    def write_sleuth(self):
+        """
+        Writes bash script to run sleuth.
+        """
+        if self.design == 1: #single-factor
+            sh = BashWriter('sleuth', self.dir)
+            sh.add('sleuth.R -d {} -k {} -o {} -g {}\n'.format(
+                    self.dir,
+                    self.align_dir,
+                    self.diff_dir,
+                    list(self.ctrl_ftrs.keys())[0]
+            ))
+        elif self.design == 2:
+            pass
+
+        sh.write()
 
     def save(self, folder=None):
         """
