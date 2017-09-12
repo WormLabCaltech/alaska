@@ -10,10 +10,12 @@ Managed by AlaskaServer.
 import os
 import json
 import pandas as pd
+import warnings as w
 from pyunpack import Archive
 import datetime as dt
 from BashWriter import BashWriter
 from AlaskaSample import AlaskaSample
+# from multiprocessing import Process
 from Alaska import Alaska
 
 class AlaskaProject(Alaska):
@@ -39,7 +41,17 @@ class AlaskaProject(Alaska):
         self.ctrl_ftrs = {} # if single-factor, key and value
                             # if two-factor, key: value, key: value
                             # (refers to keys of self.meta)
-        self.progress = 0
+
+        self.progress = 0 # int to denote current analysis progress
+                            # 0: project created
+                            # 1: raw reads uploaded, extracted, and loaded
+                            # 2: project data set and checked (at least once)
+                            # 3: finalized
+                            # 4: performing alignment
+                            # 5: performed alignment
+                            # 6: performing diff exp
+                            # 7: performed diff exp
+                            # 8: analysis completed
 
         self.meta = {} # variable for all metadata
         self.meta['name'] = ''
@@ -61,8 +73,13 @@ class AlaskaProject(Alaska):
             for fname in flist:
                 self.out('{}: unpacking {}'.format(self.id, fname))
                 try:
+                    # p = Process(target=self.unpack_reads, args=(fname,))
+                    # p.daemon = True
+                    # p.start()
+                    # p.join()
                     self.unpack_reads(fname)
-                except:
+                except Exception as e:
+                    print(str(e))
                     raise Exception('{}: exception occured while unpacking {}'.format(self.id, fname))
             self.out('{}: unpacking finished'.format(self.id))
 
@@ -86,18 +103,23 @@ class AlaskaProject(Alaska):
         """
         Archive('{}/{}'.format(self.raw_dir, fname)).extractall(self.raw_dir)
 
-    def infer_samples(self, f):
+    def infer_samples(self, f, temp=None):
         """
         Infers samples from raw reads.
         Assumes each sample is in separate folders.
         Only to be called when raw reads is not empty.
         """
         # TODO: add way to infer single- or pair-end read
+        w.warn('{}: Alaska is currently unable to infer paired-end samples'.format(self.id),
+                Warning)
 
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id)
+            if temp is not None: # if temporary variable is given
+                temp[_id] = sample
+
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
             for read in reads:
@@ -115,7 +137,7 @@ class AlaskaProject(Alaska):
         """
         Resets samples.
         """
-        for _id, sample in self.samples:
+        for _id, sample in self.samples.items():
             sample.reset()
 
     def check(self):
@@ -123,6 +145,8 @@ class AlaskaProject(Alaska):
         Checks all data.
         """
         # Have to check: design vs sample
+        w.warn('{}: Alaska is currently unable to verify experimental designs'.format(self.id),
+                Warning)
 
         # first check controls have matching control factors
         # then check if non-controls have different factors
