@@ -110,8 +110,8 @@ class AlaskaProject(Alaska):
         Only to be called when raw reads is not empty.
         """
         # TODO: add way to infer single- or pair-end read
-        w.warn('{}: Alaska is currently unable to infer paired-end samples'.format(self.id),
-                Warning)
+        w.warn('{}: Alaska is currently unable to infer paired-end samples'
+                .format(self.id), Warning)
 
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
@@ -132,6 +132,13 @@ class AlaskaProject(Alaska):
         Analyzes reads to infer whether samples are single or paired end.
         """
         # TODO: implement
+
+    def new_sample(self, _id):
+        """
+        Creates new sample with id.
+        """
+        sample = AlaskaSample(_id)
+        self.samples[_id] = sample
 
     def reset_samples(self):
         """

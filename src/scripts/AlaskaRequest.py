@@ -21,10 +21,11 @@ class AlaskaRequest(Alaska):
         'load_proj':            b'\x02',
         'save_proj':            b'\x03',
         'infer_samples':        b'\x04',
-        'set_proj':             b'\x05',
-        'finalize_proj':        b'\x06',
-        'read_quant':           b'\x07',
-        'diff_exp':             b'\x08',
+        'new_sample':           b'\x05',
+        'set_proj':             b'\x06',
+        'finalize_proj':        b'\x07',
+        'read_quant':           b'\x08',
+        'diff_exp':             b'\x09',
         'start':                b'\x98',
         'stop':                 b'\x99'
     }

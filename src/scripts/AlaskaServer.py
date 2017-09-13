@@ -7,9 +7,6 @@ This script is to be persistently running on the server.
 AlaskaServer handles all requests, manages the job queue and projects/samples.
 """
 # TODO: Implement all methods
-# TODO: how to implement workers (so that Server is never blocked)
-    # Use multiprocessing workers with lambda as the work
-    # + dedicated projectworker
 
 # TODO: find out what project & sample metadata must be collected
 # TODO: implement logging
@@ -24,6 +21,7 @@ import docker
 import warnings as w
 import datetime as dt
 from Alaska import Alaska
+from AlaskaJob import AlaskaJob
 from AlaskaProject import AlaskaProject
 from BashWriter import BashWriter
 from multiprocessing import Process
@@ -57,6 +55,7 @@ class AlaskaServer(Alaska):
         self.indices = []
         self.projects = {}
         self.samples = {}
+
         # temps are used to prevent generation of existing (but not yet finalized)
         # project/sample ids
         self.projects_temp = {} # temporary projects
@@ -65,7 +64,9 @@ class AlaskaServer(Alaska):
         self.workers_n = 1 # number of workers
         self.workers = []
         self.queue = queue.Queue()
-        self.current_proj = None # project undergoing analysis
+        self.jobs = {} # dictionary of all jobs
+        self.current_job = None # job undergoing analysis
+        self.exceptions = queue.Queue()
 
         self.idx_interval = 600 # index update interval (in seconds)
 
@@ -81,10 +82,11 @@ class AlaskaServer(Alaska):
             b'\x02': self.load_proj,
             b'\x03': self.save_proj,
             b'\x04': self.infer_samples,
-            b'\x05': self.set_proj,
-            b'\x06': self.finalize_proj,
-            b'\x07': self.read_quant,
-            b'\x08': self.diff_exp,
+            b'\x05': self.new_sample,
+            b'\x06': self.set_proj,
+            b'\x07': self.finalize_proj,
+            b'\x08': self.read_quant,
+            b'\x09': self.diff_exp,
             b'\x98': self.start,
             b'\x99': self.stop,
         }
@@ -127,18 +129,18 @@ class AlaskaServer(Alaska):
                 p.daemon = True
                 p.start()
 
+            # self.out('INFO: starting thread to catch exceptions')
+
+
 
             while self.RUNNING:
                 request = self.SOCKET.recv_multipart()
 
                 # TODO: error & exception handling
-                try:
-                    self.decode(request)
-                except Exception as e:
-                    _id = request[0]
-                    self.broadcast(_id, 'ERROR: {}'.format(request))
-                    self.broadcast(_id, str(e))
-                    self.close(_id)
+                t = Thread(target=self.decode, args=(request,))
+                t.daemon = True
+                t.start()
+                # self.decode(request)
 
     def stop(self, _id=None):
         """
@@ -159,13 +161,42 @@ class AlaskaServer(Alaska):
 
         quit()
 
+    # def exception_catcher(self):
+    #     """
+    #     Work to catch exceptions.
+    #     """
+    #     while self.RUNNING:
+
+
     def worker(self):
         """
         Worker function
         """
-        while True:
-            work = self.queue.get()
-            work()
+        while self.RUNNING:
+            job = self.queue.get()
+            job_name = job.name
+            proj_id = job.proj.id
+            self.out('INFO: starting job {}'.format(job.id))
+            self.current_job = job
+            job.run()
+            hook = job.docker.hook()
+
+            for l in hook:
+                l = l.decode(self.ENCODING).strip()
+
+                if '\n' in l:
+                    outs = l.split('\n')
+                else:
+                    outs = [l]
+
+                for out in outs:
+                    self.out('{}: {}: {}'.format(proj_id, job_name, out))
+
+            job.proj.progress += 1
+            job.finished()
+            self.current_job = None
+            self.queue.task_done()
+            self.out('INFO: finished job {}'.format(job.id))
 
     def decode(self, request):
         """
@@ -174,13 +205,20 @@ class AlaskaServer(Alaska):
         # TODO: remove return statements from functions
         # TODO: instead, send messages directly
         self.out('{}: received {}'.format(request[0], request[1]))
-        # must be valid codet
-        if request[1] in self.CODES:
-            t = Thread(target=self.CODES[request[1]], args=(request[0].decode(self.ENCODING),))
-            t.start()
-            # self.CODES[request[1]](request[0].decode(self.ENCODING))
-        else:
-            raise Exception('ERROR: code {} was not recognized')
+        # must be valid code
+            # t = Thread(target=self.CODES[request[1]], args=(request[0].decode(self.ENCODING),))
+            # t.daemon = True
+            # t.start()
+        try:
+            if request[1] not in self.CODES:
+                raise Exception('ERROR: code {} was not recognized')
+
+            self.CODES[request[1]](request[0].decode(self.ENCODING))
+        except Exception as e:
+            _id = request[0]
+            self.broadcast(_id, 'ERROR: {}'.format(request))
+            self.broadcast(_id, str(e))
+            self.close(_id)
 
         # self.respond(request[0], response)
 
@@ -295,7 +333,6 @@ class AlaskaServer(Alaska):
         """
         # TODO: check if _id starts with underscore
 
-        self.broadcast(_id, '{}: creating new AlaskaProject'.format(_id))
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(self.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
@@ -456,7 +493,7 @@ class AlaskaServer(Alaska):
             raise Exception('{}: raw reads have to be retrieved and samples inferred'
                             .format(_id))
 
-        self.broadcast(_id, '{}: setting project data')
+        self.broadcast(_id, '{}: setting project data'.format(_id))
 
         # TODO: what if sample id exists?
         self.projects_temp[_id].load(self.TEMP_DIR)
@@ -469,6 +506,19 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, msg)
         self.close(_id)
 
+    def new_sample(self, _id):
+        """
+        Creates new sample.
+        """
+        self.broadcast(_id, '{}: creating new sample'.format(_id))
+
+        ids = list(self.samples.keys()) + list(self.samples_temp.keys())
+        __id = self.rand_str_except(self.PROJECT_L, ids) # get unique id
+        self.projects_temp[_id].new_sample(__id)
+
+        self.samples_temp[__id] = self.projects_temp[_id].samples[__id]
+        self.broadcast(_id, '{}: new sample created with id {}'.format(_id, __id))
+        self.close(_id)
 
     def finalize_proj(self, _id):
         """
@@ -488,20 +538,23 @@ class AlaskaServer(Alaska):
             os.makedirs(f, exist_ok=True)
             self.broadcast(_id, '{}: {} created'.format(_id, f))
 
+        # convert temporary project to permanent project
+        self.projects[_id] = AlaskaProject(_id)
+        self.projects[_id].load(self.TEMP_DIR)
+
         # remove temporary files
         f = './{}/{}/{}/{}.json'.format(self.PROJECTS_DIR, _id, self.TEMP_DIR, _id)
         if os.path.isfile(f):
             os.remove(f)
             self.broadcast(_id, '{}: {} removed'.format(_id, f))
 
-        # convert temporary project to permanent project
-        self.projects[_id] = AlaskaProject(_id)
-        self.projects[_id].load()
-        del self.projects_temp[_id]
-
-        # add samples to dictionary
-        # IMPORTANT: ASSUMING THERE IS NO OVERLAP
+        # convert temporary samples to permanent samples
         self.samples = {**self.samples, **self.projects[_id].samples}
+
+        # delete temps
+        for __id in self.projects_temp[_id].samples:
+            del self.samples_temp[__id]
+        del self.projects_temp[_id]
 
         self.projects[_id].progress = 3
         self.projects[_id].save()
@@ -519,27 +572,14 @@ class AlaskaServer(Alaska):
             raise Exception('{}: project must be finalized before alignment'
                             .format(_id))
 
-        # check if another analysis is running
-        # TODO: make separate function to add/run queue process?
-        read_quant = lambda : self.read_quant_thread(_id)
-        self.queue.put(read_quant)
-        self.broadcast(_id, '{}: added to queue (size: {})'.format(_id, self.queue.qsize()))
-
-    def read_quant_thread(self, _id):
-        """
-        Read quantification process
-        """
-        self.broadcast(_id, '{}: beginning alignment sequence'.format(_id))
-        self.projects[_id].progress = 4 # alignment in progress
-
-
         self.projects[_id].write_kallisto()
         self.broadcast(_id, '{}: wrote alignment script'.format(_id))
 
-        self.out('{}: {}'.format(_id, self.DOCKER.images.list()))
+        self.broadcast(_id, '{}: creating new job'.format(_id))
+        self.projects[_id].progress = 4 # alignment in progress
 
-        # TODO: error when docker image doesn't exist
-
+        ### begin job variables
+        __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
         # source and target mounting points
         src_proj = os.path.abspath(self.projects[_id].dir)
         tgt_proj = '/projects/{}'.format(_id)
@@ -550,31 +590,26 @@ class AlaskaServer(Alaska):
             src_proj: {'bind': tgt_proj, 'mode': 'rw'},
             src_idx: {'bind': tgt_idx, 'mode': 'ro'}
         }
+        cmd = 'bash {}/kallisto.sh'.format(tgt_proj)
+        args = {
+            'volumes': volumes,
+            'cpuset_cpus': self.CPUS,
+        }
+        ### end job variables
 
-        self.broadcast(_id, '{}: starting docker container with {} core allocation'.format(_id, self.CPUS))
-        cont = self.DOCKER.containers.run('kallisto:latest',
-                                'bash {}/kallisto.sh'.format(tgt_proj),
-                                volumes=volumes,
-                                cpuset_cpus=self.CPUS,
-                                detach=True)
-        self.broadcast(_id, '{}: container started with id {}'.format(_id, cont.short_id))
+        job = AlaskaJob(__id, 'kallisto', self.projects[_id],
+                         'kallisto:latest', cmd, **args)
+        self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
-        # TODO: use worker to fetch output
-
-        for l in cont.attach(stream=True):
-            l = l.decode(self.ENCODING).strip()
-
-            # since kallisto output can be multiple lines
-            if '\n' in l:
-                outs = l.split('\n')
-            else:
-                outs = [l]
-
-            for out in outs:
-                self.broadcast(_id, '{}: Kallisto: {}'.format(_id, out))
-
-        self.projects[_id].progress = 5 # alignment finished
-        self.broadcast(_id, '{}: alignment successful'.format(_id))
+        self.broadcast(_id, '{}: checking queue'.format(_id, __id))
+        if self.current_job is None and self.queue.qsize() == 0: # no other job running
+            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
+        else:
+            self.broadcast(_id, '{}: job {} added to queue (size: {})'
+                            .format(_id, __id, self.queue.qsize()))
+        self.queue.put(job) # put job into queue
+                            # job must be put into queue
+                            # regardless of it being empty
         self.close(_id)
 
     def diff_exp(self, _id):
@@ -585,25 +620,17 @@ class AlaskaServer(Alaska):
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
 
-        diff_exp = lambda : self.diff_exp_thread(_id)
-        self.queue.put(diff_exp)
-        self.broadcast(_id, '{}: added to queue (size: {})'.format(_id, self.queue.qsize()))
-
-
-    def diff_exp_thread(self, _id):
-        """
-        Diff. exp. process
-        """
-        self.broadcast(_id, '{}: beginning diff. exp. sequence'.format(_id))
+        # write sleuth matrix and bash script
         self.projects[_id].write_matrix()
         self.broadcast(_id, '{}: wrote sleuth design matrix'.format(_id))
         self.projects[_id].write_sleuth()
         self.broadcast(_id, '{}: wrote sleuth script'.format(_id))
 
-        self.out('{}: {}'.format(_id, self.DOCKER.images.list()))
+        self.broadcast(_id, '{}: creating new job'.format(_id))
+        self.projects[_id].progress = 6 # diff_exp in progress
 
-        # TODO: error when docker image doesn't exist
-
+        ### begin job variables
+        __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
         # source and target mouting points
         src_proj = os.path.abspath(self.projects[_id].dir)
         tgt_proj = '/projects/{}'.format(_id)
@@ -611,29 +638,27 @@ class AlaskaServer(Alaska):
         volumes = {
             src_proj: {'bind': tgt_proj, 'mode': 'rw'},
         }
+        cmd = 'bash {}/sleuth.sh'.format(tgt_proj)
+        args = {
+            'volumes': volumes,
+            'cpuset_cpus': self.CPUS,
+        }
+        ### end job variables
 
-        self.broadcast(_id, '{}: starting docker container with {} core allocation'.format(_id, self.CPUS))
-        cont = self.DOCKER.containers.run('sleuth:latest',
-                                'bash {}/sleuth.sh'.format(tgt_proj),
-                                volumes=volumes,
-                                cpuset_cpus=self.CPUS,
-                                detach=True)
-        self.broadcast(_id, '{}: container started with id {}'.format(_id, cont.short_id))
+        job = AlaskaJob(__id, 'sleuth', self.projects[_id],
+                        'sleuth:latest', cmd, **args)
+        self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
-        for l in cont.attach(stream=True):
-            l = l.decode(self.ENCODING).strip()
-
-            # since kallisto output can be multiple lines
-            if '\n' in l:
-                outs = l.split('\n')
-            else:
-                outs = [l]
-
-            for out in outs:
-                self.broadcast(_id, '{}: Sleuth: {}'.format(_id, out))
-
+        self.broadcast(_id, '{}: checking queue'.format(_id, __id))
+        if self.current_job is None and self.queue.qsize() == 0: # no other job running
+            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
+        else:
+            self.broadcast(_id, '{}: job {} added to queue (size: {})'
+                            .format(_id, __id, self.queue.qsize()))
+        self.queue.put(job) # put job into queue
+                            # job must be put into queue
+                            # regardless of it being empty
         self.close(_id)
-
 
     def save(self):
         """

@@ -13,12 +13,13 @@ class Alaska():
     """
     Alaska.
     This class contains all variables that are shared among Alaska scripts.
-    Including: directory structure, messaging codes, etc.
+    Including: directory structure, etc.
     """
     VERSION = 'dev'
     ENCODING = 'utf-8'
     ROOT_DIR = '/media/sf_Github/alaska/src/root'
     SCRIPT_DIR = 'scripts'
+    JOBS_DIR = 'jobs'
     TRANS_DIR = 'transcripts' # transcripts directory
     IDX_DIR = 'idx' # index directory name
     LOG_DIR = 'log' # log directory name
@@ -74,7 +75,11 @@ class Alaska():
         """
         Encodes current object to JSON.
         """
-        return obj.__dict__
+        try:
+            dic = obj.__dict__
+            return dic
+        except:
+            self.out('ERROR: could not serialize object {}'.format(obj))
 
     def save(self):
         """
