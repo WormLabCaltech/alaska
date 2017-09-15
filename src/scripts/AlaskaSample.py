@@ -27,6 +27,7 @@ class AlaskaSample(Alaska):
 
         self.meta = {} # variable for all metadata
         self.meta['name'] = ''
+        self.meta['genotype'] = ''
         self.meta['date created'] = dt.datetime.now().strftime('%Y-%m-%d')
         self.meta['time created'] = dt.datetime.now().strftime('%H:%M:%S')
 

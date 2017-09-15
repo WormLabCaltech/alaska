@@ -13,6 +13,7 @@ AlaskaServer handles all requests, manages the job queue and projects/samples.
 # TODO: how to show results?
 
 import os
+import io
 import zmq
 import time
 import json
@@ -24,25 +25,13 @@ from Alaska import Alaska
 from AlaskaJob import AlaskaJob
 from AlaskaProject import AlaskaProject
 from BashWriter import BashWriter
-from multiprocessing import Process
+import threading
 from threading import Thread
 
 class AlaskaServer(Alaska):
     """
     AlaskaServer
     """
-
-    # messeging codes
-            # CODES = {
-            #     'new_project':          b'\x01',
-            #     'load_project':         b'\x02',
-            #     'save_project':         b'\x03',
-            #     'get_raw_reads':        b'\x04',
-            #     'set_proj_metadata':    b'\x05',
-            #     'set_sample_metadata':  b'\x06',
-            #     'read_quant':           b'\x07',
-            #     'diff_exp':             b'\x08'
-            # }
 
     def __init__(self, port=8888):
         """
@@ -66,9 +55,11 @@ class AlaskaServer(Alaska):
         self.queue = queue.Queue()
         self.jobs = {} # dictionary of all jobs
         self.current_job = None # job undergoing analysis
-        self.exceptions = queue.Queue()
 
         self.idx_interval = 600 # index update interval (in seconds)
+
+        self.log_pool = [] # pool of logs to be flushed
+        self.log_interval = 600 # log interval (in seconds)
 
         # set up server
         self.PORT = port
@@ -82,19 +73,33 @@ class AlaskaServer(Alaska):
             b'\x02': self.load_proj,
             b'\x03': self.save_proj,
             b'\x04': self.infer_samples,
-            b'\x05': self.new_sample,
-            b'\x06': self.set_proj,
-            b'\x07': self.finalize_proj,
-            b'\x08': self.read_quant,
-            b'\x09': self.diff_exp,
+            b'\x05': self.get_idx,
+            b'\x06': self.new_sample,
+            b'\x07': self.set_proj,
+            b'\x08': self.finalize_proj,
+            b'\x09': self.read_quant,
+            b'\x10': self.diff_exp,
+            b'\x94': self.save,
+            b'\x95': self.load,
+            b'\x96': self.log,
+            b'\x97': self.update_idx,
             b'\x98': self.start,
             b'\x99': self.stop,
         }
 
-        self.DOCKER = docker.from_env()
+        self.DOCKER = docker.from_env() # docker client
+        self.load_ignore = [ # keys to ignore when loading server state
+            'queue',
+            'CONTEXT',
+            'SOCKET',
+            'CODES',
+            'DOCKER'
+        ]
 
         # switch working directory to root
         os.chdir(self.ROOT_DIR)
+
+        self.out('INFO: AlaskaServer initialized')
 
     def start(self, _id=None):
         """
@@ -103,7 +108,7 @@ class AlaskaServer(Alaska):
         # make log file
         # self.log = open('{}-{}.log'.format(self.date, self.time))
 
-        self.out('INFO: Starting AlaskaServer {}'.format(self.VERSION))
+        self.out('INFO: starting AlaskaServer {}'.format(self.VERSION))
         self.RUNNING = True
 
         self.out('INFO: checking admin privilages')
@@ -118,8 +123,13 @@ class AlaskaServer(Alaska):
         with w.catch_warnings() as caught:
             w.simplefilter('always')
 
+            self.out('INFO: starting logger')
+            p = Thread(target=self.log_loop, args=(self.log_interval,))
+            p.daemon = True
+            p.start()
+
             self.out('INFO: starting index update worker')
-            p = Process(target=self.update_idx_loop, args=(self.idx_interval,))
+            p = Thread(target=self.update_idx_loop, args=(self.idx_interval,))
             p.daemon = True
             p.start()
 
@@ -129,24 +139,17 @@ class AlaskaServer(Alaska):
                 p.daemon = True
                 p.start()
 
-            # self.out('INFO: starting thread to catch exceptions')
-
-
-
             while self.RUNNING:
                 request = self.SOCKET.recv_multipart()
 
-                # TODO: error & exception handling
                 t = Thread(target=self.decode, args=(request,))
                 t.daemon = True
                 t.start()
-                # self.decode(request)
 
     def stop(self, _id=None):
         """
         Stops the server.
         """
-        # TODO: implement
         # self.log.close()
         self.out('INFO: terminating ZeroMQ')
         self.SOCKET.close()
@@ -159,68 +162,60 @@ class AlaskaServer(Alaska):
             self.out('INFO: terminating container {}'.format(cont.short_id))
             cont.remove(force=True)
 
+        self.save()
+        self.log() # write all remaining logs
         quit()
-
-    # def exception_catcher(self):
-    #     """
-    #     Work to catch exceptions.
-    #     """
-    #     while self.RUNNING:
-
 
     def worker(self):
         """
         Worker function
         """
-        while self.RUNNING:
-            job = self.queue.get()
-            job_name = job.name
-            proj_id = job.proj.id
-            self.out('INFO: starting job {}'.format(job.id))
-            self.current_job = job
-            job.run()
-            hook = job.docker.hook()
+        try:
+            while self.RUNNING:
+                job = self.queue.get() # receive job from queue
+                                        # block if there is no job
+                job_name = job.name
+                proj_id = job.proj.id
+                self.out('INFO: starting job {}'.format(job.id))
+                self.current_job = job
+                job.run()
+                self.out('INFO: container started with id {}'.format(job.docker.id))
+                hook = job.docker.hook()
 
-            for l in hook:
-                l = l.decode(self.ENCODING).strip()
+                for l in hook:
+                    l = l.decode(self.ENCODING).strip()
 
-                if '\n' in l:
-                    outs = l.split('\n')
-                else:
-                    outs = [l]
+                    if '\n' in l:
+                        outs = l.split('\n')
+                    else:
+                        outs = [l]
 
-                for out in outs:
-                    self.out('{}: {}: {}'.format(proj_id, job_name, out))
+                    for out in outs:
+                        self.out('{}: {}: {}'.format(proj_id, job_name, out))
 
-            job.proj.progress += 1
-            job.finished()
-            self.current_job = None
-            self.queue.task_done()
-            self.out('INFO: finished job {}'.format(job.id))
+                job.proj.progress += 1
+                job.finished()
+                self.current_job = None
+                self.queue.task_done()
+                self.out('INFO: finished job {}'.format(job.id))
+        except KeyboardInterrupt:
+            self.out('INFO: stopping workers')
 
     def decode(self, request):
         """
         Method to decode messages received from AlaskaRequest.
         """
-        # TODO: remove return statements from functions
-        # TODO: instead, send messages directly
         self.out('{}: received {}'.format(request[0], request[1]))
-        # must be valid code
-            # t = Thread(target=self.CODES[request[1]], args=(request[0].decode(self.ENCODING),))
-            # t.daemon = True
-            # t.start()
         try:
             if request[1] not in self.CODES:
                 raise Exception('ERROR: code {} was not recognized')
-
+            # distribute message to appropriate method
             self.CODES[request[1]](request[0].decode(self.ENCODING))
         except Exception as e:
             _id = request[0]
             self.broadcast(_id, 'ERROR: {}'.format(request))
             self.broadcast(_id, str(e))
             self.close(_id)
-
-        # self.respond(request[0], response)
 
     def respond(self, to, msg):
         """
@@ -233,8 +228,44 @@ class AlaskaServer(Alaska):
             to = to.encode()
 
         response = [to, msg]
-        # self.out('RESPONSE: {}'.format(response))
         self.SOCKET.send_multipart(response)
+
+    def log(self, _id=None):
+        """
+        Writes contents of log_pool to log file.
+        """
+        self.out('INFO: writing log')
+        datetime = dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+
+        with open('{}/{}.log'.format(self.LOG_DIR, datetime), 'w') as f:
+            for line in self.log_pool:
+                f.write(line + '\n')
+
+        # empty log pool
+        self.log_pool = []
+
+        self.out('INFO: wrote log')
+
+        self.close(_id)
+
+    def log_loop(self, t=600):
+        """
+        Log loop.
+        Runs log in intervals.
+        """
+        try:
+            while self.RUNNING:
+                time.sleep(t)
+                self.log()
+        except KeyboardInterrupt:
+            self.out('INFO: terminating log loop')
+
+    def out(self, out):
+        """
+        Overrides parent's out().
+        """
+        line = super().out(out)
+        self.log_pool.append(line)
 
     def broadcast(self, to, msg):
         """
@@ -247,7 +278,8 @@ class AlaskaServer(Alaska):
         """
         Closes connection to AlaskaRequest.
         """
-        self.respond(to, 'END')
+        if to is not None:
+            self.respond(to, 'END')
 
     def check(self, to):
         """
@@ -256,7 +288,7 @@ class AlaskaServer(Alaska):
         """
         self.respond(to, to)
 
-    def update_idx(self):
+    def update_idx(self, _id=None):
         """
         Writes bash script to update indices.
         """
@@ -277,7 +309,9 @@ class AlaskaServer(Alaska):
             self.out('INFO: writing update script')
             sh.write() # write script
 
-
+            ### begin variables
+            __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
+            # source and target mounting points
             src_scrpt = os.path.abspath(self.SCRIPT_DIR)
             tgt_scrpt = '/{}'.format(self.SCRIPT_DIR)
             src_trans = os.path.abspath(self.TRANS_DIR)
@@ -290,16 +324,20 @@ class AlaskaServer(Alaska):
                 src_trans: {'bind': tgt_trans, 'mode': 'ro'},
                 src_idx: {'bind': tgt_idx, 'mode': 'rw'}
             }
+            cmd = 'bash {}/update_idx.sh'.format(self.SCRIPT_DIR)
+            args = {
+                'volumes': volumes,
+                'cpuset_cpus': self.CPUS,
+            }
+            ### end variables
 
             self.out('INFO: starting docker container with {} core allocation'.format(self.CPUS))
-            cont = self.DOCKER.containers.run('kallisto:latest',
+            cont = self.DOCKER.containers.run(self.KAL_VERSION,
                                     'bash {}/update_idx.sh'.format(self.SCRIPT_DIR),
                                     volumes=volumes,
                                     cpuset_cpus=self.CPUS,
                                     detach=True)
             self.out('INFO: container started with id {}'.format(cont.short_id))
-
-            # TODO: use worker to fetch output
 
             for l in cont.attach(stream=True):
                 l = l.decode(self.ENCODING).strip()
@@ -311,7 +349,7 @@ class AlaskaServer(Alaska):
                     outs = [l]
 
                 for out in outs:
-                    self.out('INFO: Kallisto: {}'.format(out))
+                    self.out('INFO: index: {}'.format(out))
 
             self.out('INFO: index build successful')
             self.update_idx()
@@ -320,24 +358,23 @@ class AlaskaServer(Alaska):
 
     def update_idx_loop(self, t=600):
         """
-        Index update loop
+        Index update loop.
+        Runs update_idx in intervals.
         """
-        while self.RUNNING:
-            self.update_idx()
-            time.sleep(t)
-
+        try:
+            while self.RUNNING:
+                self.update_idx()
+                time.sleep(t)
+        except KeyboardInterrupt:
+            self.out('INFO: terminating update loop')
 
     def new_proj(self, _id):
         """
         Creates a new project.
         """
-        # TODO: check if _id starts with underscore
-
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(self.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
-        # 9/12/2017: hold new projects in projects_temp
-        # self.projects[__id] = AlaskaProject(__id)
         self.projects_temp[__id] = AlaskaProject(__id)
         self.broadcast(_id, '{}: creating'.format(__id))
 
@@ -407,10 +444,13 @@ class AlaskaServer(Alaska):
         ap = AlaskaProject(_id)
         ap.load()
 
-        if ap.progress >= 2:
+        # add project and samples to dictionary
+        if ap.progress > 2:
             self.projects[_id] = ap
+            self.samples = {**self.samples, **self.ap.samples}
         else:
             self.projects_temp[_id] = ap
+            self.samples_temp = {**self.samples_temp, **self.ap.samples}
 
         msg = '{}: successfully loaded'.format(_id)
 
@@ -482,6 +522,14 @@ class AlaskaServer(Alaska):
         self.projects_temp[_id].progress = 1
 
         self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
+        self.close(_id)
+
+    def get_idx(self, _id):
+        """
+        Responds with the list of available indices.
+        """
+        self.out('INFO: available indices {}'.format(self.indices))
+        self.respond(_id, self.indices)
         self.close(_id)
 
     def set_proj(self, _id):
@@ -580,6 +628,7 @@ class AlaskaServer(Alaska):
 
         ### begin job variables
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
+        self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mounting points
         src_proj = os.path.abspath(self.projects[_id].dir)
         tgt_proj = '/projects/{}'.format(_id)
@@ -598,7 +647,8 @@ class AlaskaServer(Alaska):
         ### end job variables
 
         job = AlaskaJob(__id, 'kallisto', self.projects[_id],
-                         'kallisto:latest', cmd, **args)
+                         self.KAL_VERSION, cmd, **args)
+        self.jobs[__id] = job
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
         self.broadcast(_id, '{}: checking queue'.format(_id, __id))
@@ -631,6 +681,7 @@ class AlaskaServer(Alaska):
 
         ### begin job variables
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
+        self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mouting points
         src_proj = os.path.abspath(self.projects[_id].dir)
         tgt_proj = '/projects/{}'.format(_id)
@@ -646,7 +697,7 @@ class AlaskaServer(Alaska):
         ### end job variables
 
         job = AlaskaJob(__id, 'sleuth', self.projects[_id],
-                        'sleuth:latest', cmd, **args)
+                        self.SLE_VERSION, cmd, **args)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
         self.broadcast(_id, '{}: checking queue'.format(_id, __id))
@@ -660,23 +711,57 @@ class AlaskaServer(Alaska):
                             # regardless of it being empty
         self.close(_id)
 
-    def save(self):
+    def save(self, _id=None):
         """
         Saves its current state.
         """
-        datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        path = '{}/{}'.format(self.ROOT_DIR, self.SAVE_DIR)
+        datetime = dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
 
-        with open('{}.json'.format(datetime), 'w') as f:
-            json.dump(self.__dict__, f, indent=4)
+        self.out('INFO: locking all threads to save server state')
+        lock = threading.Lock()
+        lock.acquire()
 
-    def load(self):
+        with open('{}/{}.json'.format(path, datetime), 'w') as f:
+            json.dump(self.__dict__, f, skipkeys=True,
+                        default=self.encode_json, indent=4)
+
+        self.out('INFO: saved, unlocking threads')
+        lock.release()
+
+        self.close(_id)
+
+    def load(self, _id=None):
         """
         Loads state from JSON.
         """
-        # TODO: get list of jsons and load most recent
-        with open('{}{}.json'.format(self.path, self.id), 'r') as f:
+        path = '{}/{}'.format(self.ROOT_DIR, self.SAVE_DIR)
+        files = os.listdir(path)
+
+        self.out('INFO: locking all threads to load server state')
+        lock = threading.Lock()
+        lock.acquire()
+
+        jsons = []
+        for fname in files:
+            if fname.endswith('.json'):
+                jsons.append(fname)
+
+        jsons = sorted(jsons)
+        fname = jsons[-1]
+
+        self.out('INFO: loading {}'.format(fname))
+        with open('{}/{}'.format(path, fname), 'r') as f:
             loaded = json.load(f)
-        self.__dict__ = loaded
+
+        for key, item in loaded.items():
+            if key not in self.load_ignore:
+                setattr(self, key, item)
+
+        self.out('INFO: loaded, unlocking threads')
+        lock.release()
+
+        self.close(_id)
 
 if __name__ == '__main__':
     try:

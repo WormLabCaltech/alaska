@@ -16,18 +16,23 @@ class AlaskaRequest(Alaska):
     """
     # messeging codes
     CODES = {
-        'check':                b'\x00',
-        'new_proj':             b'\x01',
-        'load_proj':            b'\x02',
-        'save_proj':            b'\x03',
-        'infer_samples':        b'\x04',
-        'new_sample':           b'\x05',
-        'set_proj':             b'\x06',
-        'finalize_proj':        b'\x07',
-        'read_quant':           b'\x08',
-        'diff_exp':             b'\x09',
-        'start':                b'\x98',
-        'stop':                 b'\x99'
+        'check':                b'\x00', # empty request for pinging server
+        'new_proj':             b'\x01', # create new project
+        'load_proj':            b'\x02', # load project from JSON
+        'save_proj':            b'\x03', # save project to JSON
+        'infer_samples':        b'\x04', # extract raw reads and infer samples
+        'get_idx':              b'\x05', # get list of avaliable indices
+        'new_sample':           b'\x06', # create new sample with unique id
+        'set_proj':             b'\x07', # set project data by reading temporary JSON
+        'finalize_proj':        b'\x08', # finalize project
+        'read_quant':           b'\x09', # perform read quantification
+        'diff_exp':             b'\x10', # perform differential expression
+        'save':                 b'\x94', # saves server state
+        'load':                 b'\x95', # loads server state
+        'log':                  b'\x96', # force log
+        'update_idx':           b'\x97', # force index update
+        'start':                b'\x98', # start server
+        'stop':                 b'\x99'  # stop server
     }
 
     def __init__(self, port=8888):

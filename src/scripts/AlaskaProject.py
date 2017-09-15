@@ -11,8 +11,8 @@ import os
 import json
 import pandas as pd
 import warnings as w
-from pyunpack import Archive
 import datetime as dt
+from pyunpack import Archive
 from BashWriter import BashWriter
 from AlaskaSample import AlaskaSample
 # from multiprocessing import Process
@@ -34,7 +34,7 @@ class AlaskaProject(Alaska):
         self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
         self.raw_reads = {}
         self.samples = {}
-        self.bootstrap_n = 300
+        self.bootstrap_n = 100
         self.idx = ''
         self.design = 1 # 1: single-factor, 2: two-factor
         self.ctrl_ids = [] # control ids
@@ -55,6 +55,7 @@ class AlaskaProject(Alaska):
 
         self.meta = {} # variable for all metadata
         self.meta['name'] = ''
+        self.meta['email'] = ''
         self.meta['date created'] = dt.datetime.now().strftime('%Y-%m-%d')
         self.meta['time created'] = dt.datetime.now().strftime('%H:%M:%S')
 
@@ -65,7 +66,7 @@ class AlaskaProject(Alaska):
         """
         # get list of files/directories in raw reads directory
         flist = os.listdir(self.raw_dir)
-        unpack = all(not os.path.isdir(d) for d in flist)
+        unpack = all(not os.path.isdir('{}/{}'.format(self.raw_dir, d)) for d in flist)
 
         # if files need to be unpack_reads
         if unpack:
@@ -101,6 +102,7 @@ class AlaskaProject(Alaska):
         """
         Unpacks read archive.
         """
+
         Archive('{}/{}'.format(self.raw_dir, fname)).extractall(self.raw_dir)
 
     def infer_samples(self, f, temp=None):
@@ -260,7 +262,6 @@ class AlaskaProject(Alaska):
         """
         Loads project from JSON.
         """
-        # TODO: check if object id and JSON id matches
         if folder is None: # if folder not given, load from project root
             path = self.dir
         else:
@@ -268,6 +269,10 @@ class AlaskaProject(Alaska):
 
         with open('{}/{}.json'.format(path, self.id), 'r') as f:
             loaded = json.load(f)
+
+        if not loaded['id'] == self.id:
+            raise Exception('{}: JSON id {} does not match object id'
+                        .format(self.id, loaded['id']))
 
         for key, item in loaded.items():
             if key == 'samples':

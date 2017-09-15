@@ -41,7 +41,6 @@ class AlaskaJob(Alaska):
         """
         self.date_started = dt.datetime.now().strftime('%Y-%m-%d')
         self.time_started = dt.datetime.now().strftime('%H:%M:%S')
-        self.save()
 
         self.docker.run(self.docker_cmd, **self.docker_args)
 
