@@ -59,7 +59,7 @@ class Alaska():
 
         return False
 
-    def out(self, out):
+    def out(self, out, override=False):
         """
         Prints message to terminal and log with appropriate prefix.
         """
@@ -69,10 +69,13 @@ class Alaska():
         line = '{} {}'.format(prefix, out)
 
         # shorten output if too long
-        if len(out) > 90:
-            out = '{}...'.format(out[:90])
-        line_short = '{} {}'.format(prefix, out)
-        print(line_short)
+        if override:
+            print(line)
+        else:
+            if len(out) > 90:
+                out = '{}...'.format(out[:90])
+            line_short = '{} {}'.format(prefix, out)
+            print(line_short)
 
         return line
 

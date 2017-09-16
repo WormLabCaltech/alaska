@@ -19,6 +19,7 @@ import time
 import json
 import queue
 import docker
+import traceback
 import warnings as w
 import datetime as dt
 from Alaska import Alaska
@@ -51,7 +52,6 @@ class AlaskaServer(Alaska):
         self.samples_temp = {} # temporary samples
 
         self.workers_n = 1 # number of workers
-        self.workers = []
         self.queue = queue.Queue()
         self.jobs = {} # dictionary of all jobs
         self.current_job = None # job undergoing analysis
@@ -88,13 +88,6 @@ class AlaskaServer(Alaska):
         }
 
         self.DOCKER = docker.from_env() # docker client
-        self.load_ignore = [ # keys to ignore when loading server state
-            'queue',
-            'CONTEXT',
-            'SOCKET',
-            'CODES',
-            'DOCKER'
-        ]
 
         # switch working directory to root
         os.chdir(self.ROOT_DIR)
@@ -142,9 +135,15 @@ class AlaskaServer(Alaska):
             while self.RUNNING:
                 request = self.SOCKET.recv_multipart()
 
-                t = Thread(target=self.decode, args=(request,))
-                t.daemon = True
-                t.start()
+                # if save/load, don't use thread
+                if request[1] == b'\x94' or request[1] == b'\x95':
+                    self.decode(request)
+                else:
+                    t = Thread(target=self.decode, args=(request,))
+                    t.daemon = True
+                    t.start()
+
+            self.stop()
 
     def stop(self, _id=None):
         """
@@ -193,13 +192,18 @@ class AlaskaServer(Alaska):
                     for out in outs:
                         self.out('{}: {}: {}'.format(proj_id, job_name, out))
 
-                job.proj.progress += 1
-                job.finished()
-                self.current_job = None
-                self.queue.task_done()
-                self.out('INFO: finished job {}'.format(job.id))
+                # TODO: better way to check correct termnation
+                exitcode = self.DOCKER.containers.get(job.docker.id).wait()
+                if exitcode == 0:
+                    job.proj.progress += 1
+                    job.finished()
+                    self.current_job = None
+                    self.queue.task_done()
+                    self.out('INFO: finished job {}'.format(job.id))
         except KeyboardInterrupt:
             self.out('INFO: stopping workers')
+        except Exception as e:
+            raise e
 
     def decode(self, request):
         """
@@ -214,7 +218,9 @@ class AlaskaServer(Alaska):
         except Exception as e:
             _id = request[0]
             self.broadcast(_id, 'ERROR: {}'.format(request))
-            self.broadcast(_id, str(e))
+            self.respond(_id, str(e))
+            self.out(''.join(traceback.format_exception(None, e, e.__traceback__)),
+                        override=True)
             self.close(_id)
 
     def respond(self, to, msg):
@@ -260,11 +266,11 @@ class AlaskaServer(Alaska):
         except KeyboardInterrupt:
             self.out('INFO: terminating log loop')
 
-    def out(self, out):
+    def out(self, out, override=False):
         """
         Overrides parent's out().
         """
-        line = super().out(out)
+        line = super().out(out, override)
         self.log_pool.append(line)
 
     def broadcast(self, to, msg):
@@ -447,10 +453,10 @@ class AlaskaServer(Alaska):
         # add project and samples to dictionary
         if ap.progress > 2:
             self.projects[_id] = ap
-            self.samples = {**self.samples, **self.ap.samples}
+            self.samples = {**self.samples, **ap.samples}
         else:
             self.projects_temp[_id] = ap
-            self.samples_temp = {**self.samples_temp, **self.ap.samples}
+            self.samples_temp = {**self.samples_temp, **ap.samples}
 
         msg = '{}: successfully loaded'.format(_id)
 
@@ -620,6 +626,18 @@ class AlaskaServer(Alaska):
             raise Exception('{}: project must be finalized before alignment'
                             .format(_id))
 
+        # check if alignment is already queued
+        qu = list(self.queue.queue)
+        for job in qu:
+            if job.proj.id == _id and job.name == 'kallisto':
+                raise Exception('{}: already in queue'.format(_id))
+
+        # check if alignment is currently running
+        if self.current_job is not None\
+            and self.current_job.id == _id\
+            and self.current_job.name == 'kallisto':
+            raise Exception('{}: currently running'.format(_id))
+
         self.projects[_id].write_kallisto()
         self.broadcast(_id, '{}: wrote alignment script'.format(_id))
 
@@ -669,6 +687,16 @@ class AlaskaServer(Alaska):
         if self.projects[_id].progress < 5:
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
+
+        # check if diff. exp. is already queued
+        qu = list(self.queue.queue)
+        for job in qu:
+            if job.proj.id == _id and job.name == 'sleuth':
+                raise Exception('{}: already in queue'.format(_id))
+
+        # check if diff. exp. is currently running
+        if self.current_job.id == _id and self.current_job.name == 'sleuth':
+            raise Exception('{}: currently running'.format(_id))
 
         # write sleuth matrix and bash script
         self.projects[_id].write_matrix()
@@ -722,9 +750,59 @@ class AlaskaServer(Alaska):
         lock = threading.Lock()
         lock.acquire()
 
+        # save all projects and jobs first
+        for __id, project in self.projects.items():
+            project.save()
+        for __id, project_temp in self.projects_temp.items():
+            project_temp.save(self.TEMP_DIR)
+        for __id, job in self.jobs.items():
+            job.save()
+
+        ### hide variables that should not be written to JSON
+        _projects = self.projects
+        _samples = self.samples
+        _projects_temp = self.projects_temp
+        _samples_temp = self.samples_temp
+        _queue = self.queue
+        _jobs = self.jobs
+        _current_job = self.current_job
+        _CONTEXT = self.CONTEXT
+        _SOCKET = self.SOCKET
+        _CODES = self.CODES
+        _DOCKER = self.DOCKER
+        _RUNNING = self.RUNNING
+        # delete / replace
+        self.projects = list(self.projects.keys())
+        self.samples = list(self.samples.keys())
+        self.projects_temp = list(self.projects_temp.keys())
+        self.samples_temp = list(self.samples_temp.keys())
+        self.queue = [job.id for job in list(self.queue.queue)]
+        self.jobs = list(self.jobs.keys())
+        if self.current_job is not None:
+            self.current_job = self.current_job.id
+        del self.CONTEXT
+        del self.SOCKET
+        del self.CODES
+        del self.DOCKER
+        del self.RUNNING
+
         with open('{}/{}.json'.format(path, datetime), 'w') as f:
-            json.dump(self.__dict__, f, skipkeys=True,
-                        default=self.encode_json, indent=4)
+            # dump to json
+            json.dump(self.__dict__, f, default=self.encode_json, indent=4)
+
+        # once dump is finished, restore variables
+        self.projects = _projects
+        self.samples = _samples
+        self.projects_temp = _projects_temp
+        self.samples_temp = _samples_temp
+        self.queue = _queue
+        self.jobs = _jobs
+        self.current_job = _current_job
+        self.CONTEXT = _CONTEXT
+        self.SOCKET = _SOCKET
+        self.CODES = _CODES
+        self.DOCKER = _DOCKER
+        self.RUNNING = _RUNNING
 
         self.out('INFO: saved, unlocking threads')
         lock.release()
@@ -754,9 +832,55 @@ class AlaskaServer(Alaska):
         with open('{}/{}'.format(path, fname), 'r') as f:
             loaded = json.load(f)
 
+        # IMPORTANT: must load entire json first
+        # because projects must be loaded before jobs are
         for key, item in loaded.items():
-            if key not in self.load_ignore:
+            if key == 'queue':
+                # the queue needs to be dealt specially
+                _queue = item
+                with self.queue.mutex:
+                    self.queue.queue.clear()
+            else:
                 setattr(self, key, item)
+
+        #### create necessary objects & assign
+        _projects = {}
+        self.samples = {}
+        for __id in self.projects:
+            self.out('INFO: loading project {}'.format(__id))
+            ap = AlaskaProject(__id)
+            ap.load()
+            _projects[__id] = ap
+            self.samples = {**self.samples, **ap.samples}
+        self.projects = _projects
+
+        _projects_temp = {}
+        self.samples_temp = {}
+        for __id in self.projects_temp:
+            self.out('INFO: loading temporary project {}'.format(__id))
+            ap = AlaskaProject(__id)
+            ap.load(self.TEMP_DIR)
+            _projects_temp[__id] = ap
+            self.samples_temp = {**self.samples_temp, **ap.samples}
+        self.projects_temp = _projects_temp
+
+        _jobs = {}
+        for __id in self.jobs:
+            self.out('INFO: loading job {}'.format(__id))
+            job = AlaskaJob(__id)
+            job.load()
+            job.proj = self.projects[job.proj]
+            _jobs[__id] = job
+        self.jobs = _jobs
+
+        if self.current_job is not None:
+            self.out('INFO: unfinished job {} was detected'.format(self.current_job))
+            self.current_job = self.jobs[self.current_job]
+            self.queue.put(self.current_job)
+            self.out('INFO: {} added to first in queue'.format(self.current_job.id))
+        for __id in _queue:
+            self.out('INFO: adding {} to queue'.format(__id))
+            self.queue.put(self.jobs[__id])
 
         self.out('INFO: loaded, unlocking threads')
         lock.release()

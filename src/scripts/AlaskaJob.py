@@ -18,7 +18,7 @@ class AlaskaJob(Alaska):
     AlaskaJob.
     """
 
-    def __init__(self, _id, name, proj, img_tag, cmd, **args):
+    def __init__(self, _id, name=None, proj=None, img_tag=None, cmd=None, **args):
         """
         Constructor.
         """
@@ -52,7 +52,6 @@ class AlaskaJob(Alaska):
         self.time_finished = dt.datetime.now().strftime('%H:%M:%S')
         self.save() # save job info
 
-
     def save(self, folder=None):
         """
         Saves job information to JSON.
@@ -62,7 +61,44 @@ class AlaskaJob(Alaska):
         else:
             path = folder
 
+        ### hide some variables
+        _proj = self.proj
+
+        if self.proj is not None:
+            self.proj = self.proj.id
+
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
 
+        # restore hidden variables
+        self.proj = _proj
+
+    def load(self, folder=None, proj=None):
+        """
+        Load job from JSON.
+        """
+        if folder is None:
+            path = self.JOBS_DIR
+        else:
+            path = folder
+
+        with open('{}/{}.json'.format(path, self.id), 'r') as f:
+            loaded = json.load(f)
+
+        if not loaded['id'] == self.id:
+            raise Exception('ERROR: job id {} does not match JSON id {}'
+                            .format(self.id, loaded['id']))
+
+        for key, item in loaded.items():
+            if key == 'docker':
+                self.docker = AlaskaDocker(item['img_tag'])
+            else:
+                setattr(self, key, item)
+
+        if proj is not None:
+            if proj.id == self.proj:
+                self.proj = proj
+            else:
+                raise Exception('ERROR: job id {} received incorrect project id \
+                {} (expected {})'.format(self.id, proj.id, self.proj))
 
