@@ -44,14 +44,17 @@ class AlaskaProject(Alaska):
 
         self.progress = 0 # int to denote current analysis progress
                             # 0: project created
-                            # 1: raw reads uploaded, extracted, and loaded
-                            # 2: project data set and checked (at least once)
-                            # 3: finalized
-                            # 4: performing alignment
-                            # 5: performed alignment
-                            # 6: performing diff exp
-                            # 7: performed diff exp
-                            # 8: analysis completed
+                            # 1: unpacking and inferring raw reads
+                            # 2: raw reads uploaded, extracted, and loaded
+                            # 3: project data set and checked (at least once)
+                            # 4: finalized
+                            # 5: added to queue
+                            # 6: performing alignment
+                            # 7: performed alignment
+                            # 8: added to queue
+                            # 9: performing diff exp
+                            # 10: performed diff exp
+                            # 11: analysis completed
 
         self.meta = {} # variable for all metadata
         self.meta['name'] = ''

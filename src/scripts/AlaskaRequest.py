@@ -27,6 +27,7 @@ class AlaskaRequest(Alaska):
         'finalize_proj':        b'\x08', # finalize project
         'read_quant':           b'\x09', # perform read quantification
         'diff_exp':             b'\x10', # perform differential expression
+        'proj_status':          b'\x11', # check project status
         'save':                 b'\x94', # saves server state
         'load':                 b'\x95', # loads server state
         'log':                  b'\x96', # force log

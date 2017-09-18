@@ -59,7 +59,7 @@ class AlaskaServer(Alaska):
         self.idx_interval = 600 # index update interval (in seconds)
 
         self.log_pool = [] # pool of logs to be flushed
-        self.log_interval = 600 # log interval (in seconds)
+        self.log_interval = 3600 # log interval (in seconds)
 
         # set up server
         self.PORT = port
@@ -149,7 +149,10 @@ class AlaskaServer(Alaska):
         """
         Stops the server.
         """
-        # self.log.close()
+        # if stop is called with request
+        if _id is not None:
+            self.close(_id)
+            
         self.out('INFO: terminating ZeroMQ')
         self.SOCKET.close()
         self.CONTEXT.term()
@@ -178,6 +181,15 @@ class AlaskaServer(Alaska):
                 self.out('INFO: starting job {}'.format(job.id))
                 self.current_job = job
                 job.run()
+
+                # change progress
+                if job.name == 'kallisto':
+                    job.proj.progress = 6
+                elif job.name == 'sleuth':
+                    job.proj.progress = 9
+                else:
+                    raise Exception('ERROR: job {} has unrecognized name'.format(job.id))
+
                 self.out('INFO: container started with id {}'.format(job.docker.id))
                 hook = job.docker.hook()
 
@@ -192,10 +204,19 @@ class AlaskaServer(Alaska):
                     for out in outs:
                         self.out('{}: {}: {}'.format(proj_id, job_name, out))
 
-                # TODO: better way to check correct termnation
-                exitcode = self.DOCKER.containers.get(job.docker.id).wait()
+                # TODO: better way to check correct termnation?
+                try:
+                    exitcode = self.DOCKER.containers.get(job.docker.id).wait()
+                except:
+                    raise Exception('ERROR: container {} exited incorrectly'
+                                    .format(job.docker.id))
                 if exitcode == 0:
-                    job.proj.progress += 1
+                    if job.name == 'kallisto':
+                        job.proj.progress = 7
+                    elif job.name == 'sleuth':
+                        job.proj.progress = 10
+                    else:
+                        raise Exception('ERROR: job {} has unrecognized name'.format(job.id))
                     job.finished()
                     self.current_job = None
                     self.queue.task_done()
@@ -508,6 +529,7 @@ class AlaskaServer(Alaska):
         """
         Infers samples from raw reads.
         """
+        self.projects_temp[_id].progress = 1
         self.get_raw_reads(_id) # make sure raw reads have been extracted
 
         # TODO: check data with exception catching
@@ -543,7 +565,7 @@ class AlaskaServer(Alaska):
         Sets project params.
         Only to be called after the project has been created.
         """
-        if self.projects_temp[_id].progress < 1:
+        if self.projects_temp[_id].progress < 2:
             raise Exception('{}: raw reads have to be retrieved and samples inferred'
                             .format(_id))
 
@@ -554,7 +576,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: validating data'.format(_id))
         self.projects_temp[_id].check()
 
-        self.projects_temp[_id].progress = 2
+        self.projects_temp[_id].progress = 3
 
         msg = '{}: project data successfully set'.format(_id)
         self.broadcast(_id, msg)
@@ -579,7 +601,7 @@ class AlaskaServer(Alaska):
         Finalizes project and samples by creating appropriate json and
         sample directories
         """
-        if self.projects_temp[_id].progress < 2:
+        if self.projects_temp[_id].progress < 3:
             raise Exception('{}: project data must be set and validated at least once'
                             .format(_id))
 
@@ -610,7 +632,7 @@ class AlaskaServer(Alaska):
             del self.samples_temp[__id]
         del self.projects_temp[_id]
 
-        self.projects[_id].progress = 3
+        self.projects[_id].progress = 4
         self.projects[_id].save()
 
         msg = '{}: successfully finalized'.format(_id)
@@ -622,7 +644,7 @@ class AlaskaServer(Alaska):
         Checks if another analysis is running,
         then performs read quantification.
         """
-        if self.projects[_id].progress < 3:
+        if self.projects[_id].progress < 4:
             raise Exception('{}: project must be finalized before alignment'
                             .format(_id))
 
@@ -642,7 +664,6 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: wrote alignment script'.format(_id))
 
         self.broadcast(_id, '{}: creating new job'.format(_id))
-        self.projects[_id].progress = 4 # alignment in progress
 
         ### begin job variables
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
@@ -678,13 +699,14 @@ class AlaskaServer(Alaska):
         self.queue.put(job) # put job into queue
                             # job must be put into queue
                             # regardless of it being empty
+        self.projects[_id].progress = 5 # added to queue
         self.close(_id)
 
     def diff_exp(self, _id):
         """
         Perform differential expression analysis.
         """
-        if self.projects[_id].progress < 5:
+        if self.projects[_id].progress < 7:
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
 
@@ -705,7 +727,6 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: wrote sleuth script'.format(_id))
 
         self.broadcast(_id, '{}: creating new job'.format(_id))
-        self.projects[_id].progress = 6 # diff_exp in progress
 
         ### begin job variables
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
@@ -737,6 +758,46 @@ class AlaskaServer(Alaska):
         self.queue.put(job) # put job into queue
                             # job must be put into queue
                             # regardless of it being empty
+        self.projects[_id].progress = 8 # added to queue
+        self.close(_id)
+
+    def proj_status(self, _id):
+        """
+        Checks project status.
+        """
+        if self.exists_temp(_id):
+            progress = self.projects_temp[_id].progress
+        elif self.exists_var(_id):
+            progress = self.projects[_id].progress
+        else:
+            raise Exception('{}: does not exist'.format(_id))
+
+        if progress == 0:
+            msg = 'project was created (and nothing else)'
+        elif progress == 1:
+            msg = 'raw reads are being unpacked and samples being inferred'
+        elif progress == 2:
+            msg = 'raw reads have been successfully loaded'
+        elif progress == 3:
+            msg = 'project data have been set and validated'
+        elif progress == 4:
+            msg = 'project has been finalized'
+        elif progress == 5:
+            msg = 'alignment has been added to queue'
+        elif progress == 6:
+            msg = 'alignment is being performed'
+        elif progress == 7:
+            msg = 'completed alignment'
+        elif progress == 8:
+            msg = 'differential expression analysis has been added to queue'
+        elif progress == 9:
+            msg = 'differential expression analysis is being performed'
+        elif progress == 10:
+            msg = 'completed differential expression analysis'
+        elif progress == 11:
+            msg = 'analysis completed'
+
+        self.broadcast(_id, '{}: {}'.format(_id, msg))
         self.close(_id)
 
     def save(self, _id=None):
