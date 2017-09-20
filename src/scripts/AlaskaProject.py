@@ -32,10 +32,10 @@ class AlaskaProject(Alaska):
         self.raw_dir = '{}/{}'.format(self.dir, self.RAW_DIR)
         self.align_dir = '{}/{}'.format(self.dir, self.ALIGN_DIR)
         self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
+        self.jobs = [] # jobs related to this project
         self.raw_reads = {}
+        self.chk_md5 = {} # md5 checksums
         self.samples = {}
-        self.bootstrap_n = 100
-        self.idx = ''
         self.design = 1 # 1: single-factor, 2: two-factor
         self.ctrl_ids = [] # control ids
         self.ctrl_ftrs = {} # if single-factor, key and value
@@ -57,10 +57,14 @@ class AlaskaProject(Alaska):
                             # 11: analysis completed
 
         self.meta = {} # variable for all metadata
-        self.meta['name'] = ''
+        # from GEO submission template
+        self.meta['title'] = ''
+        self.meta['summary'] = ''
+        self.meta['contributors'] = []
+        self.meta['SRA_center_code'] = ''
         self.meta['email'] = ''
-        self.meta['date created'] = dt.datetime.now().strftime('%Y-%m-%d')
-        self.meta['time created'] = dt.datetime.now().strftime('%H:%M:%S')
+        # end from GEO submission template
+        self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
     def get_raw_reads(self):
@@ -98,8 +102,7 @@ class AlaskaProject(Alaska):
 
             # assign list to dictionary
             if not len(reads) == 0:
-                self.raw_reads[root.replace(self.raw_dir, '')] = reads
-
+                self.raw_reads[root.replace(self.raw_dir, '')[1:]] = reads
 
     def unpack_reads(self, fname):
         """
@@ -118,6 +121,10 @@ class AlaskaProject(Alaska):
         w.warn('{}: Alaska is currently unable to infer paired-end samples'
                 .format(self.id), Warning)
 
+        # make sure that md5 checksums have been calculated
+        if len(self.chk_md5) == 0:
+            raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
@@ -127,9 +134,11 @@ class AlaskaProject(Alaska):
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
-            for read in reads:
+            for read, md5 in zip(reads, self.chk_md5[folder]):
                 sample.reads.append('{}/{}'.format(folder, read))
+                sample.chk_md5.append(md5)
 
+            sample.projects.append(self.id)
             self.samples[_id] = sample
 
     def analyze_reads(self):
@@ -190,9 +199,9 @@ class AlaskaProject(Alaska):
             sh.add('# align sample {}'.format(_id))
             if sample.type == 1: # single-end
                 sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
-                        './{}/{}'.format(self.IDX_DIR, self.idx),
+                        './{}/{}'.format(self.IDX_DIR, sample.idx),
                         '{}/{}'.format(self.align_dir, _id),
-                        self.bootstrap_n,
+                        sample.bootstrap_n,
                         self.THREADS,
                         sample.length,
                         sample.stdev,
@@ -201,9 +210,9 @@ class AlaskaProject(Alaska):
 
             elif sample.type == 2: #paired-end
                 sh.add('kallisto quant -i {} -o {} -b {} --threads={} {}\n'.format(
-                        './{}/{}'.format(self.IDX_DIR, self.idx),
+                        './{}/{}'.format(self.IDX_DIR, sample.idx),
                         '{}/{}'.format(self.align_dir, _id),
-                        self.bootstrap_n,
+                        sample.bootstrap_n,
                         self.THREADS,
                         ' '.join(['{}{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
                 ))
@@ -260,6 +269,7 @@ class AlaskaProject(Alaska):
 
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
+
 
     def load(self, folder=None):
         """

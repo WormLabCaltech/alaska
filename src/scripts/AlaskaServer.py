@@ -22,6 +22,7 @@ import docker
 import traceback
 import warnings as w
 import datetime as dt
+import hashlib as hl
 from Alaska import Alaska
 from AlaskaJob import AlaskaJob
 from AlaskaProject import AlaskaProject
@@ -38,8 +39,7 @@ class AlaskaServer(Alaska):
         """
         AlaskaServer constructor. Starts the server at the given port.
         """
-        self.date = dt.datetime.now().strftime('%Y-%m-%d')
-        self.time = dt.datetime.now().strftime('%H:%M:%S')
+        self.datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         self.transcripts = []
         self.indices = []
@@ -152,7 +152,7 @@ class AlaskaServer(Alaska):
         # if stop is called with request
         if _id is not None:
             self.close(_id)
-            
+
         self.out('INFO: terminating ZeroMQ')
         self.SOCKET.close()
         self.CONTEXT.term()
@@ -520,10 +520,34 @@ class AlaskaServer(Alaska):
         if len(self.projects_temp[_id].raw_reads) == 0:
             self.projects_temp[_id].get_raw_reads()
 
+        # if md5 checksums are empty
+        if len(self.projects_temp[_id].chk_md5) == 0:
+            self.broadcast(-id, '{}: calculating MD5 checksums'.format(_id))
+            for folder, reads in self.projects_temp[_id].raw_reads.items():
+                self.projects_temp[_id].chk_md5[folder] = []
+                for read in reads:
+                    md5 = self.md5_chksum('{}/{}/{}/{}/{}'.format(
+                            self.PROJECTS_DIR, _id, self.RAW_DIR, folder, read))
+                    self.projects_temp[_id].chk_md5[folder].append(md5)
+
         self.broadcast(_id, '{}: successfully retrieved raw reads'.format(_id))
 
         self.respond(_id, json.dumps(self.projects_temp[_id].raw_reads, default=self.encode_json, indent=4))
+        self.respond(_id, json.dumps(self.projects_temp[_id].chk_md5, default=self.encode_json, indent=4))
         self.close(_id)
+
+    def md5_chksum(self, fname):
+        """
+        Calculates the md5 checksum of the given file at location.
+        """
+        md5 = hl.md5()
+
+        # open file and read in blocks
+        with open(fname, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b''):
+                md5.update(chunk)
+
+        return md5.hexdigest()
 
     def infer_samples(self, _id):
         """
@@ -688,6 +712,7 @@ class AlaskaServer(Alaska):
         job = AlaskaJob(__id, 'kallisto', self.projects[_id],
                          self.KAL_VERSION, cmd, **args)
         self.jobs[__id] = job
+        self.projects[_id].jobs.append(__id)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
         self.broadcast(_id, '{}: checking queue'.format(_id, __id))
@@ -747,6 +772,7 @@ class AlaskaServer(Alaska):
 
         job = AlaskaJob(__id, 'sleuth', self.projects[_id],
                         self.SLE_VERSION, cmd, **args)
+        self.projects[_id].jobs.append(__id)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
         self.broadcast(_id, '{}: checking queue'.format(_id, __id))
