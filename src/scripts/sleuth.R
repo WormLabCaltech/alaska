@@ -102,7 +102,7 @@ for (genotype in genotypes) {
   if (!grepl(genotypes[1], genotype)) {
     # String for current progress
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
-    print(paste('#Computing Wald test on ', substring(genotype, 2), progress))
+    print(paste('#Computing Wald test on ', genotype, progress))
     so <- sleuth_wt(so, which_beta = paste('condition', genotype, sep=''), which_model = 'full')
   }
 }
@@ -117,7 +117,7 @@ for (genotype in genotypes) {
     # 'betasX.csv'
     output_file <- paste(substring(genotype, 2), '.csv', sep='')
 
-    print(paste('#Writing ', substring(genotype, 2), 'results to', output_file, progress))
+    print(paste('#Writing ', genotype, 'results to', output_file, progress))
     results_table <- sleuth_results(so, paste('condition', genotype, sep=''), 'full', test_type='wt')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }

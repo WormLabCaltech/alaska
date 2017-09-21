@@ -177,16 +177,16 @@ class AlaskaServer(Alaska):
                 job = self.queue.get() # receive job from queue
                                         # block if there is no job
                 job_name = job.name
-                proj_id = job.proj.id
+                proj_id = job.proj_id
                 self.out('INFO: starting job {}'.format(job.id))
                 self.current_job = job
                 job.run()
 
                 # change progress
                 if job.name == 'kallisto':
-                    job.proj.progress = 6
+                    self.projects[proj_id].progress = 6
                 elif job.name == 'sleuth':
-                    job.proj.progress = 9
+                    self.projects[proj_id].progress = 9
                 else:
                     raise Exception('ERROR: job {} has unrecognized name'.format(job.id))
 
@@ -212,9 +212,9 @@ class AlaskaServer(Alaska):
                                     .format(job.docker.id))
                 if exitcode == 0:
                     if job.name == 'kallisto':
-                        job.proj.progress = 7
+                        self.projects[proj_id].progress = 7
                     elif job.name == 'sleuth':
-                        job.proj.progress = 10
+                        self.projects[proj_id].progress = 10
                     else:
                         raise Exception('ERROR: job {} has unrecognized name'.format(job.id))
                     job.finished()
@@ -522,7 +522,7 @@ class AlaskaServer(Alaska):
 
         # if md5 checksums are empty
         if len(self.projects_temp[_id].chk_md5) == 0:
-            self.broadcast(-id, '{}: calculating MD5 checksums'.format(_id))
+            self.broadcast(_id, '{}: calculating MD5 checksums'.format(_id))
             for folder, reads in self.projects_temp[_id].raw_reads.items():
                 self.projects_temp[_id].chk_md5[folder] = []
                 for read in reads:
@@ -567,11 +567,11 @@ class AlaskaServer(Alaska):
         self.projects_temp[_id].infer_samples(f, temp=self.samples_temp)
         self.broadcast(_id, '{}: samples successfully inferred'.format(_id))
 
+        self.projects_temp[_id].progress = 2
+
         # output project JSON to temp folder
         self.projects_temp[_id].save(self.TEMP_DIR)
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
-
-        self.projects_temp[_id].progress = 1
 
         self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
         self.close(_id)
@@ -675,7 +675,7 @@ class AlaskaServer(Alaska):
         # check if alignment is already queued
         qu = list(self.queue.queue)
         for job in qu:
-            if job.proj.id == _id and job.name == 'kallisto':
+            if job.proj_id == _id and job.name == 'kallisto':
                 raise Exception('{}: already in queue'.format(_id))
 
         # check if alignment is currently running
@@ -709,7 +709,7 @@ class AlaskaServer(Alaska):
         }
         ### end job variables
 
-        job = AlaskaJob(__id, 'kallisto', self.projects[_id],
+        job = AlaskaJob(__id, 'kallisto', _id,
                          self.KAL_VERSION, cmd, **args)
         self.jobs[__id] = job
         self.projects[_id].jobs.append(__id)
@@ -738,11 +738,13 @@ class AlaskaServer(Alaska):
         # check if diff. exp. is already queued
         qu = list(self.queue.queue)
         for job in qu:
-            if job.proj.id == _id and job.name == 'sleuth':
+            if job.proj_id == _id and job.name == 'sleuth':
                 raise Exception('{}: already in queue'.format(_id))
 
         # check if diff. exp. is currently running
-        if self.current_job.id == _id and self.current_job.name == 'sleuth':
+        if self.current_job is not None\
+            and self.current_job.id == _id\
+            and self.current_job.name == 'sleuth':
             raise Exception('{}: currently running'.format(_id))
 
         # write sleuth matrix and bash script
@@ -770,8 +772,9 @@ class AlaskaServer(Alaska):
         }
         ### end job variables
 
-        job = AlaskaJob(__id, 'sleuth', self.projects[_id],
+        job = AlaskaJob(__id, 'sleuth', _id,
                         self.SLE_VERSION, cmd, **args)
+        self.jobs[__id] = job
         self.projects[_id].jobs.append(__id)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
 
@@ -853,6 +856,8 @@ class AlaskaServer(Alaska):
         _queue = self.queue
         _jobs = self.jobs
         _current_job = self.current_job
+        _idx_interval = self.idx_interval
+        _PORT = self.PORT
         _CONTEXT = self.CONTEXT
         _SOCKET = self.SOCKET
         _CODES = self.CODES
@@ -867,6 +872,8 @@ class AlaskaServer(Alaska):
         self.jobs = list(self.jobs.keys())
         if self.current_job is not None:
             self.current_job = self.current_job.id
+        del self.idx_interval
+        del self.PORT
         del self.CONTEXT
         del self.SOCKET
         del self.CODES
@@ -885,6 +892,8 @@ class AlaskaServer(Alaska):
         self.queue = _queue
         self.jobs = _jobs
         self.current_job = _current_job
+        self.idx_interval = _idx_interval
+        self.PORT = _PORT
         self.CONTEXT = _CONTEXT
         self.SOCKET = _SOCKET
         self.CODES = _CODES
@@ -956,7 +965,6 @@ class AlaskaServer(Alaska):
             self.out('INFO: loading job {}'.format(__id))
             job = AlaskaJob(__id)
             job.load()
-            job.proj = self.projects[job.proj]
             _jobs[__id] = job
         self.jobs = _jobs
 

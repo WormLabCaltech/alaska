@@ -18,13 +18,13 @@ class AlaskaJob(Alaska):
     AlaskaJob.
     """
 
-    def __init__(self, _id, name=None, proj=None, img_tag=None, cmd=None, **args):
+    def __init__(self, _id, name=None, proj_id=None, img_tag=None, cmd=None, **args):
         """
         Constructor.
         """
         self.id = _id # job id
         self.name = name
-        self.proj = proj # project associated with this job
+        self.proj_id = proj_id # project associated with this job
         self.docker = AlaskaDocker(img_tag)
         self.docker_cmd = cmd
         self.docker_args = args
@@ -35,6 +35,8 @@ class AlaskaJob(Alaska):
         self.date_finished = ''
         self.time_finished = ''
 
+        self.save()
+
     def run(self):
         """
         Work to do.
@@ -44,12 +46,17 @@ class AlaskaJob(Alaska):
 
         self.docker.run(self.docker_cmd, **self.docker_args)
 
+        self.save()
+
     def finished(self):
         """
         Notifies that the job is done.
         """
         self.date_finished = dt.datetime.now().strftime('%Y-%m-%d')
         self.time_finished = dt.datetime.now().strftime('%H:%M:%S')
+
+        self.docker.terminate()
+
         self.save() # save job info
 
     def save(self, folder=None):
@@ -61,17 +68,8 @@ class AlaskaJob(Alaska):
         else:
             path = folder
 
-        ### hide some variables
-        _proj = self.proj
-
-        if self.proj is not None:
-            self.proj = self.proj.id
-
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
-
-        # restore hidden variables
-        self.proj = _proj
 
     def load(self, folder=None, proj=None):
         """
@@ -94,11 +92,4 @@ class AlaskaJob(Alaska):
                 self.docker = AlaskaDocker(item['img_tag'])
             else:
                 setattr(self, key, item)
-
-        if proj is not None:
-            if proj.id == self.proj:
-                self.proj = proj
-            else:
-                raise Exception('ERROR: job id {} received incorrect project id \
-                {} (expected {})'.format(self.id, proj.id, self.proj))
 

@@ -45,7 +45,7 @@ class AlaskaProject(Alaska):
         self.progress = 0 # int to denote current analysis progress
                             # 0: project created
                             # 1: unpacking and inferring raw reads
-                            # 2: raw reads uploaded, extracted, and loaded
+                            # 2: raw reads extracted and loaded
                             # 3: project data set and checked (at least once)
                             # 4: finalized
                             # 5: added to queue
@@ -205,7 +205,7 @@ class AlaskaProject(Alaska):
                         self.THREADS,
                         sample.length,
                         sample.stdev,
-                        ' '.join(['{}{}'.format(self.raw_dir, read) for read in sample.reads])
+                        ' '.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads])
                 ))
 
             elif sample.type == 2: #paired-end
@@ -214,7 +214,7 @@ class AlaskaProject(Alaska):
                         '{}/{}'.format(self.align_dir, _id),
                         sample.bootstrap_n,
                         self.THREADS,
-                        ' '.join(['{}{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
+                        ' '.join(['{}/{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
                 ))
 
         sh.write()

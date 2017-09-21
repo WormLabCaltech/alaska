@@ -63,14 +63,21 @@ print('#Reading analysis matrix')
 sample_id <- dir(file.path(kallisto))
 kal_dirs <- sapply(sample_id, function(id) file.path(kallisto, id))
 s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+print(sample_id)
+print(kal_dirs)
+print(s2c)
 
 # Unique, sorted genotype list
 genotypes <- sort(unique(s2c[, 'condition']))
+print(genotypes)
 
 print('#Reading Kallisto results')
 s2c <- dplyr::select(s2c, sample= sample, condition)
+print(s2c)
 s2c <- dplyr::arrange(s2c, sample)
+print(s2c)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
+print(s2c)
 # so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE)
 # so <- sleuth_fit(so, ~genotype+batch, 'full')
 # so <- sleuth_fit(so, ~batch, 'reduced')
@@ -79,6 +86,7 @@ so <- sleuth_prep(s2c, ~ condition, target_mapping= t2g)
 so <- sleuth_fit(so, ~ condition, fit_name = 'full')
 so <- sleuth_fit(so, ~1, 'reduced')
 so <- sleuth_lrt(so, 'reduced', 'full')
+print(so)
 #print(s2c)
 
 #prepend and make object, state maximum model here
@@ -94,7 +102,7 @@ for (genotype in genotypes) {
   if (!grepl(genotypes[1], genotype)) {
     # String for current progress
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
-    print(paste('#Computing Wald test on ', substring(genotype, 2), progress))
+    print(paste('#Computing Wald test on ', genotype, progress))
     so <- sleuth_wt(so, which_beta = paste('condition', genotype, sep=''), which_model = 'full')
   }
 }
@@ -109,7 +117,7 @@ for (genotype in genotypes) {
     # 'betasX.csv'
     output_file <- paste(substring(genotype, 2), '.csv', sep='')
 
-    print(paste('#Writing ', substring(genotype, 2), 'results to', output_file, progress))
+    print(paste('#Writing ', genotype, 'results to', output_file, progress))
     results_table <- sleuth_results(so, paste('condition', genotype, sep=''), 'full', test_type='wt')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }

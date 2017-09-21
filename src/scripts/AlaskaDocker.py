@@ -31,7 +31,7 @@ class AlaskaDocker(Alaska):
         """
         client = docker.from_env()
         container = client.containers.run(self.img_tag, cmd, detach=True,
-                        auto_remove=True, **args)
+                        auto_remove=False, **args)
         self.id = container.short_id
         self.running = True
 
