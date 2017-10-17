@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    ruby-full
+    ruby-full \
+    curl
 
 ############ R INSTALLATION #################
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
@@ -44,5 +45,5 @@ ENV PATH="${WORKDIR}/kallisto:${PATH}"
 
 ############## SLEUTH INSTALLATION ##############
 # copy r script for installing packages
-COPY install_sleuth.R ./downloads/install_sleuth.R
+COPY sleuth/install_sleuth.R ./downloads/install_sleuth.R
 RUN Rscript ./downloads/install_sleuth.R
