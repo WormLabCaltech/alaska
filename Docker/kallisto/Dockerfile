@@ -7,7 +7,7 @@
 # Index folder must be mounted to /idx/ in container
 
 FROM ubuntu:xenial
-RUN mkdir ./kallisto/ ./projects/ ./idx/
+RUN mkdir ./kallisto/ ./projects/ ./idx/ ./scripts/ ./transcripts/
 
 
 ##### DEPENDENCIES #####
