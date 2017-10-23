@@ -100,3 +100,4 @@ ENV/
 
 # test root directory
 root/
+test_samples/
