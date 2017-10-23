@@ -10,6 +10,7 @@ RUN mkdir ./downloads/
 
 ##### DEPENDENCIES #####
 RUN apt-get update && apt-get install -y \
+    wget \
     bzip2 \
     apt-transport-https \
     ca-certificates \
