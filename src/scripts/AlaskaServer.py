@@ -132,6 +132,13 @@ class AlaskaServer(Alaska):
                 p.daemon = True
                 p.start()
 
+            # self.out('INFO: loading docker images')
+            # with open('{}/kallisto'.format(self.IMG_DIR), 'br') as img:
+            #     self.DOCKER.images.load(img)
+            # with open('{}/sleuth'.format(self.IMG_DIR), 'br') as img:
+            #     self.DOCKER.images.load(img)
+            # self.out(self.DOCKER.images.list())
+
             while self.RUNNING:
                 request = self.SOCKET.recv_multipart()
 
@@ -160,9 +167,17 @@ class AlaskaServer(Alaska):
         self.RUNNING = False
 
         # stop all containers
-        for cont in self.DOCKER.containers.list():
-            self.out('INFO: terminating container {}'.format(cont.short_id))
-            cont.remove(force=True)
+        # for cont in self.DOCKER.containers.list():
+        #     self.out('INFO: terminating container {}'.format(cont.short_id))
+        #     cont.remove(force=True)
+
+        # stop running jobs
+        if self.current_job is not None:
+            cont_id = self.current_job.docker.id
+            self.out('INFO: job {} is running...terminating container {}'
+                        .format(self.current_job.id, cont_id))
+            self.DOCKER.containers.get(cont_id).remove(force=True)
+            self.out('INFO: termination successful')
 
         self.save()
         self.log() # write all remaining logs
@@ -176,10 +191,10 @@ class AlaskaServer(Alaska):
             while self.RUNNING:
                 job = self.queue.get() # receive job from queue
                                         # block if there is no job
+                self.current_job = job
                 job_name = job.name
                 proj_id = job.proj_id
                 self.out('INFO: starting job {}'.format(job.id))
-                self.current_job = job
                 job.run()
 
                 # change progress
@@ -191,7 +206,7 @@ class AlaskaServer(Alaska):
                     raise Exception('ERROR: job {} has unrecognized name'.format(job.id))
 
                 self.out('INFO: container started with id {}'.format(job.docker.id))
-                hook = job.docker.hook()
+                hook = self.DOCKER.containers.get(job.docker.id).logs(stdout=True, stderr=True, stream=True)
 
                 for l in hook:
                     l = l.decode(self.ENCODING).strip()
@@ -202,6 +217,7 @@ class AlaskaServer(Alaska):
                         outs = [l]
 
                     for out in outs:
+                        job.docker.output.append(out) # append output
                         self.out('{}: {}: {}'.format(proj_id, job_name, out))
 
                 # TODO: better way to check correct termnation?
@@ -680,7 +696,7 @@ class AlaskaServer(Alaska):
 
         # check if alignment is currently running
         if self.current_job is not None\
-            and self.current_job.id == _id\
+            and self.current_job.proj_id == _id\
             and self.current_job.name == 'kallisto':
             raise Exception('{}: currently running'.format(_id))
 
@@ -693,15 +709,17 @@ class AlaskaServer(Alaska):
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
         self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mounting points
-        src_proj = os.path.abspath(self.projects[_id].dir)
+        # src_proj = os.path.abspath(self.projects[_id].dir)
+        src_proj = '{}/{}/{}'.format(self.HOST_DIR, self.PROJECTS_DIR, _id)
         tgt_proj = '/projects/{}'.format(_id)
-        src_idx = os.path.abspath(self.IDX_DIR)
-        tgt_idx = '/{}'.format(self.IDX_DIR)
+        src_idx = '{}/{}'.format(self.HOST_DIR, self.IDX_DIR)
+        tgt_idx = '/idx'
         # volumes to mount to container
         volumes = {
             src_proj: {'bind': tgt_proj, 'mode': 'rw'},
             src_idx: {'bind': tgt_idx, 'mode': 'ro'}
         }
+
         cmd = 'bash {}/kallisto.sh'.format(tgt_proj)
         args = {
             'volumes': volumes,
@@ -711,6 +729,7 @@ class AlaskaServer(Alaska):
 
         job = AlaskaJob(__id, 'kallisto', _id,
                          self.KAL_VERSION, cmd, **args)
+        job.save()
         self.jobs[__id] = job
         self.projects[_id].jobs.append(__id)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
@@ -743,7 +762,7 @@ class AlaskaServer(Alaska):
 
         # check if diff. exp. is currently running
         if self.current_job is not None\
-            and self.current_job.id == _id\
+            and self.current_job.proj_id == _id\
             and self.current_job.name == 'sleuth':
             raise Exception('{}: currently running'.format(_id))
 
@@ -759,7 +778,7 @@ class AlaskaServer(Alaska):
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
         self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mouting points
-        src_proj = os.path.abspath(self.projects[_id].dir)
+        src_proj = '{}/{}/{}'.format(self.HOST_DIR, self.PROJECTS_DIR, _id)
         tgt_proj = '/projects/{}'.format(_id)
         # volumes to mount to container
         volumes = {
@@ -774,6 +793,7 @@ class AlaskaServer(Alaska):
 
         job = AlaskaJob(__id, 'sleuth', _id,
                         self.SLE_VERSION, cmd, **args)
+        job.save()
         self.jobs[__id] = job
         self.projects[_id].jobs.append(__id)
         self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))

@@ -35,7 +35,7 @@ class AlaskaJob(Alaska):
         self.date_finished = ''
         self.time_finished = ''
 
-        self.save()
+        # self.save()
 
     def run(self):
         """

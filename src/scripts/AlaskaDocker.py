@@ -22,7 +22,7 @@ class AlaskaDocker(Alaska):
         """
         self.img_tag = img_tag
         self.id = ''
-        self.output = '' # need to use queue to allow blocking
+        self.output = []
         self.running = False
 
     def run(self, cmd, **args):
@@ -35,9 +35,9 @@ class AlaskaDocker(Alaska):
         self.id = container.short_id
         self.running = True
 
-        t = Thread(target=self.out_listener)
-        t.daemon = True
-        t.start()
+        # t = Thread(target=self.out_listener)
+        # t.daemon = True
+        # t.start()
 
     def out_listener(self):
         """
