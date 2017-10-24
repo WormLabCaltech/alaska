@@ -89,8 +89,7 @@ class AlaskaServer(Alaska):
 
         self.DOCKER = docker.from_env() # docker client
 
-        # switch working directory to root
-        os.chdir(self.ROOT_DIR)
+        os.chdir('../') # go to parent of script directory
 
         self.out('INFO: AlaskaServer initialized')
 
@@ -104,14 +103,46 @@ class AlaskaServer(Alaska):
         self.out('INFO: starting AlaskaServer {}'.format(self.VERSION))
         self.RUNNING = True
 
-        self.out('INFO: checking admin privilages')
         try:
+            self.out('INFO: checking admin privilages')
             if not os.getuid() == 0:
                 raise Exception('ERROR: AlaskaServer requires admin rights')
+                self.out('INFO: AlaskaServer running as root')
+
+            self.out('INFO: acquiring absolute path')
+            if not os.path.exists('PATH_TO_HERE'):
+                raise Exception('ERROR: absolute path file doesn\'t exist')
+
+            with open('PATH_TO_HERE', 'r') as pathf:
+                path = pathf.readlines()[0].strip()
+                Alaska.HOST_DIR = path
+                Alaska.ROOT_PATH = '{}/{}'.format(path, self.ROOT_DIR)
+
+            # check if all necessary folders are there
+            folders = [self.SAVE_DIR,
+                        self.SCRIPT_DIR,
+                        self.JOBS_DIR,
+                        self.TRANS_DIR,
+                        self.IDX_DIR,
+                        self.LOG_DIR,
+                        self.PROJECTS_DIR]
+
+            for folder in folders:
+                # this path is the path on the alaska container...not host!
+                path = './{}/{}'.format(self.ROOT_DIR, folder)
+                print(path)
+                print(os.path.exists(path))
+                if not os.path.exists(path):
+                    self.out('INFO: creating folder {}'.format(path))
+                    os.makedirs(path)
+
+            # switch working directory to root
+            os.chdir(self.ROOT_DIR)
+
+
         except Exception as e:
             self.out(str(e))
             self.stop()
-        self.out('INFO: AlaskaServer running as root')
 
         with w.catch_warnings() as caught:
             w.simplefilter('always')
@@ -355,11 +386,11 @@ class AlaskaServer(Alaska):
             ### begin variables
             __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
             # source and target mounting points
-            src_scrpt = os.path.abspath(self.SCRIPT_DIR)
+            src_scrpt = '/{}/{}'.format(self.ROOT_PATH, self.SCRIPT_DIR)
             tgt_scrpt = '/{}'.format(self.SCRIPT_DIR)
-            src_trans = os.path.abspath(self.TRANS_DIR)
+            src_trans = '/{}/{}'.format(self.ROOT_PATH, self.TRANS_DIR)
             tgt_trans = '/{}'.format(self.TRANS_DIR)
-            src_idx = os.path.abspath(self.IDX_DIR)
+            src_idx = '/{}/{}'.format(self.ROOT_PATH, self.IDX_DIR)
             tgt_idx = '/{}'.format(self.IDX_DIR)
             # volumes to mount to container
             volumes = {
@@ -710,9 +741,9 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mounting points
         # src_proj = os.path.abspath(self.projects[_id].dir)
-        src_proj = '{}/{}/{}'.format(self.HOST_DIR, self.PROJECTS_DIR, _id)
+        src_proj = '{}/{}/{}'.format(self.ROOT_PATH, self.PROJECTS_DIR, _id)
         tgt_proj = '/projects/{}'.format(_id)
-        src_idx = '{}/{}'.format(self.HOST_DIR, self.IDX_DIR)
+        src_idx = '{}/{}'.format(self.ROOT_PATH, self.IDX_DIR)
         tgt_idx = '/idx'
         # volumes to mount to container
         volumes = {
@@ -778,7 +809,7 @@ class AlaskaServer(Alaska):
         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
         self.jobs[__id] = None # initialize empty job to prevent duplicate ids
         # source and target mouting points
-        src_proj = '{}/{}/{}'.format(self.HOST_DIR, self.PROJECTS_DIR, _id)
+        src_proj = '{}/{}/{}'.format(self.ROOT_PATH, self.PROJECTS_DIR, _id)
         tgt_proj = '/projects/{}'.format(_id)
         # volumes to mount to container
         volumes = {
@@ -853,7 +884,7 @@ class AlaskaServer(Alaska):
         """
         Saves its current state.
         """
-        path = '{}/{}'.format(self.ROOT_DIR, self.SAVE_DIR)
+        path = self.SAVE_DIR
         datetime = dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
 
         self.out('INFO: locking all threads to save server state')
@@ -929,7 +960,7 @@ class AlaskaServer(Alaska):
         """
         Loads state from JSON.
         """
-        path = '{}/{}'.format(self.ROOT_DIR, self.SAVE_DIR)
+        path = self.SAVE_DIR
         files = os.listdir(path)
 
         self.out('INFO: locking all threads to load server state')

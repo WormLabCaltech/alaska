@@ -5,6 +5,7 @@
 pushd `dirname $0` > /dev/null
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 printf "Root Directory: ${SCRIPTPATH}\n"
+echo $SCRIPTPATH > PATH_TO_HERE
 
 # build alaska image
 docker build --no-cache -t alaska ./Docker/alaska/

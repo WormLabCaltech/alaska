@@ -71,14 +71,19 @@ class AlaskaProject(Alaska):
         """
         Retrieves list of uploaded sample files. Unpacks archive if detected.
         """
-        # get list of files/directories in raw reads directory
-        flist = os.listdir(self.raw_dir)
-        unpack = all(not os.path.isdir('{}/{}'.format(self.raw_dir, d)) for d in flist)
+        # TODO: scan until all archives have been unpacked?
+        unpack = []
+        for root, dirs, files in os.walk(self.raw_dir):
+            for fname in files:
+                # if the file name does not end in a know raw read extension,
+                # assume that the file is an archive that needs to be extracted
+                if not fname.endswith(self.RAW_EXT):
+                    unpack.append('{}/{}'.format(root, fname))
 
         # if files need to be unpack_reads
-        if unpack:
+        if not len(unpack) == 0:
             self.out('{}: unpacking required'.format(self.id))
-            for fname in flist:
+            for fname in unpack:
                 self.out('{}: unpacking {}'.format(self.id, fname))
                 try:
                     # p = Process(target=self.unpack_reads, args=(fname,))
@@ -97,7 +102,7 @@ class AlaskaProject(Alaska):
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
-                if fname.endswith(self.RAW_EXT) and fname not in flist:
+                if fname.endswith(self.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
                     reads.append(fname)
 
             # assign list to dictionary
@@ -108,8 +113,7 @@ class AlaskaProject(Alaska):
         """
         Unpacks read archive.
         """
-
-        Archive('{}/{}'.format(self.raw_dir, fname)).extractall(self.raw_dir)
+        Archive(fname).extractall(fname + '_extracted', auto_create_dir=True)
 
     def infer_samples(self, f, temp=None):
         """

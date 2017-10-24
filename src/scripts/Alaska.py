@@ -17,10 +17,11 @@ class Alaska():
     """
     VERSION = 'dev' # alaska version
     ENCODING = 'utf-8' # encoding for decoding byte literals
-    HOST_DIR = '/media/sf_Github/alaska/src/root'   # root dir on host machine
-                                                    # this is required because spawning host container from host container
-                                                    # needs to have host's absolute path
-    ROOT_DIR = '../root' # root dir in docker image
+    HOST_DIR = None     # root dir on host machine
+                        # this is required because spawning host container from host container
+                        # needs to have host's absolute path
+    ROOT_PATH = None # absolute path to 'root' directory
+    ROOT_DIR = 'root' # root dir
     SAVE_DIR = 'saves' # folder to save server states
     # IMG_DIR = 'images'
     SCRIPT_DIR = 'scripts' # scripts directory
