@@ -28,7 +28,3 @@ ENV PATH="/anaconda/bin:${PATH}"
 RUN conda update --all -y
 # remove installation script
 RUN rm ./downloads/anaconda.sh
-
-##### COPY REQUEST FILES ######
-COPY AlaskaRequest.py AlaskaRequest.py
-COPY Alaska.py Alaska.py

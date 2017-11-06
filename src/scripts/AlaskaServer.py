@@ -14,6 +14,7 @@ AlaskaServer handles all requests, manages the job queue and projects/samples.
 
 import os
 import io
+import sys
 import zmq
 import time
 import json
@@ -130,8 +131,6 @@ class AlaskaServer(Alaska):
             for folder in folders:
                 # this path is the path on the alaska container...not host!
                 path = './{}/{}'.format(self.ROOT_DIR, folder)
-                print(path)
-                print(os.path.exists(path))
                 if not os.path.exists(path):
                     self.out('INFO: creating folder {}'.format(path))
                     os.makedirs(path)
@@ -142,7 +141,7 @@ class AlaskaServer(Alaska):
 
         except Exception as e:
             self.out(str(e))
-            self.stop()
+            self.stop(code=1)
 
         with w.catch_warnings() as caught:
             w.simplefilter('always')
@@ -181,9 +180,9 @@ class AlaskaServer(Alaska):
                     t.daemon = True
                     t.start()
 
-            self.stop()
+            self.stop(code=1)
 
-    def stop(self, _id=None):
+    def stop(self, _id=None, code=0):
         """
         Stops the server.
         """
@@ -192,6 +191,8 @@ class AlaskaServer(Alaska):
             self.close(_id)
 
         self.out('INFO: terminating ZeroMQ')
+        lock = threading.Lock()
+        lock.acquire()
         self.SOCKET.close()
         self.CONTEXT.term()
 
@@ -211,8 +212,13 @@ class AlaskaServer(Alaska):
             self.out('INFO: termination successful')
 
         self.save()
+
+        if not code == 0:
+            self.out('TERMINATED WITH EXIT CODE {}'.format(code))
+
         self.log() # write all remaining logs
-        quit()
+
+        sys.exit(code)
 
     def worker(self):
         """

@@ -7,18 +7,22 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 printf "Root Directory: ${SCRIPTPATH}\n"
 echo $SCRIPTPATH > PATH_TO_HERE
 
+# remove old containers
+docker container rm --force alaska
+
 # build alaska image
-docker build --no-cache -t alaska ./Docker/alaska/
+docker build -t alaska ./Docker/alaska/
 
 # build request image
-docker build --no-cache -t request ./Docker/request/
+docker build -t request ./Docker/request/
 
 # build kallisto image
-docker build --no-cache -t kallisto ./Docker/kallisto/
+docker build -t kallisto ./Docker/kallisto/
 
 # build sleuth image
-docker build --no-cache -t sleuth ./Docker/sleuth/
+docker build -t sleuth ./Docker/sleuth/
 
+# create alasa container
 docker create --name="alaska" -it -v "/etc/localtime:/etc/localtime:ro"\
                                   -v "/var/run/docker.sock:/var/run/docker.sock"\
                                   -v "${SCRIPTPATH}:/alaska"\

@@ -8,6 +8,7 @@ Bridge between browser and server.
 """
 
 import zmq
+import sys
 from Alaska import Alaska
 
 class AlaskaRequest(Alaska):
@@ -68,7 +69,7 @@ class AlaskaRequest(Alaska):
             print('Error connecting to server')
             self.SOCKET.close()
             self.CONTEXT.term()
-            quit()
+            sys.exit(1)
 
     def check(self):
         """
