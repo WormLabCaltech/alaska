@@ -202,7 +202,7 @@ class AlaskaProject(Alaska):
         for _id, sample in self.samples.items():
             sh.add('# align sample {}'.format(_id))
             if sample.type == 1: # single-end
-                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
+                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} --plaintext {}\n'.format(
                         './{}/{}'.format(self.IDX_DIR, sample.idx),
                         '{}/{}'.format(self.align_dir, _id),
                         sample.bootstrap_n,
