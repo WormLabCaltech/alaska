@@ -202,7 +202,7 @@ class AlaskaProject(Alaska):
         for _id, sample in self.samples.items():
             sh.add('# align sample {}'.format(_id))
             if sample.type == 1: # single-end
-                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} --plaintext {}\n'.format(
+                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
                         './{}/{}'.format(self.IDX_DIR, sample.idx),
                         '{}/{}'.format(self.align_dir, _id),
                         sample.bootstrap_n,
@@ -230,11 +230,10 @@ class AlaskaProject(Alaska):
         if self.design == 1: # single-factor
             # write design matrix txt
             ctrl_ftr = list(self.ctrl_ftrs.keys())[0]
-            ctrl_id = self.ctrl_ids[0]
             head = ['sample', 'condition']
             data = []
             for _id, sample in self.samples.items():
-                if _id == ctrl_id:
+                if _id in self.ctrl_ids:
                     ftr = 'a_{}'.format(sample.meta[ctrl_ftr])
                 else:
                     ftr = 'b_{}'.format(sample.meta[ctrl_ftr])

@@ -75,11 +75,15 @@ class AlaskaServer(Alaska):
             b'\x03': self.save_proj,
             b'\x04': self.infer_samples,
             b'\x05': self.get_idx,
-            b'\x06': self.new_sample,
+            # b'\x06': self.new_sample,
             b'\x07': self.set_proj,
             b'\x08': self.finalize_proj,
             b'\x09': self.read_quant,
             b'\x10': self.diff_exp,
+            b'\x11': self.proj_status,
+            b'\x50': self.test_read_quant,
+            b'\x51': self.test_diff_exp,
+            b'\x52': self.test_all,
             b'\x94': self.save,
             b'\x95': self.load,
             b'\x96': self.log,
@@ -310,7 +314,7 @@ class AlaskaServer(Alaska):
         response = [to, msg]
         self.SOCKET.send_multipart(response)
 
-    def log(self, _id=None):
+    def log(self, _id=None, close=True):
         """
         Writes contents of log_pool to log file.
         """
@@ -326,7 +330,8 @@ class AlaskaServer(Alaska):
 
         self.out('INFO: wrote log')
 
-        self.close(_id)
+        if close:
+            self.close(_id)
 
     def log_loop(self, t=600):
         """
@@ -448,7 +453,7 @@ class AlaskaServer(Alaska):
         except KeyboardInterrupt:
             self.out('INFO: terminating update loop')
 
-    def new_proj(self, _id):
+    def new_proj(self, _id, close=True):
         """
         Creates a new project.
         """
@@ -473,7 +478,9 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: {} created'.format(__id, f))
 
         self.broadcast(_id, '{}: created successfully'.format(__id))
-        self.close(_id)
+
+        if close:
+            self.close(_id)
 
 
     def exists(self, _id):
@@ -503,7 +510,7 @@ class AlaskaServer(Alaska):
         else:
             return False
 
-    def load_proj(self, _id):
+    def load_proj(self, _id, close=True):
         """
         Loads project.
         """
@@ -535,9 +542,11 @@ class AlaskaServer(Alaska):
         msg = '{}: successfully loaded'.format(_id)
 
         self.broadcast(_id, msg)
-        self.close(_id)
 
-    def save_proj(self, _id):
+        if close:
+            self.close(_id)
+
+    def save_proj(self, _id, close=True):
         """
         Saves project to JSON.
         """
@@ -556,9 +565,11 @@ class AlaskaServer(Alaska):
 
         msg = '{}: saved'.format(_id)
         self.broadcast(_id, msg)
-        self.close(_id)
 
-    def get_raw_reads(self, _id):
+        if close:
+            self.close(_id)
+
+    def get_raw_reads(self, _id, close=True):
         """
         Retrieves list of uploaded sample files.
         """
@@ -585,9 +596,12 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: successfully retrieved raw reads'.format(_id))
 
-        self.respond(_id, json.dumps(self.projects_temp[_id].raw_reads, default=self.encode_json, indent=4))
-        self.respond(_id, json.dumps(self.projects_temp[_id].chk_md5, default=self.encode_json, indent=4))
-        self.close(_id)
+        # 11/27/2017
+        # self.respond(_id, json.dumps(self.projects_temp[_id].raw_reads, default=self.encode_json, indent=4))
+        # self.respond(_id, json.dumps(self.projects_temp[_id].chk_md5, default=self.encode_json, indent=4))
+
+        if close:
+            self.close(_id)
 
     def md5_chksum(self, fname):
         """
@@ -602,7 +616,7 @@ class AlaskaServer(Alaska):
 
         return md5.hexdigest()
 
-    def infer_samples(self, _id):
+    def infer_samples(self, _id, close=True):
         """
         Infers samples from raw reads.
         """
@@ -626,18 +640,23 @@ class AlaskaServer(Alaska):
         self.projects_temp[_id].save(self.TEMP_DIR)
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
 
-        self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
-        self.close(_id)
+        # 11/27/2017
+        # self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
 
-    def get_idx(self, _id):
+        if close:
+            self.close(_id)
+
+    def get_idx(self, _id, close=True):
         """
         Responds with the list of available indices.
         """
         self.out('INFO: available indices {}'.format(self.indices))
         self.respond(_id, self.indices)
-        self.close(_id)
 
-    def set_proj(self, _id):
+        if close:
+            self.close(_id)
+
+    def set_proj(self, _id, close=True):
         """
         Sets project params.
         Only to be called after the project has been created.
@@ -657,23 +676,27 @@ class AlaskaServer(Alaska):
 
         msg = '{}: project data successfully set'.format(_id)
         self.broadcast(_id, msg)
-        self.close(_id)
 
-    def new_sample(self, _id):
-        """
-        Creates new sample.
-        """
-        self.broadcast(_id, '{}: creating new sample'.format(_id))
+        if close:
+            self.close(_id)
 
-        ids = list(self.samples.keys()) + list(self.samples_temp.keys())
-        __id = self.rand_str_except(self.PROJECT_L, ids) # get unique id
-        self.projects_temp[_id].new_sample(__id)
+    # def new_sample(self, _id, close=True):
+    #     """
+    #     Creates new sample.
+    #     """
+    #     self.broadcast(_id, '{}: creating new sample'.format(_id))
+    #
+    #     ids = list(self.samples.keys()) + list(self.samples_temp.keys())
+    #     __id = self.rand_str_except(self.PROJECT_L, ids) # get unique id
+    #     self.projects_temp[_id].new_sample(__id)
+    #
+    #     self.samples_temp[__id] = self.projects_temp[_id].samples[__id]
+    #     self.broadcast(_id, '{}: new sample created with id {}'.format(_id, __id))
+    #
+    #     if close:
+    #         self.close(_id)
 
-        self.samples_temp[__id] = self.projects_temp[_id].samples[__id]
-        self.broadcast(_id, '{}: new sample created with id {}'.format(_id, __id))
-        self.close(_id)
-
-    def finalize_proj(self, _id):
+    def finalize_proj(self, _id, close=True):
         """
         Finalizes project and samples by creating appropriate json and
         sample directories
@@ -714,14 +737,16 @@ class AlaskaServer(Alaska):
 
         msg = '{}: successfully finalized'.format(_id)
         self.broadcast(_id, msg)
-        self.close(_id)
 
-    def read_quant(self, _id):
+        if close:
+            self.close(_id)
+
+    def read_quant(self, _id, close=True, force=False):
         """
         Checks if another analysis is running,
         then performs read quantification.
         """
-        if self.projects[_id].progress < 4:
+        if self.projects[_id].progress < 4 and not force:
             raise Exception('{}: project must be finalized before alignment'
                             .format(_id))
 
@@ -781,13 +806,15 @@ class AlaskaServer(Alaska):
                             # job must be put into queue
                             # regardless of it being empty
         self.projects[_id].progress = 5 # added to queue
-        self.close(_id)
 
-    def diff_exp(self, _id):
+        if close:
+            self.close(_id)
+
+    def diff_exp(self, _id, close=True, force=True):
         """
         Perform differential expression analysis.
         """
-        if self.projects[_id].progress < 7:
+        if self.projects[_id].progress < 7 and not force:
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
 
@@ -845,9 +872,11 @@ class AlaskaServer(Alaska):
                             # job must be put into queue
                             # regardless of it being empty
         self.projects[_id].progress = 8 # added to queue
-        self.close(_id)
 
-    def proj_status(self, _id):
+        if close:
+            self.close(_id)
+
+    def proj_status(self, _id, close=True):
         """
         Checks project status.
         """
@@ -884,7 +913,80 @@ class AlaskaServer(Alaska):
             msg = 'analysis completed'
 
         self.broadcast(_id, '{}: {}'.format(_id, msg))
+
+        if close:
+            self.close(_id)
+
+    def test_read_quant(self, _id, close=True):
+        """
+        For testing read quantification.
+        """
+        if not self.exists(_id):
+            raise Exception('{}: does not exist'.format(_id))
+
+        self.broadcast(_id, '{}: beginning read quantification test'.format(_id))
+        self.respond(_id, '{}: check server console for more details'.format(_id))
+
+        # project to test
+        proj = self.projects_temp[_id]
+
+        # infer samples and set project
+        self.infer_samples(_id, close=False)
+
+        # manually change project sample variables
+        for sid, sample in proj.samples.items():
+            sample.length = 200
+            sample.stdev = 60
+            sample.bootstrap_n = 10
+            sample.idx = 'c_elegans.PRJNA13758.WS261.CDS_transcripts.idx'
+
+            if all('wt' in read for read in sample.reads):
+                sample.meta['title'] = 'wt'
+                proj.ctrl_ids.append(sid)
+            elif all('mt' in read for read in sample.reads):
+                sample.meta['title'] = 'mt'
+
+        proj.ctrl_ftrs['title'] = 'wt'
+
+        # finalize project
+        proj.save(self.TEMP_DIR)
+        self.set_proj(_id, close=False)
+        self.finalize_proj(_id, close=False)
+
+        if close:
+            self.close(_id)
+
+        # run read quantification
+        self.read_quant(_id, close=False)
+
+
+    def test_diff_exp(self, _id, close=True):
+        """
+        For testing differential expresion analysis.
+        """
+        if not self.exists(_id):
+            raise Exception('{}: does not exist'.format(_id))
+
+        self.broadcast(_id, '{}: beginning diff. expression test'.format(_id))
+        self.respond(_id, '{}: check server console for more details'.format(_id))
+
+        if close:
+            self.close(_id)
+
+        self.diff_exp(_id, close=False)
+
+
+    def test_all(self, _id):
+        """
+        For testing both read quant and differential expression.
+        """
+        self.broadcast(_id, '{}: beginnning test everything'.format(_id))
+        self.respond(_id, '{}: check server console for more details'.format(_id))
         self.close(_id)
+
+        self.test_read_quant(_id, close=False)
+        self.test_diff_exp(_id, close=False)
+
 
     def save(self, _id=None):
         """
