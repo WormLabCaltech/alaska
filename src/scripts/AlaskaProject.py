@@ -71,13 +71,12 @@ class AlaskaProject(Alaska):
         """
         Retrieves list of uploaded sample files. Unpacks archive if detected.
         """
-        # TODO: scan until all archives have been unpacked?
         unpack = []
         for root, dirs, files in os.walk(self.raw_dir):
             for fname in files:
-                # if the file name does not end in a know raw read extension,
-                # assume that the file is an archive that needs to be extracted
-                if not fname.endswith(self.RAW_EXT):
+                # if the file name does not end in a known raw read extension,
+                # and is a known (and unpackable) archive, add to list
+                if not fname.endswith(self.RAW_EXT) and fname.endswith(self.ARCH_EXT):
                     unpack.append('{}/{}'.format(root, fname))
 
         # if files need to be unpack_reads

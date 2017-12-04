@@ -34,6 +34,21 @@ class Alaska():
     PROJECT_L = 6 # length of project ids
     RAW_DIR = '0_raw_reads' # raw reads directory name
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
+    # archives that patool can unpack
+    # patool supports 7z (.7z, .cb7), ACE (.ace, .cba), ADF (.adf), ALZIP (.alz),
+    # APE (.ape), AR (.a), ARC (.arc), ARJ (.arj), BZIP2 (.bz2), CAB (.cab),
+    # COMPRESS (.Z), CPIO (.cpio), DEB (.deb), DMS (.dms), FLAC (.flac),
+    # GZIP (.gz), ISO (.iso), LRZIP (.lrz), LZH (.lha, .lzh), LZIP (.lz),
+    # LZMA (.lzma), LZOP (.lzo), RPM (.rpm), RAR (.rar, .cbr), RZIP (.rz),
+    # SHN (.shn), TAR (.tar, .cbt), XZ (.xz), ZIP (.zip, .jar, .cbz)
+    # and ZOO (.zoo) archive formats.
+    # It relies on helper applications to handle those archive formats
+    # (for example bzip2 for BZIP2 archives).
+    ARCH_EXT = ('.7z', '.cb7', '.ace', '.cba', '.adf', '.alz', '.ape',
+                '.a', '.arc', '.arj', '.bz2', '.cab', '.Z', '.cpio', '.deb',
+                '.dms', '.flac', '.gz', '.iso', '.lrz', '.lha', '.lzh', '.lz',
+                '.lzma', '.lzo', '.rpm', '.rar', '.cbr', '.rz', '.shn', '.tar',
+                '.cbt', '.xz', '.zip', '.jar', '.cbz', '.zoo')
     ALIGN_DIR = '1_alignment' # alignment directory name
     DIFF_DIR = '2_diff_exp' # differential expression directory name
     CPUS = '1-3' # processing CPUs
