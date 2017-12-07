@@ -946,12 +946,10 @@ class AlaskaServer(Alaska):
             sample.idx = 'c_elegans.PRJNA13758.WS261.CDS_transcripts.idx'
 
             if all('wt' in read for read in sample.reads):
-                sample.meta['title'] = 'wt'
-                proj.ctrl_ids.append(sid)
+                sample.meta['chars']['genotype'] = 'wt'
+                proj.ctrls[sid] = 'genotype'
             elif all('mt' in read for read in sample.reads):
-                sample.meta['title'] = 'mt'
-
-        proj.ctrl_ftrs['title'] = 'wt'
+                sample.meta['chars']['genotype'] = 'mt'
 
         # finalize project
         proj.save(self.TEMP_DIR)

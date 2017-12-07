@@ -35,7 +35,7 @@ class AlaskaSample(Alaska):
         self.meta['contributors'] = []
         self.meta['source'] = ''
         self.meta['organism'] = ''
-        self.meta['charcteristics'] = {} # multiple allowed
+        self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 

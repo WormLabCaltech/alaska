@@ -12,6 +12,7 @@ import json
 import pandas as pd
 import warnings as w
 import datetime as dt
+from collections import defaultdict
 from pyunpack import Archive
 from BashWriter import BashWriter
 from AlaskaSample import AlaskaSample
@@ -37,10 +38,7 @@ class AlaskaProject(Alaska):
         self.chk_md5 = {} # md5 checksums
         self.samples = {}
         self.design = 1 # 1: single-factor, 2: two-factor
-        self.ctrl_ids = [] # control ids
-        self.ctrl_ftrs = {} # if single-factor, key and value
-                            # if two-factor, key: value, key: value
-                            # (refers to keys of self.meta)
+        self.ctrls = {} # controls
 
         self.progress = 0 # int to denote current analysis progress
                             # 0: project created
@@ -164,6 +162,18 @@ class AlaskaProject(Alaska):
         for _id, sample in self.samples.items():
             sample.reset()
 
+    def reverse_ctrls(self):
+        """
+        Reverses controls and assigns ctrl_rev.
+        """
+        reversed = defaultdict(list)
+
+        for key, item in self.ctrls.items():
+            reversed[item].append(key)
+
+        self.ctrls_rev = dict(reversed)
+
+
     def check(self):
         """
         Checks all data.
@@ -172,25 +182,47 @@ class AlaskaProject(Alaska):
         w.warn('{}: Alaska is currently unable to verify experimental designs'.format(self.id),
                 Warning)
 
-        # first check controls have matching control factors
-        # then check if non-controls have different factors
-        # TODO: check other data and ensure other factors are the same
-        for _id, sample in self.samples.items():
-            # check controls have matching control factors
-            if _id in self.ctrl_ids:
-                for key, item in self.ctrl_ftrs.items():
-                    val = self.samples[_id].meta[key]
-                    if not val == item:
-                        msg = '{}: control sample {} does not have {}:{}. \
-                            instead, has {}'.format(self.id, _id, key, item, val)
-                        raise Exception(msg)
-            else:
-                # check if non-controls have different factors
-                for key, item in self.ctrl_ftrs.items():
-                    val = self.samples[_id].meta[key]
-                    if val == item:
-                        msg = '{}: non-control sample {} has {}:{}'.format(self.id, _id, key, item)
-                        raise Exception(msg)
+        # ctrl_chars = {}
+        # # first, get control characteristics
+        # for _id, char in self.ctrls.items():
+        #     if char not in ctrl_chars:
+        #         ctrl_chars[char] = self.samples[_id].meta[char]
+        #
+        # # check controls & their characteristics
+        # for _id, sample in self.samples.items():
+        #     if _id in self.ctrls:
+        #         char = self.ctrls[_id]
+        #         if not sample.meta[char] == ctrl_chars[char]:
+        #             msg = '{}: control sample {} does not have {} : {}' \
+        #                     .format(self.id, _id, char, ctrl_chars[char])
+        #             raise Exception(msg)
+        #     else:
+        #         if sample.meta[char] == ctrl_chars[char]:
+        #             msg = '{}: non-control sample {} has {} : {}' \
+        #                     .format(self.id, _id, char, ctrl_chars[char])
+        #             raise Exception(msg)
+
+
+
+        # # first check controls have matching control factors
+        # # then check if non-controls have different factors
+        # # TODO: check other data and ensure other factors are the same
+        # for _id, sample in self.samples.items():
+        #     # check controls have matching control factors
+        #     if _id in self.ctrls:
+        #         for __id, char in self.ctrls.items():
+        #             val = self.samples[_id].meta[key]
+        #             if not val == item:
+        #                 msg = '{}: control sample {} does not have {}:{}. \
+        #                     instead, has {}'.format(self.id, _id, key, item, val)
+        #                 raise Exception(msg)
+        #     else:
+        #         # check if non-controls have different factors
+        #         for key, item in self.ctrl_ftrs.items():
+        #             val = self.samples[_id].meta[key]
+        #             if val == item:
+        #                 msg = '{}: non-control sample {} has {}:{}'.format(self.id, _id, key, item)
+        #                 raise Exception(msg)
 
 
     def write_kallisto(self):
@@ -228,14 +260,14 @@ class AlaskaProject(Alaska):
         """
         if self.design == 1: # single-factor
             # write design matrix txt
-            ctrl_ftr = list(self.ctrl_ftrs.keys())[0]
+            ctrl_ftr = list(self.ctrls.values())[0]
             head = ['sample', 'condition']
             data = []
             for _id, sample in self.samples.items():
-                if _id in self.ctrl_ids:
-                    ftr = 'a_{}'.format(sample.meta[ctrl_ftr])
+                if _id in self.ctrls:
+                    ftr = 'a_{}'.format(sample.meta['chars'][ctrl_ftr])
                 else:
-                    ftr = 'b_{}'.format(sample.meta[ctrl_ftr])
+                    ftr = 'b_{}'.format(sample.meta['chars'][ctrl_ftr])
                 data.append([_id, ftr]) # TODO: batch??
             # convert to dataframe and save with space as delimiter
             df = pd.DataFrame(data, columns=head)
