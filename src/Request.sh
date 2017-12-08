@@ -12,7 +12,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPTPATH="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-docker run -it --rm --network="container:alaska"\
+docker run -i --rm --network="container:alaska"\
                 -v "${SCRIPTPATH}/scripts/Alaska.py:/Alaska.py:ro"\
                 -v "${SCRIPTPATH}/scripts/AlaskaRequest.py:/AlaskaRequest.py:ro"\
                 request\
