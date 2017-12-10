@@ -102,7 +102,7 @@ class AlaskaServer(Alaska):
 
         self.out('INFO: AlaskaServer initialized')
 
-    def start(self, _id=None):
+    def start(self, _id=None, force=False):
         """
         Starts the server.
         """
@@ -117,6 +117,17 @@ class AlaskaServer(Alaska):
             if not os.getuid() == 0:
                 raise Exception('ERROR: AlaskaServer requires admin rights')
                 self.out('INFO: AlaskaServer running as root')
+
+            if force:
+                self.out('INFO: --force flag detected...bypassing instance check')
+            else:
+                self.out('INFO: checking if another instance is running')
+                if os.path.isfile('_running'):
+                    raise Exception('ERROR: another instance was detected. If there '
+                    'is no other instance, this error may be because of an incorrect '
+                    'termination of a previous instance. In this case, please '
+                    'manually delete the \'_running\' file from the root directory.')
+            open('_running', 'w').close()
 
             self.out('INFO: acquiring absolute path')
             if not os.path.exists('PATH_TO_HERE'):
@@ -148,8 +159,9 @@ class AlaskaServer(Alaska):
 
 
         except Exception as e:
-            self.out(str(e))
+            self.out(str(e), override=True)
             self.stop(code=1)
+            sys.exit(1)
 
         with w.catch_warnings() as caught:
             w.simplefilter('always')
@@ -198,35 +210,41 @@ class AlaskaServer(Alaska):
         if _id is not None:
             self.close(_id)
 
-        self.out('INFO: terminating ZeroMQ')
-        lock = threading.Lock()
-        lock.acquire()
-        self.SOCKET.close()
-        self.CONTEXT.term()
+        try:
+            self.RUNNING = False
+            self.out('INFO: terminating ZeroMQ')
+            lock = threading.Lock()
+            lock.acquire()
+            self.SOCKET.close()
+            self.CONTEXT.term()
 
-        self.RUNNING = False
 
-        # stop all containers
-        # for cont in self.DOCKER.containers.list():
-        #     self.out('INFO: terminating container {}'.format(cont.short_id))
-        #     cont.remove(force=True)
 
-        # stop running jobs
-        if self.current_job is not None:
-            cont_id = self.current_job.docker.id
-            self.out('INFO: job {} is running...terminating container {}'
-                        .format(self.current_job.id, cont_id))
-            self.DOCKER.containers.get(cont_id).remove(force=True)
-            self.out('INFO: termination successful')
+            # stop all containers
+            # for cont in self.DOCKER.containers.list():
+            #     self.out('INFO: terminating container {}'.format(cont.short_id))
+            #     cont.remove(force=True)
 
-        self.save()
+            # stop running jobs
+            if self.current_job is not None:
+                cont_id = self.current_job.docker.id
+                self.out('INFO: job {} is running...terminating container {}'
+                            .format(self.current_job.id, cont_id))
+                self.DOCKER.containers.get(cont_id).remove(force=True)
+                self.out('INFO: termination successful')
 
-        if not code == 0:
-            self.out('TERMINATED WITH EXIT CODE {}'.format(code))
+            self.save()
 
-        self.log() # write all remaining logs
+            if not code == 0:
+                self.out('TERMINATED WITH EXIT CODE {}'.format(code))
 
-        sys.exit(code)
+            self.log() # write all remaining logs
+
+            os.remove('../_running')
+
+            sys.exit(code)
+        except:
+            pass
 
     def worker(self):
         """
@@ -1145,9 +1163,16 @@ class AlaskaServer(Alaska):
         self.close(_id)
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Start server with given arguments.')
+    parser.add_argument('--force',
+                        action='store_true')
+    args = parser.parse_args()
+
     try:
         server = AlaskaServer()
-        server.start()
+        server.start(force=args.force)
     except KeyboardInterrupt:
         print('\nINFO: interrupt received, stopping...')
     finally:

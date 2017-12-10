@@ -105,6 +105,8 @@ class AlaskaProject(Alaska):
             # assign list to dictionary
             if not len(reads) == 0:
                 self.raw_reads[root.replace(self.raw_dir, '')[1:]] = reads
+            else:
+                raise Exception('{}: raw reads folder is empty!'.format(self.id))
 
     def unpack_reads(self, fname):
         """
