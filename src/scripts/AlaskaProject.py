@@ -30,6 +30,7 @@ class AlaskaProject(Alaska):
         """
         self.id = _id
         self.dir = './{}/{}'.format(self.PROJECTS_DIR, _id)
+        self.qc_dir = '{}/{}'.format(self.dir, self.QC_DIR)
         self.raw_dir = '{}/{}'.format(self.dir, self.RAW_DIR)
         self.align_dir = '{}/{}'.format(self.dir, self.ALIGN_DIR)
         self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
@@ -175,6 +176,92 @@ class AlaskaProject(Alaska):
 
         self.ctrls_rev = dict(reversed)
 
+    def write_qcs(self):
+        """
+        Writes all qc scripts.
+        """
+        # TODO: implement helper functions for each qc step
+        sh = BashWriter('qc', self.dir)
+
+        # append commands to convert to BAM
+        write_bam(sh)
+
+        # append commands to run rseqc
+        write_rseqc(sh)
+
+        # append commands to run fastqc
+        write_fastqc(sh)
+
+        # append commands to run multiqc
+        write_multiqc(sh)
+
+        # write all commands to .sh file
+        sh.write()
+
+
+
+    def write_bam(self, sh):
+        """
+        Writes script to generate BAM files from raw reads.
+        Raw reads are aligned using Bowtie2 and converted to BAM
+        using samtools.
+        """
+        # TODO: implement
+        sh.add('# convert raw reads to BAM')
+        for _id, sample in self.samples.items():
+            bam = '{}/{}.bam'.format(self.QC_DIR, _id)
+            command = 'bowtie2 -x {} -U {} -p {} -S {} | samtools sort -O {} -@ {}'.format(
+                sample.idx,
+                ','.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads],
+                self.THREADS,
+                bam,
+                self.THREADS
+            )
+            sh.add(command)
+
+            command = 'samtools index {}'.format(bam)
+            sh.add(command)
+
+    def write_rseqc(self, sh):
+        """
+        Writes script to run rseqc.
+        """
+        # TODO: implement
+        sh.add('# run rseqc')
+
+        for _id, sample in self.samples.items():
+            bam = '{}/{}.bam'.format(self.qc_dir, _id)
+            ref = PLACE_BED_HERE
+
+            command = 'read_distribution.py -i {} -r {} > {}'.format(
+                bam,
+                ref,
+                '{}_distribution.txt'.format(_id)
+            )
+            sh.add(command)
+
+            command = 'geneBody_coverage.py -i {} -r {} -o {}'.format(
+                bam,
+                ref,
+                _id
+            )
+            sh.add(command)
+
+
+
+    def write_fastqc(self, sh):
+        """
+        Writes script to run fastqc.
+        """
+        # TODO: implement
+        pass
+
+    def write_multiqc(self):
+        """
+        Writes script to run multiqc.
+        """
+        # TODO: implement
+        pass
 
     def check(self):
         """

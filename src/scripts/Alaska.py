@@ -49,8 +49,9 @@ class Alaska():
                 '.dms', '.flac', '.gz', '.iso', '.lrz', '.lha', '.lzh', '.lz',
                 '.lzma', '.lzo', '.rpm', '.rar', '.cbr', '.rz', '.shn', '.tar',
                 '.cbt', '.xz', '.zip', '.jar', '.cbz', '.zoo')
-    ALIGN_DIR = '1_alignment' # alignment directory name
-    DIFF_DIR = '2_diff_exp' # differential expression directory name
+    QC_DIR = '1_qc' # quality control directory name
+    ALIGN_DIR = '2_alignment' # alignment directory name
+    DIFF_DIR = '3_diff_exp' # differential expression directory name
     CPUS = '1-3' # processing CPUs
     THREADS = 3 # number of threads for processing
     KAL_VERSION = 'kallisto:latest' # kallisto image version to use

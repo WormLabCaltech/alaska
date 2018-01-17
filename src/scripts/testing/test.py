@@ -464,6 +464,7 @@ def test_read_quant(ids):
                     'bs_abundance_99.tsv': '54a1593945a6da7d3d37d6cb2614ec42',
                     'run_info.json': 'ad2ba0be4210ad8ab9238a4817bc0308'}
 }
+    md5s_list = md5s['mt1'].values() + md5s['mt2'].values() + md5s['wt1'].values() + md5s['wt2'].values()
 
     new_md5s = {}
     for root, dirs, files in os.walk('../../test_samples/aligned/'):
@@ -479,7 +480,17 @@ def test_read_quant(ids):
     assert md5s == new_md5s, 'MD5\'s do not match those in record!.'
 
     for _id in ids:
-        
+        for root, folders, files in os.walk('../../root/projects/{}/1_alignment'.format(_id)):
+            if len(folders) == 0:
+                for fname in files:
+                    md5 = md5_chksum('{}/{}'.format(root, fname))
+
+                    if md5 in md5s_list:
+                        print('.', end='')
+                    else:
+                        print('\n{} not in list'.format(md5))
+
+
 
 
 
@@ -603,6 +614,7 @@ if __name__ == '__main__':
     #
     # for _id in projects:
     #     read_quant(_id)
+    wait = input("PRESS ENTER ONCE ALIGNMENTS ARE FINISHED.")
     test_read_quant()
 
 

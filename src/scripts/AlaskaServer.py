@@ -493,6 +493,9 @@ class AlaskaServer(Alaska):
         f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.RAW_DIR)
         os.makedirs(f)
         self.broadcast(_id, '{}: {} created'.format(__id, f))
+        f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.QC_DIR)
+        os.makedirs(f)
+        self.broadcast(_id, '{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(self.PROJECTS_DIR, __id, self.ALIGN_DIR)
         os.makedirs(f)
         self.broadcast(_id, '{}: {} created'.format(__id, f))
@@ -678,6 +681,12 @@ class AlaskaServer(Alaska):
 
         if close:
             self.close(_id)
+
+    def qc(self, _id, close=True):
+        """
+        Performs quality control on the given raw reads.
+        """
+        
 
     def set_proj(self, _id, close=True):
         """
