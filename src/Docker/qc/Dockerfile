@@ -33,5 +33,14 @@ RUN conda install fastqc==0.11.6
 RUN conda install rseqc==2.6.4
 RUN conda install multiqc==1.4
 
+# Install R
+RUN apt-get update && apt-get install -y \
+    apt-transport-https
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+    && add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/' \
+    && apt-get update \
+    && apt-get install r-base r-base-dev -y
+
+
 
 
