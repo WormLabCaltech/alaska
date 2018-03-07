@@ -1,6 +1,6 @@
-# run_kallisto.py
+# run_analysis.py
 # This file is intended to be copied into the project folder.
-# It runs kallisto on all samples in a directory-independent manner.
+# It runs the appropriate analysis on all samples in a directory-independent manner.
 # (i.e. Does not require absolute path.)
 
 import os
@@ -23,34 +23,51 @@ def run_sys(cmd, prefix=''):
     This function blocks until command execution is terminated.
     """
     p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+    output = ''
 
     for line in p.stdout:
         if not line.isspace():
             print(prefix + ': ' + line, end='')
+        output += line
+
+    return output
 
 def run_kallisto(proj):
     """
     Runs read quantification with Kallisto.
     Assumes that the indices are in the folder /organisms
     """
+    def bam_to_bai(_id, path):
+        """
+        Helper function to call samtools to convert .bam to .bam.bai
+        """
+        for f in os.listdir(path):
+            if f.endswith('.bam'):
+                bam_path = '{}/{}'.format(path, f)
+        args = ['samtools', 'index', bam_path]
+        run_sys(args, prefix=_id)
+
+
     print('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print(_id, end=' ')
     print()
 
     for _id in proj['samples']:
+        path = './2_alignment/{}'.format(_id)
+
         args = ['kallisto', 'quant']
 
         # first find the index
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
-        path = '/organisms/{}/{}/{}/index'.format(org[0], org[1], ver)
-        path += '/{}_{}_{}.idx'.format(org[0][0], org[1], ver)
-        arg = ['-i', path]
+        idx_path = '/organisms/{}/{}/{}/index'.format(org[0], org[1], ver)
+        idx_path += '/{}_{}_{}.idx'.format(org[0][0], org[1], ver)
+        arg = ['-i', idx_path]
         args += arg
 
         # find the output directory
-        arg = ['-o', './2_alignment/{}'.format(_id)]
+        arg = ['-o', path]
         args += arg
 
         # find the number of bootstraps
@@ -81,41 +98,102 @@ def run_kallisto(proj):
         for read in proj['samples'][_id]['reads']:
             args.append('./0_raw_reads/{}'.format(read))
 
-        run_sys(args, prefix=_id)
+        # run_sys(args, prefix=_id)
+
+        bam_to_bai(_id, path)
 
 
 def run_qc(proj):
     """
     Runs read quantification with RSeQC, FastQC and MultiQC.
     """
+    def read_distribution(_id, path, bed_path):
+        """
+        Helper function to run read_distribution.py
+        """
+        args = ['read_distribution.py']
+        arg = ['-i', bam_path]
+        args += arg
+        arg = ['-r', bed_path]
+        args += arg
+
+        # print(args)
+        output = run_sys(args, prefix=_id)
+        # output file
+        with open('{}/{}_distribution.txt'.format(path, _id), 'w') as out:
+            out.write(output)
+
+
+    def geneBody_coverage(_id, path, bed_path):
+        """
+        Helper function to run geneBody_coverage.py
+        """
+        args = ['geneBody_coverage.py']
+        arg = ['-i', bam_path]
+        args += arg
+        arg = ['-r', bed_path]
+        args += arg
+        arg = ['-o', '{}/{}_coverage'.format(path, _id)]
+        args += arg
+
+        run_sys(args, prefix=_id)
+
+    def tin(_id, path, bed_path):
+        """
+        Helper function to run tin.py
+        """
+        args = ['tin.py']
+        arg = ['-i', bam_path]
+        args += arg
+        arg = ['-r', bed_path]
+        args += arg
+
+        output = run_sys(args, prefix=_id)
+        # output file
+        with open('{}/{}_tin.txt'.format(path, _id), 'w') as out:
+            out.write(output)
+
+    def fastqc(_id, path, bed_path):
+        """
+        Helper function to run fastqc.
+        """
+        pass
+
+    def multiqc(_id, path):
+        """
+        Helper function to run multiqc.
+        """
+        args = ['multiqc', path]
+        run_sys(args, prefix=_id)
+    ########## HELPER FUNCTIONS END HERE ###########
+
     print('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print(_id, end=' ')
     print()
 
     for _id in proj['samples']:
-        # RSeQC
-        args = ['read_distribution.py']
+        # define necessary variables
         path = './2_alignment/{}'.format(_id)
         # find bam file
         for f in os.listdir(path):
             if f.endswith('.bam'):
                 bam_path = '{}/{}'.format(path, f)
                 break
-        arg = ['-i', bam_path]
-        args += arg
         # find reference bed file
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
         bed_path = '/organisms/{}/{}/{}/reference'.format(org[0], org[1], ver)
         bed_path += '/{}_{}_{}.bed'.format(org[0][0], org[1], ver)
-        arg = ['-r', bed_path]
-        args += arg
-        # output file
-        arg = ['>', '{}/{}_distribution.txt'.format(path,_id)]
-        args += arg
 
-        run_sys(args, prefix=_id)
+        # read_distribution.py
+        # read_distribution(_id, path, bed_path)
+
+        # geneBody_coverage.py
+        # geneBody_coverage(_id, path, bed_path)
+
+        # tin.py
+        tin(_id, path, bed_path)
 
         # FastQC
 
@@ -145,6 +223,8 @@ if __name__ == '__main__':
     # Kallisto.
     run_kallisto(proj)
 
+    # TODO: convert kallisto sam/bam to bam
+
     # QC.
-    # run_qc(proj)
+    run_qc(proj)
 
