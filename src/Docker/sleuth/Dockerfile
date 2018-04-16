@@ -6,7 +6,7 @@
 # Current project folder must be mounted to /projects/ in container
 
 FROM ubuntu:xenial
-RUN mkdir ./sleuth/ ./projects/
+RUN mkdir /sleuth/ /projects/
 
 ##### DEPENDENCIES #####
 RUN apt-get update && apt-get install -y \
@@ -26,7 +26,4 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD5
 # copy r script for installing packages
 COPY install_sleuth.R ./sleuth/install_sleuth.R
 RUN Rscript ./sleuth/install_sleuth.R
-
-##### COPY DIFFERENTIAL EXPRESSION SCRIPT #####
-COPY sleuth.R ./sleuth/sleuth.R
-ENV PATH="/sleuth:${PATH}"
+RUN rm /sleuth/install_sleuth.R
