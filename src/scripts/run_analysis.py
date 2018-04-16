@@ -4,6 +4,8 @@
 # (i.e. Does not require absolute path.)
 
 import os
+import sys
+import time
 import json
 import subprocess as sp
 
@@ -22,60 +24,221 @@ def run_sys(cmd, prefix=''):
     Runs a system command and echos all output.
     This function blocks until command execution is terminated.
     """
-    p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
-    output = ''
+    print('# ' + ' '.join(cmd))
+    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
+        output = ''
 
-    for line in p.stdout:
-        if not line.isspace():
-            print(prefix + ': ' + line, end='')
-        output += line
+        while p.poll() is None:
+            line = p.stdout.readline()
+            if not line.isspace() and len(line) > 1:
+                output += line
+                print(prefix + ': ' + line, end='')
+                sys.stdout.flush()
+        p.stdout.read()
+        # p.stderr.read()
+        p.stdout.close()
+        # p.stderr.close()
+    time.sleep(1)
 
+    if p.returncode != 0:
+        sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
     return output
 
-def run_kallisto(proj):
+def run_qc(proj, nthreads):
     """
-    Runs read quantification with Kallisto.
-    Assumes that the indices are in the folder /organisms
+    Runs read quantification with RSeQC, FastQC and MultiQC.
     """
-    def bam_to_bai(_id, path):
+    def bowtie2(_id, path, bt2_path, reads, t):
         """
-        Helper function to call samtools to convert .bam to .bam.bai
+        Helper function to call bowtie2 alignment.
         """
-        for f in os.listdir(path):
-            if f.endswith('.bam'):
-                bam_path = '{}/{}'.format(path, f)
-        args = ['samtools', 'index', bam_path]
+        args = ['bowtie2', '-x', bt2_path]
+
+        if t == 1:
+            args += ['-U', ','.join(reads)]
+        else:
+            pair1 = []
+            pair2 = []
+            for pair in reads:
+                pair1.append(pair[0])
+                pair2.append(pair[1])
+            args += ['-1', ','.join(pair1)]
+            args += ['-2', ','.join(pair2)]
+
+        args += ['-S', '{}/alignments.sam'.format(path)]
+        args += ['-u', str(2 * (10 ** 5))]
+        args += ['--threads', str(nthreads)]
+        # args += ['--verbose']
+        run_sys(args)
+
+
+    def samtools_sort(_id):
+        """
+        Helper function to call samtools to sort .bam
+        """
+        sam_path = 'alignments.sam'
+        args = ['samtools', 'sort', sam_path]
+        sorted_bam = 'sorted.bam'
+        args += ['-o', sorted_bam]
+        args += ['-@', str(nthreads-1)]
+        args += ['-m', '4G']
         run_sys(args, prefix=_id)
 
+    def samtools_index(_id):
+        """
+        Helper function to call samtools to index .bam
+        """
+        args = ['samtools', 'index', 'sorted.bam']
+        run_sys(args, prefix=_id)
+
+
+    def read_distribution(_id, bed_path):
+        """
+        Helper function to run read_distribution.py
+        """
+        args = ['read_distribution.py']
+        args += ['-i', 'sorted.bam']
+        args += ['-r', bed_path]
+
+        # print(args)
+        output = run_sys(args, prefix=_id)
+        # output file
+        with open('{}_distribution.txt'.format(_id), 'w') as out:
+            out.write(output)
+
+
+    def geneBody_coverage(_id, bed_path):
+        """
+        Helper function to run geneBody_coverage.py
+        """
+        args = ['geneBody_coverage.py']
+        args += ['-i', 'sorted.bam']
+        args += ['-r', bed_path]
+        args += ['-o', '{}_coverage'.format(_id)]
+
+        run_sys(args, prefix=_id)
+
+    def tin(_id, bed_path):
+        """
+        Helper function to run tin.py
+        """
+        args = ['tin.py']
+        args += ['-i', 'sorted.bam']
+        args += ['-r', bed_path]
+
+        output = run_sys(args, prefix=_id)
+        # output file
+        with open('{}_tin.txt'.format(_id), 'w') as out:
+            out.write(output)
+
+    def fastqc(_id):
+        """
+        Helper function to run fastqc.
+        """
+        args = ['fastqc', 'sorted.bam']
+        run_sys(args, prefix=_id)
+
+    def multiqc(_id):
+        """
+        Helper function to run multiqc.
+        """
+        args = ['multiqc', '.']
+        run_sys(args, prefix=_id)
+    ########## HELPER FUNCTIONS END HERE ###########
 
     print('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print(_id, end=' ')
     print()
 
+    # run kallisto to get pseudobam
+    # run_kallisto(proj, nthreads, qc=True, nbootstraps=0, ver=235)
+
     for _id in proj['samples']:
-        path = './2_alignment/{}'.format(_id)
+        # define necessary variables
+        wdir = os.getcwd()
+        path = '1_qc/{}'.format(_id)
+        org = proj['samples'][_id]['organism'].split('_')
+        ver = str(proj['samples'][_id]['ref_ver'])
+        bed_path = '/alaska/root/organisms/{}/{}/{}/reference'.format(org[0], org[1], ver)
+        bed_path += '/{}_{}_{}.bed'.format(org[0][0], org[1], ver)
+        bt2_idx = '{}_{}_{}'.format(org[0][0], org[1], ver)
+        bt2_path = '/alaska/root/organisms/{}/{}/{}/index/{}'.format(org[0], org[1], ver, bt2_idx)
+
+        # get all the raw reads for this sample
+        reads = []
+        # finally, add the sample reads
+        for read in proj['samples'][_id]['reads']:
+            reads.append(read)
+
+        # Align with bowtie2
+        if (proj['samples'][_id]['type'] == 1):
+            bowtie2(_id, path, bt2_path, reads, 1)
+        elif (proj['samples'][_id]['type'] == 2):
+            # TODO: implement
+            pass
+        else:
+            print('unrecognized sample type!')
+
+        os.chdir(path)
+        print('# changed working directory to {}'.format(path))
+
+        # Sort and index reads with samtools first.
+        samtools_sort(_id)
+        # Give it some time.
+        time.sleep(1)
+        samtools_index(_id)
+
+        # read_distribution.py
+        read_distribution(_id, bed_path)
+
+        # geneBody_coverage.py
+        geneBody_coverage(_id, bed_path)
+
+        # tin.py
+        tin(_id, bed_path)
+
+        # FastQC
+        fastqc(_id)
+
+        # MultiQC
+        multiqc(_id)
+
+        os.chdir(wdir)
+        print('# returned to {}'.format(wdir))
+
+
+def run_kallisto(proj, nthreads):
+    """
+    Runs read quantification with Kallisto.
+    Assumes that the indices are in the folder /organisms
+    """
+    print('{} samples detected...'.format(len(proj['samples'])), end='')
+    for _id in proj['samples']:
+        print(_id, end=' ')
+    print()
+
+    for _id in proj['samples']:
+        path = '2_alignment/{}'.format(_id)
 
         args = ['kallisto', 'quant']
 
         # first find the index
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
-        idx_path = '/organisms/{}/{}/{}/index'.format(org[0], org[1], ver)
+        idx_path = '/alaska/root/organisms/{}/{}/{}/index'.format(org[0], org[1], ver)
         idx_path += '/{}_{}_{}.idx'.format(org[0][0], org[1], ver)
-        arg = ['-i', idx_path]
-        args += arg
+        args += ['-i', idx_path]
 
         # find the output directory
-        arg = ['-o', path]
-        args += arg
+        args += ['-o', path]
 
         # find the number of bootstraps
-        arg = ['-b', str(proj['samples'][_id]['bootstrap_n'])]
-        args += arg
+        nbootstraps = proj['samples'][_id]['bootstrap_n']
+        args += ['-b', str(nbootstraps)]
 
         # number of threads
-        arg = ['-t', '3']
+        args += ['-t', str(nthreads)]
 
         # single/paired end
         if (proj['samples'][_id]['type'] == 1):
@@ -90,123 +253,35 @@ def run_kallisto(proj):
             print('unrecognized sample type!')
         args += arg
 
-        # pseudobam
-        arg = ['--pseudobam']
-        args += arg
-
         # finally, add the sample reads
         for read in proj['samples'][_id]['reads']:
-            args.append('./0_raw_reads/{}'.format(read))
-
-        # run_sys(args, prefix=_id)
-
-        bam_to_bai(_id, path)
-
-
-def run_qc(proj):
-    """
-    Runs read quantification with RSeQC, FastQC and MultiQC.
-    """
-    def read_distribution(_id, path, bed_path):
-        """
-        Helper function to run read_distribution.py
-        """
-        args = ['read_distribution.py']
-        arg = ['-i', bam_path]
-        args += arg
-        arg = ['-r', bed_path]
-        args += arg
-
-        # print(args)
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}/{}_distribution.txt'.format(path, _id), 'w') as out:
-            out.write(output)
-
-
-    def geneBody_coverage(_id, path, bed_path):
-        """
-        Helper function to run geneBody_coverage.py
-        """
-        args = ['geneBody_coverage.py']
-        arg = ['-i', bam_path]
-        args += arg
-        arg = ['-r', bed_path]
-        args += arg
-        arg = ['-o', '{}/{}_coverage'.format(path, _id)]
-        args += arg
+            args.append(read)
 
         run_sys(args, prefix=_id)
 
-    def tin(_id, path, bed_path):
-        """
-        Helper function to run tin.py
-        """
-        args = ['tin.py']
-        arg = ['-i', bam_path]
-        args += arg
-        arg = ['-r', bed_path]
-        args += arg
-
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}/{}_tin.txt'.format(path, _id), 'w') as out:
-            out.write(output)
-
-    def fastqc(_id, path, bed_path):
-        """
-        Helper function to run fastqc.
-        """
-        pass
-
-    def multiqc(_id, path):
-        """
-        Helper function to run multiqc.
-        """
-        args = ['multiqc', path]
-        run_sys(args, prefix=_id)
-    ########## HELPER FUNCTIONS END HERE ###########
-
-    print('{} samples detected...'.format(len(proj['samples'])), end='')
-    for _id in proj['samples']:
-        print(_id, end=' ')
-    print()
-
-    for _id in proj['samples']:
-        # define necessary variables
-        path = './2_alignment/{}'.format(_id)
-        # find bam file
-        for f in os.listdir(path):
-            if f.endswith('.bam'):
-                bam_path = '{}/{}'.format(path, f)
-                break
-        # find reference bed file
-        org = proj['samples'][_id]['organism'].split('_')
-        ver = str(proj['samples'][_id]['ref_ver'])
-        bed_path = '/organisms/{}/{}/{}/reference'.format(org[0], org[1], ver)
-        bed_path += '/{}_{}_{}.bed'.format(org[0][0], org[1], ver)
-
-        # read_distribution.py
-        # read_distribution(_id, path, bed_path)
-
-        # geneBody_coverage.py
-        # geneBody_coverage(_id, path, bed_path)
-
-        # tin.py
-        tin(_id, path, bed_path)
-
-        # FastQC
-
-        # MultiQC
 
 def run_sleuth(proj):
     """
     Runs differential expression analysis with sleuth.
     Assumes that the design matrix is already present in the directory.
     """
-    pass
+    args = ['./sleuth.R']
+    args += ['-d', '.']
+    args += ['-k', './2_alignment']
+    args += ['-o', './3_diff_exp']
+
+    run_sys(args)
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Perform analysis.')
+    parser.add_argument('type', choices=['qc', 'kallisto', 'sleuth'])
+    parser.add_argument('--threads', type=int, default=1)
+    args = parser.parse_args()
+
+    nthreads = args.threads
+
     # Assume only one json file exists in current directory.
     files = os.listdir()
 
@@ -220,11 +295,10 @@ if __name__ == '__main__':
     proj = load_proj(data)
     print('{} loaded'.format(data))
 
-    # Kallisto.
-    run_kallisto(proj)
-
-    # TODO: convert kallisto sam/bam to bam
-
-    # QC.
-    run_qc(proj)
+    if args.type == 'qc':
+        run_qc(proj, nthreads)
+    elif args.type == 'kallisto':
+        run_kallisto(proj, nthreads)
+    elif args.type == 'sleuth':
+        run_sleuth(proj)
 

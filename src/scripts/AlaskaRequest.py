@@ -15,30 +15,6 @@ class AlaskaRequest(Alaska):
     """
     AlaskaRequest
     """
-    # messeging codes
-    CODES = {
-        'check':                b'\x00', # empty request for pinging server
-        'new_proj':             b'\x01', # create new project
-        'load_proj':            b'\x02', # load project from JSON
-        'save_proj':            b'\x03', # save project to JSON
-        'infer_samples':        b'\x04', # extract raw reads and infer samples
-        'get_idx':              b'\x05', # get list of avaliable indices
-        'new_sample':           b'\x06', # create new sample with unique id
-        'set_proj':             b'\x07', # set project data by reading temporary JSON
-        'finalize_proj':        b'\x08', # finalize project
-        'read_quant':           b'\x09', # perform read quantification
-        'diff_exp':             b'\x10', # perform differential expression
-        'proj_status':          b'\x11', # check project status
-        'test_read_quant':      b'\x50',
-        'test_diff_exp':        b'\x51',
-        'test_all':             b'\x52',
-        'save':                 b'\x94', # saves server state
-        'load':                 b'\x95', # loads server state
-        'log':                  b'\x96', # force log
-        'update_idx':           b'\x97', # force index update
-        'start':                b'\x98', # start server
-        'stop':                 b'\x99'  # stop server
-    }
 
     def __init__(self, port=8888):
         """
@@ -57,7 +33,7 @@ class AlaskaRequest(Alaska):
         """
         # encode message to byte
         _id = self.id.encode()
-        m = self.CODES[msg]
+        m = Alaska.CODES[msg]
 
         # TODO: how to tell if server is online?
         print('Connecting to server on port {}'.format(self.PORT))
@@ -78,7 +54,7 @@ class AlaskaRequest(Alaska):
         """
         Check if server is responding correctly.
         """
-        self.SOCKET.send(self.CODES['check'])
+        self.SOCKET.send(Alaska.CODES['check'])
 
         # use poller for timeout
         poller = zmq.Poller()

@@ -8,6 +8,7 @@ AlaskaOrganism is an object that contains information of each organism.
 (Including all available reference sequences.)
 """
 
+import os
 import json
 from Alaska import Alaska
 from AlaskaReference import AlaskaReference
@@ -24,6 +25,7 @@ class AlaskaOrganism(Alaska):
         """
         self.genus = genus
         self.species = species
+        self.full = '{}_{}'.format(genus, species)
         self.short = '{}_{}'.format(genus[0].lower(), species)
         self.refs = {}
         self.path = '{}/{}/{}'.format(self.ORGS_DIR, genus, species)
@@ -40,11 +42,13 @@ class AlaskaOrganism(Alaska):
         Saves organism data to JSON.
         """
         if folder is None:
-            path = self.path
+            path = self.ORGS_DIR
         else:
             path = folder
 
-        with open('{}/{}.json'.format(path, self.short), 'w') as f:
+        out = '{}/jsons/{}.json'.format(path, self.full)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        with open(out, 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
 
     def load(self, folder=None):
@@ -52,21 +56,22 @@ class AlaskaOrganism(Alaska):
         Loads organism from JSON.
         """
         if folder is None:
-            path = self.path
+            path = self.ORGS_DIR
         else:
             path = folder
 
-        with open('{}/{}.json'.format(path, self.short), 'r') as f:
+        with open('{}/jsons/{}.json'.format(path, self.full), 'r') as f:
             loaded = json.load(f)
 
         # load each item now
         for key, item in loaded.items():
             if key == 'refs':
                 for ver, obj in item.items():
-                    cds = obj['cds']
+                    dna = obj['dna']
+                    cdna = obj['cdna']
                     bed = obj['bed']
                     kallisto_idx = obj['kallisto_idx']
                     bowtie_idx = obj['bowtie_idx']
 
-                    ref = AlaskaReference(ver, cds, bed, kallisto_idx, bowtie_idx)
+                    ref = AlaskaReference(ver, dna, cdna, bed, kallisto_idx, bowtie_idx)
                     self.refs[ver] = ref

@@ -17,17 +17,23 @@ class Alaska():
     """
     VERSION = 'dev' # alaska version
     ENCODING = 'utf-8' # encoding for decoding byte literals
-    HOST_DIR = None     # root dir on host machine
-                        # this is required because spawning host container from host container
-                        # needs to have host's absolute path
-    ROOT_PATH = None # absolute path to 'root' directory
+    # HOST_DIR = None     # root dir on host machine
+    #                     # this is required because spawning host container from host container
+    #                     # needs to have host's absolute path
     ROOT_DIR = 'root' # root dir
+    ROOT_PATH = '/alaska/{}'.format(ROOT_DIR)
     SAVE_DIR = 'saves' # folder to save server states
     # IMG_DIR = 'images'
-    SCRIPT_DIR = 'scripts' # scripts directory
+    SCRIPT_DIR = '../scripts' # scripts directory
+    IDX_SCRIPT = 'build_index.py'
+    ANL_SCRIPT = 'run_analysis.py'
+    SLE_SCRIPT = 'sleuth.R'
     JOBS_DIR = 'jobs' # jobs directory
-    TRANS_DIR = 'transcripts' # transcripts directory
-    IDX_DIR = 'idx' # index directory name
+    ORGS_DIR = 'organisms'
+    REF_DIR = 'reference'
+    TRANS_DIR = 'reference/fasta' # transcripts directory
+    BED_DIR = 'reference/bed'
+    IDX_DIR = 'index' # index directory name
     LOG_DIR = 'logs' # log directory name
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
@@ -53,9 +59,72 @@ class Alaska():
     ALIGN_DIR = '2_alignment' # alignment directory name
     DIFF_DIR = '3_diff_exp' # differential expression directory name
     CPUS = '1-3' # processing CPUs
-    THREADS = 3 # number of threads for processing
-    KAL_VERSION = 'kallisto:latest' # kallisto image version to use
-    SLE_VERSION = 'sleuth:latest' # sleuth image version to use
+    NTHREADS = 3 # number of threads for processing
+    DOCKER_SCRIPT_VOLUME = 'alaska_script_volume'
+    DOCKER_DATA_VOLUME = 'alaska_data_volume'
+    DOCKER_QC_TAG = 'alaska_qc:latest'
+    DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest' # kallisto image version to use
+    DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest' # sleuth image version to use
+
+    TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
+                            'test_samples/raw/minimum/mt2',
+                            'test_samples/raw/minimum/wt1',
+                            'test_samples/raw/minimum/wt2']
+
+    TEST_RAW_READS_FULL = ['test_samples/raw/full/mt1',
+                            'test_samples/raw/full/mt2',
+                            'test_samples/raw/full/mt3',
+                            'test_samples/raw/full/wt1',
+                            'test_samples/raw/full/wt2',
+                            'test_samples/raw/full/wt3']
+
+
+    # messeging codes
+    CODES = {
+        'check':                b'\x00', # empty request for pinging server
+        'new_proj':             b'\x01', # create new project
+        'load_proj':            b'\x02', # load project from JSON
+        'save_proj':            b'\x03', # save project to JSON
+        'infer_samples':        b'\x04', # extract raw reads and infer samples
+        # 'get_idx':              b'\x05', # get list of avaliable indices
+        # 'new_sample':           b'\x06', # create new sample with unique id
+        'set_proj':             b'\x07', # set project data by reading temporary JSON
+        'finalize_proj':        b'\x08', # finalize project
+        'qc':                   b'\x09',
+        'read_quant':           b'\x10', # perform read quantification
+        'diff_exp':             b'\x11', # perform differential expression
+        'proj_status':          b'\x12', # check project status
+        'test_copy_reads':      b'\x47',
+        'test_set_vars':        b'\x48',
+        'test_qc':              b'\x49',
+        'test_read_quant':      b'\x50',
+        'test_diff_exp':        b'\x51',
+        'test_all':             b'\x52',
+        'save':                 b'\x94', # saves server state
+        'load':                 b'\x95', # loads server state
+        'log':                  b'\x96', # force log
+        'update_orgs':           b'\x97', # force organism update
+        'start':                b'\x98', # start server
+        'stop':                 b'\x99'  # stop server
+    }
+
+    # Progress notes
+    # 0: This is a new project.
+    # 1: raw reads fetched
+    # 2: samples inferred.
+    # 3: project set.
+    # 4: project finalized.
+    # 5: QC added to queue
+    # 6: QC started
+    # 7: QC finished
+    # 8: Alignment added to queue
+    # 9: Alignment started
+    # 10: Alignment finished
+    # 11: Diff exp added to queue
+    # 12: Diff exp started
+    # 13: Diff exp finished.
+
+
 
     def rand_str(self, l):
         """
@@ -115,3 +184,9 @@ class Alaska():
         Saves object state to JSON.
         """
         pass
+
+    def __repr__(self):
+        """
+        String representation of this object.
+        """
+        return str(self.__dict__)

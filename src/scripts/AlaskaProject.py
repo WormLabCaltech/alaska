@@ -29,11 +29,12 @@ class AlaskaProject(Alaska):
         AlaskaProject constructor. Must receive id.
         """
         self.id = _id
-        self.dir = './{}/{}'.format(self.PROJECTS_DIR, _id)
-        self.qc_dir = '{}/{}'.format(self.dir, self.QC_DIR)
-        self.raw_dir = '{}/{}'.format(self.dir, self.RAW_DIR)
-        self.align_dir = '{}/{}'.format(self.dir, self.ALIGN_DIR)
-        self.diff_dir = '{}/{}'.format(self.dir, self.DIFF_DIR)
+        self.dir = '{}/{}'.format(Alaska.PROJECTS_DIR, _id)
+        self.qc_dir = '{}/{}'.format(self.dir, Alaska.QC_DIR)
+        self.raw_dir = '{}/{}'.format(self.dir, Alaska.RAW_DIR)
+        self.align_dir = '{}/{}'.format(self.dir, Alaska.ALIGN_DIR)
+        self.diff_dir = '{}/{}'.format(self.dir, Alaska.DIFF_DIR)
+        self.temp_dir = '{}/{}'.format(self.dir, Alaska.TEMP_DIR)
         self.jobs = [] # jobs related to this project
         self.raw_reads = {}
         self.chk_md5 = {} # md5 checksums
@@ -96,12 +97,20 @@ class AlaskaProject(Alaska):
 
         # walk through raw reads directory
         for root, dirs, files in os.walk(self.raw_dir):
+            # go straight to deepest directory
+            if not len(dirs) == 0:
+                continue
+
             reads = [] # list to contain read files for each directory
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
                 if fname.endswith(self.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
-                    reads.append(fname)
+                    # remove project folder from root
+                    split = root.split('/')
+                    split.remove(Alaska.PROJECTS_DIR)
+                    split.remove(self.id)
+                    reads.append('{}/{}'.format('/'.join(split), fname))
 
             # assign list to dictionary
             if not len(reads) == 0:
@@ -115,7 +124,7 @@ class AlaskaProject(Alaska):
         """
         Archive(fname).extractall(fname + '_extracted', auto_create_dir=True)
 
-    def infer_samples(self, f, temp=None):
+    def infer_samples(self, f, temp=None, md5=True):
         """
         Infers samples from raw reads.
         Assumes each sample is in separate folders.
@@ -126,7 +135,7 @@ class AlaskaProject(Alaska):
                 .format(self.id), Warning)
 
         # make sure that md5 checksums have been calculated
-        if len(self.chk_md5) == 0:
+        if md5 and len(self.chk_md5) == 0:
             raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
 
         # loop through each folder with sample
@@ -138,9 +147,13 @@ class AlaskaProject(Alaska):
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
-            for read, md5 in zip(reads, self.chk_md5[folder]):
-                sample.reads.append('{}/{}'.format(folder, read))
-                sample.chk_md5.append(md5)
+            if md5:
+                for read, md5 in zip(reads, self.chk_md5[folder]):
+                    sample.reads.append(read)
+                    sample.chk_md5.append(md5)
+            else:
+                for read in reads:
+                    sample.reads.append(read)
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
@@ -184,16 +197,16 @@ class AlaskaProject(Alaska):
         sh = BashWriter('qc', self.dir)
 
         # append commands to convert to BAM
-        write_bam(sh)
+        self.write_bam(sh)
 
-        # append commands to run rseqc
-        write_rseqc(sh)
-
-        # append commands to run fastqc
-        write_fastqc(sh)
-
-        # append commands to run multiqc
-        write_multiqc(sh)
+        # # append commands to run rseqc
+        # write_rseqc(sh)
+        #
+        # # append commands to run fastqc
+        # write_fastqc(sh)
+        #
+        # # append commands to run multiqc
+        # write_multiqc(sh)
 
         # write all commands to .sh file
         sh.write()
@@ -209,10 +222,12 @@ class AlaskaProject(Alaska):
         # TODO: implement
         sh.add('# convert raw reads to BAM')
         for _id, sample in self.samples.items():
-            bam = '{}/{}.bam'.format(self.QC_DIR, _id)
-            command = 'bowtie2 -x {} -U {} -p {} -S {} | samtools sort -O {} -@ {}'.format(
-                sample.idx,
-                ','.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads],
+            bam = '{}/{}/{}.bam'.format(self.id, self.QC_DIR, _id)
+            split = sample.organism.split('_')
+            bt_idx = '{}/{}_{}_{}'.format(self.IDX_DIR, split[0].lower(), split[1], sample.ref_ver)
+            command = 'bowtie2 -x {} -U {} --threads {} | samtools view -b | samtools sort -o {} -@ {}'.format(
+                bt_idx,
+                ','.join(['{}/{}/{}'.format(self.id, self.RAW_DIR, read) for read in sample.reads]),
                 self.THREADS,
                 bam,
                 self.THREADS
@@ -314,34 +329,34 @@ class AlaskaProject(Alaska):
         #                 raise Exception(msg)
 
 
-    def write_kallisto(self):
-        """
-        Writes bash script that will perform read quantification using Kallisto.
-        """
-        sh = BashWriter('kallisto', self.dir)
-        for _id, sample in self.samples.items():
-            sh.add('# align sample {}'.format(_id))
-            if sample.type == 1: # single-end
-                sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
-                        './{}/{}'.format(self.IDX_DIR, sample.idx),
-                        '{}/{}'.format(self.align_dir, _id),
-                        sample.bootstrap_n,
-                        self.THREADS,
-                        sample.length,
-                        sample.stdev,
-                        ' '.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads])
-                ))
-
-            elif sample.type == 2: #paired-end
-                sh.add('kallisto quant -i {} -o {} -b {} --threads={} {}\n'.format(
-                        './{}/{}'.format(self.IDX_DIR, sample.idx),
-                        '{}/{}'.format(self.align_dir, _id),
-                        sample.bootstrap_n,
-                        self.THREADS,
-                        ' '.join(['{}/{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
-                ))
-
-        sh.write()
+    # def write_kallisto(self):
+    #     """
+    #     Writes bash script that will perform read quantification using Kallisto.
+    #     """
+    #     sh = BashWriter('kallisto', self.dir)
+    #     for _id, sample in self.samples.items():
+    #         sh.add('# align sample {}'.format(_id))
+    #         if sample.type == 1: # single-end
+    #             sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
+    #                     './{}/{}'.format(self.IDX_DIR, sample.idx),
+    #                     '{}/{}'.format(self.align_dir, _id),
+    #                     sample.bootstrap_n,
+    #                     self.THREADS,
+    #                     sample.length,
+    #                     sample.stdev,
+    #                     ' '.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads])
+    #             ))
+    #
+    #         elif sample.type == 2: #paired-end
+    #             sh.add('kallisto quant -i {} -o {} -b {} --threads={} {}\n'.format(
+    #                     './{}/{}'.format(self.IDX_DIR, sample.idx),
+    #                     '{}/{}'.format(self.align_dir, _id),
+    #                     sample.bootstrap_n,
+    #                     self.THREADS,
+    #                     ' '.join(['{}/{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
+    #             ))
+    #
+    #     sh.write()
 
     def write_matrix(self):
         """
@@ -365,21 +380,21 @@ class AlaskaProject(Alaska):
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.dir), sep=' ', index=False)
 
-    def write_sleuth(self):
-        """
-        Writes bash script to run sleuth.
-        """
-        if self.design == 1: #single-factor
-            sh = BashWriter('sleuth', self.dir)
-            sh.add('sleuth.R -d {} -k {} -o {}\n'.format(
-                    self.dir,
-                    self.align_dir,
-                    self.diff_dir
-            ))
-        elif self.design == 2:
-            pass
-
-        sh.write()
+    # def write_sleuth(self):
+    #     """
+    #     Writes bash script to run sleuth.
+    #     """
+    #     if self.design == 1: #single-factor
+    #         sh = BashWriter('sleuth', self.dir)
+    #         sh.add('sleuth.R -d {} -k {} -o {}\n'.format(
+    #                 self.dir,
+    #                 self.align_dir,
+    #                 self.diff_dir
+    #         ))
+    #     elif self.design == 2:
+    #         pass
+    #
+    #     sh.write()
 
     def save(self, folder=None):
         """

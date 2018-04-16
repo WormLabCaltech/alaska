@@ -39,7 +39,9 @@ if(!file.exists(opt$d)) {
 
 #gene info for sleuth
 print('#Fetching bioMart info (1/2)')
-mart <- biomaRt::useMart(biomart = 'ensembl', dataset = 'celegans_gene_ensembl')
+mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
+                         biomart = 'metazoa_mart',
+                         dataset = 'celegans_eg_gene')
 print('#Fetching bioMart info (2/2)')
 t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id',
                                      'external_gene_name'), mart = mart)
@@ -60,7 +62,7 @@ output_dir <- opt$o
 
 #get ids
 print('#Reading analysis matrix')
-sample_id <- dir(file.path(kallisto))
+sample_id <- list.dirs(kallisto, recursive=FALSE, full.names=FALSE)
 kal_dirs <- sapply(sample_id, function(id) file.path(kallisto, id))
 s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
 print(sample_id)
@@ -123,8 +125,10 @@ for (genotype in genotypes) {
   }
 }
 
-sr <- sleuth_results(so, 'reduced:full', 'lrt')
-write.csv(sr, paste(output_dir, 'batch_lrt.csv', sep='/'))
+if (opt$batch) {
+  sr <- sleuth_results(so, 'reduced:full', 'lrt')
+  write.csv(sr, paste(output_dir, 'batch_lrt.csv', sep='/'))
+}
 
 if (opt$shiny) {
   print('#Starting shiny web server')

@@ -20,7 +20,8 @@ class AlaskaSample(Alaska):
         """
         self.id = _id
         self.type = 1 # 1: single-end, 2: pair-end
-        self.idx = '' # kallisto index for this sample
+        self.organism = ''
+        self.ref_ver = '' # kallisto index for this sample
         self.length = 0 # used for single-end
         self.stdev = 0 # used for single-end
         self.bootstrap_n = 100 # number of bootstraps to perform
@@ -34,7 +35,6 @@ class AlaskaSample(Alaska):
         self.meta['title'] = ''
         self.meta['contributors'] = []
         self.meta['source'] = ''
-        self.meta['organism'] = ''
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
