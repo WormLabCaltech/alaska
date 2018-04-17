@@ -1,0 +1,274 @@
+{
+    "id": "APj3hc4v",
+    "dir": "projects/APj3hc4v",
+    "qc_dir": "projects/APj3hc4v/1_qc",
+    "raw_dir": "projects/APj3hc4v/0_raw_reads",
+    "align_dir": "projects/APj3hc4v/2_alignment",
+    "diff_dir": "projects/APj3hc4v/3_diff_exp",
+    "temp_dir": "projects/APj3hc4v/_temp",
+    "jobs": [
+        "ain68j",
+        "4ajwos",
+        "h07j25",
+        "fxkgre"
+    ],
+    "raw_reads": {
+        "wt2": [
+            "0_raw_reads/wt2/18842_AGTTCC_L001_R1_002.fastq.gz",
+            "0_raw_reads/wt2/18842_AGTTCC_L002_R1_002.fastq.gz",
+            "0_raw_reads/wt2/18842_AGTTCC_L001_R1_003.fastq.gz",
+            "0_raw_reads/wt2/18842_AGTTCC_L001_R1_001.fastq.gz",
+            "0_raw_reads/wt2/18842_AGTTCC_L002_R1_001.fastq.gz",
+            "0_raw_reads/wt2/18842_AGTTCC_L002_R1_003.fastq.gz"
+        ],
+        "mt3": [
+            "0_raw_reads/mt3/18846_GTGAAA_L001_R1_001.fastq.gz",
+            "0_raw_reads/mt3/18846_GTGAAA_L002_R1_003.fastq.gz",
+            "0_raw_reads/mt3/18846_GTGAAA_L001_R1_002.fastq.gz",
+            "0_raw_reads/mt3/18846_GTGAAA_L002_R1_001.fastq.gz",
+            "0_raw_reads/mt3/18846_GTGAAA_L002_R1_002.fastq.gz",
+            "0_raw_reads/mt3/18846_GTGAAA_L001_R1_003.fastq.gz"
+        ],
+        "wt1": [
+            "0_raw_reads/wt1/18841_AGTCAA_L002_R1_003.fastq.gz",
+            "0_raw_reads/wt1/18841_AGTCAA_L001_R1_001.fastq.gz",
+            "0_raw_reads/wt1/18841_AGTCAA_L001_R1_003.fastq.gz",
+            "0_raw_reads/wt1/18841_AGTCAA_L002_R1_001.fastq.gz",
+            "0_raw_reads/wt1/18841_AGTCAA_L002_R1_002.fastq.gz",
+            "0_raw_reads/wt1/18841_AGTCAA_L001_R1_002.fastq.gz"
+        ],
+        "mt2": [
+            "0_raw_reads/mt2/18845_GTCCGC_L002_R1_001.fastq.gz",
+            "0_raw_reads/mt2/18845_GTCCGC_L002_R1_002.fastq.gz",
+            "0_raw_reads/mt2/18845_GTCCGC_L001_R1_001.fastq.gz",
+            "0_raw_reads/mt2/18845_GTCCGC_L001_R1_003.fastq.gz",
+            "0_raw_reads/mt2/18845_GTCCGC_L002_R1_003.fastq.gz",
+            "0_raw_reads/mt2/18845_GTCCGC_L001_R1_002.fastq.gz"
+        ],
+        "wt3": [
+            "0_raw_reads/wt3/18843_ATGTCA_L001_R1_002.fastq.gz",
+            "0_raw_reads/wt3/18843_ATGTCA_L002_R1_002.fastq.gz",
+            "0_raw_reads/wt3/18843_ATGTCA_L002_R1_001.fastq.gz",
+            "0_raw_reads/wt3/18843_ATGTCA_L002_R1_003.fastq.gz",
+            "0_raw_reads/wt3/18843_ATGTCA_L001_R1_003.fastq.gz",
+            "0_raw_reads/wt3/18843_ATGTCA_L001_R1_001.fastq.gz"
+        ],
+        "mt1": [
+            "0_raw_reads/mt1/18844_CCGTCC_L002_R1_001.fastq.gz",
+            "0_raw_reads/mt1/18844_CCGTCC_L001_R1_002.fastq.gz",
+            "0_raw_reads/mt1/18844_CCGTCC_L002_R1_002.fastq.gz",
+            "0_raw_reads/mt1/18844_CCGTCC_L002_R1_003.fastq.gz",
+            "0_raw_reads/mt1/18844_CCGTCC_L001_R1_003.fastq.gz",
+            "0_raw_reads/mt1/18844_CCGTCC_L001_R1_001.fastq.gz"
+        ]
+    },
+    "chk_md5": {},
+    "samples": {
+        "ASgyci7n": {
+            "id": "ASgyci7n",
+            "name": "wt2",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/wt2/18842_AGTTCC_L001_R1_002.fastq.gz",
+                "0_raw_reads/wt2/18842_AGTTCC_L002_R1_002.fastq.gz",
+                "0_raw_reads/wt2/18842_AGTTCC_L001_R1_003.fastq.gz",
+                "0_raw_reads/wt2/18842_AGTTCC_L001_R1_001.fastq.gz",
+                "0_raw_reads/wt2/18842_AGTTCC_L002_R1_001.fastq.gz",
+                "0_raw_reads/wt2/18842_AGTTCC_L002_R1_003.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "sample_title",
+                "contributors": ["sample_contrib_one", "sample_contrib_two"],
+                "source": "sample_source",
+                "organism": "sample_organism",
+                "chars": {"genotype": "mt", "phenotype": "WBPhenotype:0001"},
+                "description": "sample_description",
+                "datetime": "2017-11-27 13:31:59"
+            }
+        },
+        "AShu0wib": {
+            "id": "AShu0wib",
+            "name": "mt3",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/mt3/18846_GTGAAA_L001_R1_001.fastq.gz",
+                "0_raw_reads/mt3/18846_GTGAAA_L002_R1_003.fastq.gz",
+                "0_raw_reads/mt3/18846_GTGAAA_L001_R1_002.fastq.gz",
+                "0_raw_reads/mt3/18846_GTGAAA_L002_R1_001.fastq.gz",
+                "0_raw_reads/mt3/18846_GTGAAA_L002_R1_002.fastq.gz",
+                "0_raw_reads/mt3/18846_GTGAAA_L001_R1_003.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "chars": {
+                    "genotype": "mt"
+                },
+                "description": "",
+                "datetime": "2018-04-17 14:57:37"
+            }
+        },
+        "ASb8063z": {
+            "id": "ASb8063z",
+            "name": "wt1",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/wt1/18841_AGTCAA_L002_R1_003.fastq.gz",
+                "0_raw_reads/wt1/18841_AGTCAA_L001_R1_001.fastq.gz",
+                "0_raw_reads/wt1/18841_AGTCAA_L001_R1_003.fastq.gz",
+                "0_raw_reads/wt1/18841_AGTCAA_L002_R1_001.fastq.gz",
+                "0_raw_reads/wt1/18841_AGTCAA_L002_R1_002.fastq.gz",
+                "0_raw_reads/wt1/18841_AGTCAA_L001_R1_002.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "chars": {
+                    "genotype": "wt"
+                },
+                "description": "",
+                "datetime": "2018-04-17 14:57:37"
+            }
+        },
+        "AStkqpz9": {
+            "id": "AStkqpz9",
+            "name": "mt2",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/mt2/18845_GTCCGC_L002_R1_001.fastq.gz",
+                "0_raw_reads/mt2/18845_GTCCGC_L002_R1_002.fastq.gz",
+                "0_raw_reads/mt2/18845_GTCCGC_L001_R1_001.fastq.gz",
+                "0_raw_reads/mt2/18845_GTCCGC_L001_R1_003.fastq.gz",
+                "0_raw_reads/mt2/18845_GTCCGC_L002_R1_003.fastq.gz",
+                "0_raw_reads/mt2/18845_GTCCGC_L001_R1_002.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "chars": {
+                    "genotype": "mt"
+                },
+                "description": "",
+                "datetime": "2018-04-17 14:57:37"
+            }
+        },
+        "ASga23hd": {
+            "id": "ASga23hd",
+            "name": "wt3",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/wt3/18843_ATGTCA_L001_R1_002.fastq.gz",
+                "0_raw_reads/wt3/18843_ATGTCA_L002_R1_002.fastq.gz",
+                "0_raw_reads/wt3/18843_ATGTCA_L002_R1_001.fastq.gz",
+                "0_raw_reads/wt3/18843_ATGTCA_L002_R1_003.fastq.gz",
+                "0_raw_reads/wt3/18843_ATGTCA_L001_R1_003.fastq.gz",
+                "0_raw_reads/wt3/18843_ATGTCA_L001_R1_001.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "chars": {
+                    "genotype": "wt"
+                },
+                "description": "",
+                "datetime": "2018-04-17 14:57:37"
+            }
+        },
+        "AS4bmpyw": {
+            "id": "AS4bmpyw",
+            "name": "mt1",
+            "type": 1,
+            "organism": "caenorhabditis_elegans",
+            "ref_ver": "235",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 200,
+            "reads": [
+                "0_raw_reads/mt1/18844_CCGTCC_L002_R1_001.fastq.gz",
+                "0_raw_reads/mt1/18844_CCGTCC_L001_R1_002.fastq.gz",
+                "0_raw_reads/mt1/18844_CCGTCC_L002_R1_002.fastq.gz",
+                "0_raw_reads/mt1/18844_CCGTCC_L002_R1_003.fastq.gz",
+                "0_raw_reads/mt1/18844_CCGTCC_L001_R1_003.fastq.gz",
+                "0_raw_reads/mt1/18844_CCGTCC_L001_R1_001.fastq.gz"
+            ],
+            "chk_md5": [],
+            "projects": [
+                "APj3hc4v"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "chars": {
+                    "genotype": "mt"
+                },
+                "description": "",
+                "datetime": "2018-04-17 14:57:37"
+            }
+        }
+    },
+    "design": 1,
+    "ctrls": {
+        "ASgyci7n": "genotype",
+        "ASb8063z": "genotype",
+        "ASga23hd": "genotype"
+    },
+    "progress": 4,
+    "meta": {
+        "title": "Title",
+        "summary": "Summary",
+        "contributors": ["someone", "another"],
+        "SRA_center_code": "SRA CODE",
+        "email": "bob@example.com",
+        "datetime": "2017-11-27 13:31:24"
+    }
+}
