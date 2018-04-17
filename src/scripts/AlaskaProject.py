@@ -141,7 +141,7 @@ class AlaskaProject(Alaska):
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
-            sample = AlaskaSample(_id)
+            sample = AlaskaSample(_id, folder)
             if temp is not None: # if temporary variable is given
                 temp[_id] = sample
 
@@ -164,13 +164,13 @@ class AlaskaProject(Alaska):
         """
         # TODO: implement
 
-    def new_sample(self, _id):
-        """
-        Creates new sample with id.
-        """
-        sample = AlaskaSample(_id)
-        self.samples[_id] = sample
-
+    # def new_sample(self, _id):
+    #     """
+    #     Creates new sample with id.
+    #     """
+    #     sample = AlaskaSample(_id)
+    #     self.samples[_id] = sample
+    #
     def reset_samples(self):
         """
         Resets samples.
@@ -372,7 +372,7 @@ class AlaskaProject(Alaska):
                     ftr = 'a_{}'.format(sample.meta['chars'][ctrl_ftr])
                 else:
                     ftr = 'b_{}'.format(sample.meta['chars'][ctrl_ftr])
-                data.append([_id, ftr]) # TODO: batch??
+                data.append([sample.name, ftr]) # TODO: batch??
             # convert to dataframe and save with space as delimiter
             df = pd.DataFrame(data, columns=head)
         elif self.design == 2: # two-factor

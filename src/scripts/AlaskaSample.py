@@ -14,11 +14,12 @@ class AlaskaSample(Alaska):
     AlaskaSample. Class to wrap all sample data.
     """
 
-    def __init__(self, _id):
+    def __init__(self, _id, name=''):
         """
         AlaskaSample constructor. Must receive id.
         """
         self.id = _id
+        self.name = name
         self.type = 1 # 1: single-end, 2: pair-end
         self.organism = ''
         self.ref_ver = '' # kallisto index for this sample

@@ -69,7 +69,7 @@ def run_qc(proj, nthreads):
         args += ['-u', str(2 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
         # args += ['--verbose']
-        run_sys(args)
+        run_sys(args, prefix=_id)
 
 
     def samtools_sort(_id):
@@ -148,7 +148,7 @@ def run_qc(proj, nthreads):
 
     print('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
-        print(_id, end=' ')
+        print('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
     print()
 
     # run kallisto to get pseudobam
@@ -156,8 +156,9 @@ def run_qc(proj, nthreads):
 
     for _id in proj['samples']:
         # define necessary variables
+        name = proj['samples'][_id]['name']
         wdir = os.getcwd()
-        path = '1_qc/{}'.format(_id)
+        path = '1_qc/{}'.format(name)
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
         bed_path = '/alaska/root/organisms/{}/{}/{}/reference'.format(org[0], org[1], ver)
@@ -182,6 +183,7 @@ def run_qc(proj, nthreads):
 
         os.chdir(path)
         print('# changed working directory to {}'.format(path))
+        _id = name
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
@@ -215,11 +217,12 @@ def run_kallisto(proj, nthreads):
     """
     print('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
-        print(_id, end=' ')
+        print('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
     print()
 
     for _id in proj['samples']:
-        path = '2_alignment/{}'.format(_id)
+        name = proj['samples'][_id]['name']
+        path = '2_alignment/{}'.format(name)
 
         args = ['kallisto', 'quant']
 
@@ -256,6 +259,8 @@ def run_kallisto(proj, nthreads):
         # finally, add the sample reads
         for read in proj['samples'][_id]['reads']:
             args.append(read)
+
+        _id = name
 
         run_sys(args, prefix=_id)
 

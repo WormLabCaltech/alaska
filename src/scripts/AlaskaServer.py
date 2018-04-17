@@ -65,6 +65,7 @@ class AlaskaServer(Alaska):
         self.workers_n = 1 # number of workers
         self.queue = queue.Queue()  # job queue
         self.jobs = {} # dictionary of all jobs
+        self.stale_jobs = [] # list of stale jobs (these are skipped)
         self.current_job = None # job currently undergoing analysis
         self.org_update_id = None # container ID for organism update
 
@@ -239,8 +240,26 @@ class AlaskaServer(Alaska):
         """
         try:
             while self.RUNNING:
-                job = self.queue.get() # receive job from queue
-                                        # block if there is no job
+                # get non-stale job
+                while True:
+                    job = self.queue.get() # receive job from queue
+                                            # block if there is no job
+
+                    # skip if stale job
+                    if job.id in self.stale_jobs:
+                        self.out('INFO: skipping and removing stale job {}'.format(job.id))
+                        # remove job because it is stale
+                        path = '{}/{}/{}.json'.format(Alaska.ROOT_PATH, Alaska.JOBS_DIR, job.id)
+                        if os.path.isfile(path):
+                            os.remove(path)
+                        del self.jobs[job.id]
+                        self.stale_jobs.remove(job.id)
+                        # indicate the job is "done"
+                        self.queue.task_done()
+                        continue
+                    else:
+                        break
+
                 self.current_job = job
                 job_name = job.name
                 proj_id = job.proj_id
@@ -305,9 +324,24 @@ class AlaskaServer(Alaska):
                             self.out('ERROR: job {} has unrecognized name'.format(job.id))
                         self.out('INFO: finished job {}'.format(job.id))
                     else:
-                        proj.progress -= 2
                         self.out('ERROR: job {} / container {} terminated with non-zero exit code!'.format(job.id, job.docker.id))
+                        proj.progress -= 2
+                        # Add the job to stale list
+                        self.stale_jobs.append(job.id)
 
+                        # if error occurred during qc
+                        if job.name == 'qc':
+                            # find any other queued analyses and make them stale
+                            for ele in list(self.queue.queue):
+                                if ele.proj_id == proj_id and ele.name in ['kallisto', 'sleuth']:
+                                    self.stale_jobs.append(ele.id)
+
+                        # if error occurred during kallisto
+                        elif job.name == 'kallisto':
+                            # find any other queued analyses and make them stale
+                            for ele in list(self.queue.queue):
+                                if ele.proj_id == proj_id and ele.name in ['sleuth']:
+                                    self.stale_jobs.append(ele.id)
 
         except KeyboardInterrupt:
             self.out('INFO: stopping workers')
@@ -983,11 +1017,11 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def qc(self, _id, close=True):
+    def qc(self, _id, close=True, check=True):
         """
         Performs quality control on the given raw reads.
         """
-        if _id not in self.projects:
+        if check and _id not in self.projects:
             raise Exception('This project has not been finalized.')
         # Project we are interested in.
         proj = self.projects[_id]
@@ -1010,8 +1044,8 @@ class AlaskaServer(Alaska):
 
         # make directories
         self.broadcast(_id, '{}: making directories for quality control'.format(_id))
-        for sample in proj.samples:
-            f = '{}/{}'.format(proj.qc_dir, sample)
+        for __id, sample in proj.samples.items():
+            f = '{}/{}'.format(proj.qc_dir, sample.name)
             os.makedirs(f, exist_ok=True)
             self.broadcast(_id, '{}: {} created'.format(_id, f))
 
@@ -1060,12 +1094,12 @@ class AlaskaServer(Alaska):
             self.close(_id)
 
 
-    def read_quant(self, _id, close=True):
+    def read_quant(self, _id, close=True, check=True):
         """
         Checks if another analysis is running,
         then performs read quantification.
         """
-        if self.projects[_id].progress < 7:
+        if check and self.projects[_id].progress < 7:
             raise Exception('{}: Quality control has not been performed.'
                             .format(_id))
         # The project we are interested in.
@@ -1087,8 +1121,8 @@ class AlaskaServer(Alaska):
 
         # make directories
         self.broadcast(_id, '{}: making directories for read alignment'.format(_id))
-        for sample in proj.samples:
-            f = '{}/{}'.format(proj.align_dir, sample)
+        for __id, sample in proj.samples.items():
+            f = '{}/{}'.format(proj.align_dir, sample.name)
             os.makedirs(f, exist_ok=True)
             self.broadcast(_id, '{}: {} created'.format(_id, f))
 
@@ -1136,11 +1170,11 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def diff_exp(self, _id, close=True):
+    def diff_exp(self, _id, close=True, check=True):
         """
         Perform differential expression analysis.
         """
-        if self.projects[_id].progress < 10:
+        if check and self.projects[_id].progress < 10:
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
         # The project we are interested in.
@@ -1208,6 +1242,18 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+    def do_all(_id, close=True):
+        """
+        Perform all three analyses.
+        """
+        self.broadcast(_id, '{}: performing all analyses'.format(_id))
+        if close:
+            self.close(_id)
+
+        self.qc(_id, close=False)
+        self.read_quant(_id, close=False, check=False)
+        self.diff_exp(_id, close=False, check=False)
+
     def copy_script(self, _id, script):
         """
         Copies specified script (and overwrites if it already exists) to
@@ -1220,7 +1266,6 @@ class AlaskaServer(Alaska):
         # if it does, remove
         path = '{}/{}'.format(proj.dir, script)
         if os.path.isfile(path):
-            print('HERE!')
             os.remove(path)
 
         # then, copy

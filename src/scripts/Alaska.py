@@ -93,7 +93,8 @@ class Alaska():
         'qc':                   b'\x09',
         'read_quant':           b'\x10', # perform read quantification
         'diff_exp':             b'\x11', # perform differential expression
-        'proj_status':          b'\x12', # check project status
+        'do_all':               b'\x12', # perform qc, read quant, and diff exp
+        'proj_status':          b'\x13', # check project status
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
