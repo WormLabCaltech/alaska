@@ -1030,7 +1030,7 @@ class AlaskaServer(Alaska):
             src: {'bind': tgt, 'mode': 'rw'},
         }
 
-        cmd = 'python3 run_analysis.py --threads {}'.format(Alaska.NTHREADS)
+        cmd = 'python3 run_analysis.py qc --threads {}'.format(Alaska.NTHREADS)
         args = {
             'working_dir': wdir,
             'volumes': volumes,
@@ -1380,11 +1380,7 @@ class AlaskaServer(Alaska):
         self.respond(_id, '{}: check server console for more details'.format(_id))
         self.close(_id)
 
-        self.test_set_vars(_id, close=False)
-        self.test_qc(_id, close=False)
-        self.test_read_quant(_id, close=False)
         self.test_diff_exp(_id, close=False)
-
 
     def save(self, _id=None):
         """
