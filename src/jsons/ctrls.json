@@ -1,0 +1,243 @@
+{
+    "id": "APpod74c",
+    "dir": "./projects/APpod74c",
+    "raw_dir": "./projects/APpod74c/0_raw_reads",
+    "align_dir": "./projects/APpod74c/1_alignment",
+    "diff_dir": "./projects/APpod74c/2_diff_exp",
+    "jobs": [
+        "7fr6km",
+        "y4gs58"
+    ],
+    "raw_reads": {
+        "mt1": [
+            "18844_CCGTCC_L001_R1_001aa.fastq.gz",
+            "18844_CCGTCC_L001_R1_002aa.fastq.gz",
+            "18844_CCGTCC_L001_R1_003aa.fastq.gz",
+            "18844_CCGTCC_L002_R1_001aa.fastq.gz",
+            "18844_CCGTCC_L002_R1_002aa.fastq.gz",
+            "18844_CCGTCC_L002_R1_003aa.fastq.gz"
+        ],
+        "mt2": [
+            "18845_GTCCGC_L001_R1_001aa.fastq.gz",
+            "18845_GTCCGC_L001_R1_002aa.fastq.gz",
+            "18845_GTCCGC_L001_R1_003aa.fastq.gz",
+            "18845_GTCCGC_L002_R1_001aa.fastq.gz",
+            "18845_GTCCGC_L002_R1_002aa.fastq.gz",
+            "18845_GTCCGC_L002_R1_003aa.fastq.gz"
+        ],
+        "wt1": [
+            "18841_AGTCAA_L001_R1_001aa.fastq.gz",
+            "18841_AGTCAA_L001_R1_002aa.fastq.gz",
+            "18841_AGTCAA_L001_R1_003aa.fastq.gz",
+            "18841_AGTCAA_L002_R1_001aa.fastq.gz",
+            "18841_AGTCAA_L002_R1_002aa.fastq.gz",
+            "18841_AGTCAA_L002_R1_003aa.fastq.gz"
+        ],
+        "wt2": [
+            "18842_AGTTCC_L001_R1_001aa.fastq.gz",
+            "18842_AGTTCC_L001_R1_002aa.fastq.gz",
+            "18842_AGTTCC_L001_R1_003aa.fastq.gz",
+            "18842_AGTTCC_L002_R1_001aa.fastq.gz",
+            "18842_AGTTCC_L002_R1_002aa.fastq.gz",
+            "18842_AGTTCC_L002_R1_003aa.fastq.gz"
+        ]
+    },
+    "chk_md5": {
+        "mt1": [
+            "d4eb3295777b6556988f772158f6eaee",
+            "be800e0e845f528aef13a2427db9c28c",
+            "71b355c1d54ac7c15513fca4a5d09dcc",
+            "6d13e0c1844339fcb73f6efd321435ba",
+            "fb42a29875358fda7bc9a3fbb1b26db6",
+            "006e33f74303d076b0e0dcb6d0563352"
+        ],
+        "mt2": [
+            "2cd48438b23f51a2807dd8173d022dd6",
+            "6356c494452e44696c66436bd437f473",
+            "9797c44857a9ed9b9540d0fd87bbfdf2",
+            "aacca6b59e419e9814985aa44a0c76bb",
+            "9395e721461d3bb91a9945bfe77c17d1",
+            "63ad9c405c181ea74bdaf78ec85f7ed6"
+        ],
+        "wt1": [
+            "1e84587cf4d07cf3f9945656765f50aa",
+            "34f2ee199d90250019cde457f7f3af3b",
+            "cb9a4a1d4bd792d29a0d6d73834d83a4",
+            "2d9b1c464bfabcea7fd021f0e07c60f6",
+            "71b3aeb73a909292b7a65a9f2eea6131",
+            "e7403dd5536d9acf71065fc5ef9c89b1"
+        ],
+        "wt2": [
+            "4467221cbd918be2c6799d3ecbd73113",
+            "3679701aab7ae4ffe55ad8203813b284",
+            "32eedc6587834a18005fa31984910217",
+            "11b0a8f6c0e1e78907ef5d9c1513d93a",
+            "811bf0c7dd01e13792285d4e82a57637",
+            "dc0b307190a6edabafe890e90c811aec"
+        ]
+    },
+    "samples": {
+        "AS9z5wl2": {
+            "id": "AS9z5wl2",
+            "type": 1,
+            "idx": "c_elegans.PRJNA13758.WS261.CDS_transcripts.idx",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 10,
+            "reads": [
+                "mt1/18844_CCGTCC_L001_R1_001aa.fastq.gz",
+                "mt1/18844_CCGTCC_L001_R1_002aa.fastq.gz",
+                "mt1/18844_CCGTCC_L001_R1_003aa.fastq.gz",
+                "mt1/18844_CCGTCC_L002_R1_001aa.fastq.gz",
+                "mt1/18844_CCGTCC_L002_R1_002aa.fastq.gz",
+                "mt1/18844_CCGTCC_L002_R1_003aa.fastq.gz"
+            ],
+            "chk_md5": [
+                "d4eb3295777b6556988f772158f6eaee",
+                "be800e0e845f528aef13a2427db9c28c",
+                "71b355c1d54ac7c15513fca4a5d09dcc",
+                "6d13e0c1844339fcb73f6efd321435ba",
+                "fb42a29875358fda7bc9a3fbb1b26db6",
+                "006e33f74303d076b0e0dcb6d0563352"
+            ],
+            "projects": [
+                "APpod74c"
+            ],
+            "meta": {
+                "title": "sample_title",
+                "contributors": ["sample_contrib_one", "sample_contrib_two"],
+                "source": "sample_source",
+                "organism": "sample_organism",
+                "chars": {"genotype": "mt", "phenotype": "WBPhenotype:0001"},
+                "description": "sample_description",
+                "datetime": "2017-11-27 13:31:59"
+            }
+        },
+        "ASjukmbp": {
+            "id": "ASjukmbp",
+            "type": 1,
+            "idx": "c_elegans.PRJNA13758.WS261.CDS_transcripts.idx",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 10,
+            "reads": [
+                "mt2/18845_GTCCGC_L001_R1_001aa.fastq.gz",
+                "mt2/18845_GTCCGC_L001_R1_002aa.fastq.gz",
+                "mt2/18845_GTCCGC_L001_R1_003aa.fastq.gz",
+                "mt2/18845_GTCCGC_L002_R1_001aa.fastq.gz",
+                "mt2/18845_GTCCGC_L002_R1_002aa.fastq.gz",
+                "mt2/18845_GTCCGC_L002_R1_003aa.fastq.gz"
+            ],
+            "chk_md5": [
+                "2cd48438b23f51a2807dd8173d022dd6",
+                "6356c494452e44696c66436bd437f473",
+                "9797c44857a9ed9b9540d0fd87bbfdf2",
+                "aacca6b59e419e9814985aa44a0c76bb",
+                "9395e721461d3bb91a9945bfe77c17d1",
+                "63ad9c405c181ea74bdaf78ec85f7ed6"
+            ],
+            "projects": [
+                "APpod74c"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "organism": "",
+                "chars": {
+                    "genotype": "mt"
+                },
+                "description": "",
+                "datetime": "2017-12-06 22:09:11"
+            }
+        },
+        "ASn5edcf": {
+            "id": "ASn5edcf",
+            "type": 1,
+            "idx": "c_elegans.PRJNA13758.WS261.CDS_transcripts.idx",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 10,
+            "reads": [
+                "wt1/18841_AGTCAA_L001_R1_001aa.fastq.gz",
+                "wt1/18841_AGTCAA_L001_R1_002aa.fastq.gz",
+                "wt1/18841_AGTCAA_L001_R1_003aa.fastq.gz",
+                "wt1/18841_AGTCAA_L002_R1_001aa.fastq.gz",
+                "wt1/18841_AGTCAA_L002_R1_002aa.fastq.gz",
+                "wt1/18841_AGTCAA_L002_R1_003aa.fastq.gz"
+            ],
+            "chk_md5": [
+                "1e84587cf4d07cf3f9945656765f50aa",
+                "34f2ee199d90250019cde457f7f3af3b",
+                "cb9a4a1d4bd792d29a0d6d73834d83a4",
+                "2d9b1c464bfabcea7fd021f0e07c60f6",
+                "71b3aeb73a909292b7a65a9f2eea6131",
+                "e7403dd5536d9acf71065fc5ef9c89b1"
+            ],
+            "projects": [
+                "APpod74c"
+            ],
+            "meta": {
+                "title": "",
+                "contributors": [],
+                "source": "",
+                "organism": "",
+                "chars": {
+                    "genotype": "wt"
+                },
+                "description": "",
+                "datetime": "2017-12-06 22:09:11"
+            }
+        },
+        "AS92enmu": {
+            "id": "AS92enmu",
+            "type": 1,
+            "idx": "c_elegans.PRJNA13758.WS261.CDS_transcripts.idx",
+            "length": 200,
+            "stdev": 60,
+            "bootstrap_n": 10,
+            "reads": [
+                "wt2/18842_AGTTCC_L001_R1_001aa.fastq.gz",
+                "wt2/18842_AGTTCC_L001_R1_002aa.fastq.gz",
+                "wt2/18842_AGTTCC_L001_R1_003aa.fastq.gz",
+                "wt2/18842_AGTTCC_L002_R1_001aa.fastq.gz",
+                "wt2/18842_AGTTCC_L002_R1_002aa.fastq.gz",
+                "wt2/18842_AGTTCC_L002_R1_003aa.fastq.gz"
+            ],
+            "chk_md5": [
+                "4467221cbd918be2c6799d3ecbd73113",
+                "3679701aab7ae4ffe55ad8203813b284",
+                "32eedc6587834a18005fa31984910217",
+                "11b0a8f6c0e1e78907ef5d9c1513d93a",
+                "811bf0c7dd01e13792285d4e82a57637",
+                "dc0b307190a6edabafe890e90c811aec"
+            ],
+            "projects": [
+                "APpod74c"
+            ],
+            "meta": {
+                "title": "enmu",
+                "contributors": ["someone", "another"],
+                "source": "a source",
+                "organism": "elegans",
+                "chars": {"genotype": "mt", "phenotype": "WBPhenotype:0001"},
+                "description": "a descript",
+                "datetime": "2017-12-06 22:09:11"
+            }
+        }
+    },
+    "design": 1,
+    "ctrls": {
+        "ASn5edcf": "genotype",
+        "AS92enmu": "genotype"
+    },
+    "progress": 6,
+    "meta": {
+        "title": "Title",
+        "summary": "Summary",
+        "contributors": ["someone", "another"],
+        "SRA_center_code": "SRA CODE",
+        "email": "bob@example.com",
+        "datetime": "2017-11-27 13:31:24"
+    }
+}
