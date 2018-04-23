@@ -723,26 +723,23 @@ class AlaskaServer(Alaska):
         __id = self.rand_str_except(Alaska.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
         self.projects_temp[__id] = AlaskaProject(__id)
-        self.broadcast(_id, '{}: creating'.format(__id))
 
         # make directories
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.TEMP_DIR)
         os.makedirs(f)
-        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.RAW_DIR)
         os.makedirs(f)
-        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.QC_DIR)
         os.makedirs(f)
-        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.ALIGN_DIR)
         os.makedirs(f)
-        self.broadcast(_id, '{}: {} created'.format(__id, f))
+        self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.DIFF_DIR)
         os.makedirs(f)
-        self.broadcast(_id, '{}: {} created'.format(__id, f))
-
-        self.broadcast(_id, '{}: created successfully'.format(__id))
+        self.broadcast(_id, '{}: new project created'.format(__id))
 
         if close:
             self.close(_id)
@@ -894,7 +891,7 @@ class AlaskaServer(Alaska):
 
         self.get_raw_reads(_id, close=close, md5=md5) # make sure raw reads have been extracted
 
-        self.broadcast(_id, '{}: infering samples from raw reads'.format(_id))
+        self.broadcast(_id, '{}: inferring samples from raw reads'.format(_id))
 
         # function to get new sample ids
         ids = lambda : list(self.samples.keys()) + list(self.samples_temp.keys())
@@ -1213,11 +1210,15 @@ class AlaskaServer(Alaska):
         volumes = {
             src: {'bind': tgt, 'mode': 'rw'},
         }
+        ports = {
+            42427: ('127.0.0.1': 80)
+        }
         cmd = 'python3 run_analysis.py sleuth --threads {}'.format(Alaska.NTHREADS)
         args = {
             'working_dir': wdir,
             'volumes': volumes,
             'cpuset_cpus': self.CPUS,
+            'ports': ports
         }
         ### end job variables
 
@@ -1242,7 +1243,7 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def do_all(_id, close=True):
+    def do_all(self, _id, close=True):
         """
         Perform all three analyses.
         """
@@ -1425,7 +1426,8 @@ class AlaskaServer(Alaska):
         self.respond(_id, '{}: check server console for more details'.format(_id))
         self.close(_id)
 
-        self.test_diff_exp(_id, close=False)
+        self.test_set_vars(_id, close=False)
+        self.do_all(_id, close=False)
 
     def save(self, _id=None):
         """
