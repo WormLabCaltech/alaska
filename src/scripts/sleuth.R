@@ -21,7 +21,6 @@ option_list <- list(
   make_option(c('-s', '--shiny'), action='store_true', default=FALSE,
               help='Command to open shiny console')
 )
-# TODO: short args must only be one letter long?
 
 opt = parse_args(OptionParser(option_list=option_list))
 
@@ -65,19 +64,19 @@ print('#Reading analysis matrix')
 sample_id <- list.dirs(kallisto, recursive=FALSE, full.names=FALSE)
 kal_dirs <- sapply(sample_id, function(id) file.path(kallisto, id))
 s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
-print(sample_id)
-print(kal_dirs)
-print(s2c)
+# print(sample_id)
+# print(kal_dirs)
+# print(s2c)
 
 # Unique, sorted genotype list
 genotypes <- sort(unique(s2c[, 'condition']))
-print(genotypes)
+# print(genotypes)
 
 print('#Reading Kallisto results')
 s2c <- dplyr::select(s2c, sample= sample, condition)
-print(s2c)
+# print(s2c)
 s2c <- dplyr::arrange(s2c, sample)
-print(s2c)
+# print(s2c)
 s2c <- dplyr::mutate(s2c, path = kal_dirs)
 print(s2c)
 # so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE)
@@ -88,8 +87,11 @@ so <- sleuth_prep(s2c, ~ condition, target_mapping= t2g)
 so <- sleuth_fit(so, ~ condition, fit_name = 'full')
 so <- sleuth_fit(so, ~1, 'reduced')
 so <- sleuth_lrt(so, 'reduced', 'full')
-print(so)
+# print(so)
 #print(s2c)
+
+models(so)
+
 
 #prepend and make object, state maximum model here
 #so <- sleuth_prep(s2c, ~ genotype, target_mapping= t2g)
@@ -117,7 +119,7 @@ for (genotype in genotypes) {
     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
 
     # 'betasX.csv'
-    output_file <- paste(substring(genotype, 2), '.csv', sep='')
+    output_file <- paste(substring(genotype, 3), '.csv', sep='')
 
     print(paste('#Writing ', genotype, 'results to', output_file, progress))
     results_table <- sleuth_results(so, paste('condition', genotype, sep=''), 'full', test_type='wt')
@@ -130,7 +132,11 @@ if (opt$batch) {
   write.csv(sr, paste(output_dir, 'batch_lrt.csv', sep='/'))
 }
 
+so_file = paste(output_dir, 'so.rds', sep='/')
+print(paste('#Writing sleuth object to', so_file))
+saveRDS(so, file=so_file)
+
 if (opt$shiny) {
   print('#Starting shiny web server')
-  sleuth_live(so)
+  sleuth_live(so, port=42427)
 }
