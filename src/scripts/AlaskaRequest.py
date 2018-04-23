@@ -36,16 +36,16 @@ class AlaskaRequest(Alaska):
         m = Alaska.CODES[msg]
 
         # TODO: how to tell if server is online?
-        print('Connecting to server on port {}'.format(self.PORT))
+        print('INFO: Connecting to server on port {}'.format(self.PORT))
         self.SOCKET.setsockopt(zmq.IDENTITY, _id)
         self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
 
         if self.check():
             self.SOCKET.send(m)
-            print('Connected successfully')
+            print('INFO: Connected successfully')
             self.listen()
         else:
-            print('Error connecting to server')
+            print('ERROR: Error connecting to server')
             self.SOCKET.close()
             self.CONTEXT.term()
             sys.exit(1)
@@ -73,7 +73,8 @@ class AlaskaRequest(Alaska):
         """
         Listen for responses.
         """
-        print('Waiting for response')
+        print('INFO: Waiting for response')
+        print('-' * 30)
         while True:
             response = self.SOCKET.recv_string()
             print(response)
@@ -108,6 +109,6 @@ if __name__ == '__main__':
         print('ID: {}'.format(args.id))
         request.id = args.id
 
-    print('Creating {} request'.format(args.action))
+    print('INFO: Creating {} request'.format(args.action))
     # gate for actions
     request.send(args.action)
