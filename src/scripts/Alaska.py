@@ -28,6 +28,7 @@ class Alaska():
     IDX_SCRIPT = 'build_index.py'
     ANL_SCRIPT = 'run_analysis.py'
     SLE_SCRIPT = 'sleuth.R'
+    SHI_SCRIPT = 'open_sleuth_server.R'
     JOBS_DIR = 'jobs' # jobs directory
     ORGS_DIR = 'organisms'
     REF_DIR = 'reference'
@@ -95,6 +96,7 @@ class Alaska():
         'diff_exp':             b'\x11', # perform differential expression
         'do_all':               b'\x12', # perform qc, read quant, and diff exp
         'proj_status':          b'\x13', # check project status
+        'open_sleuth_server':   b'\x13',
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
@@ -124,6 +126,7 @@ class Alaska():
     # 11: Diff exp added to queue
     # 12: Diff exp started
     # 13: Diff exp finished.
+    # 14: Server opened
 
 
 

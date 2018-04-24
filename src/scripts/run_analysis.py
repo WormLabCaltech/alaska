@@ -274,6 +274,7 @@ def run_sleuth(proj):
     args += ['-d', '.']
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
+    # args += ['--shiny']
 
     run_sys(args)
 

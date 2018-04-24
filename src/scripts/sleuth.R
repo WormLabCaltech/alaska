@@ -139,4 +139,5 @@ saveRDS(so, file=so_file)
 if (opt$shiny) {
   print('#Starting shiny web server')
   sleuth_live(so, port=42427)
+  sleuth_live(so, options=list(port=42427, launch.browser=FALSE, host='0.0.0.0'))
 }

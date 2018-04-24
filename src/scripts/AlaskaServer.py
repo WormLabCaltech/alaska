@@ -69,6 +69,8 @@ class AlaskaServer(Alaska):
         self.current_job = None # job currently undergoing analysis
         self.org_update_id = None # container ID for organism update
 
+        self.sleuth_servers = {} # dict of port:container_id pairs
+
         self.idx_conts = []
         self.idx_interval = 600 # index update interval (in seconds)
         self.log_pool = [] # pool of logs to be flushed
@@ -207,6 +209,11 @@ class AlaskaServer(Alaska):
             #     self.out('INFO: terminating container {}'.format(cont.short_id))
             #     cont.remove(force=True)
 
+            for port, cont_id in self.sleuth_servers.items():
+                self.out('INFO: sleuth shiny app container {} is running...terminating'.format(cont_id))
+                self.DOCKER.containers.get(cont_id).remove(force=True)
+                self.out('INFO: termination successful')
+
             # stop running jobs
             if self.current_job is not None:
                 cont_id = self.current_job.docker.id
@@ -231,8 +238,9 @@ class AlaskaServer(Alaska):
             os.remove('../_running')
 
             sys.exit(code)
-        except:
-            pass
+        except Exception as e:
+            print('An error occured while stopping the server!')
+            print(e)
 
     def worker(self):
         """
@@ -1210,15 +1218,11 @@ class AlaskaServer(Alaska):
         volumes = {
             src: {'bind': tgt, 'mode': 'rw'},
         }
-        ports = {
-            42427: ('127.0.0.1': 80)
-        }
         cmd = 'python3 run_analysis.py sleuth --threads {}'.format(Alaska.NTHREADS)
         args = {
             'working_dir': wdir,
             'volumes': volumes,
             'cpuset_cpus': self.CPUS,
-            'ports': ports
         }
         ### end job variables
 
@@ -1255,7 +1259,48 @@ class AlaskaServer(Alaska):
         self.read_quant(_id, close=False, check=False)
         self.diff_exp(_id, close=False, check=False)
 
-    def copy_script(self, _id, script):
+    def open_sleuth_server(self, _id, close=True):
+        """
+        Open sleuth shiny app.
+        """
+        proj = self.projects[_id]
+
+        if proj.progress < 13:
+            raise Exception('{}: Sleuth not yet run'.format(_id))
+
+        self.broadcast(_id, '{}: starting Sleuth shiny app'.format(_id))
+
+        # First, copy the script that opens the server.
+        self.copy_script(_id, Alaska.SHI_SCRIPT, dst=proj.diff_dir)
+
+        # source and target mouting points
+        src = Alaska.DOCKER_DATA_VOLUME
+        tgt = Alaska.ROOT_PATH
+        wdir = '{}/{}'.format(Alaska.ROOT_PATH, proj.diff_dir)
+        # volumes to mount to container
+        volumes = {
+            src: {'bind': tgt, 'mode': 'rw'},
+        }
+        ports = {
+            42427: 42427
+        }
+        cmd = 'Rscript {}'.format(Alaska.SHI_SCRIPT)
+        ###############################
+
+        cont = AlaskaDocker(Alaska.DOCKER_SLEUTH_TAG)
+        cont.run(cmd, working_dir=wdir,
+                          volumes=volumes,
+                          ports=ports)
+        cont_id = cont.id
+        self.out('INFO: shiny app container started with id {}'.format(cont_id))
+        self.sleuth_servers[42427] = cont_id
+
+        self.broadcast(_id, '{}: server opened on port 42427'.format(_id))
+
+        if close:
+            self.close(_id)
+
+    def copy_script(self, _id, script, dst=None):
         """
         Copies specified script (and overwrites if it already exists) to
         project.
@@ -1263,14 +1308,17 @@ class AlaskaServer(Alaska):
         # retrieve project
         proj = self.projects[_id]
 
+        if dst is None:
+            path = '{}/{}'.format(proj.dir, script)
+        else:
+            path = '{}/{}'.format(dst, script)
         # check if the file already exists
         # if it does, remove
-        path = '{}/{}'.format(proj.dir, script)
         if os.path.isfile(path):
             os.remove(path)
 
         # then, copy
-        shutil.copy2('{}/{}'.format(Alaska.SCRIPT_DIR, script), proj.dir)
+        shutil.copy2('{}/{}'.format(Alaska.SCRIPT_DIR, script), path)
 
     def proj_status(self, _id, close=True):
         """
@@ -1459,6 +1507,7 @@ class AlaskaServer(Alaska):
         _jobs = self.jobs
         _organisms = self.organisms
         _current_job = self.current_job
+        _sleuth_servers = self.sleuth_servers
         _idx_interval = self.idx_interval
         _PORT = self.PORT
         _CONTEXT = self.CONTEXT
@@ -1479,6 +1528,7 @@ class AlaskaServer(Alaska):
                 self.organisms[genus][species] = list(obj_2.refs.keys())
         if self.current_job is not None:
             self.current_job = self.current_job.id
+        del self.sleuth_servers
         del self.idx_interval
         del self.PORT
         del self.CONTEXT
@@ -1500,6 +1550,7 @@ class AlaskaServer(Alaska):
         self.jobs = _jobs
         self.organisms = _organisms
         self.current_job = _current_job
+        self.sleuth_servers = _sleuth_servers
         self.idx_interval = _idx_interval
         self.PORT = _PORT
         self.CONTEXT = _CONTEXT

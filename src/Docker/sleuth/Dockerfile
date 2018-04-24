@@ -27,3 +27,5 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD5
 COPY install_sleuth.R ./sleuth/install_sleuth.R
 RUN Rscript ./sleuth/install_sleuth.R
 RUN rm /sleuth/install_sleuth.R
+
+EXPOSE 42427
