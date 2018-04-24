@@ -1,11 +1,18 @@
-"""
-AlaskaSample.py
+"""Contains the AlaskaSample class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-This file contains the class AlaskaSample, which contains all sample metadata.
-Managed by AlaskaProject.
+Contains all information on a given sample. AlaskaProjects hold multiple
+AlaskaSample objects, one per sample.
 """
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
+
 from Alaska import Alaska
 import datetime as dt
 
@@ -40,32 +47,3 @@ class AlaskaSample(Alaska):
         self.meta['description'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    def reset(self):
-        """
-        Resets sample by calling constructor.
-        """
-        self.__init__()
-
-    # def set_metadata(self):
-    #     """
-    #     Sets sample metadata by reading JSON.
-    #     """
-    #     with open('{}/meta.json'.format(self.dir), 'r') as f:
-    #         loaded = json.load(f)
-    #     for key, item in loaded.items():
-    #         self.meta[key] = item
-
-
-    # def save(self):
-    #     """
-    #     Save sample to JSON.
-    #     """
-    #     path = '{}/{}'.format(self.dir, self.RAW_DIR)
-    #     with open('{}/{}.json'.format(path, self.id), 'w') as f:
-    #         json.dump(self.__dict__, f, default=self.encode_json, indent=4)
-
-    # def load(self):
-    #     """
-    #     Load sample from JSON.
-    #     """
-    #     pass

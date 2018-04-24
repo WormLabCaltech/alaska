@@ -1,11 +1,22 @@
-"""
-AlaskaJob.py
+"""Contains the AlaskaJob class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-This file contains the class AlaskaJob, which contains job information.
-Managed by Alaskaserver.
+Computationally-intense processes are managed by creating AlaskaJob objects.
+The AlaskaJob class serves as an intermediary between the AlaskaServer and
+AlaskaDocker. Specifically, this class provides abstractions that simplify
+spawning containers, reading their output and terminating them. Quality
+control, read alignment and differential expression analysis are done by using
+this class.
 """
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
+
 import io
 import contextlib as cl
 import json
@@ -64,7 +75,7 @@ class AlaskaJob(Alaska):
         Saves job information to JSON.
         """
         if folder is None: # if folder not given, save to project root
-            path = self.JOBS_DIR
+            path = Alaska.JOBS_DIR
         else:
             path = folder
 
@@ -76,7 +87,7 @@ class AlaskaJob(Alaska):
         Load job from JSON.
         """
         if folder is None:
-            path = self.JOBS_DIR
+            path = Alaska.JOBS_DIR
         else:
             path = folder
 

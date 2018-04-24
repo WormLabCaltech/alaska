@@ -1,12 +1,18 @@
-"""
-AlaskaRequest.py
+"""Contains the AlaskaRequest class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-This script is to be called exclusively from the web portal (via HTML/PHP request).
-Bridge between browser and server.
+The AlaskaRequest class is used to run commands on the AlaskaServer.
+When run from the command line, this script creates an AlaskaRequest and sends
+that to the AlaskaServer.
 """
 
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
 import zmq
 import sys
 from Alaska import Alaska

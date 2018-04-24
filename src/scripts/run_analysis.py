@@ -1,7 +1,17 @@
-# run_analysis.py
-# This file is intended to be copied into the project folder.
-# It runs the appropriate analysis on all samples in a directory-independent manner.
-# (i.e. Does not require absolute path.)
+"""Script to run various analyses.
+
+This script is used by AlaskaServer to perform quality control, read
+alignment/quantification and differential expression analysis.
+"""
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
 
 import os
 import sys

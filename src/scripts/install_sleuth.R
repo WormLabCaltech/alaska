@@ -1,3 +1,7 @@
+"""Script to install all R dependencis for Sleuth.
+
+"""
+
 # install dependencies
 install.packages("stringr", repos="http://cran.us.r-project.org")
 install.packages("htmltools", repos="http://cran.us.r-project.org")

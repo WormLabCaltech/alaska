@@ -1,10 +1,18 @@
-"""
-Alaska.py
+"""Contains the Alaska class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-This file contains the class Alaska, which is inherited by all Alaska scripts.
+The Alaska class is inherited by all AlaskaX classes. The class contains
+all shared variables among the Alaska family.
 """
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
+
 import os
 import random
 import datetime as dt
@@ -95,23 +103,29 @@ class Alaska():
         'read_quant':           b'\x10', # perform read quantification
         'diff_exp':             b'\x11', # perform differential expression
         'do_all':               b'\x12', # perform qc, read quant, and diff exp
-        'proj_status':          b'\x13', # check project status
         'open_sleuth_server':   b'\x13',
+        'proj_status':          b'\x14', # check project status
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
         'test_read_quant':      b'\x50',
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
+        'get_status':           b'\x93',
         'save':                 b'\x94', # saves server state
         'load':                 b'\x95', # loads server state
         'log':                  b'\x96', # force log
-        'update_orgs':           b'\x97', # force organism update
+        'update_orgs':          b'\x97', # force organism update
         'start':                b'\x98', # start server
         'stop':                 b'\x99'  # stop server
     }
 
-    # Progress notes
+    # Server state.
+    SERVER_STATE = {
+        0: 'under maintenance',
+        1: 'active',
+    }
+
     # 0: This is a new project.
     # 1: raw reads fetched
     # 2: samples inferred.

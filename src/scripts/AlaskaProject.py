@@ -1,12 +1,20 @@
-"""
-AlaskaProject.py
+"""Contains the AlaskaProject class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-This file contains the class AlaskaProject, which contains all data related
-to a project.
-Managed by AlaskaServer.
+Alaska is organized into "projects." These project hold all information about
+a specific experiment. The ultimate goal of a project is to perform
+differential expression analysis and identify differentially expressed genes
+among samples.
 """
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
+
 import os
 import json
 import pandas as pd
@@ -43,18 +51,6 @@ class AlaskaProject(Alaska):
         self.ctrls = {} # controls
 
         self.progress = 0 # int to denote current analysis progress
-                            # 0: project created
-                            # 1: unpacking and inferring raw reads
-                            # 2: raw reads extracted and loaded
-                            # 3: project data set and checked (at least once)
-                            # 4: finalized
-                            # 5: added to queue
-                            # 6: performing alignment
-                            # 7: performed alignment
-                            # 8: added to queue
-                            # 9: performing diff exp
-                            # 10: performed diff exp
-                            # 11: analysis completed
 
         self.meta = {} # variable for all metadata
         # from GEO submission template
@@ -76,7 +72,7 @@ class AlaskaProject(Alaska):
             for fname in files:
                 # if the file name does not end in a known raw read extension,
                 # and is a known (and unpackable) archive, add to list
-                if not fname.endswith(self.RAW_EXT) and fname.endswith(self.ARCH_EXT):
+                if not fname.endswith(Alaska.RAW_EXT) and fname.endswith(Alaska.ARCH_EXT):
                     unpack.append('{}/{}'.format(root, fname))
 
         # if files need to be unpack_reads
@@ -105,7 +101,7 @@ class AlaskaProject(Alaska):
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
-                if fname.endswith(self.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
+                if fname.endswith(Alaska.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
                     # remove project folder from root
                     split = root.split('/')
                     split.remove(Alaska.PROJECTS_DIR)
@@ -164,120 +160,6 @@ class AlaskaProject(Alaska):
         """
         # TODO: implement
 
-    # def new_sample(self, _id):
-    #     """
-    #     Creates new sample with id.
-    #     """
-    #     sample = AlaskaSample(_id)
-    #     self.samples[_id] = sample
-    #
-    def reset_samples(self):
-        """
-        Resets samples.
-        """
-        for _id, sample in self.samples.items():
-            sample.reset()
-
-    def reverse_ctrls(self):
-        """
-        Reverses controls and assigns ctrl_rev.
-        """
-        reversed = defaultdict(list)
-
-        for key, item in self.ctrls.items():
-            reversed[item].append(key)
-
-        self.ctrls_rev = dict(reversed)
-
-    def write_qcs(self):
-        """
-        Writes all qc scripts.
-        """
-        # TODO: implement helper functions for each qc step
-        sh = BashWriter('qc', self.dir)
-
-        # append commands to convert to BAM
-        self.write_bam(sh)
-
-        # # append commands to run rseqc
-        # write_rseqc(sh)
-        #
-        # # append commands to run fastqc
-        # write_fastqc(sh)
-        #
-        # # append commands to run multiqc
-        # write_multiqc(sh)
-
-        # write all commands to .sh file
-        sh.write()
-
-
-
-    def write_bam(self, sh):
-        """
-        Writes script to generate BAM files from raw reads.
-        Raw reads are aligned using Bowtie2 and converted to BAM
-        using samtools.
-        """
-        # TODO: implement
-        sh.add('# convert raw reads to BAM')
-        for _id, sample in self.samples.items():
-            bam = '{}/{}/{}.bam'.format(self.id, self.QC_DIR, _id)
-            split = sample.organism.split('_')
-            bt_idx = '{}/{}_{}_{}'.format(self.IDX_DIR, split[0].lower(), split[1], sample.ref_ver)
-            command = 'bowtie2 -x {} -U {} --threads {} | samtools view -b | samtools sort -o {} -@ {}'.format(
-                bt_idx,
-                ','.join(['{}/{}/{}'.format(self.id, self.RAW_DIR, read) for read in sample.reads]),
-                self.THREADS,
-                bam,
-                self.THREADS
-            )
-            sh.add(command)
-
-            command = 'samtools index {}'.format(bam)
-            sh.add(command)
-
-    def write_rseqc(self, sh):
-        """
-        Writes script to run rseqc.
-        """
-        # TODO: implement
-        sh.add('# run rseqc')
-
-        for _id, sample in self.samples.items():
-            bam = '{}/{}.bam'.format(self.qc_dir, _id)
-            ref = PLACE_BED_HERE
-
-            command = 'read_distribution.py -i {} -r {} > {}'.format(
-                bam,
-                ref,
-                '{}_distribution.txt'.format(_id)
-            )
-            sh.add(command)
-
-            command = 'geneBody_coverage.py -i {} -r {} -o {}'.format(
-                bam,
-                ref,
-                _id
-            )
-            sh.add(command)
-
-
-
-    def write_fastqc(self, sh):
-        """
-        Writes script to run fastqc.
-        """
-        # TODO: implement
-        pass
-
-    def write_multiqc(self):
-        """
-        Writes script to run multiqc.
-        """
-        # TODO: implement
-        pass
-
     def check(self):
         """
         Checks all data.
@@ -329,34 +211,6 @@ class AlaskaProject(Alaska):
         #                 raise Exception(msg)
 
 
-    # def write_kallisto(self):
-    #     """
-    #     Writes bash script that will perform read quantification using Kallisto.
-    #     """
-    #     sh = BashWriter('kallisto', self.dir)
-    #     for _id, sample in self.samples.items():
-    #         sh.add('# align sample {}'.format(_id))
-    #         if sample.type == 1: # single-end
-    #             sh.add('kallisto quant -i {} -o {} -b {} --threads={} --single -l {} -s {} {}\n'.format(
-    #                     './{}/{}'.format(self.IDX_DIR, sample.idx),
-    #                     '{}/{}'.format(self.align_dir, _id),
-    #                     sample.bootstrap_n,
-    #                     self.THREADS,
-    #                     sample.length,
-    #                     sample.stdev,
-    #                     ' '.join(['{}/{}'.format(self.raw_dir, read) for read in sample.reads])
-    #             ))
-    #
-    #         elif sample.type == 2: #paired-end
-    #             sh.add('kallisto quant -i {} -o {} -b {} --threads={} {}\n'.format(
-    #                     './{}/{}'.format(self.IDX_DIR, sample.idx),
-    #                     '{}/{}'.format(self.align_dir, _id),
-    #                     sample.bootstrap_n,
-    #                     self.THREADS,
-    #                     ' '.join(['{}/{}'.format(self.raw_dir, read) for read in [item for sublist in sample.reads for item in sublist]])
-    #             ))
-    #
-    #     sh.write()
 
     def write_matrix(self):
         """
@@ -379,22 +233,6 @@ class AlaskaProject(Alaska):
             pass # TODO: implement
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.dir), sep=' ', index=False)
-
-    # def write_sleuth(self):
-    #     """
-    #     Writes bash script to run sleuth.
-    #     """
-    #     if self.design == 1: #single-factor
-    #         sh = BashWriter('sleuth', self.dir)
-    #         sh.add('sleuth.R -d {} -k {} -o {}\n'.format(
-    #                 self.dir,
-    #                 self.align_dir,
-    #                 self.diff_dir
-    #         ))
-    #     elif self.design == 2:
-    #         pass
-    #
-    #     sh.write()
 
     def save(self, folder=None):
         """

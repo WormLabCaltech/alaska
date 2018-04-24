@@ -1,12 +1,17 @@
-"""
-AlaskaOrganism.py
+"""Contains the AlaskaOrganism class.
 
-Author: Joseph Min (kmin@caltech.edu)
-
-Contains AlaskaOrganism class.
-AlaskaOrganism is an object that contains information of each organism.
-(Including all available reference sequences.)
+Contains all necessary information about a model organism. This class holds
+multiple AlaskaReference objects, one for each reference version.
 """
+
+__author__ = 'Kyung Hoi (Joseph) Min'
+__copyright__ = 'Copyright 2017 WormLabCaltech'
+__credits__ = ['David Angeles', 'Raymond Lee', 'Juancarlos Chan']
+__license__ = "MIT"
+__version__ = "alpha"
+__maintainer__ = "Kyung Hoi (Joseph) Min"
+__email__ = "kmin@caltech.edu"
+__status__ = "alpha"
 
 import os
 import json
@@ -28,7 +33,7 @@ class AlaskaOrganism(Alaska):
         self.full = '{}_{}'.format(genus, species)
         self.short = '{}_{}'.format(genus[0].lower(), species)
         self.refs = {}
-        self.path = '{}/{}/{}'.format(self.ORGS_DIR, genus, species)
+        self.path = '{}/{}/{}'.format(Alaska.ORGS_DIR, genus, species)
 
     def add_new_ref(self, version, cds, bed):
         """
@@ -42,7 +47,7 @@ class AlaskaOrganism(Alaska):
         Saves organism data to JSON.
         """
         if folder is None:
-            path = self.ORGS_DIR
+            path = Alaska.ORGS_DIR
         else:
             path = folder
 
@@ -56,7 +61,7 @@ class AlaskaOrganism(Alaska):
         Loads organism from JSON.
         """
         if folder is None:
-            path = self.ORGS_DIR
+            path = Alaska.ORGS_DIR
         else:
             path = folder
 
