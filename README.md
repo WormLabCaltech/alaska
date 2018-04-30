@@ -16,9 +16,9 @@ These instructions will install the Alaska server on your local machine for deve
 * [Pandas](https://pandas.pydata.org/)\*
 * [Docker SDK for Python](https://docker-py.readthedocs.io/en/stable/)
 
-\*: These are included with [Anaconda 3.6.x](https://www.anaconda.com/)
+\* These are included with [Anaconda 3.6.x](https://www.anaconda.com/)
 
-### Installing
+### Installing Alaska
 Once you `git pull` or `git clone` Alaska, run `Setup.sh` to get everything set up. The script creates the following containers
 * alaska
 * alaska_request
@@ -86,14 +86,14 @@ The server itself outputs the following:
 [2018-04-30 14:28:14] APjvz31r: new project created
 ```
 
-From here on, every instance of `*APjvz31r*` refers to the project ID.
+From here on, every instance of `[PROJECT_ID]` refers to the project ID (*APjvz31r* above).
 
-Once a new project is created, the user should be given FTP access to `projects/*APjvz31r*/0_raw_reads` as the root directory.
+Once a new project is created, the user should be given FTP access to `projects/[PROJECT_ID]/0_raw_reads` as the root directory.
 
 ### Uploading raw reads
-Raw reads are uploaded via FTP to `projects/*APjvz31r*/0_raw_reads`. Every sample *must* be in separate folders. Once the user is finished uploading, they will indicate through the **portal** that they are done. The **portal** runs the following command
+Raw reads are uploaded via FTP to `projects/[PROJECT_ID]/0_raw_reads`. Every sample *must* be in separate folders. Once the user is finished uploading, they will indicate through the **portal** that they are done. The **portal** runs the following command
 ```
-~$ Request.sh infer_samples --id *APjvz31r*
+~$ Request.sh infer_samples --id [PROJECT_ID]
 ID: AP7yrvax
 INFO: Creating infer_samples request
 INFO: Connecting to server on port 8888
@@ -126,9 +126,9 @@ The server itself outputs the following:
 ```
 
 ### Setting Metadata & Finalizing Project
-The user must now fill out metadata for the project. The **portal** reads information from the temporary JSON located at `projects/*APjvz31r*/_temp/*APjvz31r*.json`. Information for which model organism the user is using is fetched from `organisms/jsons`. Once the user indicates that they are done filling out metdata, the **portal** writes all the information in the *same* JSON format to `projects/*APjvz31r*/*APjvz31r*.json` and runs the following command
+The user must now fill out metadata for the project. The **portal** reads information from the temporary JSON located at `projects/[PROJECT_ID]/_temp/[PROJECT_ID].json`. Information for which model organism the user is using is fetched from `organisms/jsons`. Once the user indicates that they are done filling out metdata, the **portal** writes all the information in the *same* JSON format to `projects/[PROJECT_ID]/[PROJECT_ID].json` and runs the following command
 ```
-~$ Request.sh set_proj --id *APjvz31r*
+~$ Request.sh set_proj --id [PROJECT_ID]
 ID: AP7yrvax
 INFO: Creating set_proj request
 INFO: Connecting to server on port 8888
@@ -153,7 +153,7 @@ The server itself outputs the following
 
 If the server detects an error in the input data, it responds with a line that contains `ERROR`. *Only if* this did not happen, the **portal** then issues this command
 ```
-~$ Request.sh finalize_proj --id *APjvz31r*
+~$ Request.sh finalize_proj --id [PROJECT_ID]
 ID: AP7yrvax
 INFO: Creating finalize_proj request
 INFO: Connecting to server on port 8888
@@ -179,7 +179,7 @@ The server itself outputs the following
 ### Starting Analysis
 The analysis pipeline is started with the following command:
 ```
-~$ Request.sh do_all --id *APjvz31r*
+~$ Request.sh do_all --id [PROJECT_ID]
 ID: AP7yrvax
 INFO: Creating do_all request
 INFO: Connecting to server on port 8888
@@ -195,7 +195,7 @@ Alaska automatically runs **quality control**, **read alignment & quantification
 ### Visualizing the Results
 Data visualization is done via the Sleuth Shiny web application. The Shiny web app can be opened with the following command:
 ```
-~$ Request.sh open_sleuth_server --id *APjvz31r*
+~$ Request.sh open_sleuth_server --id [PROJECT_ID]
 ID: APk70uwv
 INFO: Creating open_sleuth_server request
 INFO: Connecting to server on port 8888
@@ -208,6 +208,52 @@ END
 ```
 
 *This part of the pipeline is still in progress.*
+
+## Testing Considerations
+The entire pipeline can be tested by issuing the following commands:
+
+```
+~$ Request.sh new_proj
+~$ Request.sh test_all --id [PROJECT_ID]
+```
+
+## Planned features
+- [ ] *Server* Deploy server
+- [ ] *Portal* Working portal
+- [ ] *Server* Dynamic port allocation for Shiny web app
+- [ ] *Server* Allow users to download analyses results
+- [ ] *Server* Ability to copy past samples to a new project
+- [ ] *Server* Better raw read validation
+- [ ] *Server* More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
+- [ ] *Server* Standardized metadata
+- [ ] *Server* Better metadata-validation
+- [ ] *Server* Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
+
+## Software Details
+Alaska packages a variety of software into one simple pipeline. They are listed in this section.
+
+### Quality Control
+* [Miniconda](https://conda.io/miniconda.html) 4.3.31
+* [Samtools](http://samtools.sourceforge.net/) 1.7
+* [RSeQC](http://rseqc.sourceforge.net/) 2.6.4
+* [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) 0.11.6
+* [MultiQC](http://multiqc.info/) 0.11.6
+
+### Read Alignment & Quantification
+* [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) 2.3.4 - Read alignment for quality control
+* [Kallisto](https://pachterlab.github.io/kallisto/) 0.44.0 - Read alignment for differential expression analysis
+
+### Differential Expression Analysis
+* [Sleuth](http://pachterlab.github.io/sleuth/)
+
+## Authors & Contributors
+* **Kyung Hoi (Joseph) Min** - *Server design & programming*
+* **Raymond Lee** - *Server management*
+* **Juancarlos Chan** - *Portal design & programming*
+* **David Angeles** - *Inspiration & guidance*
+
+## License
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 
 
