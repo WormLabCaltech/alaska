@@ -29,7 +29,7 @@ docker build -t $DOCKER_ALASKA_TAG Docker/alaska/
 # build request image
 docker build -t $DOCKER_REQUEST_TAG Docker/request/
 
-# build request image
+# build qc image
 docker build -t $DOCKER_QC_TAG Docker/qc/
 
 # build kallisto image
