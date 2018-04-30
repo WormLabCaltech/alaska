@@ -218,13 +218,13 @@ The entire pipeline can be tested by issuing the following commands:
 ```
 
 ## Planned features
-- [ ] *Server* Deploy server
-- [ ] *Portal* Working portal
-- [ ] *Server* Dynamic port allocation for Shiny web app
-- [ ] *Server* Allow users to download analyses results
-- [ ] *Server* Ability to copy past samples to a new project
-- [ ] *Server* Better raw read validation
-- [ ] *Server* More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
+- [ ] **Server** Deploy server
+- [ ] **Portal** Working portal
+- [ ] **Server** Dynamic port allocation for Shiny web app
+- [ ] **Server** Allow users to download analyses results
+- [ ] **Server** Ability to copy past samples to a new project
+- [ ] **Server** Better raw read validation
+- [ ] **Server** More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
 - [ ] *Server* Standardized metadata
 - [ ] *Server* Better metadata-validation
 - [ ] *Server* Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
