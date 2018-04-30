@@ -225,9 +225,9 @@ The entire pipeline can be tested by issuing the following commands:
 - [ ] **Server** Ability to copy past samples to a new project
 - [ ] **Server** Better raw read validation
 - [ ] **Server** More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
-- [ ] *Server* Standardized metadata
-- [ ] *Server* Better metadata-validation
-- [ ] *Server* Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
+- [ ] **Server** Standardized metadata
+- [ ] **Server** Better metadata-validation
+- [ ] **Server** Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
 
 ## Software Details
 Alaska packages a variety of software into one simple pipeline. They are listed in this section.
