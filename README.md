@@ -253,7 +253,7 @@ Alaska packages a variety of software into one simple pipeline. They are listed 
 * **David Angeles** - *Inspiration & guidance*
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 
 
