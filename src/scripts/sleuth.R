@@ -1,9 +1,5 @@
 #!/usr/bin/env Rscript
 
-"""Script to run Sleuth.
-
-"""
-
 # command line arguments
 option_list <- list(
   make_option(c('-v', '--verbose'), action='store_true', default=TRUE,
