@@ -220,7 +220,7 @@ The entire pipeline can be tested by issuing the following commands:
 ## Planned features
 - [ ] **Server** Deploy server
 - [ ] **Portal** Working portal
-- [ ] **Server** Dynamic port allocation for Shiny web app
+- [x] **Server** Dynamic port allocation for Shiny web app
 - [ ] **Server** Multithread some Quality Control scripts
 - [ ] **Server** Allow users to download analyses results
 - [ ] **Server** Ability to copy past samples to a new project

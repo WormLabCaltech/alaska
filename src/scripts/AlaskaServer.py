@@ -26,6 +26,7 @@ import json
 import queue
 import docker
 import shutil
+import random
 import traceback
 import warnings as w
 import datetime as dt
@@ -74,6 +75,7 @@ class AlaskaServer(Alaska):
         self.current_job = None # job currently undergoing analysis
         self.org_update_id = None # container ID for organism update
 
+        self.available_ports = Alaska.SHI_PORTS
         self.sleuth_servers = {} # dict of port:container_id pairs
 
         self.idx_conts = []
@@ -214,9 +216,9 @@ class AlaskaServer(Alaska):
             #     self.out('INFO: terminating container {}'.format(cont.short_id))
             #     cont.remove(force=True)
 
-            for port, cont_id in self.sleuth_servers.items():
-                self.out('INFO: sleuth shiny app container {} is running...terminating'.format(cont_id))
-                self.DOCKER.containers.get(cont_id).remove(force=True)
+            for port, item in self.sleuth_servers.items():
+                self.out('INFO: sleuth shiny app container {} is running...terminating'.format(item[1]))
+                self.DOCKER.containers.get(item[1]).remove(force=True)
                 self.out('INFO: termination successful')
 
             # stop running jobs
@@ -1273,6 +1275,17 @@ class AlaskaServer(Alaska):
         if proj.progress < 13:
             raise Exception('{}: Sleuth not yet run'.format(_id))
 
+        # If the server for this project is already open, just return the
+        # port.
+        for port, item in self.sleuth_servers.items():
+            if item[0] == _id:
+                self.broadcast(_id, '{}: server already open on port {}'.format(_id, port))
+                # refresh open time
+                item[2] = dt.datetime.now()
+                if close:
+                    self.close(_id)
+                return
+
         self.broadcast(_id, '{}: starting Sleuth shiny app'.format(_id))
 
         # First, copy the script that opens the server.
@@ -1286,8 +1299,17 @@ class AlaskaServer(Alaska):
         volumes = {
             src: {'bind': tgt, 'mode': 'rw'},
         }
+
+        # Randomly choose port.
+        port = random.choice(self.available_ports)
+
+        # Make sure port isn't taken.
+        if port in self.sleuth_servers:
+            raise Exception('{}: port {} is already taken!'.format(_id, port))
+
+        self.sleuth_servers[port] = None
         ports = {
-            42427: 42427
+            42427: port
         }
         cmd = 'Rscript {}'.format(Alaska.SHI_SCRIPT)
         ###############################
@@ -1298,9 +1320,9 @@ class AlaskaServer(Alaska):
                           ports=ports)
         cont_id = cont.id
         self.out('INFO: shiny app container started with id {}'.format(cont_id))
-        self.sleuth_servers[42427] = cont_id
+        self.sleuth_servers[port] = (_id, cont_id, dt.datetime.now())
 
-        self.broadcast(_id, '{}: server opened on port 42427'.format(_id))
+        self.broadcast(_id, '{}: server opened on port {}'.format(_id, port))
 
         if close:
             self.close(_id)
