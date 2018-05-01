@@ -51,13 +51,13 @@ organisms/[GENUS]/[SPECIES]/[REFERENCE_VERSRION]/reference
 ```
 Place the three files (they can be archived) in the `reference` folder and either restart the server or manually run an organism update by issuing the following command:
 ```
-Request.sh update_orgs
+~$ Request.sh update_orgs
 ```
 
 ### Loading Previous Server State
 Every 5 minutes (may be changed in the future) AND whenever the server is turned off, it saves its state in the `saves` directory. The most recent save can be loaded by first starting the server and then issuing the following command:
 ```
-Request.sh load
+~$ Request.sh load
 ```
 
 ## The Pipeline
@@ -221,6 +221,7 @@ The entire pipeline can be tested by issuing the following commands:
 - [ ] **Server** Deploy server
 - [ ] **Portal** Working portal
 - [ ] **Server** Dynamic port allocation for Shiny web app
+- [ ] **Server** Multithread some Quality Control scripts
 - [ ] **Server** Allow users to download analyses results
 - [ ] **Server** Ability to copy past samples to a new project
 - [ ] **Server** Better raw read validation
@@ -250,7 +251,8 @@ Alaska packages a variety of software into one simple pipeline. They are listed 
 * **Kyung Hoi (Joseph) Min** - *Server design & programming*
 * **Raymond Lee** - *Server management*
 * **Juancarlos Chan** - *Portal design & programming*
-* **David Angeles** - *Inspiration & guidance*
+* **David Angeles**
+* **Paul W. Sternberg**
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
