@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+library('sleuth')
+library('optparse')
+library('files')
+
 # command line arguments
 option_list <- list(
   make_option(c('-v', '--verbose'), action='store_true', default=TRUE,
