@@ -1403,7 +1403,7 @@ class AlaskaServer(Alaska):
         for sid, sample in proj.samples.items():
             sample.length = 200
             sample.stdev = 60
-            sample.bootstrap_n = 200
+            sample.bootstrap_n = 10
             sample.organism = 'caenorhabditis_elegans'
             sample.ref_ver = '235'
 
