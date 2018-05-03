@@ -280,7 +280,8 @@ def run_sleuth(proj):
     Runs differential expression analysis with sleuth.
     Assumes that the design matrix is already present in the directory.
     """
-    args = ['./sleuth.R']
+    args = ['Rscript']
+    args += ['./sleuth.R']
     args += ['-d', '.']
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
