@@ -126,7 +126,7 @@ The server itself outputs the following:
 ```
 
 ### Setting Metadata & Finalizing Project
-The user must now fill out metadata for the project. The **portal** reads information from the temporary JSON located at `projects/[PROJECT_ID]/_temp/[PROJECT_ID].json`. Information for which model organism the user is using is fetched from `organisms/jsons`. Once the user indicates that they are done filling out metdata, the **portal** writes all the information in the *same* JSON format to `projects/[PROJECT_ID]/[PROJECT_ID].json` and runs the following command
+The user must now fill out metadata for the project. The **portal** reads information from the temporary JSON located at `projects/[PROJECT_ID]/_temp/[PROJECT_ID].json`. Information for which model organism the user is using is fetched from `organisms/jsons`. Once the user indicates that they are done filling out metdata, the **portal** writes all the information in the *same* JSON format to `projects/[PROJECT_ID]/[PROJECT_ID].json`. The project JSON specification, including descriptions of each field, is available here: [JSON-README.md](jsons/JSON-README.md). The server then runs the following command
 ```
 ~$ Request.sh set_proj --id [PROJECT_ID]
 ID: AP7yrvax
