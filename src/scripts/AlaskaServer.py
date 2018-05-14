@@ -372,7 +372,11 @@ class AlaskaServer(Alaska):
             if request[1] not in self.CODES:
                 raise Exception('ERROR: code {} was not recognized'.format(request[1]))
             _id = request[0].decode(Alaska.ENCODING)
-            if not _id.startswith('_'):
+
+            # Deal with 'check' first.
+            if request[1] == Alaska.CODES['check']:
+                self.CODES[request[1]](_id)
+            elif not _id.startswith('_'):
                 # check if it exists
                 if not self.exists(_id):
                     raise Exception('{}: does not exist'.format(_id))
