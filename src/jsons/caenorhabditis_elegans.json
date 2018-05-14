@@ -1,0 +1,24 @@
+{
+    "genus": "caenorhabditis",
+    "species": "elegans",
+    "full": "caenorhabditis_elegans",
+    "short": "c_elegans",
+    "refs": {
+        "235": {
+            "version": "235",
+            "dna": "c_elegans_235_dna.fa.gz",
+            "cdna": "c_elegans_235_cdna.fa.gz",
+            "bed": "c_elegans_235.bed",
+            "kallisto_idx": "c_elegans_235.idx",
+            "bowtie_idx": [
+                "c_elegans_235.3.bt2",
+                "c_elegans_235.2.bt2",
+                "c_elegans_235.rev.2.bt2",
+                "c_elegans_235.rev.1.bt2",
+                "c_elegans_235.4.bt2",
+                "c_elegans_235.1.bt2"
+            ]
+        }
+    },
+    "path": "organisms/caenorhabditis/elegans"
+}
