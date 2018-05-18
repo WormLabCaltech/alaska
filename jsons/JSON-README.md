@@ -44,5 +44,24 @@ This section describes each field in the JSON: its purpose, its use and how it s
 * **chk_md5**: The MD5 checksums corresponding to the read files.
 * **projects**: List of project IDs that are linked to this sample. Internal use only.
 * **meta**: Other relevant metadata about this sample.
+    * *title*: Nickname/title for this sample, set by the user.
+    * *contributors*: Contributors to generating this sample.
+    * *source*: Where this sample originated.
+    * *chars*: Sample characteristics. This is a dictionary of string key-value pairs that describe this sample. Users can expand the entries freely, but every sample must have at least one field that is shared among all samples in the project. Examples of fields users may include are: strain, tissue, developmental stage, etc.
+    * *description*: Short description of this sample, input by the user.
+    * *datetime*: Date and time this sample was created. Not visible to the user.
 
+### design
+* Either 1 or 2. 1 indicates the project is a single-factor design. A single-factor design is when one experimental factor is being tested. 2 indicates the project is a two-factor design. A two-factor design is when two experimental factors and their relationship are being tested.
+* Alaska currently does **NOT** support two-factor design.
+
+### ctrls
+### progress
+### meta
+* **title**
+* **summary**
+* **contributors**
+* **SRA_center_code**
+* **email**
+* **datetime**
 
