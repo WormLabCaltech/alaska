@@ -56,12 +56,18 @@ This section describes each field in the JSON: its purpose, its use and how it s
 * Alaska currently does **NOT** support two-factor design.
 
 ### ctrls
+* A dictionary of sample IDs as keys and control characteristics as values. Both are strings.
+* The keys of the dictionary are the control samples (Note that there can be multiple controls).
+* The values of the dictionary are the *control characteristic* of each sample. The value must match a key in the *chars* field of the **meta** field of the sample object. Also, all samples in the project must have all the *control characteristic* values that appear in this dictionary. For example, if the dictionary is `"ASgyci7n": "genotype", "ASb8063z": "life stage"`, then every sample in the project MUST have both `genotype` and `life stage` fields in their respective *chars* fields in the **meta** field of their sample objects.
+* For instance, one element of the dictionary may be `"ASgyci7n": "genotype"`, which indicates that the sample with ID `ASgyci7n` is a control sample, and that this sample is the control for the `genotype` characteristic.
 ### progress
+* Indicates the progress of this project.
+* Internal use.
 ### meta
-* **title**
-* **summary**
-* **contributors**
-* **SRA_center_code**
-* **email**
-* **datetime**
+* **title**: Title of the project. This is a custom title the user calls this project.
+* **summary**: Brief summary of the project.
+* **contributors**: List of contributors of the project. It is currently just a list of names. It may be changed into a dictionary containing names and emails.
+* **SRA_center_code**: SRA center code. Not necessary and user-editable.
+* **email**: Email of the individual submitting the project. This is how the user is notified that analysis is finished.
+* **datetime**: The date and time this project was created. For internal use.
 
