@@ -41,4 +41,6 @@ RUN apt-get update && apt-get install -y \
 # install pyunpack & docker
 RUN pip install docker && pip install patool && pip install pyunpack
 
-ENTRYPOINT cd alaska/scripts && python AlaskaServer.py
+# Set up working directory
+WORKDIR /alaska/scripts
+CMD ["python", "AlaskaServer.py"]

@@ -17,3 +17,4 @@ docker run -i --rm --network="container:alaska"\
                 -w "/alaska/scripts"\
                 alaska_request\
                 python AlaskaRequest.py ${COMMAND} ${ID}
+                

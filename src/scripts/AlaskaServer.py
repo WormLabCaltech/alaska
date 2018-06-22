@@ -1671,6 +1671,12 @@ if __name__ == '__main__':
 
     try:
         server = AlaskaServer()
+
+        # Register signal handler for SIGTERM.
+        signal.signal(signal.SIGTERM, server.stop)
+        signal.signal(signal.SIGILL, server.stop)
+
+        # Start the server.
         server.start(force=True)
     except KeyboardInterrupt:
         print('\nINFO: interrupt received, stopping...')
