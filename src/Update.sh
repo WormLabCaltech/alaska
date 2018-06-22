@@ -1,6 +1,8 @@
 #!/bin/bash
 # This script updates the server with the option --restart unless-stopped.
 
+DOCKER_ALASKA_TAG="alaska"
+
 # remove old container
 docker container rm --force alaska
 
