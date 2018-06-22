@@ -42,9 +42,10 @@ docker build -t $DOCKER_SLEUTH_TAG Docker/sleuth/
 docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
 
-# create alasa container
+# create alaska container
 docker create --name="$DOCKER_ALASKA_TAG" -it -v "/etc/localtime:/etc/localtime:ro"\
                                   -v "/var/run/docker.sock:/var/run/docker.sock"\
                                   -v "alaska_script_volume:/alaska/scripts"\
                                   -v "alaska_data_volume:/alaska/root"\
+                                  --restart unless-stopped\
                                   alaska:latest
