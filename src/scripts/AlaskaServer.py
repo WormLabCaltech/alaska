@@ -24,6 +24,7 @@ import zmq
 import time
 import json
 import queue
+import signal
 import docker
 import shutil
 import random
