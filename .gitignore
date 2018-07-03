@@ -104,3 +104,5 @@ test_samples/
 
 # other stuff
 PATH_TO_HERE
+src/.DS_Store
+.DS_Store
