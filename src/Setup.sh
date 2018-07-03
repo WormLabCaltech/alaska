@@ -23,6 +23,7 @@ DOCKER_CGI_TAG="alaska_cgi"
 
 # remove old containers
 docker container rm --force alaska
+docker container rm --force alaska_cgi
 
 # build alaska image
 docker build -t $DOCKER_ALASKA_TAG Docker/alaska/

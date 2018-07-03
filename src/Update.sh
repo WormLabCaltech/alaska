@@ -22,6 +22,9 @@
 # This script sets up the cgi container.
 DOCKER_CGI_TAG="alaska_cgi"
 
+# remove any old cgi containers
+docker container rm --force alaska_cgi
+
 # build cgi image
 docker build -t $DOCKER_CGI_TAG Docker/cgi/
 
