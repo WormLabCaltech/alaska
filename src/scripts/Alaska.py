@@ -31,6 +31,7 @@ class Alaska():
     ROOT_DIR = 'root' # root dir
     ROOT_PATH = '/alaska/{}'.format(ROOT_DIR)
     SAVE_DIR = 'saves' # folder to save server states
+    SAVE_MAX = 20   # maximum number of saves to keep
     # IMG_DIR = 'images'
     SCRIPT_DIR = '../scripts' # scripts directory
     IDX_SCRIPT = 'build_index.py'

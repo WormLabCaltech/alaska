@@ -177,6 +177,10 @@ class AlaskaServer(Alaska):
             self.out('INFO: updating organisms')
             self.update_orgs()
 
+            # Load if there is at least one save.
+            if len(os.listdir(Alaska.SAVE_DIR)) > 0:
+                self.load()
+
             self.out('INFO: starting {} workers'.format(self.workers_n))
             for i in range(self.workers_n):
                 p = Thread(target=self.worker)
@@ -1490,6 +1494,39 @@ class AlaskaServer(Alaska):
         """
         pass
 
+    def cleanup(self):
+        """
+        Cleans up projects saves and jobs.
+        """
+        # First, deal with projects.
+        self.out('INFO: cleaning up projects')
+        for fname in os.listdir(Alaska.PROJECTS_DIR):
+            if fname not in self.projects and fname not in self.projects_temp:
+                path = '{}/{}'.format(Alaska.PROJECTS_DIR, fname)
+                self.out('INFO: removing folder {}'.format(path))
+                shutil.rmtree(path)
+
+        # Then, deal with jobs.
+        self.out('INFO: cleaning up jobs')
+        for fname in os.listdir(Alaska.JOBS_DIR):
+            job = fname.split('.')[0]
+            if job not in self.jobs and job not in self.stale_jobs:
+                path = '{}/{}'.format(Alaska.JOBS_DIR, fname)
+                self.out('INFO: removing job {}'.format(path))
+                os.remove(path)
+
+        # Then, deal with saves.
+        self.out('INFO: cleaning up saves')
+        files = os.listdir(Alaska.SAVE_DIR)
+        files = sorted(files)
+
+        # Remove oldest saves more than max.
+        while len(files) > Alaska.SAVE_MAX:
+            path = '{}/{}'.format(Alaska.SAVE_DIR, files[0])
+            self.out('INFO: removing save {}'.format(path))
+            os.remove(path)
+            del files[0]
+
     def save(self, _id=None):
         """
         Saves its current state.
@@ -1522,6 +1559,7 @@ class AlaskaServer(Alaska):
         _current_job = self.current_job
         _sleuth_servers = self.sleuth_servers
         _idx_interval = self.idx_interval
+        _available_ports = self.available_ports
         _PORT = self.PORT
         _CONTEXT = self.CONTEXT
         _SOCKET = self.SOCKET
@@ -1543,6 +1581,7 @@ class AlaskaServer(Alaska):
             self.current_job = self.current_job.id
         del self.sleuth_servers
         del self.idx_interval
+        del self.available_ports
         del self.PORT
         del self.CONTEXT
         del self.SOCKET
@@ -1565,6 +1604,7 @@ class AlaskaServer(Alaska):
         self.current_job = _current_job
         self.sleuth_servers = _sleuth_servers
         self.idx_interval = _idx_interval
+        self.available_ports = _available_ports
         self.PORT = _PORT
         self.CONTEXT = _CONTEXT
         self.SOCKET = _SOCKET
@@ -1575,12 +1615,54 @@ class AlaskaServer(Alaska):
         self.out('INFO: saved, unlocking threads')
         lock.release()
 
+        # Once saved, clean up.
+        self.cleanup()
+
         self.close(_id)
 
-    def load(self, _id=None):
+    def load(self, _id=None, newest=False):
         """
         Loads state from JSON.
         """
+        def get_most_recent_json(files):
+            """
+            Helper function that returns the filename of the most recent json.
+            """
+            jsons = []
+            for fname in files:
+                if fname.endswith('.json'):
+                    jsons.append(fname)
+
+            jsons = sorted(jsons)
+            fname = jsons[-1]
+
+            return fname
+
+        def get_best_json(files):
+            """
+            Helper function that returns the filename of the best json to load
+            based on its number of projects.
+            """
+            max_n = 0
+            candidates = []
+            jsons = {}
+            for fname in files:
+                with open('{}/{}'.format(path, fname), 'r') as f:
+                    loaded = json.load(f)
+                    n = len(loaded['projects']) + len(loaded['samples'])\
+                                                    + len(loaded['jobs'])
+
+                    if max_n < n:
+                        candidates = [fname]
+                        max_n = n
+                    elif max_n == n:
+                        candidates.append(fname)
+
+                    jsons[fname] = len(loaded['projects'])
+
+            # Choose the oldest one from the candidates.
+            return sorted(candidates)[-1]
+
         path = Alaska.SAVE_DIR
         files = os.listdir(path)
 
@@ -1588,13 +1670,10 @@ class AlaskaServer(Alaska):
         lock = threading.Lock()
         lock.acquire()
 
-        jsons = []
-        for fname in files:
-            if fname.endswith('.json'):
-                jsons.append(fname)
-
-        jsons = sorted(jsons)
-        fname = jsons[-1]
+        if newest:
+            fname = get_most_recent_json(files)
+        else:
+            fname = get_best_json(files);
 
         self.out('INFO: loading {}'.format(fname))
         with open('{}/{}'.format(path, fname), 'r') as f:
@@ -1666,9 +1745,13 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Start server with given arguments.')
-    parser.add_argument('--force',
-                        action='store_true')
+    parser.add_argument('--force', action='store_true')
+    parser.add_argument('--no-load', action='store_true')
     args = parser.parse_args()
+
+    # Fetch command line args.
+    force = args.force
+    no_load = args.no_load
 
     try:
         server = AlaskaServer()
