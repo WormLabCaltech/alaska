@@ -12,6 +12,12 @@ RUN apt-get update && apt-get install -y \
     perl \
     curl
 
+##### Perl Packages #####
+RUN apt-get update && apt-get install -y \
+    libcgi-pm-perl \
+    libjson-perl \
+    libtie-ixhash-perl
+
 ##### Install Docker #####
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 RUN add-apt-repository \

@@ -19,6 +19,9 @@
 #                                   --restart unless-stopped\
 #                                   alaska:latest
 
+# Mounting point for Juancarlos's CGI folder.
+DOCKER_CGI_MOUNT="/Juancarlos's/CGI/folder:/CGI/folder/within/container"
+
 # This script sets up the cgi container.
 DOCKER_CGI_TAG="alaska_cgi"
 
@@ -33,4 +36,5 @@ docker create --name="$DOCKER_CGI_TAG" -it -v "/etc/localtime:/etc/localtime:ro"
                                   -v "/var/run/docker.sock:/var/run/docker.sock"\
                                   -v "alaska_script_volume:/alaska/scripts"\
                                   -v "alaska_data_volume:/alaska/root"\
+                                  -v $DOCKER_CGI_MOUNT
                                   alaska_cgi:latest
