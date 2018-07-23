@@ -2,15 +2,9 @@
 # This script sets up alaska on a new machine
 # Please run it in the parent of the root directory
 
-# Find out script's directory
-# SOURCE="${BASH_SOURCE[0]}"
-# while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-#   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-#   SOURCE="$(readlink "$SOURCE")"
-#   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-# done
-# SCRIPTPATH="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-# echo $SCRIPTPATH > PATH_TO_HERE
+# Mounting point for Juancarlos's CGI folder.
+DOCKER_CGI_MOUNT="/Juancarlos's/CGI/folder:/CGI/folder/within/container"
+
 
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
@@ -60,4 +54,5 @@ docker create --name="$DOCKER_CGI_TAG" -it -v "/etc/localtime:/etc/localtime:ro"
                                   -v "/var/run/docker.sock:/var/run/docker.sock"\
                                   -v "alaska_script_volume:/alaska/scripts"\
                                   -v "alaska_data_volume:/alaska/root"\
+                                  -v $DOCKER_CGI_MOUNT\
                                   alaska_cgi:latest
