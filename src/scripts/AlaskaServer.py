@@ -1632,14 +1632,14 @@ class AlaskaServer(Alaska):
             # First, get the list of all valid projects from the 'projects'
             # directory.
             projects = []
-            for dir in os.listdir(Alaska.PROJECTS_DIR):
-                path = '{}/{}'.format(Alaska.PROJECTS_DIR, dir)
+            for folder in os.listdir(Alaska.PROJECTS_DIR):
+                path = '{}/{}'.format(Alaska.PROJECTS_DIR, folder)
 
                 if not os.path.isdir(path):
                     continue
 
-                if os.path.isfile('{}/{}'.format(path, dir)):
-                    projects.append(dir)
+                if os.path.isfile('{}/{}.json'.format(path, folder)):
+                    projects.append(folder)
             self.out('INFO: detected {} valid project folders'.format(len(projects)))
 
             return projects
@@ -1658,7 +1658,7 @@ class AlaskaServer(Alaska):
                     self.out('INFO: skipping {} due to mising project(s)'.format(fname))
                     continue
 
-                
+
                 if fname.endswith('.json'):
                     jsons.append(fname)
 
