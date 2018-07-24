@@ -3,7 +3,7 @@
 # Please run it in the parent of the root directory
 
 # Mounting point for Juancarlos's CGI folder.
-DOCKER_CGI_MOUNT="/Juancarlos's/CGI/folder:/CGI/folder/within/container"
+DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
 
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"

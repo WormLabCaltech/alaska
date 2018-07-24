@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Mounting point for Juancarlos's CGI folder.
-DOCKER_CGI_MOUNT="/Juancarlos's/CGI/folder:/CGI/folder/within/container"
+DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
 # This script sets up the cgi container.
 DOCKER_CGI_TAG="alaska_cgi"
