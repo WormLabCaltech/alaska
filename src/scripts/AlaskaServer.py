@@ -1624,56 +1624,116 @@ class AlaskaServer(Alaska):
         """
         Loads state from JSON.
         """
+        def get_valid_projects():
+            """
+            Helper function to retrieve list of valid projects from 'projects'
+            folder.
+            """
+            # First, get the list of all valid projects from the 'projects'
+            # directory.
+            projects = []
+            for dir in os.listdir(Alaska.PROJECTS_DIR):
+                path = '{}/{}'.format(Alaska.PROJECTS_DIR, dir)
+
+                if not os.path.isdir(path):
+                    continue
+
+                if os.path.isfile('{}/{}'.format(path, dir)):
+                    projects.append(dir)
+            self.out('INFO: detected {} valid project folders'.format(len(projects)))
+
+            return projects
+
         def get_most_recent_json(files):
             """
             Helper function that returns the filename of the most recent json.
             """
+            projects = get_valid_projects()
+
             jsons = []
             for fname in files:
+                # Check if every project in this save exists in the
+                # projects folder.
+                if not all(proj in projects for proj in loaded['projects']):
+                    self.out('INFO: skipping {} due to mising project(s)'.format(fname))
+                    continue
+
+                
                 if fname.endswith('.json'):
                     jsons.append(fname)
 
             jsons = sorted(jsons)
             fname = jsons[-1]
 
-            return fname
+            if len(jsons) > 0:
+                return fname
+            else:
+                return None
 
         def get_best_json(files):
             """
             Helper function that returns the filename of the best json to load
             based on its number of projects.
+            This function excludes save files that can not be opened or those
+            that have some projects missing. The save file returned by this
+            function will ALWAYS load successfully.
             """
+            projects = get_valid_projects()
+
             max_n = 0
             candidates = []
             jsons = {}
             for fname in files:
-                with open('{}/{}'.format(path, fname), 'r') as f:
-                    loaded = json.load(f)
-                    n = len(loaded['projects']) + len(loaded['samples'])\
-                                                    + len(loaded['jobs'])
+                # Try the following. If it can not be opened/parsed for some
+                # reason, skip the file.
+                try:
+                    with open('{}/{}'.format(path, fname), 'r') as f:
+                        loaded = json.load(f)
 
-                    if max_n < n:
-                        candidates = [fname]
-                        max_n = n
-                    elif max_n == n:
-                        candidates.append(fname)
+                        # Check if every project in this save exists in the
+                        # projects folder.
+                        if not all(proj in projects for proj in loaded['projects']):
+                            self.out('INFO: skipping {} due to mising project(s)'.format(fname))
+                            continue
 
-                    jsons[fname] = len(loaded['projects'])
+                        n = len(loaded['projects']) + len(loaded['samples'])\
+                                                        + len(loaded['jobs'])
+
+                        if max_n < n:
+                            candidates = [fname]
+                            max_n = n
+                        elif max_n == n:
+                            candidates.append(fname)
+
+                        jsons[fname] = len(loaded['projects'])
+                except:
+                    self.out('INFO: skipping {} due to an unknown error'.format(fname))
+                    continue
 
             # Choose the oldest one from the candidates.
-            return sorted(candidates)[-1]
+            if len(candidates) > 0:
+                return sorted(candidates)[-1]
+            else:
+                return None
 
         path = Alaska.SAVE_DIR
         files = os.listdir(path)
-
-        self.out('INFO: locking all threads to load server state')
-        lock = threading.Lock()
-        lock.acquire()
 
         if newest:
             fname = get_most_recent_json(files)
         else:
             fname = get_best_json(files);
+
+        if fname is None:
+            self.out('WARNING: no valid save states to load...aborting')
+            return
+
+
+        self.out('INFO: locking all threads to load server state')
+        lock = threading.Lock()
+        lock.acquire()
+
+
 
         self.out('INFO: loading {}'.format(fname))
         with open('{}/{}'.format(path, fname), 'r') as f:
