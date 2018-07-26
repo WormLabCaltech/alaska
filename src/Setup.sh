@@ -1,11 +1,8 @@
 #!/bin/bash
 # This script sets up alaska on a new machine
-# Please run it in the parent of the root directory
 
-# Mounting point for Juancarlos's CGI folder.
-DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
-
-
+####### DEFINE VARIABLES #######
+# Docker image tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
 DOCKER_ALASKA_TAG="alaska"
@@ -14,6 +11,28 @@ DOCKER_QC_TAG="alaska_qc"
 DOCKER_KALLISTO_TAG="alaska_kallisto"
 DOCKER_SLEUTH_TAG="alaska_sleuth"
 DOCKER_CGI_TAG="alaska_cgi"
+
+# Mounting points.
+DOCKER_TIME_MOUNT="/etc/localtime:/etc/localtime:ro"
+DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
+DOCKER_SCRIPT_MOUNT="alaska_script_volume:/alaska/scripts"
+DOCKER_DATA_MOUNT="alaska_data_volume:/alaska/root"
+DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
+####### END VARIABLE DEFINITIONS #######
+
+# First, check if the container is already running.
+if [[ $(docker ps -a -f "name=$DOCKER_ALASKA_TAG" --format '{{.Names}}') != $DOCKER_ALASKA_TAG ]]
+then
+    printf "%s\n" "It seems there is a previous installation of Alaska. \
+                    Are you sure you would like to reinstall? Continuing will \
+                    remove the containers 'alaska' and 'alaska_cgi', as well \
+                    as rebuilding all necessary Docker images. (Y/N)"
+    read -p ">" choice
+    case "$choice" in
+        Y|y ) ;;
+        * ) exit 0;;
+    esac
+fi
 
 # remove old containers
 docker container rm --force alaska
@@ -42,17 +61,17 @@ docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
 
 # create alaska container
-docker create --name="$DOCKER_ALASKA_TAG" -it -v "/etc/localtime:/etc/localtime:ro"\
-                                  -v "/var/run/docker.sock:/var/run/docker.sock"\
-                                  -v "alaska_script_volume:/alaska/scripts"\
-                                  -v "alaska_data_volume:/alaska/root"\
-                                  --restart unless-stopped\
+docker create --name="$DOCKER_ALASKA_TAG" -it -v $DOCKER_TIME_MOUNT \
+                                  -v $DOCKER_SOCKET_MOUNT \
+                                  -v $DOCKER_SCRIPT_MOUNT \
+                                  -v $DOCKER_DATA_MOUNT \
+                                  --restart unless-stopped \
                                   alaska:latest
 
 # create cgi container
-docker create --name="$DOCKER_CGI_TAG" -it -v "/etc/localtime:/etc/localtime:ro"\
-                                  -v "/var/run/docker.sock:/var/run/docker.sock"\
-                                  -v "alaska_script_volume:/alaska/scripts"\
-                                  -v "alaska_data_volume:/alaska/root"\
-                                  -v $DOCKER_CGI_MOUNT\
+docker create --name="$DOCKER_CGI_TAG" -it -v $DOCKER_TIME_MOUNT \
+                                  -v $DOCKER_SOCKET_MOUNT \
+                                  -v $DOCKER_SCRIPT_MOUNT \
+                                  -v $DOCKER_DATA_MOUNT \
+                                  -v $DOCKER_CGI_MOUNT \
                                   alaska_cgi:latest
