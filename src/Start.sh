@@ -1,35 +1,8 @@
 #!/bin/bash
 # This script starts AlaskaServer
 
-####### DEFINE VARIABLES #######
-# Docker image tags.
-DOCKER_SCRIPT_VOLUME="alaska_script_volume"
-DOCKER_DATA_VOLUME="alaska_data_volume"
-DOCKER_ALASKA_TAG="alaska"
-DOCKER_REQUEST_TAG="alaska_request"
-DOCKER_QC_TAG="alaska_qc"
-DOCKER_KALLISTO_TAG="alaska_kallisto"
-DOCKER_SLEUTH_TAG="alaska_sleuth"
-DOCKER_CGI_TAG="alaska_cgi"
-
-# Declare array varables for required images, containers, and volumes.
-declare -a images=(
-    "$DOCKER_ALASKA_TAG"
-    "$DOCKER_REQUEST_TAG"
-    "$DOCKER_QC_TAG"
-    "$DOCKER_KALLISTO_TAG"
-    "$DOCKER_SLEUTH_TAG"
-    "$DOCKER_CGI_TAG"
-)
-declare -a containers=(
-    "$DOCKER_ALASKA_TAG"
-    "$DOCKER_CGI_TAG"
-)
-declare -a volumes=(
-    "$DOCKER_SCRIPT_VOLUME"
-    "$DOCKER_DATA_VOLUME"
-)
-####### END VARIABLE DEFINITIONS #######
+# Set up variables from set_env_variables.sh
+source scripts/set_env_variables.sh
 
 # Make sure all the required images are present.
 for val in "${images[@]}"
