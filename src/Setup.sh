@@ -58,4 +58,5 @@ docker create --name="$DOCKER_CGI_TAG" -it -v $DOCKER_TIME_MOUNT \
                                   -v $DOCKER_SCRIPT_MOUNT \
                                   -v $DOCKER_DATA_MOUNT \
                                   -v $DOCKER_CGI_MOUNT \
+                                  -p $DOCKER_CGI_PORT
                                   alaska_cgi:latest

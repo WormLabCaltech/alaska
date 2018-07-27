@@ -21,6 +21,9 @@ DOCKER_SCRIPT_MOUNT="alaska_script_volume:/alaska/scripts"
 DOCKER_DATA_MOUNT="alaska_data_volume:/alaska/root"
 DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
+# Port mappings.
+DOCKER_CGI_PORT="81:80"
+
 # Declare array varables for required images, containers, and volumes.
 declare -a images=(
     "$DOCKER_ALASKA_TAG"
