@@ -7,7 +7,7 @@
 # Docker image tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
-DOCKER_ALASKA_TAG="alaska"
+DOCKER_ALASKA_TAG="alaska_server"
 DOCKER_REQUEST_TAG="alaska_request"
 DOCKER_QC_TAG="alaska_qc"
 DOCKER_KALLISTO_TAG="alaska_kallisto"
