@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     docker-ce
 
 # Set up conf
-COPY serve-cgi-bin.conf /etc/apache2/conf-enabled/serve-cgi-bin.conf
+COPY serve-cgi-bin.conf /etc/apache2/conf-available/serve-cgi-bin.conf
 
 # Copy startup script.
 COPY cgi_startup.sh cgi_startup.sh
