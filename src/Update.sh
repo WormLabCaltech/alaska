@@ -22,7 +22,6 @@ docker create -t --name="$DOCKER_ALASKA_TAG" \
 
 # create cgi container
 docker create -t --name="$DOCKER_CGI_TAG" \
-              --network="container:$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
