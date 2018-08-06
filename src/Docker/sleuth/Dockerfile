@@ -1,12 +1,8 @@
 # Sleuth automation using docker container
 # UBUNTU VERSION: 16.04 (xenial)
-# SLEUTH VERSION: 0.43.1
-
-# IMPORTANT
-# Current project folder must be mounted to /projects/ in container
-
 FROM ubuntu:xenial
-RUN mkdir /sleuth/ /projects/
+
+ARG SLEUTH_VER=0.30.0
 
 ##### DEPENDENCIES #####
 RUN apt-get update && apt-get install -y \
@@ -24,8 +20,9 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD5
 
 ##### SLEUTH INSTALLATION #####
 # copy r script for installing packages
-COPY install_sleuth.R ./sleuth/install_sleuth.R
-RUN Rscript ./sleuth/install_sleuth.R
+COPY install_sleuth.R /sleuth/install_sleuth.R
+RUN Rscript /sleuth/install_sleuth.R $SLEUTH_VER
 RUN rm /sleuth/install_sleuth.R
 
+# default port for Sleuth Live
 EXPOSE 42427

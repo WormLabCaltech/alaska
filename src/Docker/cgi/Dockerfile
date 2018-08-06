@@ -1,6 +1,5 @@
 # Dockerfile for cgi container.
 # UBUNTU VERSION: 16.04 (xenial)
-
 FROM ubuntu:xenial
 
 ##### DEPENDECIES #####

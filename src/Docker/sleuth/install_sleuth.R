@@ -1,3 +1,14 @@
+# This R script installs Sleuth and its dependencies.
+
+# Parse command line arguments.
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args) != 1) {
+    stop("Exactly one argument required.n", call.=FALSE)
+} else {
+    repo <- paste("pachterlab/sleuth", args[1], sep="@")
+}
+
 # install dependencies
 install.packages("stringr", repos="http://cran.us.r-project.org")
 install.packages("htmltools", repos="http://cran.us.r-project.org")
@@ -15,4 +26,4 @@ biocLite("rhdf5")
 biocLite("biomaRt")
 
 # install sleuth
-devtools::install_github("pachterlab/sleuth")
+devtools::install_github(repo)
