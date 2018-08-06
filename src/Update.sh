@@ -16,7 +16,6 @@ docker network create $DOCKER_ALASKA_NETWORK
 
 # create alaska container
 docker create -t --name="$DOCKER_ALASKA_TAG" \
-              --network="$DOCKER_ALASKA_NETWORK" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
@@ -27,7 +26,7 @@ docker create -t --name="$DOCKER_ALASKA_TAG" \
 
 # create cgi container
 docker create -t --name="$DOCKER_CGI_TAG" \
-              --network="$DOCKER_ALASKA_NETWORK" \
+              --network="container:$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
