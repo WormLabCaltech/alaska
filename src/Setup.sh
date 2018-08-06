@@ -58,7 +58,7 @@ docker create --name="$DOCKER_ALASKA_TAG" \
               alaska:latest
 
 # create cgi container
-docker create --name="$DOCKER_CGI_TAG"
+docker create --name="$DOCKER_CGI_TAG" \
               --network="$DOCKER_ALASKA_NETWORK" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \

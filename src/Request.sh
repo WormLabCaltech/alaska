@@ -9,5 +9,5 @@ source scripts/set_env_variables.sh
 docker run -i --rm --network="$DOCKER_ALASKA_NETWORK" \
                 -v $DOCKER_SCRIPT_MOUNT \
                 -w "/alaska/scripts" \
-                alaska_request\
+                alaska_request \
                 python AlaskaRequest.py ${COMMAND} ${ID}
