@@ -58,6 +58,6 @@ then
         * ) ;;
     esac
 else
-    sudo cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+    cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
     docker start -i $DOCKER_ALASKA_TAG
 fi
