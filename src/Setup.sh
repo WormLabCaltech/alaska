@@ -44,19 +44,27 @@ docker build -t $DOCKER_CGI_TAG Docker/cgi/
 docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
 
+# make network
+docker network create $DOCKER_ALASKA_NETWORK
+
 # create alaska container
-docker create --name="$DOCKER_ALASKA_TAG" -it -v $DOCKER_TIME_MOUNT \
-                                  -v $DOCKER_SOCKET_MOUNT \
-                                  -v $DOCKER_SCRIPT_MOUNT \
-                                  -v $DOCKER_DATA_MOUNT \
-                                  --restart unless-stopped \
-                                  alaska:latest
+docker create --name="$DOCKER_ALASKA_TAG" \
+              --network="$DOCKER_ALASKA_NETWORK" \
+              -v $DOCKER_TIME_MOUNT \
+              -v $DOCKER_SOCKET_MOUNT \
+              -v $DOCKER_SCRIPT_MOUNT \
+              -v $DOCKER_DATA_MOUNT \
+              --restart unless-stopped \
+              alaska:latest
 
 # create cgi container
-docker create --name="$DOCKER_CGI_TAG" -it -v $DOCKER_TIME_MOUNT \
-                                  -v $DOCKER_SOCKET_MOUNT \
-                                  -v $DOCKER_SCRIPT_MOUNT \
-                                  -v $DOCKER_DATA_MOUNT \
-                                  -v $DOCKER_CGI_MOUNT \
-                                  -p $DOCKER_CGI_PORT \
-                                  alaska_cgi:latest
+docker create --name="$DOCKER_CGI_TAG"
+              --network="$DOCKER_ALASKA_NETWORK" \
+              -v $DOCKER_TIME_MOUNT \
+              -v $DOCKER_SOCKET_MOUNT \
+              -v $DOCKER_SCRIPT_MOUNT \
+              -v $DOCKER_DATA_MOUNT \
+              -v $DOCKER_CGI_MOUNT \
+              -p $DOCKER_CGI_PORT \
+              --restart unless-stopped \
+              alaska_cgi:latest

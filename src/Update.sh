@@ -7,14 +7,31 @@ source scripts/set_env_variables.sh
 docker stop $DOCKER_CGI_TAG
 docker container rm --force $DOCKER_CGI_TAG
 
-# build cgi image
-docker build -t $DOCKER_CGI_TAG Docker/cgi/
+# remove any old alaska containers
+docker stop $DOCKER_ALASKA_TAG
+docker container rm --force $DOCKER_ALASKA_TAG
+
+# make network
+docker network create $DOCKER_ALASKA_NETWORK
+
+# create alaska container
+docker create --name="$DOCKER_ALASKA_TAG" \
+              --network="$DOCKER_ALASKA_NETWORK" \
+              -v $DOCKER_TIME_MOUNT \
+              -v $DOCKER_SOCKET_MOUNT \
+              -v $DOCKER_SCRIPT_MOUNT \
+              -v $DOCKER_DATA_MOUNT \
+              --restart unless-stopped \
+              alaska:latest
 
 # create cgi container
-docker create --name="$DOCKER_CGI_TAG" -it -v $DOCKER_TIME_MOUNT \
-                                  -v $DOCKER_SOCKET_MOUNT \
-                                  -v $DOCKER_SCRIPT_MOUNT \
-                                  -v $DOCKER_DATA_MOUNT \
-                                  -v $DOCKER_CGI_MOUNT \
-                                  -p $DOCKER_CGI_PORT \
-                                  alaska_cgi:latest
+docker create --name="$DOCKER_CGI_TAG"
+              --network="$DOCKER_ALASKA_NETWORK" \
+              -v $DOCKER_TIME_MOUNT \
+              -v $DOCKER_SOCKET_MOUNT \
+              -v $DOCKER_SCRIPT_MOUNT \
+              -v $DOCKER_DATA_MOUNT \
+              -v $DOCKER_CGI_MOUNT \
+              -p $DOCKER_CGI_PORT \
+              --restart unless-stopped \
+              alaska_cgi:latest
