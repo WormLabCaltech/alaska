@@ -23,6 +23,7 @@ DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="81:80"
+DOCKER_ALASKA_PORT="8888:8888"
 DOCKER_ALASKA_NETWORK="alaska_network"
 
 # Declare array varables for required images, containers, volumes, and networks.

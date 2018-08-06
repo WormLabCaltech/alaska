@@ -54,6 +54,7 @@ docker create -t --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
               -v $DOCKER_DATA_MOUNT \
+              -p $DOCKER_ALASKA_PORT \
               --restart unless-stopped \
               $DOCKER_ALASKA_TAG
 
