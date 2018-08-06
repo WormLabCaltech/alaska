@@ -22,7 +22,7 @@ docker create --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_SCRIPT_MOUNT \
               -v $DOCKER_DATA_MOUNT \
               --restart unless-stopped \
-              alaska:latest
+              $DOCKER_ALASKA_TAG
 
 # create cgi container
 docker create --name="$DOCKER_CGI_TAG" \
@@ -34,4 +34,4 @@ docker create --name="$DOCKER_CGI_TAG" \
               -v $DOCKER_CGI_MOUNT \
               -p $DOCKER_CGI_PORT \
               --restart unless-stopped \
-              alaska_cgi:latest
+              $DOCKER_CGI_TAG
