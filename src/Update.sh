@@ -11,9 +11,6 @@ docker container rm --force $DOCKER_CGI_TAG
 docker stop $DOCKER_ALASKA_TAG
 docker container rm --force $DOCKER_ALASKA_TAG
 
-# make network
-docker network create $DOCKER_ALASKA_NETWORK
-
 # create alaska container
 docker create -t --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \
