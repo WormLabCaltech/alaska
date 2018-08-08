@@ -56,4 +56,5 @@ SLEUTH_VER="0.30.0"
 #       there is also a link for miniconda 2.
 MINICONDA2_URL="https://repo.continuum.io/miniconda/Miniconda2-$MINICONDA_VER-Linux-x86_64.sh"
 MINICONDA3_URL="https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-Linux-x86_64.sh"
+KALLISTO_URL="https://github.com/pachterlab/kallisto/releases/download/v$KALLISTO_VER/kallisto_linux-v$KALLISTO_VER.tar.gz"
 ####### END VARIABLE DEFINITIONS #######
