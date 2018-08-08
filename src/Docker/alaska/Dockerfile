@@ -27,6 +27,7 @@ ENV PATH="/miniconda/bin:${PATH}"
 RUN rm /downloads/miniconda.sh
 # install zeromq
 RUN conda install zeromq
+RUN conda install pyzmq
 
 ##### Install Docker #####
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
