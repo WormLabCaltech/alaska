@@ -52,12 +52,36 @@ then
     read -p ">" choice
     case "$choice" in
         1 ) docker attach $DOCKER_ALASKA_TAG;;
-        2 ) sudo cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+        2 ) cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+            if [$? != 0]
+            then
+                printf "%s\n" "Failed to copy scripts to the appropriate volume."
+                printf "%s\n" "Please ensure you have write permissions."
+                exit 1
+            fi
             docker restart $DOCKER_ALASKA_TAG;;
         3 ) docker stop $DOCKER_ALASKA_TAG;;
         * ) ;;
     esac
 else
     cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+    if [$? != 0]
+    then
+        printf "%s\n" "Failed to copy scripts to the appropriate volume."
+        printf "%s\n" "Please ensure you have write permissions."
+        exit 1
+    fi
     docker start -i $DOCKER_ALASKA_TAG
 fi
+
+# If the cgi container isn't running, start that too.
+# First, check if the server container is already running.
+if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_CGI_TAG) != "true" ]]
+then
+    printf "%s\n" "$DOCKER_CGI_TAG is not running."
+    printf "%s\n" "Starting container."
+    docker start $DOCKER_CGI_TAG
+else
+    printf "%s\n" "$DOCKER_CGI_TAG is running."
+fi
+

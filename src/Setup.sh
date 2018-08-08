@@ -4,16 +4,35 @@
 # Set up variables from set_env_variables.sh
 source scripts/set_env_variables.sh
 
-# First, check if the container is already running.
-if [[ $(docker ps -a -f "name=$DOCKER_ALASKA_TAG" --format '{{.Names}}') != $DOCKER_ALASKA_TAG ]]
+printf "%s\n" "This script will REBUILD all Alaska images."
+read -p "Are you sure you would like to continue? (Y/N)" choice
+case "$choice" in
+    Y|y ) ;;
+    * ) exit 0;;
+esac
+
+# First, check if the server container is already running.
+if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_ALASKA_TAG) == "true" ]]
 then
-    printf "%s\n" "It seems there is a previous installation of Alaska. \
-Are you sure you would like to reinstall? Continuing will \
-remove the containers '$DOCKER_ALASKA_TAG' and '$DOCKER_CGI_TAG', as well \
-as rebuilding all necessary Docker images. (Y/N)"
+    printf "%s\n" "$DOCKER_ALASKA_TAG is currently running."
+    printf "%s\n" "The container must be stopped before rebuilding any images."
+    printf "%s\n" "Would you like to proceed? (Y/N)"
     read -p ">" choice
     case "$choice" in
-        Y|y ) ;;
+        Y|y ) docker stop $DOCKER_ALASKA_TAG;;
+        * ) exit 0;;
+    esac
+fi
+
+# Then, check if the cgi container is already running.
+if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_CGI_TAG) == "true" ]]
+then
+    printf "%s\n" "$DOCKER_CGI_TAG is currently running."
+    printf "%s\n" "The container must be stopped before rebuilding any images."
+    printf "%s\n" "Would you like to proceed? (Y/N)"
+    read -p ">" choice
+    case "$choice" in
+        Y|y ) docker stop $DOCKER_CGI_TAG;;
         * ) exit 0;;
     esac
 fi
