@@ -1,0 +1,1 @@
+/home/azurebrd/public_html/cgi-bin/alaska/alaska.cgi
