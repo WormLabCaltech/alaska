@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     bzip2
 
 ##### KALLISTO INSTALLATION #####
-RUN curl $KALLISTO_URL --create-dirs -o /kallisto/kallisto.tar.gz
+RUN curl -L $KALLISTO_URL --create-dirs -o /kallisto/kallisto.tar.gz
 # extract kallisto to directory
 RUN tar -xvzf /kallisto/kallisto.tar.gz -C /kallisto --strip-components=1
 # remove tar
