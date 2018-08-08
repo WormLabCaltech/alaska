@@ -39,12 +39,9 @@ class AlaskaJob(Alaska):
         self.docker = AlaskaDocker(img_tag)
         self.docker_cmd = cmd
         self.docker_args = args
-        self.date_created = dt.datetime.now().strftime('%Y-%m-%d')
-        self.time_created = dt.datetime.now().strftime('%H:%M:%S')
-        self.date_started = ''
-        self.time_started = ''
-        self.date_finished = ''
-        self.time_finished = ''
+        self.datetime_created = dt.datetime.now()
+        self.datetime_started = None
+        self.datetime_finished = None
 
         # self.save()
 
@@ -52,8 +49,7 @@ class AlaskaJob(Alaska):
         """
         Work to do.
         """
-        self.date_started = dt.datetime.now().strftime('%Y-%m-%d')
-        self.time_started = dt.datetime.now().strftime('%H:%M:%S')
+        self.datetime_started = dt.datetime.now()
 
         self.docker.run(self.docker_cmd, **self.docker_args)
 
@@ -63,7 +59,7 @@ class AlaskaJob(Alaska):
         """
         Notifies that the job is done.
         """
-        self.date_finished = dt.datetime.now().strftime('%Y-%m-%d')
+        self.datetime_finished = dt.datetime.now().strftime('%Y-%m-%d')
         self.time_finished = dt.datetime.now().strftime('%H:%M:%S')
 
         self.docker.terminate()
@@ -79,8 +75,21 @@ class AlaskaJob(Alaska):
         else:
             path = folder
 
+        # convert all datetime objects to simple strings
+        _datetime_created = self.datetime_created
+        _datetime_started = self.datetime_started
+        _datetime_finished = self.datetime_finished
+        self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
+        self.datetime_started = self.datetime_started.strftime(Alaska.DATETIME_FORMAT)
+        self.datetime_finished = self.datetime_finished.strftime(Alaska.DATETIME_FORMAT)
+
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
+
+        # restore datetime objects after saving
+        self.datetime_created = _datetime_created
+        self.datetime_started = _datetime_started
+        self.datetime_finsihed = _datetime_finished
 
     def load(self, folder=None, proj=None):
         """
@@ -101,6 +110,7 @@ class AlaskaJob(Alaska):
         for key, item in loaded.items():
             if key == 'docker':
                 self.docker = AlaskaDocker(item['img_tag'])
+            elif key.startswith('datetime'):
+                setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
             else:
                 setattr(self, key, item)
-

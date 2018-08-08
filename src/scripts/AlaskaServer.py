@@ -55,7 +55,7 @@ class AlaskaServer(Alaska):
         AlaskaServer constructor. Starts the server at the given port.
         """
         # date and time server was initialized
-        self.datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.datetime = dt.datetime.now()
 
         self.organisms = {}
 
@@ -414,7 +414,7 @@ class AlaskaServer(Alaska):
         Writes contents of log_pool to log file.
         """
         self.out('INFO: writing log')
-        datetime = dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+        datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
         with open('{}/{}.log'.format(Alaska.LOG_DIR, datetime), 'w') as f:
             for line in self.log_pool:
@@ -1532,7 +1532,7 @@ class AlaskaServer(Alaska):
         Saves its current state.
         """
         path = self.SAVE_DIR
-        datetime = dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+        datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
         self.out('INFO: locking all threads to save server state')
         lock = threading.Lock()
@@ -1549,6 +1549,7 @@ class AlaskaServer(Alaska):
             for species, obj_2 in obj_1.items():
                 obj_2.save()
         ### hide variables that should not be written to JSON
+        _datetime = self.datetime
         _projects = self.projects
         _samples = self.samples
         _projects_temp = self.projects_temp
@@ -1567,6 +1568,7 @@ class AlaskaServer(Alaska):
         _DOCKER = self.DOCKER
         _RUNNING = self.RUNNING
         # delete / replace
+        self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
         self.projects = list(self.projects.keys())
         self.samples = list(self.samples.keys())
         self.projects_temp = list(self.projects_temp.keys())
@@ -1594,6 +1596,7 @@ class AlaskaServer(Alaska):
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
 
         # once dump is finished, restore variables
+        self.datetime = _datetime
         self.projects = _projects
         self.samples = _samples
         self.projects_temp = _projects_temp
@@ -1747,6 +1750,8 @@ class AlaskaServer(Alaska):
                 _queue = item
                 with self.queue.mutex:
                     self.queue.queue.clear()
+            elif key == 'datetime':
+                setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
             else:
                 setattr(self, key, item)
 
