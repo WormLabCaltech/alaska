@@ -84,6 +84,24 @@ class AlaskaServer(Alaska):
         self.log_pool = [] # pool of logs to be flushed
         self.log_interval = 3600 # log interval (in seconds)
 
+        # server state. 1: active, 0: under maintenance
+        self.state = 1
+
+        # Counts of samples in each SUCCESSFUL job.
+        self.counts = {
+            'qc': 0,
+            'kallisto': 0,
+            'sleuth': 0
+        }
+
+        # Running average times for each analysis.
+        # Initialized with default values.
+        self.times = {
+            'qc': 0
+            'kallisto': 0
+            'sleuth': 0
+        }
+
         # set up server
         self.PORT = port
         self.CONTEXT = zmq.Context()
@@ -264,6 +282,7 @@ class AlaskaServer(Alaska):
                 while True:
                     job = self.queue.get() # receive job from queue
                                             # block if there is no job
+                    self.out('INFO: retrieved job {} from queue (size: {})'.format(job.id, self.queue.qsize()))
 
                     # skip if stale job
                     if job.id in self.stale_jobs:
@@ -337,9 +356,16 @@ class AlaskaServer(Alaska):
                         self.current_job = None
                         self.queue.task_done()
 
+                    # Check if docker exited successfully.
                     if exitcode == 0:
                         if job.name in ['qc', 'kallisto', 'sleuth']:
                             proj.progress += 1
+
+                            # calculate average analysis time here
+                            total = self.times[job.name] * self.counts[job.name]
+                            total += job.run_duration
+                            self.counts[job.name] += len(proj.samples)
+                            self.times[job.name] = total / self.counts[job.name]
                         else:
                             self.out('ERROR: job {} has unrecognized name'.format(job.id))
                         self.out('INFO: finished job {}'.format(job.id))
@@ -467,6 +493,9 @@ class AlaskaServer(Alaska):
         Check request is sent to check if server is up and running.
         """
         self.respond(to, to)
+
+        if close:
+            self.close(to)
 
     def update_orgs(self, _id=None):
         """
@@ -1038,6 +1067,22 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+    def enqueue_job(self, _id, job):
+        """
+        Enqueues an AlaskaJob.
+        """
+        self.broadcast(_id, '{}: checking queue'.format(_id, job.id))
+        if self.current_job is None and self.queue.qsize() == 0: # no other job running
+            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
+        else:
+            self.broadcast(_id, '{}: job {} added to queue (size: {})'
+                            .format(_id, job.id, self.queue.qsize()))
+        self.queue.put(job) # put job into queue
+                            # job must be put into queue
+                            # regardless of it being empty
+        self.broadcast(_id, '{}: job {} eta {} mins'.format(_id, job.id, self.calc_queue_exhaust()))
+
+
     def qc(self, _id, close=True, check=True):
         """
         Performs quality control on the given raw reads.
@@ -1098,17 +1143,7 @@ class AlaskaServer(Alaska):
         job.save()
         self.jobs[__id] = job
         proj.jobs.append(__id)
-        self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
-
-        self.broadcast(_id, '{}: checking queue'.format(_id, __id))
-        if self.current_job is None and self.queue.qsize() == 0: # no other job running
-            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
-        else:
-            self.broadcast(_id, '{}: job {} added to queue (size: {})'
-                            .format(_id, __id, self.queue.qsize()))
-        self.queue.put(job) # put job into queue
-                            # job must be put into queue
-                            # regardless of it being empty
+        self.enqueue_job(_id, job)
         proj.progress = 5 # added to queue
 
         if close:
@@ -1175,17 +1210,7 @@ class AlaskaServer(Alaska):
         job.save()
         self.jobs[__id] = job
         proj.jobs.append(__id)
-        self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
-
-        self.broadcast(_id, '{}: checking queue'.format(_id, __id))
-        if self.current_job is None and self.queue.qsize() == 0: # no other job running
-            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
-        else:
-            self.broadcast(_id, '{}: job {} added to queue (size: {})'
-                            .format(_id, __id, self.queue.qsize()))
-        self.queue.put(job) # put job into queue
-                            # job must be put into queue
-                            # regardless of it being empty
+        self.enqueue_job(_id, job)
         proj.progress = 8 # added to queue
 
         if close:
@@ -1247,17 +1272,7 @@ class AlaskaServer(Alaska):
         job.save()
         self.jobs[__id] = job
         proj.jobs.append(__id)
-        self.broadcast(_id, '{}: new job created with id {}'.format(_id, __id))
-
-        self.broadcast(_id, '{}: checking queue'.format(_id, __id))
-        if self.current_job is None and self.queue.qsize() == 0: # no other job running
-            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
-        else:
-            self.broadcast(_id, '{}: job {} added to queue (size: {})'
-                            .format(_id, __id, self.queue.qsize()))
-        self.queue.put(job) # put job into queue
-                            # job must be put into queue
-                            # regardless of it being empty
+        self.enqueue_job(_id, job)
         proj.progress = 11 # added to queue
 
         if close:
@@ -1356,18 +1371,32 @@ class AlaskaServer(Alaska):
         # then, copy
         shutil.copy2('{}/{}'.format(Alaska.SCRIPT_DIR, script), path)
 
-    def proj_status(self, _id, close=True):
+    def get_proj_status(self, _id, close=True):
         """
         Checks project status.
         """
         if self.exists_temp(_id):
-            progress = self.projects_temp[_id].progress
+            proj = self.projects_temp[_id]
+            self.respond(_id, proj.progress)
+        elif self.exists_var(_id):
+            proj = self.projects[_id]
+
+        else:
+            raise Exception('{}: does not exist'.format(_id))
+
+
+
+        self.respond(_id, )
+
+
+        if self.exists_temp(_id):
+
         elif self.exists_var(_id):
             progress = self.projects[_id].progress
         else:
             raise Exception('{}: does not exist'.format(_id))
 
-        self.broadcast(_id, '{}: {}'.format(_id, progress))
+
 
         if close:
             self.close(_id)
@@ -1488,11 +1517,49 @@ class AlaskaServer(Alaska):
         self.test_set_vars(_id, close=False)
         self.do_all(_id, close=False)
 
-    def get_status(self, _id):
+    def get_status(self, _id, close=False):
         """
         Get the status of the server.
         """
-        pass
+        self.respond(_id, self.state)
+
+        if close:
+            self.close(_id)
+
+    def calc_queue_exhaust(self):
+        """
+        Calculates the estimated time left until the queue is exhausted.
+        The returned decimal is in minutes.
+        """
+        # estimated time to exhaust queue
+        time = 0
+
+        # First, if there is an analysis currently running, add that time.
+        if self.current_job is not None:
+            proj = self.projects(self.current_job.proj_id)
+            time += self.times[self.current_job.name] * len(proj.samples)
+
+        # Then, deal with the queue.
+        for item in list(self.queue):
+            proj = self.projects[item.proj_id]
+            time += self.times[item.name] * len(proj.samples)
+
+        return time
+
+    def get_queue(self, _id, close=False):
+        """
+        Gets the current queue status of the server.
+        """
+        # number of jobs in queue
+        count = self.queue.qsize()
+
+        time = self.calc_queue_exhaust()
+        self.broadcast(_id, 'WARNING: these are crude estimates')
+        self.broadcast(_id, 'Queue size: {}'.format(count))
+        self.broadcast(_id, 'Estimated time to exhaust queue: {} mins'.format(time))
+
+        if close:
+            self.close(_id)
 
     def cleanup(self):
         """

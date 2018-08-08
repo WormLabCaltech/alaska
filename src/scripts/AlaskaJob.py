@@ -42,6 +42,7 @@ class AlaskaJob(Alaska):
         self.datetime_created = dt.datetime.now()
         self.datetime_started = None
         self.datetime_finished = None
+        self.run_duration = None
 
         # self.save()
 
@@ -63,6 +64,11 @@ class AlaskaJob(Alaska):
         self.time_finished = dt.datetime.now().strftime('%H:%M:%S')
 
         self.docker.terminate()
+
+        # calculate run duration (in minutes)
+        delta = self.datetime_finished - self.datetime_started
+        self.run_duration = delta.total_seconds() / 60
+
 
         self.save() # save job info
 
