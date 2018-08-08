@@ -17,6 +17,8 @@ import os
 import sys
 import time
 import json
+import queue
+from threading import Thread
 import subprocess as sp
 
 def load_proj(_id):
@@ -154,6 +156,35 @@ def run_qc(proj, nthreads):
         """
         args = ['multiqc', '.']
         run_sys(args, prefix=_id)
+
+
+    def worker(i=0, qu):
+        """
+        Worker function for multithreading.
+        """
+        while True:
+            # get item from queue
+            item = qu.get()
+
+            # a way to stop the workers
+            if item is None:
+                break
+
+            _id = item[0]
+            type = item[1]
+            path = item[2]
+            f = item[3]
+            args = item[4]
+
+            # change _id argument to reflect the thread number
+            args[0] = '[Thread-{}] {}'.format(i, args[0])
+
+            print('# {}: starting {} on thread {}'.format(_id, type, i))
+            f(*args)
+
+            qu.task_done()
+
+
     ########## HELPER FUNCTIONS END HERE ###########
 
     print('{} samples detected...'.format(len(proj['samples'])), end='')
@@ -201,23 +232,68 @@ def run_qc(proj, nthreads):
         time.sleep(1)
         samtools_index(_id)
 
-        # read_distribution.py
-        read_distribution(_id, bed_path)
+        # If nthread > 1, we want to multithread.
+        if nthread > 1:
+            qu = queue.Queue()
 
-        # geneBody_coverage.py
-        geneBody_coverage(_id, bed_path)
+            # Enqueue everything here!
+            print('# multithreading on.')
 
-        # tin.py
-        tin(_id, bed_path)
+            # queue items will have the format:
+            # [_id, analysis type, path, function, arguments]
+            qu.put([_id, 'read_distribution', path,
+                        read_distribution, (_id, bed_path)])
+            print('# enqueued read_distribution for {}'.format(_id))
 
-        # FastQC
-        fastqc(_id)
+            qu.put([_id, 'geneBody_coverage', path,
+                        geneBody_coverage, (_id, bed_path)])
+            print('# enqueued geneBody_coverage for {}'.format(_id))
+
+            qu.put([_id, 'tin', path,
+                        tin, (_id, bed_path)])
+            print('# enqueued tin for {}'.format(_id))
+
+            qu.put([_id, 'fastqc', path,
+                        fastqc, (_id)])
+            print('# enqueued fastqc for {}'.format(_id))
+
+            # spawn threads
+            threads = []
+            for i in range(nthreads):
+                t = Thread(target=worker, args=(i, qu))
+                t.start()
+                threads.append(t)
+
+            # block until all tasks are done
+            qu.join()
+
+            # stop workers
+            for i in range(nthreads):
+                qu.put(None)
+            for t in threads:
+                t.join()
+        else:
+            # read_distribution.py
+            read_distribution(_id, bed_path)
+
+            # geneBody_coverage.py
+            geneBody_coverage(_id, bed_path)
+
+            # tin.py
+            tin(_id, bed_path)
+
+            # FastQC
+            fastqc(_id)
 
         # MultiQC
         multiqc(_id)
 
         os.chdir(wdir)
         print('# returned to {}'.format(wdir))
+
+        if nthread > 1:
+            print('# starting analysis of {} items in queue'.format(qu.qsize()))
+
 
 
 def run_kallisto(proj, nthreads):
@@ -318,4 +394,3 @@ if __name__ == '__main__':
         run_kallisto(proj, nthreads)
     elif args.type == 'sleuth':
         run_sleuth(proj)
-
