@@ -25,6 +25,7 @@ class Alaska():
     """
     VERSION = 'dev' # alaska version
     ENCODING = 'utf-8' # encoding for decoding byte literals
+    DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
     # HOST_DIR = None     # root dir on host machine
     #                     # this is required because spawning host container from host container
     #                     # needs to have host's absolute path
@@ -106,13 +107,14 @@ class Alaska():
         'diff_exp':             b'\x11', # perform differential expression
         'do_all':               b'\x12', # perform qc, read quant, and diff exp
         'open_sleuth_server':   b'\x13',
-        'proj_status':          b'\x14', # check project status
+        'get_proj_status':      b'\x14', # check project status
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
         'test_read_quant':      b'\x50',
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
+        'get_queue':            b'\x92',
         'get_status':           b'\x93',
         'save':                 b'\x94', # saves server state
         'load':                 b'\x95', # loads server state

@@ -21,10 +21,10 @@ DOCKER_SCRIPT_MOUNT="alaska_script_volume:/alaska/scripts"
 DOCKER_DATA_MOUNT="alaska_data_volume:/alaska/root"
 DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
-# Port mappings.
+# Port mappings & networking.
 DOCKER_CGI_PORT="81:80"
 
-# Declare array varables for required images, containers, and volumes.
+# Declare array varables for required images, containers, volumes, and networks.
 declare -a images=(
     "$DOCKER_ALASKA_TAG"
     "$DOCKER_REQUEST_TAG"
@@ -41,4 +41,20 @@ declare -a volumes=(
     "$DOCKER_SCRIPT_VOLUME"
     "$DOCKER_DATA_VOLUME"
 )
+
+# Software version control.
+MINICONDA_VER="4.5.4"
+BOWTIE2_VER="2.3.4"
+SAMTOOLS_VER="1.7"
+RSEQC_VER="2.6.4"
+FASTQC_VER="0.11.6"
+MULTIQC_VER="1.4"
+KALLISTO_VER="0.44.0"
+SLEUTH_VER="0.30.0"
+
+# Note: some bioconda packages require python2, which is why
+#       there is also a link for miniconda 2.
+MINICONDA2_URL="https://repo.continuum.io/miniconda/Miniconda2-$MINICONDA_VER-Linux-x86_64.sh"
+MINICONDA3_URL="https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-Linux-x86_64.sh"
+KALLISTO_URL="https://github.com/pachterlab/kallisto/releases/download/v$KALLISTO_VER/kallisto_linux-v$KALLISTO_VER.tar.gz"
 ####### END VARIABLE DEFINITIONS #######

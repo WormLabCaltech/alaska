@@ -1,30 +1,29 @@
 # requests containerization
 # UBUNTU VERSION: 16.04 (xenial)
-
-# IMPORTANT
-# Alaska root folder must be mounted to /alaska/
-
 FROM ubuntu:xenial
-RUN mkdir ./downloads/
 
+# default to 4.5.1
+ARG MINICONDA_VER=4.5.1
+ARG MINICONDA3_URL=https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-Linux-x86_64.sh
 
 ##### DEPENDENCIES #####
 RUN apt-get update && apt-get install -y \
-    wget \
     bzip2 \
     apt-transport-https \
     ca-certificates \
     curl \
     software-properties-common
 
-##### ANACONDA (PYTHON) INSTALLATION #####
-# fetch Anaconda installation script
-RUN wget https://repo.continuum.io/archive/Anaconda3-5.0.0.1-Linux-x86_64.sh -O ./downloads/anaconda.sh
-# run Anaconda installation
-RUN bash ./downloads/anaconda.sh -b -f -p ./anaconda/
-# add anaconda to PATH
-ENV PATH="/anaconda/bin:${PATH}"
-# update anaconda packages
-RUN conda update --all -y
+##### MINICONDA (PYTHON) INSTALLATION #####
+# fetch miniconda installation script
+RUN curl $MINICONDA3_URL --create-dirs -o /downloads/miniconda.sh
+# make script executable
+RUN chmod +x /downloads/miniconda.sh
+# run miniconda installation
+RUN /downloads/miniconda.sh -b -f -p /miniconda/
+# add miniconda to PATH
+ENV PATH="/miniconda/bin:${PATH}"
 # remove installation script
-RUN rm ./downloads/anaconda.sh
+RUN rm /downloads/miniconda.sh
+# install zeromq
+RUN conda install zeromq

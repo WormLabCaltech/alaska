@@ -116,5 +116,6 @@ if __name__ == '__main__':
         request.id = args.id
 
     print('INFO: Creating {} request'.format(args.action))
+
     # gate for actions
     request.send(args.action)
