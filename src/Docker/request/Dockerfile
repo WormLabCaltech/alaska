@@ -27,3 +27,4 @@ ENV PATH="/miniconda/bin:${PATH}"
 RUN rm /downloads/miniconda.sh
 # install zeromq
 RUN conda install zeromq
+RUN conda install pyzmq
