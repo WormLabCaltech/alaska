@@ -59,13 +59,7 @@ then
     esac
 else
     docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
-    if [$? != 0]
-    then
-        printf "%s\n" "Failed to copy scripts to the appropriate volume."
-        printf "%s\n" "Please ensure you have write permissions."
-        exit 1
-    fi
-    docker start -i $DOCKER_ALASKA_TAG
+    docker start $DOCKER_ALASKA_TAG
 fi
 
 # If the cgi container isn't running, start that too.
@@ -81,7 +75,8 @@ else
     printf "%s\n" "Would you like to re-copy all files in the cgi folder to the container? (Y/N)"
     read -p ">" choice
     case "$choice" in
-        Y|y ) docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin;;
+        Y|y ) docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
+              docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin;;
         * ) ;;
     esac
 fi
