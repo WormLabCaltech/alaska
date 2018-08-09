@@ -75,8 +75,7 @@ else
     printf "%s\n" "Would you like to re-copy all files in the cgi folder to the container? (Y/N)"
     read -p ">" choice
     case "$choice" in
-        Y|y ) docker cp scripts/. $DOCKER_CGI_TAG:/alaska/scripts
-              docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska;;
+        Y|y ) docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska;;
         * ) ;;
     esac
 fi
