@@ -18,7 +18,7 @@ DOCKER_CGI_TAG="alaska_cgi"
 # Mounting points.
 DOCKER_TIME_MOUNT="/etc/localtime:/etc/localtime:ro"
 DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
-DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_MOUNT:/alaska/scripts"
+DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_VOLUME:/alaska/scripts"
 DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
 DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin/alaska"
 
