@@ -86,7 +86,8 @@ class AlaskaJob(Alaska):
         _datetime_started = self.datetime_started
         _datetime_finished = self.datetime_finished
 
-        self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
+        if self.datetime_created is not None:
+            self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
         if self.datetime_started is not None:
             self.datetime_started = self.datetime_started.strftime(Alaska.DATETIME_FORMAT)
         if self.datetime_finished is not None:
