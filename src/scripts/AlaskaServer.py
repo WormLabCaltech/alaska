@@ -97,8 +97,8 @@ class AlaskaServer(Alaska):
         # Running average times for each analysis.
         # Initialized with default values.
         self.times = {
-            'qc': 0
-            'kallisto': 0
+            'qc': 0,
+            'kallisto': 0,
             'sleuth': 0
         }
 
