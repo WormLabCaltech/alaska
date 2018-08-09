@@ -1,6 +1,6 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
-# Form to process Alaska .json 
+# Form to process Alaska .json
 #
 # https://github.com/WormLabCaltech/alaska
 # https://github.com/WormLabCaltech/alaska/blob/master/README.md
@@ -75,7 +75,7 @@ if ($action) {
 sub loadOrganisms {
   my $organism_json_dir = '/var/lib/docker/volumes/alaska_data_volume/_data/organisms/jsons/';
   my (@files) = <${organism_json_dir}*.json>;
-  foreach my $file (@files) { 
+  foreach my $file (@files) {
     my $filename = $file;
     $filename =~ s/$organism_json_dir//;
     $filename =~ s/\.json//;
@@ -84,7 +84,7 @@ sub loadOrganisms {
     my $fileData = <IN>;
     close (IN) or die "Cannot close $file : $!";
     $/ = "\n";
-    my $perl_scalar = $json->decode( $fileData );        
+    my $perl_scalar = $json->decode( $fileData );
     my %jsonData    = %$perl_scalar;                     # decode the json into a hash
     foreach my $ref (sort keys %{ $jsonData{refs} }) { $organisms{$filename}{$ref}++; }
   }
@@ -157,17 +157,17 @@ sub loadTemplates {
   $template{values}{sample}{type}{1}               = 'Single-end';
   $template{values}{sample}{type}{2}               = 'Paired-end';
 } # sub loadTemplates
- 
+
 
 sub loadJsonFile {
   my ($source, $projectId) = @_;
   my $page = '';
-  if ($source eq 'dropdown') { 
+  if ($source eq 'dropdown') {
 #       my $jsonUrl = '../../data/alaska/' . $projectId;
 #       my $jsonUrl = "http://${hostfqdn}/~azurebrd/cgi-bin/data/alaska/" . $projectId;
       my $jsonUrl = "http://wobr2.caltech.edu/~azurebrd/cgi-bin/alaska/data/" . $projectId;
       $page        = get $jsonUrl; }
-    elsif ($source eq 'projectId') { 
+    elsif ($source eq 'projectId') {
       my $file = $projectsDir . $projectId . '/_temp/' . $projectId . '.json';
       $/ = undef;
       open (IN, "<$file") or die "Cannot open $file : $!";
@@ -201,7 +201,7 @@ sub updateJsonProjectPage {
   }
   ($var, $jsonData{design})   = &getHtmlVar($query, 'design');
 
-# don't delete, no longer updating ctrls on this page update 
+# don't delete, no longer updating ctrls on this page update
 #   delete $jsonData{ctrls};					# need to clear out all old values before loading new values
   foreach my $sample (sort keys %{ $jsonData{samples} }) {
     foreach my $field (keys %{ $template{label}{sample}{meta} }) {
@@ -281,9 +281,9 @@ sub updateJsonControlsPage {
 #      print qq(FC $form_characteristic, FD $form_detail<br>);
      foreach my $sample (sort keys %{ $jsonData{"samples"} }) {
        foreach my $characteristic (sort keys %{ $jsonData{"samples"}{$sample}{"meta"}{"chars"} }) {
-         if ($form_characteristic eq $characteristic) { 
+         if ($form_characteristic eq $characteristic) {
            my $detail = $jsonData{"samples"}{$sample}{"meta"}{"chars"}{"$characteristic"};
-             if ($form_detail eq $detail) { 
+             if ($form_detail eq $detail) {
 #              print qq($i - $sample - $characteristic<br>);
                $jsonData{"ctrls"}{$sample} = $characteristic;
      } } } }
@@ -415,13 +415,13 @@ sub showJsonProjectForm {
           print qq(<select name="$id" id="$id"><option></option></select>\n); }
         elsif ($field eq 'organism') {
           print qq(<select name="$id" id="$id">);
-          foreach my $org (sort keys %organisms) { 
+          foreach my $org (sort keys %organisms) {
             print qq(<option>$org</option>\n); }
           print qq(</select>\n); }
         elsif ($field eq 'ref_ver') {
           if (scalar keys %organisms == 1) {
               print qq(<select name="$id" id="$id">);
-              foreach my $org (sort keys %organisms) { 
+              foreach my $org (sort keys %organisms) {
                 foreach my $ver (sort keys %{ $organisms{$org} }) { print qq(<option>$ver</option>\n); } }
               print qq(</select>\n); }
             else { print qq(need update for multiple organisms); } }
@@ -468,8 +468,8 @@ sub showJsonControlsForm {
       $characteristicInSample{$characteristic}++;
       $characteristics{$characteristic}{details}{ $jsonData{"samples"}{$sample}{"meta"}{"chars"}{$characteristic} }++;
 #       my $possible = $sample . '_' . $characteristic;
-#       $possibleControls{$possible}++; 
-    } 
+#       $possibleControls{$possible}++;
+    }
     foreach my $characteristic (sort keys %characteristicInSample) {
       $characteristics{$characteristic}{count}++; }
   }
@@ -478,7 +478,7 @@ sub showJsonControlsForm {
     if ($characteristics{$characteristic}{count} == $sampleCount) {
       foreach my $detail (sort keys %{ $characteristics{$characteristic}{details} }) {
         push @options, qq(<option>$characteristic - $detail</option>); } } }
-  my $optionSize = 10; 
+  my $optionSize = 10;
   if (scalar(@options) < $optionSize) { $optionSize = scalar(@options); }
   for my $i (1 .. $designAmount) {
     print qq(Control $i : <select name="control_$i" size="$optionSize">\n);
@@ -505,7 +505,7 @@ sub showStart {
 sub startProjectPage {
   &printNormalHeader();
   print qq(<form method="post" action="alaska.cgi">);
-  my $shelltext = `/home/raymond/local/src/git/alaska/src/Request.sh new_proj`;
+  my $shelltext = `/alaska/scripts/cgi_request.sh new_proj`;
   my $projectId = '';
   if ($shelltext =~ m/[^\w](\w+?): new project created/ms) { $projectId = $1; }
   print qq(Project ID $projectId created.<br/>);
@@ -523,10 +523,10 @@ sub inferSamplesPage {
   print qq(Project ID $projectId<br/>\n);
   print qq(<input type="hidden" name="projectId" value="$projectId">\n);
   print qq(Calling : Request.sh infer_samples --id [PROJECT_ID]<br/>\n);
-  my $shelltext = `/home/raymond/local/src/git/alaska/src/Request.sh infer_samples --id $projectId`;
+  my $shelltext = `/alaska/scripts/cgi_request.sh infer_samples --id $projectId`;
   print qq(Try to load projects/[PROJECT_ID]/_temp/[PROJECT_ID].json into editor<br/>);
 #   Request.sh infer_samples --id [PROJECT_ID]
-# This creates a .json file at 
+# This creates a .json file at
 #   projects/[PROJECT_ID]/_temp/[PROJECT_ID].json
 # (Still not sure what the filesystem root for this is)
   print qq(<input type="submit" name="action" value="Load JSON">\n);
@@ -593,14 +593,14 @@ sub untaint {
 sub getHtmlVar {		# get variables from html form and untaint them
   no strict 'refs';		# need to disable refs to get the values
 				# possibly a better way than this
-  my ($query, $var, $err) = @_;	# get the CGI query val, 
+  my ($query, $var, $err) = @_;	# get the CGI query val,
 				# get the name of the variable to query->param,
 				# get whether to display and error if no such
 				# variable found
   unless ($query->param("$var")) {		# if no such variable found
     if ($err) {			# if we want error displayed, display error
       print "<FONT COLOR=blue>ERROR : No such variable : $var</FONT><BR>\n";
-    } # if ($err) 
+    } # if ($err)
   } else { # unless ($query->param("$var"))	# if we got a value
     my $oop = $query->param("$var");		# get the value
     $$var = &untaint($oop);			# untaint and put value under ref
@@ -628,11 +628,11 @@ sub loadJsonPageTemplates {
   my ($jsonDataRef) = &loadJsonFile($filename);
   my %jsonData = %$jsonDataRef;
   &loadTemplates();
-  
+
   print qq(<table>);
 
   foreach my $field (keys %jsonData) {
-    if ($project{$field}{"visible"}) { 
+    if ($project{$field}{"visible"}) {
       my $label   = $project{$field}{"label"};
       my $tooltip = $project{$field}{"tooltip"};
       my $id      = "project_" . $field;
@@ -654,12 +654,12 @@ sub loadJsonPageTemplates {
   } # foreach my $field (sort keys %jsonData)
 
   foreach my $field (sort keys %{ $jsonData{"meta"} }) {
-    if ($project{"meta"}{$field}{"visible"}) { 
+    if ($project{"meta"}{$field}{"visible"}) {
       my $label   = $project{"meta"}{$field}{"label"};
       my $tooltip = $project{"meta"}{$field}{"tooltip"};
       my $id      = "project_meta_" . $field;
       my $data    = $jsonData{"meta"}{$field};
-      if ($project{"meta"}{$field}{"editable"}) { 
+      if ($project{"meta"}{$field}{"editable"}) {
         $data = qq(<input id="$id" name="$id" value="$jsonData{"meta"}{$field}"></input>); }
       print qq(<tr><td>project meta</td><td>$label</td><td>$data</td></tr>\n);
   } }
@@ -670,7 +670,7 @@ sub loadJsonPageTemplates {
 #   print qq(<tr><td>project</td><td>project id</td><td><input id='projectId' name='projectId' disabled value="$projectId"></input></td></tr>\n);
 #   my $dir = $jsonData{'dir'};
 #   print qq(<tr><td>project</td><td>dir</td><td><input id='dir' name='dir' disabled value="$dir"></input></td></tr>\n);
-# 
+#
 #   my $date_created = $jsonData{"meta"}{"date created"};
 #   my $time_created = $jsonData{"meta"}{"time created"};
 #   print qq(<tr><td>project</td><td>date created</td><td><input id='date_created' name='date_created' disabled value="$date_created"></input></td></tr>\n);
@@ -689,18 +689,18 @@ sub loadJsonPageTemplates {
             foreach my $entry (@{ $jsonData{"samples"}{$sample}{$field} }) {
               $data .= qq( - $entry<br/>); } }
           else {
-            if ($sample{$field}{"editable"}) { 
+            if ($sample{$field}{"editable"}) {
               $data = qq(<input id="$id" name="$id" value="$jsonData{"samples"}{$sample}{$field}"></input>); } }
         print qq(<tr><td>$sample</td><td>$label</td><td>$data</td></tr>\n);
       }
     }
     foreach my $field (sort keys %{ $jsonData{"samples"}{$sample}{"meta"} }) {
-      if ($sample{"meta"}{$field}{"visible"}) { 
+      if ($sample{"meta"}{$field}{"visible"}) {
         my $label   = $sample{"meta"}{$field}{"label"};
         my $tooltip = $sample{"meta"}{$field}{"tooltip"};
         my $id      = "sample_" . $sample . "_meta_" . $field;
         my $data    = $jsonData{"samples"}{$sample}{"meta"}{$field};
-        if ($sample{"meta"}{$field}{"editable"}) { 
+        if ($sample{"meta"}{$field}{"editable"}) {
           $data = qq(<input id="$id" name="$id" value="$jsonData{"samples"}{$sample}{"meta"}{$field}"></input>); }
         print qq(<tr><td>$sample meta</td><td>$label</td><td>$data</td></tr>\n);
     } }
@@ -708,11 +708,11 @@ sub loadJsonPageTemplates {
 #     my $id = $jsonData{"samples"}{$sample}{"id"};
 #     my $name = $sample . '_id';
 #     print qq(<tr><td>$sample</td><td>id</td><td><input id='$name' name='$name' disabled value="$id"></input></td></tr>\n);
-# 
+#
 #     my $type = $jsonData{"samples"}{$sample}{"type"};
 #     $name = $sample . '_type';
 #     print qq(<tr><td>$sample</td><td>type</td><td><input id='$name' name='$name' disabled value="$type"></input></td></tr>\n);
-# 
+#
 #     my $singlechecked = 'checked'; my $pairedchecked = '';
 #     if ($type == 1) { $singlechecked = ''; $pairedchecked = 'checked'; }
 #     my $name = $sample . '_singlepair';
@@ -720,7 +720,7 @@ sub loadJsonPageTemplates {
 #     print qq(<input type="radio" id="$name" name="$name" $pairedchecked value="paired">paired<br/>);
 #     print qq(<input type="radio" id="$name" name="$name" $singlechecked value="single">single<br/>);
 #     print qq(</td></tr>\n);
-# 
+#
 #     my $length = $jsonData{"samples"}{$sample}{"length"};
 #     $name = $sample . '_length';
 #     print qq(<tr><td>$sample</td><td>length</td><td><input id='$name' name='$name' value="$length"></input></td></tr>\n);
@@ -740,14 +740,13 @@ sub loadJsonPageTemplates {
 
   } # foreach my $sample (sort keys %{ $jsonData{"samples"} })
 
-#   my @rawreads   = 
+#   my @rawreads   =
 #   print qq(ID $projectId<br/>\n);
 #   print qq(Dir $projectDir<br/>\n);
-  
+
   print qq(</table>\n);
 
   print qq(<input type="submit" name="action" value="Update JSON">\n);
   print qq(</form>\n);
   &printNormalFooter();
 } # sub loadJsonPageTemplates
-
