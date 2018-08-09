@@ -93,7 +93,7 @@ docker volume create --name $DOCKER_DATA_VOLUME
 docker volume create --name $DOCKER_CGI_VOLUME
 
 # create alaska container
-docker create -t --name="$DOCKER_ALASKA_TAG" \
+docker create -it --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
@@ -102,7 +102,7 @@ docker create -t --name="$DOCKER_ALASKA_TAG" \
               $DOCKER_ALASKA_TAG
 
 # create cgi container
-docker create -t --name="$DOCKER_CGI_TAG" \
+docker create -it --name="$DOCKER_CGI_TAG" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
