@@ -106,7 +106,6 @@ docker create -it --name="$DOCKER_CGI_TAG" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
-              -v $DOCKER_DATA_MOUNT \
               -v $DOCKER_CGI_MOUNT \
               -p $DOCKER_CGI_PORT \
               --restart unless-stopped \
