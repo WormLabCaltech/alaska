@@ -41,7 +41,7 @@ declare -a containers=(
 declare -a volumes=(
     "$DOCKER_SCRIPT_VOLUME"
     "$DOCKER_DATA_VOLUME"
-    "$ALASKA_CGI_VOLUME"
+    "$DOCKER_CGI_VOLUME"
 )
 
 # Software version control.
