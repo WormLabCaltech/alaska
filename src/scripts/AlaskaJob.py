@@ -85,9 +85,12 @@ class AlaskaJob(Alaska):
         _datetime_created = self.datetime_created
         _datetime_started = self.datetime_started
         _datetime_finished = self.datetime_finished
+
         self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
-        self.datetime_started = self.datetime_started.strftime(Alaska.DATETIME_FORMAT)
-        self.datetime_finished = self.datetime_finished.strftime(Alaska.DATETIME_FORMAT)
+        if self.datetime_started is not None:
+            self.datetime_started = self.datetime_started.strftime(Alaska.DATETIME_FORMAT)
+        if self.datetime_finished is not None:
+            self.datetime_finished = self.datetime_finished.strftime(Alaska.DATETIME_FORMAT)
 
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
