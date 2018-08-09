@@ -7,6 +7,7 @@
 # Docker image tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
+DOCKER_CGI_VOLUME="alaska_cgi_volume"
 DOCKER_ALASKA_TAG="alaska_server"
 DOCKER_REQUEST_TAG="alaska_request"
 DOCKER_QC_TAG="alaska_qc"
@@ -17,9 +18,10 @@ DOCKER_CGI_TAG="alaska_cgi"
 # Mounting points.
 DOCKER_TIME_MOUNT="/etc/localtime:/etc/localtime:ro"
 DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
-DOCKER_SCRIPT_MOUNT="alaska_script_volume:/alaska/scripts"
-DOCKER_DATA_MOUNT="alaska_data_volume:/alaska/root"
-DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
+DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_MOUNT:/alaska/scripts"
+DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
+DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/alaska/cgi"
+# DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="81:80"
@@ -40,6 +42,7 @@ declare -a containers=(
 declare -a volumes=(
     "$DOCKER_SCRIPT_VOLUME"
     "$DOCKER_DATA_VOLUME"
+    "$ALASKA_CGI_VOLUME"
 )
 
 # Software version control.

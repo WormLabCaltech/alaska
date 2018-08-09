@@ -90,6 +90,7 @@ docker build -t $DOCKER_CGI_TAG Docker/cgi/
 # make data volumes
 docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
+docker volume create --name $DOCKER_CGI_VOLUME
 
 # create alaska container
 docker create -t --name="$DOCKER_ALASKA_TAG" \

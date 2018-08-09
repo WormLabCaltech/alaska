@@ -52,11 +52,10 @@ then
     read -p ">" choice
     case "$choice" in
         1 ) docker attach $DOCKER_ALASKA_TAG;;
-        2 ) cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+        2 ) docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
             if [$? != 0]
             then
                 printf "%s\n" "Failed to copy scripts to the appropriate volume."
-                printf "%s\n" "Please ensure you have write permissions."
                 exit 1
             fi
             docker restart $DOCKER_ALASKA_TAG;;
@@ -64,7 +63,7 @@ then
         * ) ;;
     esac
 else
-    cp -a scripts/* /var/lib/docker/volumes/alaska_script_volume/_data/
+    docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
     if [$? != 0]
     then
         printf "%s\n" "Failed to copy scripts to the appropriate volume."
@@ -80,8 +79,14 @@ if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_CGI_TAG) != "true" ]]
 then
     printf "%s\n" "$DOCKER_CGI_TAG is not running."
     printf "%s\n" "Starting container."
+    docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin
     docker start $DOCKER_CGI_TAG
 else
     printf "%s\n" "$DOCKER_CGI_TAG is running."
-fi
+    printf "%s\n" "Would you like to re-copy all files in the cgi folder to the container? (Y/N)"
+    read -p ">" choice
+    case "$choice" in
+        Y|y ) docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin;;
+        * ) ;;
 
+fi
