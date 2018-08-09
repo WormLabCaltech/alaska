@@ -6,6 +6,14 @@ source scripts/set_env_variables.sh
 docker container rm --force $DOCKER_ALASKA_TAG
 docker container rm --force $DOCKER_CGI_TAG
 
+# build alaska image
+docker build -t $DOCKER_ALASKA_TAG \
+             --build-arg MINICONDA_VER="$MINICONDA_VER" \
+             --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
+             --no-cache \
+             Docker/alaska/
+
+
 # create alaska container
 docker create -it --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \

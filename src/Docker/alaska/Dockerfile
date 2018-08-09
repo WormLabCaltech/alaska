@@ -28,6 +28,8 @@ RUN rm /downloads/miniconda.sh
 # install zeromq
 RUN conda install zeromq
 RUN conda install pyzmq
+# install pandas
+RUN conda install pandas
 
 ##### Install Docker #####
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
