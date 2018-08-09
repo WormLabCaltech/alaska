@@ -270,7 +270,7 @@ class AlaskaServer(Alaska):
             sys.exit(code)
         except Exception as e:
             print('An error occured while stopping the server!')
-            print(e)
+            traceback.print_exc()
 
     def worker(self):
         """
