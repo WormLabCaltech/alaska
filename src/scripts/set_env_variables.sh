@@ -20,8 +20,7 @@ DOCKER_TIME_MOUNT="/etc/localtime:/etc/localtime:ro"
 DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
 DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_MOUNT:/alaska/scripts"
 DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
-DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/alaska/cgi"
-# DOCKER_CGI_MOUNT="/home/azurebrd/public_html/cgi-bin:/usr/lib/cgi-bin"
+DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="81:80"
