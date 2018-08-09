@@ -6,6 +6,9 @@ source scripts/set_env_variables.sh
 docker container rm --force $DOCKER_ALASKA_TAG
 docker container rm --force $DOCKER_CGI_TAG
 
+docker volume create --name $DOCKER_CGI_VOLUME
+
+
 # create alaska container
 docker create -t --name="$DOCKER_ALASKA_TAG" \
               -v $DOCKER_TIME_MOUNT \

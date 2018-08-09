@@ -7,6 +7,7 @@
 # Docker image tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
+DOCKER_CGI_VOLUME="alaska_cgi_volume"
 DOCKER_ALASKA_TAG="alaska_server"
 DOCKER_REQUEST_TAG="alaska_request"
 DOCKER_QC_TAG="alaska_qc"
@@ -40,6 +41,7 @@ declare -a containers=(
 declare -a volumes=(
     "$DOCKER_SCRIPT_VOLUME"
     "$DOCKER_DATA_VOLUME"
+    "$ALASKA_CGI_VOLUME"
 )
 
 # Software version control.
