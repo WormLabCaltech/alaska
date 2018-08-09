@@ -1375,28 +1375,7 @@ class AlaskaServer(Alaska):
         """
         Checks project status.
         """
-        if self.exists_temp(_id):
-            proj = self.projects_temp[_id]
-            self.respond(_id, proj.progress)
-        elif self.exists_var(_id):
-            proj = self.projects[_id]
-
-        else:
-            raise Exception('{}: does not exist'.format(_id))
-
-
-
-        self.respond(_id, )
-
-
-        if self.exists_temp(_id):
-
-        elif self.exists_var(_id):
-            progress = self.projects[_id].progress
-        else:
-            raise Exception('{}: does not exist'.format(_id))
-
-
+        pass
 
         if close:
             self.close(_id)
