@@ -76,7 +76,7 @@ else
     read -p ">" choice
     case "$choice" in
         Y|y ) docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
-              docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin;;
+              docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska;;
         * ) ;;
     esac
 fi
