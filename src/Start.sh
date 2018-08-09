@@ -83,5 +83,5 @@ else
     case "$choice" in
         Y|y ) docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin;;
         * ) ;;
-
+    esac
 fi
