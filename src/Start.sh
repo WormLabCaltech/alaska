@@ -53,11 +53,6 @@ then
     case "$choice" in
         1 ) docker attach $DOCKER_ALASKA_TAG;;
         2 ) docker cp scripts/. $DOCKER_ALASKA_TAG:/alaska/scripts
-            if [$? != 0]
-            then
-                printf "%s\n" "Failed to copy scripts to the appropriate volume."
-                exit 1
-            fi
             docker restart $DOCKER_ALASKA_TAG;;
         3 ) docker stop $DOCKER_ALASKA_TAG;;
         * ) ;;
