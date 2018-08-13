@@ -68,7 +68,7 @@ if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_CGI_TAG) != "true" ]]
 then
     printf "%s\n" "$DOCKER_CGI_TAG is not running."
     printf "%s\n" "Starting container."
-    docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin
+    docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska
     docker start $DOCKER_CGI_TAG
 else
     printf "%s\n" "$DOCKER_CGI_TAG is running."
