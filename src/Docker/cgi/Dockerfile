@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     apt-transport-https \
     apache2 \
     perl \
-    curl
+    curl \
+    bzip2
 
 ##### Perl Packages #####
 RUN apt-get update && apt-get install -y \
