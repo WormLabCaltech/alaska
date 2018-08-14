@@ -68,14 +68,16 @@ if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_CGI_TAG) != "true" ]]
 then
     printf "%s\n" "$DOCKER_CGI_TAG is not running."
     printf "%s\n" "Starting container."
-    docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska
+    docker cp web/cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska
+    docker cp web/html/. $DOCKER_CGI_TAG:/var/www/html
     docker start $DOCKER_CGI_TAG
 else
     printf "%s\n" "$DOCKER_CGI_TAG is running."
     printf "%s\n" "Would you like to re-copy all files in the cgi folder to the container? (Y/N)"
     read -p ">" choice
     case "$choice" in
-        Y|y ) docker cp cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska;;
+        Y|y ) docker cp web/cgi/. $DOCKER_CGI_TAG:/usr/lib/cgi-bin/alaska
+              docker cp web/html/. $DOCKER_CGI_TAG:/var/www/html;;
         * ) ;;
     esac
 fi

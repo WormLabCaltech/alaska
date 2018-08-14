@@ -32,7 +32,7 @@ def run_sys(cmd):
                 sys.stdout.flush()
         p.stdout.read()
         p.stdout.close()
-        
+
     if p.returncode != 0:
         sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
     return output
