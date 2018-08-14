@@ -3,6 +3,7 @@
 # Python cgi script for development/debugging.
 import sys
 sys.stderr = sys.stdout
+import subprocess as sp
 import cgi
 import cgitb
 cgitb.enable()
