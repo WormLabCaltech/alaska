@@ -2,6 +2,10 @@
 # UBUNTU VERSION: 16.04 (xenial)
 FROM ubuntu:xenial
 
+# default to 4.5.1
+ARG MINICONDA_VER=4.5.1
+ARG MINICONDA3_URL=https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-Linux-x86_64.sh
+
 ##### DEPENDECIES #####
 RUN apt-get update && apt-get install -y \
     lsb-release \
