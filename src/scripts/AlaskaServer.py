@@ -1515,7 +1515,7 @@ class AlaskaServer(Alaska):
 
         # First, if there is an analysis currently running, add that time.
         if self.current_job is not None:
-            proj = self.projects(self.current_job.proj_id)
+            proj = self.projects[self.current_job.proj_id]
             time += self.times[self.current_job.name] * len(proj.samples)
 
         # Then, deal with the queue.
