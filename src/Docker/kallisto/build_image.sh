@@ -10,3 +10,6 @@ docker build -t $DOCKER_KALLISTO_TAG \
              --build-arg KALLISTO_URL="$KALLISTO_URL" \
              --no-cache \
              Docker/kallisto/
+
+# exit with return value of the above command
+exit $?

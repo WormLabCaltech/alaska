@@ -8,3 +8,6 @@ docker build -t $DOCKER_REQUEST_TAG \
              --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
              --no-cache \
              Docker/request/
+
+# exit with return value of the above command
+exit $?

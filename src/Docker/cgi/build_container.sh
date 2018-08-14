@@ -1,10 +1,7 @@
 #!/bin/bash
-# Builds the cgi image AND container with appropriate options.
+# Builds the alaska_cgi container with appropriate options.
 
 source scripts/set_env_variables.sh
-
-# build cgi image
-docker build -t $DOCKER_CGI_TAG Docker/cgi/
 
 # create cgi container
 docker create -it --name="$DOCKER_CGI_TAG" \
@@ -15,3 +12,6 @@ docker create -it --name="$DOCKER_CGI_TAG" \
               -p $DOCKER_CGI_PORT \
               --restart unless-stopped \
               $DOCKER_CGI_TAG
+
+# exit with return value of the above command
+exit $?

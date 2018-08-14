@@ -41,72 +41,71 @@ fi
 docker container rm --force $DOCKER_ALASKA_TAG
 docker container rm --force $DOCKER_CGI_TAG
 
-# build alaska image
-docker build -t $DOCKER_ALASKA_TAG \
-             --build-arg MINICONDA_VER="$MINICONDA_VER" \
-             --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
-             --no-cache \
-             Docker/alaska/
-
-# build request image
-docker build -t $DOCKER_REQUEST_TAG \
-             --build-arg MINICONDA_VER="$MINICONDA_VER" \
-             --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
-             --no-cache \
-             Docker/request/
-
-# build qc image
-docker build -t $DOCKER_QC_TAG \
-             --build-arg MINICONDA_VER="$MINICONDA_VER" \
-             --build-arg MINICONDA2_URL="$MINICONDA2_URL" \
-             --build-arg BOWTIE2_VER="$BOWTIE2_VER" \
-             --build-arg SAMTOOLS_VER="$SAMTOOLS_VER" \
-             --build-arg RSEQC_VER="$RSEQC_VER" \
-             --build-arg FASTQC_VER="$FASTQC_VER" \
-             --build-arg MULTIQC_VER="$MULTIQC_VER" \
-             --build-arg KALLISTO_VER="$KALLISTO_VER" \
-             --build-arg KALLISTO_URL="$KALLISTO_URL" \
-             --no-cache \
-             Docker/qc/
-
-# build kallisto image
-docker build -t $DOCKER_KALLISTO_TAG \
-             --build-arg MINICONDA_VER="$MINICONDA_VER" \
-             --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
-             --build-arg KALLISTO_VER="$KALLISTO_VER" \
-             --build-arg KALLISTO_URL="$KALLISTO_URL" \
-             --no-cache \
-             Docker/kallisto/
-
-# build sleuth image
-docker build -t $DOCKER_SLEUTH_TAG \
-             --build-arg SLEUTH_VER="$SLEUTH_VER" \
-             --no-cache \
-             Docker/sleuth/
-
-# build cgi image
-docker build -t $DOCKER_CGI_TAG Docker/cgi/
-
 # make data volumes
 docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
 docker volume create --name $DOCKER_CGI_VOLUME
 
-# create alaska container
-docker create -it --name="$DOCKER_ALASKA_TAG" \
-              -v $DOCKER_TIME_MOUNT \
-              -v $DOCKER_SOCKET_MOUNT \
-              -v $DOCKER_SCRIPT_MOUNT \
-              -v $DOCKER_DATA_MOUNT \
-              --restart unless-stopped \
-              $DOCKER_ALASKA_TAG
+# build alaska image
+Docker/alaska/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_ALASKA_TAG image."
+    exit $exit_code
+fi
 
-# create cgi container
-docker create -it --name="$DOCKER_CGI_TAG" \
-              -v $DOCKER_TIME_MOUNT \
-              -v $DOCKER_SOCKET_MOUNT \
-              -v $DOCKER_SCRIPT_MOUNT \
-              -v $DOCKER_CGI_MOUNT \
-              -p $DOCKER_CGI_PORT \
-              --restart unless-stopped \
-              $DOCKER_CGI_TAG
+# make alaska container
+Docker/alaska/build_container.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_ALASKA_TAG container."
+    exit $exit_code
+fi
+
+# build request image
+Docker/request/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_REQUEST_TAG image."
+    exit $exit_code
+fi
+
+# build qc image
+Docker/qc/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_QC_TAG image."
+    exit $exit_code
+fi
+
+# build kallisto image
+Docker/kallisto/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_KALLISTO_TAG image."
+    exit $exit_code
+fi
+
+# build sleuth image
+Docker/sleuth/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_SLEUTH_TAG image."
+    exit $exit_code
+fi
+
+# build cgi image
+Docker/cgi/build_image.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_CGI_TAG image."
+    exit $exit_code
+fi
+
+# cgi container
+Docker/cgi/build_container.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_CGI_TAG container."
+    exit $exit_code
+fi

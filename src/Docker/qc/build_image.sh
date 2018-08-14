@@ -15,3 +15,6 @@ docker build -t $DOCKER_QC_TAG \
              --build-arg KALLISTO_URL="$KALLISTO_URL" \
              --no-cache \
              Docker/qc/
+
+# exit with return value of the above command
+exit $?
