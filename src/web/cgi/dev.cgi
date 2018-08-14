@@ -7,17 +7,6 @@ import cgi
 import cgitb
 cgitb.enable()
 
-request_script = '/alaska/scripts/cgi_request.sh'
-
-print('Content-Type: text/plain\n')
-
-# Get input data.
-form = cgi.FieldStorage()
-command = form['command'].value
-args = [request_script] + command.split(' ')
-
-run_sys(args)
-
 def run_sys(cmd):
     """
     Runs a system command and echos all output.
@@ -38,3 +27,15 @@ def run_sys(cmd):
     if p.returncode != 0:
         sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
     return output
+
+
+request_script = '/alaska/scripts/cgi_request.sh'
+
+print('Content-Type: text/plain\n')
+
+# Get input data.
+form = cgi.FieldStorage()
+command = form['command'].value
+args = [request_script] + command.split(' ')
+
+run_sys(args)
