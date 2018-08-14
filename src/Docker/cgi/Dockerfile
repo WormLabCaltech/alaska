@@ -50,4 +50,7 @@ COPY serve-cgi-bin.conf /etc/apache2/conf-available/serve-cgi-bin.conf
 COPY cgi_startup.sh cgi_startup.sh
 RUN chmod +x cgi_startup.sh
 
+# Add www-data to docker group
+RUN usermod -aG docker www-data
+
 CMD ["./cgi_startup.sh"]
