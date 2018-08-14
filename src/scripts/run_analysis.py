@@ -233,7 +233,7 @@ def run_qc(proj, nthreads):
         samtools_index(_id)
 
         # If nthread > 1, we want to multithread.
-        if nthread > 1:
+        if nthreads > 1:
             qu = queue.Queue()
 
             # Enqueue everything here!
@@ -291,7 +291,7 @@ def run_qc(proj, nthreads):
         os.chdir(wdir)
         print('# returned to {}'.format(wdir))
 
-        if nthread > 1:
+        if nthreads > 1:
             print('# starting analysis of {} items in queue'.format(qu.qsize()))
 
 
