@@ -13,7 +13,7 @@ print('Content-Type: text/plain\n')
 
 # Get input data.
 form = cgi.FieldStorage()
-command = form['command']
+command = form['command'].value
 args = [request_script] + command.split(' ')
 
 run_sys(args)
