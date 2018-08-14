@@ -158,7 +158,7 @@ def run_qc(proj, nthreads):
         run_sys(args, prefix=_id)
 
 
-    def worker(i=0, qu):
+    def worker(qu, i=0):
         """
         Worker function for multithreading.
         """
@@ -260,7 +260,7 @@ def run_qc(proj, nthreads):
             # spawn threads
             threads = []
             for i in range(nthreads):
-                t = Thread(target=worker, args=(i, qu))
+                t = Thread(target=worker, args=(qu, i))
                 t.start()
                 threads.append(t)
 

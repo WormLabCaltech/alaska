@@ -1519,7 +1519,7 @@ class AlaskaServer(Alaska):
             time += self.times[self.current_job.name] * len(proj.samples)
 
         # Then, deal with the queue.
-        for item in list(self.queue):
+        for item in list(self.queue.queue):
             proj = self.projects[item.proj_id]
             time += self.times[item.name] * len(proj.samples)
 

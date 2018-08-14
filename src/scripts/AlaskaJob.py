@@ -60,8 +60,7 @@ class AlaskaJob(Alaska):
         """
         Notifies that the job is done.
         """
-        self.datetime_finished = dt.datetime.now().strftime('%Y-%m-%d')
-        self.time_finished = dt.datetime.now().strftime('%H:%M:%S')
+        self.datetime_finished = dt.datetime.now()
 
         self.docker.terminate()
 
