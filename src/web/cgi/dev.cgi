@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 # Python cgi script for development/debugging.
+import sys
+sys.stderr = sys.stdout
 import cgi
 import cgitb
 cgitb.enable()
