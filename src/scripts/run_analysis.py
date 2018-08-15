@@ -45,7 +45,7 @@ def run_sys(cmd, prefix=''):
                 line, _err = p.communicate(timeout=10)
             except TimeoutExpired:
                 print('timeout')
-                if p.poll is None:
+                if p.poll() is None:
                     continue
                 else:
                     break
@@ -55,7 +55,6 @@ def run_sys(cmd, prefix=''):
                 print(prefix + ': ' + line, end='')
                 sys.stdout.flush()
 
-        p.stdout.read()
         # p.stderr.read()
         p.stdout.close()
         # p.stderr.close()
