@@ -50,9 +50,8 @@ def run_sys(cmd, prefix=''):
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         while p.poll() is None:
             try:
-                line, _err = p.communicate(timeout=60)
+                line, _err = p.communicate(timeout=30)
             except sp.TimeoutExpired:
-                print_with_flush('timeout')
                 sys.stdout.flush()
                 if p.poll() is None:
                     continue
@@ -263,26 +262,33 @@ def run_qc(proj, nthreads):
         samtools_index(_id)
         # sambamba_sort(_id)
 
-        # If nthread > 1, we want to multithread.
-        if False:
+        # If nthreads > 1, we want to multithread.
+        if nthreads > 1:
+            results = []
             with Pool(processes=nthreads) as pool:
-                # Enqueue everything here!
                 print_with_flush('# multithreading on.')
 
-                pool.apply_async(read_distribution, (_id, bed_path,))
+                # start processes
+                rd_result = pool.apply_async(read_distribution, args=(_id, bed_path,))
                 print_with_flush('# started read_distribution for {}'.format(_id))
+                results.append(rd_result)
 
-                pool.apply_async(geneBody_coverage, (_id, bed_path,))
+                gc_result = pool.apply_async(geneBody_coverage, args=(_id, bed_path,))
                 print_with_flush('# started geneBody_coverage for {}'.format(_id))
+                results.append(gc_result)
 
-                pool.apply_async(tin, (_id, bed_path,))
+                tin_result = pool.apply_async(tin, args=(_id, bed_path,))
                 print_with_flush('# started tin for {}'.format(_id))
+                results.append(tin_result)
 
-                pool.apply_async(fastqc, (_id,))
+                fq_result = pool.apply_async(fastqc, args=(_id,))
                 print_with_flush('# started fastqc for {}'.format(_id))
+                results.append(fq_result)
 
-                pool.close()
-                pool.join()
+            # Now, wait for all processes to finish.
+            [result.wait() for result in results]
+
+
         else:
             # read_distribution.py
             read_distribution(_id, bed_path)
