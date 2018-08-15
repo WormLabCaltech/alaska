@@ -253,10 +253,10 @@ def run_qc(proj, nthreads):
             print_with_flush('# multithreading on.')
 
             args = [
-                [read_distribution, (_id, bed_path), 'read_distribution', _id],
-                [geneBody_coverage, (_id, bed_path), 'geneBody_coverage', _id],
-                [tin, (_id, bed_path), 'tin', _id],
-                [fastqc, (_id), 'fastqc', _id],
+                [read_distribution, [_id, bed_path], 'read_distribution', _id],
+                [geneBody_coverage, [_id, bed_path], 'geneBody_coverage', _id],
+                [tin, [_id, bed_path], 'tin', _id],
+                [fastqc, [_id], 'fastqc', _id],
             ]
 
             # start processes
