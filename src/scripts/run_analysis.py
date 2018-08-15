@@ -40,17 +40,15 @@ def run_sys(cmd, prefix=''):
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1) as p:
         output = ''
 
-        # while p.poll() is None:
-        #     line = p.stdout.readline()
-        #     if not line.isspace() and len(line) > 1:
-        #         output += line
-        #         print(prefix + ': ' + line, end='')
-        #         sys.stdout.flush()
-        for line in iter(p.stdout.readline, b''):
-            line = line.decode("utf-8") 
+        while True:
+            line = p.stdout.readline()
+
+            if not line:
+                break
+
             if not line.isspace() and len(line) > 1:
-                output += line + '\n'
-                print(prefix + ': ' + line)
+                output += line
+                print(prefix + ': ' + line, end='')
                 sys.stdout.flush()
 
         p.stdout.read()
