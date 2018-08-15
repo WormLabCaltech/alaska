@@ -51,7 +51,7 @@ def run_sys(cmd, prefix=''):
         while p.poll() is None:
             try:
                 line, _err = p.communicate(timeout=60)
-            except TimeoutExpired:
+            except sp.TimeoutExpired:
                 print_with_flush('timeout')
                 sys.stdout.flush()
                 if p.poll() is None:
