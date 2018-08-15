@@ -37,14 +37,18 @@ def run_sys(cmd, prefix=''):
     This function blocks until command execution is terminated.
     """
     print('# ' + ' '.join(cmd))
-    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1) as p:
+    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         output = ''
 
-        while True:
-            line = p.stdout.readline().decode("utf-8")
-
-            if not line:
-                break
+        while p.poll() is None:
+            try:
+                line, _err = p.communicate(timeout=10)
+            except TimeoutExpired:
+                print('timeout')
+                if p.poll is None:
+                    continue
+                else:
+                    break
 
             if not line.isspace() and len(line) > 1:
                 output += line
@@ -55,6 +59,7 @@ def run_sys(cmd, prefix=''):
         # p.stderr.read()
         p.stdout.close()
         # p.stderr.close()
+    time.sleep(1)
 
     if p.returncode != 0:
         sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
@@ -96,8 +101,8 @@ def run_qc(proj, nthreads):
         args = ['samtools', 'sort', sam_path]
         sorted_bam = 'sorted.bam'
         args += ['-o', sorted_bam]
-        # args += ['-@', str(nthreads-1)]
-        # args += ['-m', '4G']
+        args += ['-@', str(nthreads-1)]
+        args += ['-m', '4G']
         run_sys(args, prefix=_id)
 
     def samtools_index(_id):
@@ -245,15 +250,12 @@ def run_qc(proj, nthreads):
         else:
             print('unrecognized sample type!')
 
-        time.sleep(2)
-
         os.chdir(path)
         print('# changed working directory to {}'.format(path))
         _id = name
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
-        time.sleep(2)
         samtools_index(_id)
         # sambamba_sort(_id)
         # sambamba_index(_id)
