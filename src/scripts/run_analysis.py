@@ -96,8 +96,8 @@ def run_qc(proj, nthreads):
         args = ['samtools', 'sort', sam_path]
         sorted_bam = 'sorted.bam'
         args += ['-o', sorted_bam]
-        args += ['-@', str(nthreads-1)]
-        args += ['-m', '4G']
+        # args += ['-@', str(nthreads-1)]
+        # args += ['-m', '4G']
         run_sys(args, prefix=_id)
 
     def samtools_index(_id):
