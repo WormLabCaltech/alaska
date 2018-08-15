@@ -21,6 +21,14 @@ import queue
 from threading import Thread
 import subprocess as sp
 
+def print_with_flush(str, **kwargs):
+    """
+    Prints the given string and passes on additional kwargs to the builtin
+    print function. This function flushes stdout immediately.
+    """
+    print(str, **kwargs)
+    sys.stdout.flush()
+
 def load_proj(_id):
     """
     Loads the project json into dictionary object.
@@ -36,14 +44,14 @@ def run_sys(cmd, prefix=''):
     Runs a system command and echos all output.
     This function blocks until command execution is terminated.
     """
-    print('# ' + ' '.join(cmd))
+    print_with_flush('# ' + ' '.join(cmd))
     output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         while p.poll() is None:
             try:
                 line, _err = p.communicate(timeout=5)
             except TimeoutExpired:
-                print('timeout')
+                print_with_flush('timeout')
                 sys.stdout.flush()
                 if p.poll() is None:
                     continue
@@ -51,8 +59,7 @@ def run_sys(cmd, prefix=''):
                     break
 
             output += line
-            print(prefix + ': ' + line, end='')
-            sys.stdout.flush()
+            print_with_flush(prefix + ': ' + line, end='')
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
@@ -136,7 +143,7 @@ def run_qc(proj, nthreads):
         args += ['-i', 'sorted.bam']
         args += ['-r', bed_path]
 
-        # print(args)
+        # print_with_flush(args)
         output = run_sys(args, prefix=_id)
         # output file
         with open('{}_distribution.txt'.format(_id), 'w') as out:
@@ -203,7 +210,7 @@ def run_qc(proj, nthreads):
             # change _id argument to reflect the thread number
             args[0] = '[Thread-{}] {}'.format(i, args[0])
 
-            print('# {}: starting {} on thread {}'.format(_id, type, i))
+            print_with_flush('# {}: starting {} on thread {}'.format(_id, type, i))
             f(*args)
 
             qu.task_done()
@@ -211,10 +218,10 @@ def run_qc(proj, nthreads):
 
     ########## HELPER FUNCTIONS END HERE ###########
 
-    print('{} samples detected...'.format(len(proj['samples'])), end='')
+    print_with_flush('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
-        print('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
-    print()
+        print_with_flush('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
+    print_with_flush()
 
     # run kallisto to get pseudobam
     # run_kallisto(proj, nthreads, qc=True, nbootstraps=0, ver=235)
@@ -244,42 +251,43 @@ def run_qc(proj, nthreads):
             # TODO: implement
             pass
         else:
-            print('unrecognized sample type!')
+            print_with_flush('unrecognized sample type!')
 
         os.chdir(path)
-        print('# changed working directory to {}'.format(path))
+        print_with_flush('# changed working directory to {}'.format(path))
         _id = name
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
-        # samtools_index(_id)
+        samtools_index(_id)
         # sambamba_sort(_id)
-        # sambamba_index(_id)
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
             qu = queue.Queue()
 
             # Enqueue everything here!
-            print('# multithreading on.')
+            print_with_flush('# multithreading on.')
 
             # queue items will have the format:
             # [_id, analysis type, path, function, arguments]
             qu.put([_id, 'read_distribution', path,
                         read_distribution, (_id, bed_path)])
-            print('# enqueued read_distribution for {}'.format(_id))
+            print_with_flush('# enqueued read_distribution for {}'.format(_id))
 
             qu.put([_id, 'geneBody_coverage', path,
                         geneBody_coverage, (_id, bed_path)])
-            print('# enqueued geneBody_coverage for {}'.format(_id))
+            print_with_flush('# enqueued geneBody_coverage for {}'.format(_id))
 
             qu.put([_id, 'tin', path,
                         tin, (_id, bed_path)])
-            print('# enqueued tin for {}'.format(_id))
+            print_with_flush('# enqueued tin for {}'.format(_id))
 
             qu.put([_id, 'fastqc', path,
                         fastqc, (_id)])
-            print('# enqueued fastqc for {}'.format(_id))
+            print_with_flush('# enqueued fastqc for {}'.format(_id))
+
+            print_with_flush('# starting analysis of {} items in queue'.format(qu.qsize()))
 
             # spawn threads
             threads = []
@@ -313,11 +321,7 @@ def run_qc(proj, nthreads):
         multiqc(_id)
 
         os.chdir(wdir)
-        print('# returned to {}'.format(wdir))
-
-        if nthreads > 1:
-            print('# starting analysis of {} items in queue'.format(qu.qsize()))
-
+        print_with_flush('# returned to {}'.format(wdir))
 
 
 def run_kallisto(proj, nthreads):
@@ -325,10 +329,10 @@ def run_kallisto(proj, nthreads):
     Runs read quantification with Kallisto.
     Assumes that the indices are in the folder /organisms
     """
-    print('{} samples detected...'.format(len(proj['samples'])), end='')
+    print_with_flush('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
-        print('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
-    print()
+        print_with_flush('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
+    print_with_flush()
 
     for _id in proj['samples']:
         name = proj['samples'][_id]['name']
@@ -363,7 +367,7 @@ def run_kallisto(proj, nthreads):
             # TODO: implement
             pass
         else:
-            print('unrecognized sample type!')
+            print_with_flush('unrecognized sample type!')
         args += arg
 
         # finally, add the sample reads
@@ -410,7 +414,7 @@ if __name__ == '__main__':
 
     # Load project json.
     proj = load_proj(data)
-    print('{} loaded'.format(data))
+    print_with_flush('{} loaded'.format(data))
 
     if args.type == 'qc':
         run_qc(proj, nthreads)
