@@ -59,9 +59,9 @@ def run_sys(cmd, prefix=''):
                 else:
                     break
 
-            if line:
+            if not line.isspace() and len(line) > 1:
                 output += line
-                print_with_flush(prefix + ': ' + line, end='')
+                print_with_flush('{}: {}'.format(prefix, line), end='')
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
