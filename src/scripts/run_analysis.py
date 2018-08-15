@@ -50,9 +50,8 @@ def run_sys(cmd, prefix=''):
                 else:
                     break
 
-            if not line.isspace() and len(line) > 1:
-                output += line
-                print(prefix + ': ' + line, end='')
+            output += line
+            print(prefix + ': ' + line, end='')
             sys.stdout.flush()
 
     if p.returncode != 0:
