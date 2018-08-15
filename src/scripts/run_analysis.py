@@ -59,8 +59,9 @@ def run_sys(cmd, prefix=''):
                 else:
                     break
 
-            output += line
-            print_with_flush(prefix + ': ' + line, end='')
+            if not line:
+                output += line
+                print_with_flush(prefix + ': ' + line, end='')
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
@@ -119,8 +120,6 @@ def mp_helper(f, args, name, _id):
     Helper function for multiprocessing.
     """
     print_with_flush('# starting {} for {}'.format(name, _id))
-
-    print(args)
 
     f(*args)
 ######### These functions must be here to allow multiprocessing.
