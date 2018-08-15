@@ -52,16 +52,16 @@ def run_sys(cmd, prefix=''):
         while p.poll() is None:
             try:
                 line, _err = p.communicate(timeout=30)
+                
+                if not line.isspace() and len(line) > 1:
+                    output += line
+                    print_with_flush('{}: {}'.format(prefix, line), end='')
             except sp.TimeoutExpired:
                 sys.stdout.flush()
                 if p.poll() is None:
                     continue
                 else:
                     break
-
-            if not line.isspace() and len(line) > 1:
-                output += line
-                print_with_flush('{}: {}'.format(prefix, line), end='')
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
