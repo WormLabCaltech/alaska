@@ -37,15 +37,21 @@ def run_sys(cmd, prefix=''):
     This function blocks until command execution is terminated.
     """
     print('# ' + ' '.join(cmd))
-    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
+    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1) as p:
         output = ''
 
-        while p.poll() is None:
-            line = p.stdout.readline()
+        # while p.poll() is None:
+        #     line = p.stdout.readline()
+        #     if not line.isspace() and len(line) > 1:
+        #         output += line
+        #         print(prefix + ': ' + line, end='')
+        #         sys.stdout.flush()
+        for line in iter(p.stdout.readline, b''):
             if not line.isspace() and len(line) > 1:
-                output += line
-                print(prefix + ': ' + line, end='')
+                output += line + '\n'
+                print(prefix + ': ' + line)
                 sys.stdout.flush()
+
         p.stdout.read()
         # p.stderr.read()
         p.stdout.close()
@@ -247,8 +253,6 @@ def run_qc(proj, nthreads):
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
-        # Give it some time.
-        time.sleep(1)
         samtools_index(_id)
         # sambamba_sort(_id)
         # sambamba_index(_id)
