@@ -19,7 +19,7 @@ import time
 import json
 import queue
 from threading import Thread
-from multiprocessing import Process, Pool
+from multiprocessing import Process
 import subprocess as sp
 
 def print_with_flush(str='', **kwargs):
@@ -246,7 +246,7 @@ def run_qc(proj, nthreads):
 
         # If nthreads > 1, we want to multithread.
         if nthreads > 1:
-            pool = Pool(processes=nthreads)
+            pool = mp.Pool(processes=nthreads)
             print_with_flush('# multithreading on.')
 
             args = [
@@ -257,9 +257,7 @@ def run_qc(proj, nthreads):
             ]
 
             # start processes
-            pool.map_async(mp_helper, args)
-            pool.close()
-            pool.join()
+            pool.map(mp_helper, args)
 
         else:
             # read_distribution.py
