@@ -62,7 +62,7 @@ def run_sys(cmd, prefix=''):
         #             continue
         #         else:
         #             break
-        # 
+        #
         output = ''
         while p.poll() is None:
             line = p.stdout.readline()
@@ -134,6 +134,8 @@ def mp_helper(f, args, name, _id):
     print_with_flush('# starting {} for {}'.format(name, _id))
 
     f(*args)
+
+    print_with_flush('# finished {} for {}'.format(name, _id))
 ######### These functions must be here to allow multiprocessing.
 
 
