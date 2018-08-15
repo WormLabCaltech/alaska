@@ -189,31 +189,13 @@ def run_qc(proj, nthreads):
         run_sys(args, prefix=_id)
 
 
-    def worker(qu, i=0):
+    def mp_helper(f, args, name, _id):
         """
-        Worker function for multithreading.
+        Helper function for multiprocessing.
         """
-        while True:
-            # get item from queue
-            item = qu.get()
+        print_with_flush('# starting {} for {}'.format(name, _id))
 
-            # a way to stop the workers
-            if item is None:
-                break
-
-            _id = item[0]
-            type = item[1]
-            path = item[2]
-            f = item[3]
-            args = item[4]
-
-            # change _id argument to reflect the thread number
-            args[0] = '[Thread-{}] {}'.format(i, args[0])
-
-            print_with_flush('# {}: starting {} on thread {}'.format(_id, type, i))
-            f(*args)
-
-            qu.task_done()
+        f(*args)
 
 
     ########## HELPER FUNCTIONS END HERE ###########
@@ -264,30 +246,20 @@ def run_qc(proj, nthreads):
 
         # If nthreads > 1, we want to multithread.
         if nthreads > 1:
-            results = []
-            with Pool(processes=nthreads) as pool:
-                print_with_flush('# multithreading on.')
+            pool = Pool(processes=nthreads)
+            print_with_flush('# multithreading on.')
 
-                # start processes
-                rd_result = pool.apply_async(read_distribution, args=(_id, bed_path,))
-                print_with_flush('# started read_distribution for {}'.format(_id))
-                results.append(rd_result)
+            args = [
+                [read_distribution, (_id, bed_path), 'read_distribution', _id],
+                [geneBody_coverage, (_id, bed_path), 'geneBody_coverage', _id],
+                [tin, (_id, bed_path), 'tin', _id],
+                [fastqc, (_id), 'fastqc', _id],
+            ]
 
-                gc_result = pool.apply_async(geneBody_coverage, args=(_id, bed_path,))
-                print_with_flush('# started geneBody_coverage for {}'.format(_id))
-                results.append(gc_result)
-
-                tin_result = pool.apply_async(tin, args=(_id, bed_path,))
-                print_with_flush('# started tin for {}'.format(_id))
-                results.append(tin_result)
-
-                fq_result = pool.apply_async(fastqc, args=(_id,))
-                print_with_flush('# started fastqc for {}'.format(_id))
-                results.append(fq_result)
-
-            # Now, wait for all processes to finish.
-            [result.wait() for result in results]
-
+            # start processes
+            pool.map_async(mp_helper, args)
+            pool.close()
+            pool.join()
 
         else:
             # read_distribution.py
