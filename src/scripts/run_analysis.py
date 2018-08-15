@@ -19,7 +19,8 @@ import time
 import json
 import queue
 from threading import Thread
-from multiprocessing import Process
+import multiprocessing as mp
+from multiprocessing import Process, Pool
 import subprocess as sp
 
 def print_with_flush(str='', **kwargs):
@@ -265,44 +266,24 @@ def run_qc(proj, nthreads):
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
-            qu = queue.Queue()
+            pool = Pool(processes=nthreads)
 
             # Enqueue everything here!
             print_with_flush('# multithreading on.')
 
-            # queue items will have the format:
-            # [_id, analysis type, path, function, arguments]
-            qu.put([_id, 'read_distribution', path,
-                        read_distribution, [_id, bed_path]])
-            print_with_flush('# enqueued read_distribution for {}'.format(_id))
+            pool.apply_async(read_distribution, (_id, bed_path))
+            print_with_flush('# started read_distribution for {}'.format(_id))
 
-            qu.put([_id, 'geneBody_coverage', path,
-                        geneBody_coverage, [_id, bed_path]])
-            print_with_flush('# enqueued geneBody_coverage for {}'.format(_id))
+            pool.apply_async(geneBody_coverage, (_id, bed_path))
+            print_with_flush('# started geneBody_coverage for {}'.format(_id))
 
-            qu.put([_id, 'tin', path, tin, [_id, bed_path]])
-            print_with_flush('# enqueued tin for {}'.format(_id))
+            pool.apply_async(tin, (_id, bed_path))
+            print_with_flush('# started tin for {}'.format(_id))
 
-            qu.put([_id, 'fastqc', path, fastqc, [_id]])
-            print_with_flush('# enqueued fastqc for {}'.format(_id))
+            pool.apply_async(fastqc, (_id))
+            print_with_flush('# started fastqc for {}'.format(_id))
 
-            print_with_flush('# starting analysis of {} items in queue'.format(qu.qsize()))
-
-            # spawn processes
-            processes = []
-            for i in range(nthreads):
-                p = Process(target=worker, args=(qu, i))
-                p.start()
-                processes.append(p)
-
-            # block until all tasks are done
-            qu.join()
-
-            # stop workers
-            for i in range(nthreads):
-                qu.put(None)
-            for p in processes:
-                p.join()
+            pool.join()
         else:
             # read_distribution.py
             read_distribution(_id, bed_path)
