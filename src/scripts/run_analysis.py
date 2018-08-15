@@ -59,7 +59,7 @@ def run_sys(cmd, prefix=''):
                 else:
                     break
 
-            if not line:
+            if line:
                 output += line
                 print_with_flush(prefix + ': ' + line, end='')
 
