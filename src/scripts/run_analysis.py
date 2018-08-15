@@ -265,25 +265,23 @@ def run_qc(proj, nthreads):
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
-            pool = Pool(processes=nthreads)
+            with Pool(processes=nthreads) as pool:
+                # Enqueue everything here!
+                print_with_flush('# multithreading on.')
 
-            # Enqueue everything here!
-            print_with_flush('# multithreading on.')
+                pool.apply_async(read_distribution, [_id, bed_path])
+                print_with_flush('# started read_distribution for {}'.format(_id))
 
-            pool.apply_async(read_distribution, (_id, bed_path))
-            print_with_flush('# started read_distribution for {}'.format(_id))
+                pool.apply_async(geneBody_coverage, [_id, bed_path])
+                print_with_flush('# started geneBody_coverage for {}'.format(_id))
 
-            pool.apply_async(geneBody_coverage, (_id, bed_path))
-            print_with_flush('# started geneBody_coverage for {}'.format(_id))
+                pool.apply_async(tin, [_id, bed_path])
+                print_with_flush('# started tin for {}'.format(_id))
 
-            pool.apply_async(tin, (_id, bed_path))
-            print_with_flush('# started tin for {}'.format(_id))
+                pool.apply_async(fastqc, [_id])
+                print_with_flush('# started fastqc for {}'.format(_id))
 
-            pool.apply_async(fastqc, (_id))
-            print_with_flush('# started fastqc for {}'.format(_id))
-
-            pool.close()
-            pool.join()
+                pool.join()
         else:
             # read_distribution.py
             read_distribution(_id, bed_path)
