@@ -42,9 +42,10 @@ def run_sys(cmd, prefix=''):
 
         while p.poll() is None:
             try:
-                line, _err = p.communicate(timeout=10)
+                line, _err = p.communicate(timeout=5)
             except TimeoutExpired:
                 print('timeout')
+                sys.stdout.flush()
                 if p.poll() is None:
                     continue
                 else:
@@ -54,8 +55,9 @@ def run_sys(cmd, prefix=''):
             print(prefix + ': ' + line, end='')
             sys.stdout.flush()
 
-    if p.returncode != 0:
-        sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
+        if p.returncode != 0:
+            sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
+
     return output
 
 def run_qc(proj, nthreads):
@@ -249,9 +251,9 @@ def run_qc(proj, nthreads):
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
-        samtools_index(_id)
+        # samtools_index(_id)
         # sambamba_sort(_id)
-        # sambamba_index(_id)
+        sambamba_index(_id)
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
