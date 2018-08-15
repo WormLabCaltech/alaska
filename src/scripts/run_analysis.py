@@ -273,29 +273,27 @@ def run_qc(proj, nthreads):
             # queue items will have the format:
             # [_id, analysis type, path, function, arguments]
             qu.put([_id, 'read_distribution', path,
-                        read_distribution, (_id, bed_path)])
+                        read_distribution, [_id, bed_path]])
             print_with_flush('# enqueued read_distribution for {}'.format(_id))
 
             qu.put([_id, 'geneBody_coverage', path,
-                        geneBody_coverage, (_id, bed_path)])
+                        geneBody_coverage, [_id, bed_path]])
             print_with_flush('# enqueued geneBody_coverage for {}'.format(_id))
 
-            qu.put([_id, 'tin', path,
-                        tin, (_id, bed_path)])
+            qu.put([_id, 'tin', path, tin, [_id, bed_path]])
             print_with_flush('# enqueued tin for {}'.format(_id))
 
-            qu.put([_id, 'fastqc', path,
-                        fastqc, (_id)])
+            qu.put([_id, 'fastqc', path, fastqc, [_id]])
             print_with_flush('# enqueued fastqc for {}'.format(_id))
 
             print_with_flush('# starting analysis of {} items in queue'.format(qu.qsize()))
 
-            # spawn threads
-            threads = []
+            # spawn processes
+            processes = []
             for i in range(nthreads):
-                t = Process(target=worker, args=(qu, i))
-                t.start()
-                threads.append(t)
+                p = Process(target=worker, args=(qu, i))
+                p.start()
+                processes.append(p)
 
             # block until all tasks are done
             qu.join()
@@ -303,8 +301,8 @@ def run_qc(proj, nthreads):
             # stop workers
             for i in range(nthreads):
                 qu.put(None)
-            for t in threads:
-                t.join()
+            for p in processes:
+                p.join()
         else:
             # read_distribution.py
             read_distribution(_id, bed_path)
