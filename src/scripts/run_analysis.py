@@ -254,7 +254,7 @@ def run_qc(proj, nthreads):
         samtools_sort(_id)
         # samtools_index(_id)
         # sambamba_sort(_id)
-        sambamba_index(_id)
+        # sambamba_index(_id)
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
