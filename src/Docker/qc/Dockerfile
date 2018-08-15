@@ -11,6 +11,7 @@ ARG SAMTOOLS_VER=1.7
 ARG RSEQC_VER=2.6.4
 ARG FASTQC_VER=0.11.6
 ARG MULTIQC_VER=1.4
+ARG SAMBAMBA_VER=0.6.6
 ARG KALLISTO_VER=0.44.0
 ARG KALLISTO_URL=https://github.com/pachterlab/kallisto/releases/download/v$KALLISTO_VER/kallisto_linux-v$KALLISTO_VER.tar.gz
 
@@ -42,6 +43,7 @@ RUN conda config --add channels bioconda
 # install software
 RUN conda install bowtie2==$BOWTIE2_VER
 RUN conda install samtools==$SAMTOOLS_VER
+RUN conda install sambamba==$SAMBAMBA_VER
 RUN conda install fastqc==$FASTQC_VER
 RUN conda install rseqc==$RSEQC_VER
 RUN conda install multiqc==$MULTIQC_VER

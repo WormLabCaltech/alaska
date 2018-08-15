@@ -53,6 +53,7 @@ FASTQC_VER="0.11.6"
 MULTIQC_VER="1.4"
 KALLISTO_VER="0.44.0"
 SLEUTH_VER="0.30.0"
+SAMBAMBA_VER="0.6.6"
 
 # Note: some bioconda packages require python2, which is why
 #       there is also a link for miniconda 2.

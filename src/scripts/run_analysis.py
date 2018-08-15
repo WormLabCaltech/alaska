@@ -37,7 +37,7 @@ def run_sys(cmd, prefix=''):
     This function blocks until command execution is terminated.
     """
     print('# ' + ' '.join(cmd))
-    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True) as p:
+    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         output = ''
 
         while p.poll() is None:
@@ -103,6 +103,25 @@ def run_qc(proj, nthreads):
         args = ['samtools', 'index', 'sorted.bam']
         run_sys(args, prefix=_id)
 
+    def sambamba_sort(_id):
+        """
+        Helper function to call samtools to sort .bam
+        """
+        sam_path = 'alignments.sam'
+        args = ['sambamba', 'sort', sam_path]
+        sorted_bam = 'sorted.bam'
+        args += ['-o', sorted_bam]
+        args += ['-t', str(nthreads-1)]
+        args += ['-m', '4G']
+        run_sys(args, prefix=_id)
+
+    def sambamba_index(_id):
+        """
+        Helper function to call samtools to index .bam
+        """
+        args = ['sambamba', 'index', 'sorted.bam']
+        args += ['-t', str(nthreads-1)]
+        run_sys(args, prefix=_id)
 
     def read_distribution(_id, bed_path):
         """
@@ -226,11 +245,13 @@ def run_qc(proj, nthreads):
         print('# changed working directory to {}'.format(path))
         _id = name
 
-        # Sort and index reads with samtools first.
-        samtools_sort(_id)
-        # Give it some time.
-        time.sleep(1)
-        samtools_index(_id)
+        # # Sort and index reads with samtools first.
+        # samtools_sort(_id)
+        # # Give it some time.
+        # time.sleep(1)
+        # samtools_index(_id)
+        sambamba_sort(_id)
+        sambamba_index(_id)
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
