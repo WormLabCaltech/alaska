@@ -19,7 +19,6 @@ import time
 import json
 import queue
 from threading import Thread
-import multiprocessing as mp
 from multiprocessing import Process, Pool
 import subprocess as sp
 
@@ -283,6 +282,7 @@ def run_qc(proj, nthreads):
             pool.apply_async(fastqc, (_id))
             print_with_flush('# started fastqc for {}'.format(_id))
 
+            pool.close()
             pool.join()
         else:
             # read_distribution.py
