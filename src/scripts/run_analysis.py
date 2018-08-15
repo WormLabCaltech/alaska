@@ -264,7 +264,7 @@ def run_qc(proj, nthreads):
         # sambamba_sort(_id)
 
         # If nthread > 1, we want to multithread.
-        if nthreads > 1:
+        if False:
             with Pool(processes=nthreads) as pool:
                 # Enqueue everything here!
                 print_with_flush('# multithreading on.')
