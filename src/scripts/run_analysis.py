@@ -47,6 +47,7 @@ def run_sys(cmd, prefix=''):
         #         print(prefix + ': ' + line, end='')
         #         sys.stdout.flush()
         for line in iter(p.stdout.readline, b''):
+            line = line.decode("utf-8") 
             if not line.isspace() and len(line) > 1:
                 output += line + '\n'
                 print(prefix + ': ' + line)
