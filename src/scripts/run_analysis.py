@@ -258,7 +258,7 @@ def run_qc(proj, nthreads):
             ]
 
             # start processes
-            pool.map(mp_helper, args)
+            pool.starmap(mp_helper, args)
 
         else:
             # read_distribution.py
