@@ -21,7 +21,7 @@ import queue
 from threading import Thread
 import subprocess as sp
 
-def print_with_flush(str, **kwargs):
+def print_with_flush(str='', **kwargs):
     """
     Prints the given string and passes on additional kwargs to the builtin
     print function. This function flushes stdout immediately.
