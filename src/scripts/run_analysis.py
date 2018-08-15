@@ -50,7 +50,7 @@ def run_sys(cmd, prefix=''):
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         while p.poll() is None:
             try:
-                line, _err = p.communicate(timeout=5)
+                line, _err = p.communicate(timeout=60)
             except TimeoutExpired:
                 print_with_flush('timeout')
                 sys.stdout.flush()
