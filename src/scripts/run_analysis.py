@@ -62,9 +62,7 @@ def run_sys(cmd, prefix=''):
                     continue
                 else:
                     break
-        p.stdout.read()
-        p.stdout.close()
-
+                    
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
 
