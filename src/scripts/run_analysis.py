@@ -23,12 +23,12 @@ import multiprocessing as mp
 from multiprocessing import Process
 import subprocess as sp
 
-def print_with_flush(str='', **kwargs):
+def print_with_flush(s='', **kwargs):
     """
     Prints the given string and passes on additional kwargs to the builtin
     print function. This function flushes stdout immediately.
     """
-    print(str, **kwargs)
+    print(s, **kwargs)
     sys.stdout.flush()
 
 def load_proj(_id):
@@ -52,7 +52,7 @@ def run_sys(cmd, prefix=''):
         while p.poll() is None:
             try:
                 line, _err = p.communicate(timeout=30)
-                
+
                 if not line.isspace() and len(line) > 1:
                     output += line
                     print_with_flush('{}: {}'.format(prefix, line), end='')
@@ -62,6 +62,8 @@ def run_sys(cmd, prefix=''):
                     continue
                 else:
                     break
+        p.stdout.read()
+        p.stdout.close()
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
