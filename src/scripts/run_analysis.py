@@ -53,12 +53,7 @@ def run_sys(cmd, prefix=''):
             if not line.isspace() and len(line) > 1:
                 output += line
                 print(prefix + ': ' + line, end='')
-                sys.stdout.flush()
-
-        # p.stderr.read()
-        p.stdout.close()
-        # p.stderr.close()
-    time.sleep(1)
+            sys.stdout.flush()
 
     if p.returncode != 0:
         sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
