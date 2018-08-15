@@ -104,6 +104,7 @@ def run_qc(proj, nthreads):
         Helper function to call samtools to index .bam
         """
         args = ['samtools', 'index', 'sorted.bam']
+        args += ['-@', str(nthreads-1)]
         run_sys(args, prefix=_id)
 
     def sambamba_sort(_id):
@@ -124,6 +125,7 @@ def run_qc(proj, nthreads):
         """
         args = ['sambamba', 'index', 'sorted.bam']
         args += ['-t', str(nthreads-1)]
+        args += ['-p']
         run_sys(args, prefix=_id)
 
     def read_distribution(_id, bed_path):
