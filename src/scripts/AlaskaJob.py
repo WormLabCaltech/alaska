@@ -68,8 +68,6 @@ class AlaskaJob(Alaska):
         delta = self.datetime_finished - self.datetime_started
         self.run_duration = delta.total_seconds() / 60
 
-        print(self.datetime_finished)
-
         self.save() # save job info
 
     def save(self, folder=None):
@@ -86,8 +84,6 @@ class AlaskaJob(Alaska):
         _datetime_started = self.datetime_started
         _datetime_finished = self.datetime_finished
 
-        print(self.datetime_finished)
-
         if self.datetime_created is not None:
             self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
         if self.datetime_started is not None:
@@ -101,7 +97,7 @@ class AlaskaJob(Alaska):
         # restore datetime objects after saving
         self.datetime_created = _datetime_created
         self.datetime_started = _datetime_started
-        self.datetime_finsihed = _datetime_finished
+        self.datetime_finished = _datetime_finished
 
     def load(self, folder=None, proj=None):
         """
