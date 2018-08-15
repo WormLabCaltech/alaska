@@ -67,6 +67,63 @@ def run_sys(cmd, prefix=''):
 
     return output
 
+######### These functions must be here to allow multiprocessing.
+def read_distribution(_id, bed_path):
+    """
+    Helper function to run read_distribution.py
+    """
+    args = ['read_distribution.py']
+    args += ['-i', 'sorted.bam']
+    args += ['-r', bed_path]
+
+    # print_with_flush(args)
+    output = run_sys(args, prefix=_id)
+    # output file
+    with open('{}_distribution.txt'.format(_id), 'w') as out:
+        out.write(output)
+
+
+def geneBody_coverage(_id, bed_path):
+    """
+    Helper function to run geneBody_coverage.py
+    """
+    args = ['geneBody_coverage.py']
+    args += ['-i', 'sorted.bam']
+    args += ['-r', bed_path]
+    args += ['-o', '{}_coverage'.format(_id)]
+
+    run_sys(args, prefix=_id)
+
+def tin(_id, bed_path):
+    """
+    Helper function to run tin.py
+    """
+    args = ['tin.py']
+    args += ['-i', 'sorted.bam']
+    args += ['-r', bed_path]
+
+    output = run_sys(args, prefix=_id)
+    # output file
+    with open('{}_tin.txt'.format(_id), 'w') as out:
+        out.write(output)
+
+def fastqc(_id):
+    """
+    Helper function to run fastqc.
+    """
+    args = ['fastqc', 'sorted.bam']
+    run_sys(args, prefix=_id)
+
+def mp_helper(f, args, name, _id):
+    """
+    Helper function for multiprocessing.
+    """
+    print_with_flush('# starting {} for {}'.format(name, _id))
+
+    f(*args)
+######### These functions must be here to allow multiprocessing.
+
+
 def run_qc(proj, nthreads):
     """
     Runs read quantification with RSeQC, FastQC and MultiQC.
@@ -136,52 +193,6 @@ def run_qc(proj, nthreads):
         args += ['-p']
         run_sys(args, prefix=_id)
 
-    def read_distribution(_id, bed_path):
-        """
-        Helper function to run read_distribution.py
-        """
-        args = ['read_distribution.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-
-        # print_with_flush(args)
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}_distribution.txt'.format(_id), 'w') as out:
-            out.write(output)
-
-
-    def geneBody_coverage(_id, bed_path):
-        """
-        Helper function to run geneBody_coverage.py
-        """
-        args = ['geneBody_coverage.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-        args += ['-o', '{}_coverage'.format(_id)]
-
-        run_sys(args, prefix=_id)
-
-    def tin(_id, bed_path):
-        """
-        Helper function to run tin.py
-        """
-        args = ['tin.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}_tin.txt'.format(_id), 'w') as out:
-            out.write(output)
-
-    def fastqc(_id):
-        """
-        Helper function to run fastqc.
-        """
-        args = ['fastqc', 'sorted.bam']
-        run_sys(args, prefix=_id)
-
     def multiqc(_id):
         """
         Helper function to run multiqc.
@@ -189,18 +200,7 @@ def run_qc(proj, nthreads):
         args = ['multiqc', '.']
         run_sys(args, prefix=_id)
 
-
-    def mp_helper(f, args, name, _id):
-        """
-        Helper function for multiprocessing.
-        """
-        print_with_flush('# starting {} for {}'.format(name, _id))
-
-        f(*args)
-
-
     ########## HELPER FUNCTIONS END HERE ###########
-
     print_with_flush('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print_with_flush('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
