@@ -55,7 +55,6 @@ def run_sys(cmd, prefix=''):
         # p.stderr.read()
         p.stdout.close()
         # p.stderr.close()
-    time.sleep(1)
 
     if p.returncode != 0:
         sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
@@ -246,12 +245,15 @@ def run_qc(proj, nthreads):
         else:
             print('unrecognized sample type!')
 
+        time.sleep(2)
+
         os.chdir(path)
         print('# changed working directory to {}'.format(path))
         _id = name
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
+        time.sleep(2)
         samtools_index(_id)
         # sambamba_sort(_id)
         # sambamba_index(_id)
