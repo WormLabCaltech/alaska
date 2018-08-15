@@ -49,20 +49,32 @@ def run_sys(cmd, prefix=''):
     print_with_flush('# ' + ' '.join(cmd))
     output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
+        # while p.poll() is None:
+        #     try:
+        #         line, _err = p.communicate(timeout=30)
+        #
+        #         if not line.isspace() and len(line) > 1:
+        #             output += line
+        #             print_with_flush('{}: {}'.format(prefix, line), end='')
+        #     except sp.TimeoutExpired:
+        #         sys.stdout.flush()
+        #         if p.poll() is None:
+        #             continue
+        #         else:
+        #             break
+        # 
+        output = ''
         while p.poll() is None:
-            try:
-                line, _err = p.communicate(timeout=30)
-
-                if not line.isspace() and len(line) > 1:
-                    output += line
-                    print_with_flush('{}: {}'.format(prefix, line), end='')
-            except sp.TimeoutExpired:
+            line = p.stdout.readline()
+            if not line.isspace() and len(line) > 1:
+                output += line
+                print(prefix + ': ' + line, end='')
                 sys.stdout.flush()
-                if p.poll() is None:
-                    continue
-                else:
-                    break
-                    
+        p.stdout.read()
+        # p.stderr.read()
+        p.stdout.close()
+        # p.stderr.close()
+
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
 
