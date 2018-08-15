@@ -41,6 +41,7 @@ RUN conda config --add channels conda-forge
 RUN conda config --add channels bioconda
 
 # install software
+RUN conda install conda-forge::openjdk
 RUN conda install bowtie2==$BOWTIE2_VER
 RUN conda install samtools==$SAMTOOLS_VER
 RUN conda install sambamba==$SAMBAMBA_VER
