@@ -19,6 +19,7 @@ import time
 import json
 import queue
 from threading import Thread
+from multiprocessing import Process
 import subprocess as sp
 
 def print_with_flush(str='', **kwargs):
@@ -292,7 +293,7 @@ def run_qc(proj, nthreads):
             # spawn threads
             threads = []
             for i in range(nthreads):
-                t = Thread(target=worker, args=(qu, i))
+                t = Process(target=worker, args=(qu, i))
                 t.start()
                 threads.append(t)
 
