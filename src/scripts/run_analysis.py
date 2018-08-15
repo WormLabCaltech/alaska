@@ -120,6 +120,8 @@ def mp_helper(f, args, name, _id):
     """
     print_with_flush('# starting {} for {}'.format(name, _id))
 
+    print(args)
+
     f(*args)
 ######### These functions must be here to allow multiprocessing.
 
