@@ -68,6 +68,7 @@ class AlaskaJob(Alaska):
         delta = self.datetime_finished - self.datetime_started
         self.run_duration = delta.total_seconds() / 60
 
+        print(self.datetime_finished)
 
         self.save() # save job info
 
