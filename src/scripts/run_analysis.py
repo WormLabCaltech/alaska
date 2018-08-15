@@ -269,16 +269,16 @@ def run_qc(proj, nthreads):
                 # Enqueue everything here!
                 print_with_flush('# multithreading on.')
 
-                pool.apply_async(read_distribution, [_id, bed_path])
+                pool.apply_async(read_distribution, (_id, bed_path,))
                 print_with_flush('# started read_distribution for {}'.format(_id))
 
-                pool.apply_async(geneBody_coverage, [_id, bed_path])
+                pool.apply_async(geneBody_coverage, (_id, bed_path,))
                 print_with_flush('# started geneBody_coverage for {}'.format(_id))
 
-                pool.apply_async(tin, [_id, bed_path])
+                pool.apply_async(tin, (_id, bed_path,))
                 print_with_flush('# started tin for {}'.format(_id))
 
-                pool.apply_async(fastqc, [_id])
+                pool.apply_async(fastqc, (_id,))
                 print_with_flush('# started fastqc for {}'.format(_id))
 
                 pool.join()
