@@ -245,13 +245,13 @@ def run_qc(proj, nthreads):
         print('# changed working directory to {}'.format(path))
         _id = name
 
-        # # Sort and index reads with samtools first.
-        # samtools_sort(_id)
-        # # Give it some time.
-        # time.sleep(1)
-        # samtools_index(_id)
-        sambamba_sort(_id)
-        sambamba_index(_id)
+        # Sort and index reads with samtools first.
+        samtools_sort(_id)
+        # Give it some time.
+        time.sleep(1)
+        samtools_index(_id)
+        # sambamba_sort(_id)
+        # sambamba_index(_id)
 
         # If nthread > 1, we want to multithread.
         if nthreads > 1:
