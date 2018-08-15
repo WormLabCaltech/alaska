@@ -37,9 +37,8 @@ def run_sys(cmd, prefix=''):
     This function blocks until command execution is terminated.
     """
     print('# ' + ' '.join(cmd))
+    output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
-        output = ''
-
         while p.poll() is None:
             try:
                 line, _err = p.communicate(timeout=5)
