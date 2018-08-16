@@ -1,10 +1,6 @@
 function handle(data) {
     var error = "Error"
-    if (data.indexOf(error) != -1) {
-        $("p").text("server is off");
-    } else {
-        $("p").text("server is on :)");
-    }
+    $("p").text(data);
 };
 
 function testAjax(handleData) {
