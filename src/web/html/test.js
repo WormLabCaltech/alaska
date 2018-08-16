@@ -1,11 +1,11 @@
 function handleData(data) {
     var error = "ERROR"
     if (data.indexOf(error) != -1) {
-        $("p").text("server is off")
+        $("p").text("server is off");
     } else {
-        $("p").text("server is on :)")
+        $("p").text("server is on :)");
     }
-}
+};
 
 function testAjax(handleData) {
   $.ajax({
@@ -14,7 +14,7 @@ function testAjax(handleData) {
       handleData(data);
     }
   });
-}
+};
 
 $(document).ready(function() {
     $("#submit").click(testAjax);
