@@ -1,5 +1,3 @@
-$("#submit").click();
-
 function handleData(data) {
     var error = "ERROR"
     if (data.indexOf(error) != -1) {
@@ -17,3 +15,9 @@ function testAjax(handleData) {
     }
   });
 }
+
+$(document).ready(function() {
+    $("#submit").click(testAjax);
+});
+
+
