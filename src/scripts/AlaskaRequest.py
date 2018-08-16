@@ -117,5 +117,15 @@ if __name__ == '__main__':
 
     print('INFO: Creating {} request'.format(args.action))
 
-    # gate for actions
-    request.send(args.action)
+    if args.action == 'check':
+        if request.check():
+            print('true')
+        else:
+            print('false')
+        request.SOCKET.close()
+        request.CONTEXT.term()
+        sys.exit(0)
+
+    else:
+        # gate for actions
+        request.send(args.action)

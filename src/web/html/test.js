@@ -18,5 +18,3 @@ $(document).ready(function() {
         testAjax(handle);
     });
 });
-
-
