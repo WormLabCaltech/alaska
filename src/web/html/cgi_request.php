@@ -21,16 +21,16 @@ function cgi_request($action, $id) {
 # if there is an id
 if (isset($_POST['id'])) {
   $id = $_POST['id'];
-  echo "received id $id";
+  echo "received id $id\n";
 } else {
   $id = NULL;
-  echo "no id received";
+  echo "no id received\n";
 }
 
 # make sure there is an action
 if (isset($_POST['action'])) {
   $action = $_POST['action'];
-  echo "received action $action";
+  echo "received action $action\n";
 
   #
 } else {

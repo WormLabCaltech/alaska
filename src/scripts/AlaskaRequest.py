@@ -33,6 +33,14 @@ class AlaskaRequest(Alaska):
         self.CONTEXT = zmq.Context()
         self.SOCKET = self.CONTEXT.socket(zmq.DEALER)
 
+    def connect(self):
+        """
+        Connect to server.
+        """
+        print('INFO: Connecting to server on port {}'.format(self.PORT))
+        self.SOCKET.setsockopt(zmq.IDENTITY, _id)
+        self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
+
     def send(self, msg):
         """
         Sends message to server.
@@ -41,10 +49,7 @@ class AlaskaRequest(Alaska):
         _id = self.id.encode()
         m = Alaska.CODES[msg]
 
-        # TODO: how to tell if server is online?
-        print('INFO: Connecting to server on port {}'.format(self.PORT))
-        self.SOCKET.setsockopt(zmq.IDENTITY, _id)
-        self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
+        self.connect()
 
         if self.check():
             self.SOCKET.send(m)
@@ -118,6 +123,7 @@ if __name__ == '__main__':
     print('INFO: Creating {} request'.format(args.action))
 
     if args.action == 'check':
+        request.connect()
         if request.check():
             print('true')
         else:
