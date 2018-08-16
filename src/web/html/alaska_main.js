@@ -15,8 +15,9 @@
  * @param {bool}  on  Whether the server is on.
  */
 function set_badge(on) {
-  $('#server_status_badge').removeClass('badge-primary');
-  $('#server_status_badge').removeClass('infinite');
+  $('#server_status_badge').removeClass();
+  $('#server_status_badge').addClass('badge');
+  $('#server_status_badge').addClass('badge-pill');
   if (on) {
     $('#server_status_badge').addClass('badge-success');
     $('#server_status_badge').text('Online');
