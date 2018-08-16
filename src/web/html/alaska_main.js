@@ -15,15 +15,15 @@
  * @param {bool}  on  Whether the server is on.
  */
 function set_badge(on) {
-    if (on) {
-      $('#server_status_badge').addClass('badge-success');
-      $('#server_status_badge').text('Online');
-    } else {
-      $('#server_status_badge').addClass('badge-danger');
-      $('#server_status_badge').text('Offline');
-    }
-    $('#server_status_badge').removeClass('badge-primary');
-    $('#server_status_badge').removeClass('infinite');
+  $('#server_status_badge').removeClass('badge-primary');
+  $('#server_status_badge').removeClass('infinite');
+  if (on) {
+    $('#server_status_badge').addClass('badge-success');
+    $('#server_status_badge').text('Online');
+  } else {
+    $('#server_status_badge').addClass('badge-danger');
+    $('#server_status_badge').text('Offline');
+  }
 }
 
 /**
