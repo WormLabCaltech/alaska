@@ -48,3 +48,8 @@ function get_server_status() {
     }
   });
 }
+
+// To run when page is loaded.
+$(document).ready(function() {
+  get_server_status();
+});
