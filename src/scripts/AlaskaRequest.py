@@ -130,7 +130,7 @@ if __name__ == '__main__':
             print('false')
         request.SOCKET.close()
         request.CONTEXT.term()
-        sys.exit(0)
+        quit()
 
     else:
         # gate for actions
