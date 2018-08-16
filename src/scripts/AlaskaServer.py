@@ -487,7 +487,7 @@ class AlaskaServer(Alaska):
         if to is not None:
             self.respond(to, 'END')
 
-    def check(self, to, close=True):
+    def check(self, to, close=False):
         """
         Responds to check request.
         Check request is sent to check if server is up and running.
@@ -1496,11 +1496,11 @@ class AlaskaServer(Alaska):
         self.test_set_vars(_id, close=False)
         self.do_all(_id, close=False)
 
-    def get_status(self, _id, close=False):
+    def is_online(self, _id, close=True):
         """
-        Get the status of the server.
+        Check if server is online.
         """
-        self.respond(_id, self.state)
+        self.respond(_id, True)
 
         if close:
             self.close(_id)

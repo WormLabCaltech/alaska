@@ -115,13 +115,13 @@ class Alaska():
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
         'get_queue':            b'\x92',
-        'get_status':           b'\x93',
+        'is_online':            b'\x93',
         'save':                 b'\x94', # saves server state
         'load':                 b'\x95', # loads server state
         'log':                  b'\x96', # force log
         'update_orgs':          b'\x97', # force organism update
         'start':                b'\x98', # start server
-        'stop':                 b'\x99'  # stop server
+        'stop':                 b'\x99', # stop server
     }
 
     # Server state.
