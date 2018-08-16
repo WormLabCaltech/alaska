@@ -32,7 +32,8 @@ if (isset($_POST['action'])) {
   $action = $_POST['action'];
   echo "received action $action\n";
 
-  #
+  # call cgi request
+  cgi_request($action, $id);
 } else {
   # if there is no action, this script was called incorrectly
   throw new Exception("action not given");
