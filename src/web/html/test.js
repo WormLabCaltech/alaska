@@ -9,7 +9,8 @@ function handle(data) {
 
 function testAjax(handleData) {
   $.ajax({
-    url: "/alaska/scripts/cgi_request.sh new_proj",
+    type: "POST",
+    url: "test.php",
     success:function(data) {
       handleData(data);
     }
