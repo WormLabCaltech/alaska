@@ -1,5 +1,5 @@
 function handle(data) {
-    var error = "ERROR"
+    var error = "Error"
     if (data.indexOf(error) != -1) {
         $("p").text("server is off");
     } else {
@@ -19,7 +19,6 @@ function testAjax(handleData) {
 
 $(document).ready(function() {
     $("#submit").click(function() {
-        alert("clicked");
         testAjax(handle);
     });
 });
