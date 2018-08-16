@@ -1,3 +1,3 @@
 <?php
-/alaska/scripts/cgi_request.sh new_proj
+shell_exec('/alaska/scripts/cgi_request.sh new_proj')
 ?>
