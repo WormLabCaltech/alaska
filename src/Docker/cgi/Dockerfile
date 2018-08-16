@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y \
     perl \
     curl \
     bzip2 \
-    php
+    php \
+    libapache2-mod-php
 
 ##### Perl Packages #####
 RUN apt-get update && apt-get install -y \
