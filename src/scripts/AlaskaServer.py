@@ -1500,7 +1500,7 @@ class AlaskaServer(Alaska):
         """
         Check if server is online.
         """
-        self.respond(_id, True)
+        self.respond(_id, 'true')
 
         if close:
             self.close(_id)
