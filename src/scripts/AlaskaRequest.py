@@ -97,7 +97,7 @@ if __name__ == '__main__':
     import argparse
 
     request = AlaskaRequest()
-    choices = request.CODES.keys()
+    choices = Alaska.CODES.keys()
 
     # command line arguments
     parser = argparse.ArgumentParser(description='Send request to AlaskaServer.')
