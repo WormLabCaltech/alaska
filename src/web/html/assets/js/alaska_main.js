@@ -83,7 +83,7 @@ function make_ftp(username, password) {
  */
 function new_proj() {
     // First, get text of server status span.
-    var status = $('#server_status_badge').text().toLowercase();
+    var status = $('#server_status_badge').text().toLowerCase();
 
     // Note: we don't have to check whether the server is online because
     // the "new project" button is only enabled when the server is on.
@@ -96,11 +96,6 @@ function new_proj() {
       data: { action: 'new_proj' },
       success:function(out) {
         console.log(out);
-        if (out.includes("true")) {
-          set_badge(true);
-        } else {
-          set_badge(false);
-        }
       }
     });
 }
