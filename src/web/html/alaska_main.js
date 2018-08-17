@@ -23,8 +23,11 @@ function set_badge(on) {
     $('#server_status_badge').text('Online');
 
     // Now that it's online, enable the new project button!
+    $('#new_proj_btn').css('pointer-events', '');
     $('#new_proj_btn').prop('disabled', 'false');
-    $('#new_proj_btn').popover('dispose');
+
+    // remove popover
+    $('#new_proj_btn_span').popover('dispose');
 
   } else {
     $('#server_status_badge').addClass('badge-danger');
@@ -104,11 +107,19 @@ function new_proj() {
 
 // To run when page is loaded.
 $(document).ready(function() {
+  // initialize tooltips
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  });
+
+  // initialize popovers
+  $(function () {
+    $('[data-toggle="popover"]').popover()
+  })
+
   // Add on click handler for start project button.
   $('#new_proj_btn').click(new_proj);
 
   // Fetch server status.
   get_server_status();
-
-
 });
