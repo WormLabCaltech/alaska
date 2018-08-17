@@ -21,6 +21,11 @@ function set_badge(on) {
   if (on) {
     $('#server_status_badge').addClass('badge-success');
     $('#server_status_badge').text('Online');
+
+    // Now that it's online, enable the new project button!
+    $('#new_proj_btn').prop('disabled', 'false');
+    $('#new_proj_btn').popover('dispose');
+
   } else {
     $('#server_status_badge').addClass('badge-danger');
     $('#server_status_badge').text('Offline');
@@ -37,6 +42,14 @@ function set_badge(on) {
  *
  */
 function get_server_status() {
+  // show loading badge
+  // $('#server_status_badge').removeClass();
+  // $('#server_status_badge').addClass('badge');
+  // $('#server_status_badge').addClass('badge-pill');
+  // $('#server_status_badge').addClass('badge-warning');
+  // $('#server_status_badge').addClass('flash');
+  // $('#server_status_badge').addClass('infinite');
+
   // submit ajax request
   $.ajax({
     type: 'POST',
@@ -53,7 +66,49 @@ function get_server_status() {
   });
 }
 
+/**
+ * Make a new ftp username and password.
+ */
+function make_ftp(username, password) {
+
+}
+
+/**
+ * Start a new project.
+ * The response from this button depends on whether the server is online or
+ * offline.
+ */
+function new_proj() {
+    // First, get text of server status span.
+    var status = $('#server_status_badge').text().toLowercase();
+
+    // Note: we don't have to check whether the server is online because
+    // the "new project" button is only enabled when the server is on.
+
+    // Send new project request.
+    // submit ajax request
+    $.ajax({
+      type: 'POST',
+      url: 'cgi_request.php',
+      data: { action: 'new_proj' },
+      success:function(out) {
+        console.log(out);
+        if (out.includes("true")) {
+          set_badge(true);
+        } else {
+          set_badge(false);
+        }
+      }
+    });
+}
+
 // To run when page is loaded.
 $(document).ready(function() {
+  // Add on click handler for start project button.
+  $('#new_proj_btn').click(new_proj);
+
+  // Fetch server status.
   get_server_status();
+
+
 });
