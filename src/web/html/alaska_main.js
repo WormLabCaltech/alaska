@@ -24,7 +24,7 @@ function set_badge(on) {
 
     // Now that it's online, enable the new project button!
     $('#new_proj_btn').css('pointer-events', 'auto');
-    $('#new_proj_btn').prop('disabled', 'false');
+    $('#new_proj_btn').prop('disabled', false);
 
     // remove popover
     $('#new_proj_btn_span').popover('dispose');
