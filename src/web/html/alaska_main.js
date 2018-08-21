@@ -74,12 +74,16 @@ function get_server_status() {
  * from output of new_proj.
  */
 function get_id_pw(response) {
+  console.log(out);
+
   // Split response to lines.
   var split = response.split('\n');
+  console.log(split);
 
   // Get second-to-last string.
   split.pop();
   var line = split.pop();
+  console.log(line);
 
   // Split with colon to get the id.
   var split2 = line.split(':');
@@ -120,7 +124,6 @@ function new_proj() {
     url: 'cgi_request.php',
     data: { action: 'new_proj' },
     success:function(out) {
-      console.log(out);
       id_pw = get_id_pw(out);
     }
   });
