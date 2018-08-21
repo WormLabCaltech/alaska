@@ -70,10 +70,35 @@ function get_server_status() {
 }
 
 /**
- * Make a new ftp username and password.
+ * Retrieve project id (which is also the ftp login) and ftp password
+ * from output of new_proj.
  */
-function make_ftp(username, password) {
+function get_id_pw(response) {
+  // Split response to lines.
+  var split = response.split('\n');
 
+  // Get second-to-last string.
+  split.pop();
+  var line = split.pop();
+
+  // Split with colon to get the id.
+  var split2 = line.split(':');
+  var id = split2[0];
+
+  // Split the second split2 with space to fetch password.
+  var split3 = split2[1].split(' ');
+  var pw = split3.pop();
+
+  // Create dict to return.
+  var result = {
+    'id': id,
+    'pw': pw
+  };
+
+  console.log('id: ' + id + '\n');
+  console.log('pw: ' + pw + '\n');
+
+  return result;
 }
 
 /**
@@ -82,22 +107,23 @@ function make_ftp(username, password) {
  * offline.
  */
 function new_proj() {
-    // First, get text of server status span.
-    var status = $('#server_status_badge').text().toLowerCase();
+  // First, get text of server status span.
+  var status = $('#server_status_badge').text().toLowerCase();
 
-    // Note: we don't have to check whether the server is online because
-    // the "new project" button is only enabled when the server is on.
+  // Note: we don't have to check whether the server is online because
+  // the "new project" button is only enabled when the server is on.
 
-    // Send new project request.
-    // submit ajax request
-    $.ajax({
-      type: 'POST',
-      url: 'cgi_request.php',
-      data: { action: 'new_proj' },
-      success:function(out) {
-        console.log(out);
-      }
-    });
+  // Send new project request.
+  // submit ajax request
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: { action: 'new_proj' },
+    success:function(out) {
+      console.log(out);
+      id_pw = get_id_pw(out);
+    }
+  });
 }
 
 // To run when page is loaded.
