@@ -777,7 +777,7 @@ class AlaskaServer(Alaska):
             Makes the given ftp user with id and a random pw.
             Returns the pw.
             """
-            pw = Alaska.rand_str(10)
+            pw = self.rand_str(Alaska.FTP_PW_L)
 
             cmd = '(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
                     -d /home/ftpusers/{}/{}/{}'.format(pw, pw, __id,
