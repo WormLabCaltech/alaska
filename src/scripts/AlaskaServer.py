@@ -785,6 +785,7 @@ class AlaskaServer(Alaska):
                                                 Alaska.PROJECTS_DIR,
                                                 __id)
             out = ftp.exec_run(cmd)
+            print(out)
             exit_code = out[0]
             if exit_code != 0:
                 raise Exception('{}: FTP user creation exited with non-zero status.'
@@ -794,6 +795,7 @@ class AlaskaServer(Alaska):
                                                 Alaska.FTP_COUNT_LIMIT,
                                                 Alaska.FTP_SIZE_LIMIT)
             out = ftp.exec_run(cmd)
+            print(out)
             exit_code = out[0]
             if exit_code != 0:
                 raise Exception('{}: FTP user modification exited with non-zero status.'
@@ -824,7 +826,6 @@ class AlaskaServer(Alaska):
         # check if ftp container is running
         try:
             ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-            print(ftp.status)
             if ftp.status != 'running':
                 self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
 
