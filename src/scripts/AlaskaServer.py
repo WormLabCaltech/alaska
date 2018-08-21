@@ -801,6 +801,9 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: FTP user modification exited with non-zero status.'
                                     .format(__id))
 
+            # return password
+            return pw
+
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(Alaska.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
