@@ -772,6 +772,33 @@ class AlaskaServer(Alaska):
         """
         Creates a new project.
         """
+        def make_ftp(__id, ftp):
+            """
+            Makes the given ftp user with id and a random pw.
+            Returns the pw.
+            """
+            pw = Alaska.rand_str(10)
+
+            cmd = '(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
+                    -d /home/ftpusers/{}/{}/{}'.format(pw, pw, __id,
+                                                Alaska.DOCKER_DATA_VOLUME,
+                                                Alaska.PROJECTS_DIR,
+                                                __id)
+            out = ftp.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception('{}: FTP user creation exited with non-zero status.'
+                                    .format(__id))
+
+            cmd = 'pure-pw usermod {} -n {} -N {} -m'.format(__id,
+                                                Alaska.FTP_COUNT_LIMIT,
+                                                Alaska.FTP_SIZE_LIMIT)
+            out = ftp.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception('{}: FTP user modification exited with non-zero status.'
+                                    .format(__id))
+
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(Alaska.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
@@ -793,6 +820,20 @@ class AlaskaServer(Alaska):
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.DIFF_DIR)
         os.makedirs(f)
         self.broadcast(_id, '{}: new project created'.format(__id))
+
+        # check if ftp container is running
+        try:
+            ftp = self.DOCKER.containers.get(__id)
+            print(ftp.status)
+            if ftp.status != 'running':
+                self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+
+            # once we know that the ftp is running,
+            pw = make_ftp(__id, ftp)
+
+            self.broadcast(_id, '{}: ftp user created with password {}'.format(__id, pw))
+        except docker.errors.NotFound as e:
+            self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
 
         if close:
             self.close(_id)

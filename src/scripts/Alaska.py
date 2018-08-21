@@ -50,6 +50,9 @@ class Alaska():
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
+    FTP_PW_L = 10 # length of ftp password
+    FTP_SIZE_LIMIT = 20000 # limit to transfer size (in MB)
+    FTP_COUNT_LIMIT = 1000 # limit to number of files
     RAW_DIR = '0_raw_reads' # raw reads directory name
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
     # archives that patool can unpack
@@ -77,6 +80,7 @@ class Alaska():
     DOCKER_QC_TAG = 'alaska_qc:latest'
     DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest' # kallisto image version to use
     DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest' # sleuth image version to use
+    DOCKER_FTP_TAG = 'ftpd_server'
 
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
                             'test_samples/raw/minimum/mt2',
