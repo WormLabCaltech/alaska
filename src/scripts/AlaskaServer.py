@@ -823,8 +823,7 @@ class AlaskaServer(Alaska):
 
         # check if ftp container is running
         try:
-            print(self.DOCKER.containers.list())
-            ftp = self.DOCKER.containers.get(__id)
+            ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
             print(ftp.status)
             if ftp.status != 'running':
                 self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
