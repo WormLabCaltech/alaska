@@ -74,26 +74,20 @@ function get_server_status() {
  * from output of new_proj.
  */
 function get_id_pw(response) {
-  console.log(response);
-
   // Split response to lines.
   var split = response.split('\n');
-  console.log(split);
 
   // Get third-to-last string.
   split.pop();
   split.pop();
   var line = split.pop();
-  console.log(line);
 
   // Split with colon to get the id.
   var split2 = line.split(':');
-  console.log(split2);
   var id = split2[0];
 
   // Split the second split2 with space to fetch password.
   var split3 = split2[1].split(' ');
-  console.log(split3);
   var pw = split3.pop();
 
   // Create dict to return.
@@ -127,6 +121,7 @@ function new_proj() {
     url: 'cgi_request.php',
     data: { action: 'new_proj' },
     success:function(out) {
+      console.log(response);
       id_pw = get_id_pw(out);
     }
   });
