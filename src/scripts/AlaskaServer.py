@@ -779,8 +779,8 @@ class AlaskaServer(Alaska):
             """
             pw = self.rand_str(Alaska.FTP_PW_L)
 
-            cmd = '(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
-                    -d /home/ftpusers/{}/{}/{}'.format(pw, pw, __id,
+            cmd = '/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
+                    -d /home/ftpusers/{}/{}/{}"'.format(pw, pw, __id,
                                                 Alaska.DOCKER_DATA_VOLUME,
                                                 Alaska.PROJECTS_DIR,
                                                 __id)
@@ -791,7 +791,7 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: FTP user creation exited with non-zero status.'
                                     .format(__id))
 
-            cmd = 'pure-pw usermod {} -n {} -N {} -m'.format(__id,
+            cmd = '/bin/bash -c "pure-pw usermod {} -n {} -N {} -m"'.format(__id,
                                                 Alaska.FTP_COUNT_LIMIT,
                                                 Alaska.FTP_SIZE_LIMIT)
             out = ftp.exec_run(cmd)
