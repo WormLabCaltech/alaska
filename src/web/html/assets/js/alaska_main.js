@@ -74,23 +74,26 @@ function get_server_status() {
  * from output of new_proj.
  */
 function get_id_pw(response) {
-  console.log(out);
+  console.log(response);
 
   // Split response to lines.
   var split = response.split('\n');
   console.log(split);
 
-  // Get second-to-last string.
+  // Get third-to-last string.
+  split.pop();
   split.pop();
   var line = split.pop();
   console.log(line);
 
   // Split with colon to get the id.
   var split2 = line.split(':');
+  console.log(split2);
   var id = split2[0];
 
   // Split the second split2 with space to fetch password.
   var split3 = split2[1].split(' ');
+  console.log(split3);
   var pw = split3.pop();
 
   // Create dict to return.
