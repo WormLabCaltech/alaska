@@ -780,9 +780,10 @@ class AlaskaServer(Alaska):
             pw = self.rand_str(Alaska.FTP_PW_L)
 
             cmd = '/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
-                    -d /home/ftpusers/{}/{}/{}"'.format(pw, pw, __id,
+                    -d /home/ftpusers/{}/{}/{}/{}"'.format(pw, pw, __id,
                                                 Alaska.DOCKER_DATA_VOLUME,
                                                 Alaska.PROJECTS_DIR,
+                                                Alaska.RAW_DIR,
                                                 __id)
             out = ftp.exec_run(cmd)
             print(out)
