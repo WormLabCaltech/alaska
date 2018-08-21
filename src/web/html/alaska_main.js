@@ -121,7 +121,7 @@ function new_proj() {
     url: 'cgi_request.php',
     data: { action: 'new_proj' },
     success:function(out) {
-      console.log(response);
+      console.log(out);
       id_pw = get_id_pw(out);
     }
   });
