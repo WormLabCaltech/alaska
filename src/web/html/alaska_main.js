@@ -70,6 +70,13 @@ function get_server_status() {
 }
 
 /**
+ * Set loading spinner in given span/div.
+ */
+function set_loading_spinner(ele) {
+  
+}
+
+/**
  * Retrieve project id (which is also the ftp login) and ftp password
  * from output of new_proj.
  */
