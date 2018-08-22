@@ -85,7 +85,7 @@ function set_loading_spinner(button, spinner) {
   var transform = anime({
     targets: obj,
     width: spinner.outerWidth(true),
-    rount: 1,
+    round: 1,
     easing: 'easeInOutQuart',
     update: function() {
       button.width(width + obj.width);
@@ -130,6 +130,35 @@ function get_id_pw(response) {
 }
 
 /**
+ * Show ftp info.
+ */
+function show_ftp_info() {
+  var ftp_div = $('#ftp_info_div');
+
+  // Show the div.
+  ftp_div.show();
+
+  // Then, scroll to it.
+  var obj = {pos: $(document).scrollTop()};
+
+  // Scroll smoothly.
+  var transform = anime({
+    targets: obj,
+    pos: ftp_div.scrollTop(),
+    round: 1,
+    easing: 'easeInOutQuart',
+    update: function() {
+      $(document).scrollTop(obj.pos);
+    },
+    complete: function(anim) {
+      spinner.show();
+    }
+  });
+}
+
+}
+
+/**
  * Start a new project.
  * The response from this button depends on whether the server is online or
  * offline.
@@ -159,6 +188,8 @@ function new_proj() {
       // Once we have an id and pw, stop the loading spinner.
       spinner.hide();
       $('#success_check').show();
+
+
     }
   });
 }
