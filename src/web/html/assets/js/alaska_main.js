@@ -149,9 +149,6 @@ function show_ftp_info() {
     easing: 'easeInOutQuart',
     update: function() {
       $(document).scrollTop(obj.pos);
-    },
-    complete: function(anim) {
-      spinner.show();
     }
   });
 }
