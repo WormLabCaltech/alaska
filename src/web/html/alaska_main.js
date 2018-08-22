@@ -187,7 +187,8 @@ function new_proj() {
       spinner.hide();
       $('#success_check').show();
 
-
+      // Then, show ftp info.
+      show_ftp_info();
     }
   });
 }
