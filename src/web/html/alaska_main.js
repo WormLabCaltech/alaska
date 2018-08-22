@@ -140,6 +140,9 @@ function show_ftp_info() {
 
   // Then, scroll to it.
   var obj = {pos: $(window).scrollTop()};
+  var target = ftp_div.scrollTop();
+
+  console.log('scrolling from ' + obj.pos + ' to ' + target + '\n');
 
   // Scroll smoothly.
   var transform = anime({
