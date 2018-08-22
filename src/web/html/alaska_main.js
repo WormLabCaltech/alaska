@@ -145,12 +145,12 @@ function show_ftp_info(id, pw) {
   var obj = {pos: $(window).scrollTop()};
   var target = ftp_div.offset().top;
 
-  console.log(obj.pos + ' ' + target);
+  // console.log(obj.pos + ' ' + target);
 
   // Scroll smoothly.
   var transform = anime({
     targets: obj,
-    pos: ftp_div.scrollTop(),
+    pos: target,
     round: 1,
     easing: 'easeInOutQuart',
     update: function() {
