@@ -156,8 +156,6 @@ function show_ftp_info() {
   });
 }
 
-}
-
 /**
  * Start a new project.
  * The response from this button depends on whether the server is online or
