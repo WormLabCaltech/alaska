@@ -82,13 +82,13 @@ function set_loading_spinner(button, spinner) {
     targets: obj,
     width: spinner.outerWidth(true),
     rount: 1,
-    easing: 'easeInOutQuart',
+    easing: 'easeInOutCubic',
     update: function() {
       button.width(width + obj.width);
     }
   });
 
-  spinner.css('display', 'auto');
+  spinner.show();
 }
 
 /**
