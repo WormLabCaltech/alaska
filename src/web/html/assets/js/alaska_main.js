@@ -132,17 +132,18 @@ function get_id_pw(response) {
 /**
  * Show ftp info.
  */
-function show_ftp_info() {
+function show_ftp_info(id, pw) {
   var ftp_div = $('#ftp_info_div');
+
+  // First, set the project id and ftp info before showing.
+  $('#proj_id').text(id);
 
   // Show the div.
   ftp_div.show();
 
   // Then, scroll to it.
   var obj = {pos: $(window).scrollTop()};
-  var target = ftp_div.scrollTop();
-
-  console.log('scrolling from ' + obj.pos + ' to ' + target + '\n');
+  var target = ftp_div.offset().top;
 
   // Scroll smoothly.
   var transform = anime({
@@ -188,7 +189,7 @@ function new_proj() {
       $('#success_check').show();
 
       // Then, show ftp info.
-      show_ftp_info();
+      show_ftp_info(id_pw.id, id_pw.pw);
     }
   });
 }
