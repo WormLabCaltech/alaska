@@ -72,8 +72,21 @@ function get_server_status() {
 /**
  * Set loading spinner in given span/div.
  */
-function set_loading_spinner(ele) {
-  
+function set_loading_spinner(button, spinner) {
+  // First, figure out by how much the button needs to be lengthened.
+  var obj = {width: 0};
+
+  // Do the transformation.
+  var transform = anime({
+    targets: obj,
+    width: spinner.outerWidth(true),
+    rount: 1,
+    update: function() {
+      button.width(obj.width);
+    }
+  });
+
+  ele.css('display', 'auto');
 }
 
 /**
@@ -121,6 +134,9 @@ function new_proj() {
   // Note: we don't have to check whether the server is online because
   // the "new project" button is only enabled when the server is on.
 
+
+  var button = $('#new_proj_btn');
+  var spinner = $('#loading_spinner');
   // Send new project request.
   // submit ajax request
   $.ajax({
@@ -129,6 +145,7 @@ function new_proj() {
     data: { action: 'new_proj' },
     success:function(out) {
       console.log(out);
+      set_loading_spinner(button, spinner);
       id_pw = get_id_pw(out);
     }
   });
