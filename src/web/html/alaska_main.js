@@ -73,6 +73,8 @@ function get_server_status() {
  * Set loading spinner in given span/div.
  */
 function set_loading_spinner(button, spinner) {
+  button.prop('disabled', true);
+
   // First, figure out by how much the button needs to be lengthened.
   var width = button.width();
   var obj = {width: 0};
@@ -82,13 +84,12 @@ function set_loading_spinner(button, spinner) {
     targets: obj,
     width: spinner.outerWidth(true),
     rount: 1,
-    easing: 'easeInOutCubic',
+    easing: 'easeInOutQuart',
     update: function() {
       button.width(width + obj.width);
     },
     complete: function(anim) {
       spinner.show();
-      button.prop('disabled', true);
     }
   });
 }
