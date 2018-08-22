@@ -14,6 +14,8 @@ function cgi_request($action, $id) {
     # now, run the command and get output
     $out = shell_exec($cmd);
 
+    sleep(5);
+
     # simply spit out the output
     echo $out;
 }
