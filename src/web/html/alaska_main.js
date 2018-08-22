@@ -143,7 +143,7 @@ function show_ftp_info(id, pw) {
 
   // Then, scroll to it.
   var obj = {pos: $(window).scrollTop()};
-  var target = ftp_div.offset().top + $('#navbar_nav').outerHeight(true);
+  var target = ftp_div.offset().top - $('#navbar_nav').outerHeight(true);
 
   // console.log(obj.pos + ' ' + target);
 
