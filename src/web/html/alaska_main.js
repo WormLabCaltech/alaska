@@ -27,6 +27,8 @@ function set_badge(on) {
     $('#new_proj_btn').prop('disabled', false);
 
     // remove popover
+    $('#new_proj_btn_span').popover('hide');
+    $('#new_proj_btn_span').popover('disable');
     $('#new_proj_btn_span').popover('dispose');
 
   } else {
