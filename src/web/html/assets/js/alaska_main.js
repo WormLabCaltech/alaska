@@ -139,7 +139,7 @@ function show_ftp_info() {
   ftp_div.show();
 
   // Then, scroll to it.
-  var obj = {pos: $(document).scrollTop()};
+  var obj = {pos: $(window).scrollTop()};
 
   // Scroll smoothly.
   var transform = anime({
@@ -148,7 +148,7 @@ function show_ftp_info() {
     round: 1,
     easing: 'easeInOutQuart',
     update: function() {
-      $(document).scrollTop(obj.pos);
+      $(window).scrollTop(obj.pos);
     }
   });
 }
