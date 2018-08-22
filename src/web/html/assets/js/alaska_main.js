@@ -153,6 +153,10 @@ function new_proj() {
     success:function(out) {
       console.log(out);
       id_pw = get_id_pw(out);
+
+      // Once we have an id and pw, stop the loading spinner.
+      spinner.hide();
+      $('#success_check').show();
     }
   });
 }

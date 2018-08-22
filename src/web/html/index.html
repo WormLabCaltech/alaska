@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alaska</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/check.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <link rel="stylesheet" href="assets/css/loading.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
-    <link rel="stylesheet" href="assets/css/ripple.css">
+    <link rel="stylesheet" href="assets/css/spinner.css">
 </head>
 
 <body style="margin:30vh auto;background-color:transparent;">
-    <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean" style="background-color:transparent;">
+    <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean" style="background-color:#3f6075;">
         <div class="container"><a class="navbar-brand" href="#" style="color:#ffffff;">Company Name</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div
                 class="collapse navbar-collapse" id="navcol-1">
@@ -28,26 +29,93 @@
         </div>
         </div>
     </nav>
-    <section>
-        <div>
-            <div class="container-fluid">
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col">
-                        <h1 class="text-center" style="color:rgb(255,255,255);font-size:5em;margin:0px;">Alaska</h1>
-                        <div class="row">
-                            <div class="col">
-                                <h2 class="text-center" style="color:#ffffff;font-weight:100;font-size:2.5em;">A complete, automatic RNA-seq analysis pipeline.</h2>
-                            </div>
+    <section id="main_content_section">
+        <div class="container-fluid" id="main_content_div">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="col">
+                    <h1 class="text-center" style="color:rgb(255,255,255);font-size:5em;margin:0px;">Alaska</h1>
+                    <div class="row">
+                        <div class="col">
+                            <h2 class="text-center" style="color:#ffffff;font-weight:100;font-size:2.5em;">A complete, automatic RNA-seq analysis pipeline.</h2>
                         </div>
                     </div>
                 </div>
-                <div class="col d-flex justify-content-center"><span id="new_proj_btn_span" class="d-inline-block" data-toggle="popover" data-content="Alaska is currently unavailable. This may be because the page has not finished loading, or the server is offline. Please consult the server status at the top of the page."
-                        data-trigger="hover" style="margin:20px;" title="Currently unavailable." data-placement="bottom"><button class="btn btn-primary btn-lg d-flex align-items-center" type="button" disabled="disabled" id="new_proj_btn" style="font-size:1.5em;margin:0;border-radius:24px;padding:10px 20px;pointer-events:none;">Start a new project!<div id="loading_spinner" class="ld ld-ring ld-spin-fast" style="margin-left:15px;display:none"></div></button>
-                    </span>
-                </div>
+            </div>
+            <div class="col d-flex justify-content-center"><span class="d-inline-block" data-toggle="popover" data-content="Alaska is currently unavailable. This may be because the page has not finished loading, or the server is offline. Please consult the server status at the top of the page." data-trigger="hover"
+                    style="margin:20px;" title="Currently unavailable." data-placement="bottom"><button class="btn btn-primary btn-lg d-flex align-items-center" type="button" disabled="disabled" id="new_proj_btn" style="font-size:1.5em;margin:0;border-radius:24px;padding:10px 20px;pointer-events:none;">Start a new project!<!--<div id="loading_spinner" class="ld ld-ring ld-spin-fast" style="margin-left:15px;display:none"></div>-->
+<div id="loading_spinner" class="spinner ml-3" style="display:none">
+    <div class="double-bounce1"></div>
+    <div class="double-bounce2"></div>
+</div><div id="success_check" class="ml-3" style="display:none">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+      <circle class="path circle" fill="none" stroke="#97e570" stroke-width="14" stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1"/>
+      <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+    </svg>
+</div></button>
+                </span>
             </div>
         </div>
     </section>
+    <div id="ftp_info_div" style="margin-top:10rem;display:none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="text-center" style="color:rgb(255,255,255);font-size:3em;margin-bottom:0px;">We've created a new project for you.</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 class="text-center" style="color:rgb(255,255,255);font-weight:100;font-size:2em;">Here's what you need to do.</h2>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col mx-4"><div class="card-deck">
+    <div class="card text-white border-success" style="background-color:transparent;">
+        <div class="card-header">1. Your project</div>
+        <div class="card-body">
+            <h4 id="proj_id" class="card-title">Project ID</h4>
+            <p class="card-text">Here is your new project ID. This is how Alaska identifies and keeps track of everything related to your project.</p>
+            <p class="card-text">You may return to this page at any time with the following url:<br><mark><code>http://alaska.caltech.edu:81/</code></mark></p>
+        </div>
+    </div>
+    <div class="card text-white border-warning" style="background-color:transparent;">
+        <div class="card-header">2. Important notes</div>
+        <div class="card-body">
+            <h4 class="card-title">Preparing your reads</h4>
+            <p class="card-text">Alaska accepts compressed files, as well as plain folders/files. If you decide to compress your reads, please make sure it is in one of the supported formats. <mark><code>.tar.gz</code></mark> is recommended. <u>Just make sure each sample is compressed into separate files (i.e. one file per sample) or in separate folders (i.e. one folder per sample).</u></p></div>
+    </div>
+    <div class="card text-white border-danger" style="background-color:transparent;">
+        <div class="card-header">3. Raw reads submission</div>
+        <div class="card-body">
+            <h4 class="card-title">Uploading your reads</h4>
+            <p class="card-text">You will be uploading your reads via FTP. For large files, you may wish to use a server.</p>
+            <!--
+            <dl class="row" style="font-size:0.8em">
+                <dt class="col-sm-4">Server</dt>
+                <dd class="col-sm-6">alaska.caltech.edu</dd>
+                <dt class="col-sm-4">Port</dt>
+                <dd class="col-sm-6">21</dd>
+                <dt class="col-sm-4">Username</dt>
+                <dd id="proj_id" class="col-sm-6">Project ID</dd>
+                <dt class="col-sm-4">Password</dt>
+                <dd id="ftp_pw" class="col-sm-6">password</dd>
+            </dl>-->
+            <p class="card-text">If you aren't familiar with transferring files via FTP, an FTP client, like Cyberduck, may be helpful.</p>
+            <p class="card-text text-center"><button id="ftp_info_btn" class="btn btn-danger mt-2" type="button">View FTP details</button></p>
+        </div>
+    </div>
+    <div class="card text-white border-primary" style="background-color:transparent;">
+        <div class="card-header">4. Fetch your reads</div>
+        <div class="card-body">
+            <h4 class="card-title">Begin pipeline</h4>
+            <p class="card-text">Once all your reads are uploaded, Alaska can start its data analysis pipeline. Please click the button below <strong>ONLY</strong> once all your reads are uploaded.</p>
+            <p class="card-text text-center"><button id="fetch_reads_btn" class="btn btn-primary mt-2" type="button">Fetch reads</button></p>
+        </div>
+    </div>
+</div></div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
