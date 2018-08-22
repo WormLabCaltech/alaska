@@ -85,10 +85,12 @@ function set_loading_spinner(button, spinner) {
     easing: 'easeInOutCubic',
     update: function() {
       button.width(width + obj.width);
+    },
+    complete: function(anim) {
+      spinner.show();
+      button.prop('disabled', true);
     }
   });
-
-  spinner.show();
 }
 
 /**
