@@ -304,9 +304,6 @@ function set_fetch_succeeded() {
   succeeded.show();
 
   scroll_to_ele(succeeded);
-
-  // Pass on the parsed reads to set the table values.
-  set_raw_reads_table(reads);
 }
 
 /**
@@ -318,6 +315,8 @@ function set_fetch_failed() {
 
   succeeded.hide();
   failed.show();
+
+  scroll_to_ele(failed);
 }
 
 /**
@@ -341,6 +340,9 @@ function parse_reads(out) {
     set_fetch_failed();
   } else {
     set_fetch_succeeded();
+
+    // Pass on the parsed reads to set the table values.
+    set_raw_reads_table(reads);
   }
 
 }
@@ -370,7 +372,7 @@ function fetch_reads() {
  * Refetch reads.
  */
 function refetch_reads() {
-  
+
 }
 
 // Global raw reads div variable.
