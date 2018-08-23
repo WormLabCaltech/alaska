@@ -413,6 +413,7 @@ $(document).ready(function() {
   $('#fetch_reads_btn').click(fetch_reads);
 
   bind_raw_reads();
+  $('#refetch_reads_btn_2').click(refetch_reads);
   raw_reads_div = $('#raw_reads_div').clone(true);
 
   // Fetch server status.
