@@ -79,11 +79,11 @@ class AlaskaProject(Alaska):
                 path = '{}/{}/{}'.format(Alaska.ROOT_PATH, root, fname)
                 folder = root.replace(self.raw_dir, '')
                 filename = fname
-                size = os.path.getsize(path)
+                size = os.path.getsize(path) / (1024 ** 2)
                 read = {
                     'folder': folder,
                     'filename': fname,
-                    'size': size,
+                    'size': '{} GB'.format(size),
                     'path': path
                 }
                 reads.append(read)

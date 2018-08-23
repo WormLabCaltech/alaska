@@ -1,4 +1,14 @@
-.spinner {
+.spinner-dark {
+  width:30px;
+  height:30px;
+  margin:auto;
+  background-color:#333;
+  border-radius:100%;
+  -webkit-animation:sk-scaleout 1.0s infinite ease-in-out;
+  animation:sk-scaleout 1.0s infinite ease-in-out;
+}
+
+.spinner-light {
   width:30px;
   height:30px;
   margin:auto;

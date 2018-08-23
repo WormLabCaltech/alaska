@@ -43,7 +43,7 @@
             </div>
             <div class="col d-flex justify-content-center"><span id="new_proj_btn_span" class="d-inline-block" data-toggle="popover" data-content="Alaska is currently unavailable. This may be because the page has not finished loading, or the server is offline. Please consult the server status at the top of the page."
                     data-trigger="hover" style="margin:20px;" title="Currently unavailable." data-placement="bottom"><button class="btn btn-primary btn-lg d-flex align-items-center" type="button" disabled="disabled" id="new_proj_btn" style="font-size:1.5em;margin:0;border-radius:24px;padding:10px 20px;pointer-events:none;">Start a new project!<!--<div id="loading_spinner" class="ld ld-ring ld-spin-fast" style="margin-left:15px;display:none"></div>-->
-<div id="loading_spinner" class="spinner ml-3" style="display:none"></div><div id="success_check" class="ml-3" style="display:none">
+<div id="loading_spinner" class="spinner-light ml-3" style="display:none"></div><div id="success_check" class="ml-3" style="display:none">
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
       <circle class="path circle" fill="none" stroke="#97e570" stroke-width="14" stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1"/>
       <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
@@ -142,11 +142,52 @@
             </div>
         </div>
     </div>
+    <div id="raw_reads_div" style="margin-top:10rem;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="text-center" style="color:rgb(255,255,255);font-size:3em;margin-bottom:0px;">Here's what Alaska found.</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 class="text-center" style="color:rgb(255,255,255);font-weight:100;font-size:1.8em;">Any files not listed here will be ignored.</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mt-5">
+                    <div class="table-responsive">
+                        <table class="table table-light" id="raw_reads_table">
+                            <thead>
+                                <tr>
+                                    <th>Folder</th>
+                                    <th>Filename</th>
+                                    <th>Size</th>
+                                    <th>MD5 Checksum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="raw_reads_table_row_num" style="display:none">
+                                    <td id="folder_num">folder</td>
+                                    <td id="filename_num">filename</td>
+                                    <td id="size_num">size</td>
+                                    <td id="md5_num"><div id="md5_loading_spinner_num" class="spinner-dark" style="display:inline-block"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col"></div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="assets/js/alaska_main-1.js"></script>
     <script src="assets/js/alaska_main.js"></script>
-    <script src="assets/js/anime.min.js"></script>
 </body>
 
 </html>
