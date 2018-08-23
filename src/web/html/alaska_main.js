@@ -401,9 +401,9 @@ $(document).ready(function() {
   $('#fetch_reads_btn').click(fetch_reads);
 
   // Add on click handler for refetch reads button.
-  raw_reads_div = $('#raw_reads_div').clone(true);
   $('#refetch_reads_btn_1').click(refetch_reads);
   $('#refetch_reads_btn_2').click(refetch_reads);
+  raw_reads_div = $('#raw_reads_div').clone(true);
 
   // Fetch server status.
   get_server_status();
