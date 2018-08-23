@@ -220,6 +220,7 @@ function set_md5(md5_id, spinner_id, md5) {
  * Get the md5 sum of the given file.
  */
 function get_md5(md5_id, spinner_id, path) {
+  console.log(path);
   // Send md5 request.
   $.ajax({
     type: 'POST',
