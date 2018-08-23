@@ -72,7 +72,7 @@ class AlaskaProject(Alaska):
             for fname in files:
                 # skip files that are not one of the recognized extensions.
                 extensions = Alaska.RAW_EXT + Alaska.ARCH_EXT
-                if not fname.endswith(extension):
+                if not fname.endswith(extensions):
                     continue
 
                 # otherwise, save info about the file
