@@ -83,7 +83,7 @@ class AlaskaProject(Alaska):
                 read = {
                     'folder': folder,
                     'filename': fname,
-                    'size': '{} MB'.format(size),
+                    'size': '{} MB'.format(round(size,1)),
                     'path': path
                 }
                 reads.append(read)

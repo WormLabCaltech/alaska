@@ -205,10 +205,33 @@ function new_proj() {
 }
 
 /**
+ * Sets the md5.
+ */
+function set_md5(md5_id, spinner_id, md5) {
+  // Remove the spinner.
+  $('#' + spinner_id).hide();
+
+  // Get md5 from output.
+  md5 = md5.split('  ')[0];
+  $('#' + md5_id).text(md5);
+}
+
+/**
  * Get the md5 sum of the given file.
  */
-function get_md5(path) {
-
+function get_md5(md5_id, spinner_id, path) {
+  // Send md5 request.
+  $.ajax({
+    type: 'POST',
+    url: 'md5sum.php',
+    data: {
+      'path': path
+    },
+    success:function(out) {
+      console.log(out);
+      set_md5(md5_id, spinner_id, out);
+    }
+  });
 }
 
 /**
@@ -220,6 +243,7 @@ function set_raw_reads_table(reads) {
   var filename_id = 'filename_num';
   var size_id = 'size_num';
   var md5_id = 'md5_num';
+  var md5_loading_spinner_id = 'md5_loading_spinner_num';
 
   // Loop through each read and add rows.
   for (var i = 0; i < reads.length; i++) {
@@ -234,6 +258,7 @@ function set_raw_reads_table(reads) {
     var new_filename_id = filename_id.replace('num', i);
     var new_size_id = size_id.replace('num', i);
     var new_md5_id = md5_id.replace('num', i);
+    var new_md5_loading_spinner_id = md5_loading_spinner_id.replace('num', i);
 
     var row = $('#' + row_id).clone();
 
@@ -245,6 +270,8 @@ function set_raw_reads_table(reads) {
     row.children('#' + filename_id).attr('id', new_filename_id);
     row.children('#' + size_id).attr('id', new_size_id);
     row.children('#' + md5_id).attr('id', new_md5_id);
+    row.children('#' + new_md5_id).children().attr('id',
+                                  new_md5_loading_spinner_id);
 
     // Then, set the values.
     row.children('#' + new_folder_id).text(folder);
@@ -256,7 +283,7 @@ function set_raw_reads_table(reads) {
     row.show();
 
     // Calculate md5 sum.
-
+    get_md5(new_md5_id, new_md5_loading_spinner_id, path);
   }
 
 }

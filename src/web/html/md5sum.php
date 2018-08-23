@@ -1,7 +1,7 @@
 <?php
 # First, check if we were given a path to a file.
 if (isset($_POST['path'])) {
-  $path = $_POST['id'];
+  $path = $_POST['path'];
 } else {
   throw new Exception("no path given");
 }
