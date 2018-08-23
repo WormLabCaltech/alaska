@@ -130,6 +130,31 @@ function get_id_pw(response) {
 }
 
 /**
+ * Scroll to specified element.
+ */
+function scroll_to_ele(ele) {
+  var obj = {pos: $(window).scrollTop()};
+  var target = ele.offset().top - $('#navbar_nav').outerHeight(true);
+  var max = $(document).height() - $(window).height();
+
+  // If the max scroll is smaller than the target, override target.
+  if (max < target) {
+    target = max;
+  }
+
+  // Scroll smoothly.
+  var transform = anime({
+    targets: obj,
+    pos: target,
+    round: 1,
+    easing: 'easeInOutQuart',
+    update: function() {
+      $(window).scrollTop(obj.pos);
+    }
+  });
+}
+
+/**
  * Show ftp info.
  */
 function show_ftp_info(id, pw) {
@@ -143,28 +168,8 @@ function show_ftp_info(id, pw) {
   // Show the div.
   ftp_div.show();
 
-  // Then, scroll to it.
-  var obj = {pos: $(window).scrollTop()};
-  var target = ftp_div.offset().top - $('#navbar_nav').outerHeight(true);
-  var max = $(document).height() - $(window).height();
-
-  // If the max scroll is smaller than the target, override target.
-  if (max < target) {
-    target = max;
-  }
-
-  // console.log(obj.pos + ' ' + target);
-
-  // Scroll smoothly.
-  var transform = anime({
-    targets: obj,
-    pos: target,
-    round: 1,
-    easing: 'easeInOutQuart',
-    update: function() {
-      $(window).scrollTop(obj.pos);
-    }
-  });
+  // Smoothly scroll to element.
+  scroll_to_ele(ftp_div);
 }
 
 /**
@@ -286,7 +291,33 @@ function set_raw_reads_table(reads) {
     // Calculate md5 sum.
     get_md5(new_md5_id, new_md5_loading_spinner_id, path);
   }
+}
 
+/**
+ * Sets fetch succeeded.
+ */
+function set_fetch_succeeded() {
+  var failed = $('#fetch_failed_div');
+  var succeeded = $('#raw_reads_div');
+
+  failed.hide();
+  succeeded.show();
+
+  scroll_to_ele(succeeded);
+
+  // Pass on the parsed reads to set the table values.
+  set_raw_reads_table(reads);
+}
+
+/**
+ * Sets fetch failed.
+ */
+function set_fetch_failed() {
+  var failed = $('#fetch_failed_div');
+  var succeeded = $('#raw_reads_div');
+
+  succeeded.hide();
+  failed.show();
 }
 
 /**
@@ -303,10 +334,15 @@ function parse_reads(out) {
   // Then, parse into json.
   var reads = JSON.parse(dump);
 
-  console.log(reads);
+  // console.log(reads);
 
-  // Pass on the parsed reads to set the table values.
-  set_raw_reads_table(reads);
+  // If there are no raw reads, something went wrong.
+  if (reads.length < 1) {
+    set_fetch_failed();
+  } else {
+    set_fetch_succeeded();
+  }
+
 }
 
 /**
@@ -330,6 +366,16 @@ function fetch_reads() {
   });
 }
 
+/**
+ * Refetch reads.
+ */
+function refetch_reads() {
+  
+}
+
+// Global raw reads div variable.
+var raw_reads_div;
+
 // To run when page is loaded.
 $(document).ready(function() {
   // initialize tooltips
@@ -347,6 +393,11 @@ $(document).ready(function() {
 
   // Add on click handler for fetch reads button.
   $('#fetch_reads_btn').click(fetch_reads);
+
+  // Add on click handler for refetch reads button.
+  raw_reads_div = $('#raw_reads_div').clone(true);
+  $('#refetch_reads_btn_1').click(refetch_reads);
+  $('#refetch_reads_btn_2').click(refetch_reads);
 
   // Fetch server status.
   get_server_status();
