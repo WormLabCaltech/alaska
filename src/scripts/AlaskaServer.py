@@ -843,7 +843,6 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-
     def exists(self, _id):
         """
         Checks if project with id exists.
@@ -926,6 +925,25 @@ class AlaskaServer(Alaska):
 
         msg = '{}: saved'.format(_id)
         self.broadcast(_id, msg)
+
+        if close:
+            self.close(_id)
+
+    def fetch_reads(self, _id, close=True):
+        """
+        Fetches all files & folders in the raw reads directory.
+        """
+        if self.exists_temp(_id):
+            proj = self.projects_temp[_id]
+        elif self.exists_var(_id):
+            proj = self.projects[_id]
+        else:
+            raise Exception('This project does not exist.')
+
+        # fetch read files
+        reads = proj.fetch_reads()
+
+        self.respond(_id, reads)
 
         if close:
             self.close(_id)

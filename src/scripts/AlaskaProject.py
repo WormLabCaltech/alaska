@@ -62,6 +62,32 @@ class AlaskaProject(Alaska):
         # end from GEO submission template
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    def fetch_reads(self):
+        """
+        Simply fetches all files & folders in the raw reads directory in JSON format.
+        """
+        reads = []
+        # walk through the raw directory
+        for root, dirs, files in os.walk(self.raw_dir):
+            for fname in files:
+                # skip files that are not one of the recognized extensions.
+                extensions = Alaska.RAW_EXT + Alaska.ARCH_EXT:
+                if not fname.endswith(extension):
+                    continue
+
+                # otherwise, save info about the file
+                path = '{}/{}'.format(root, fname)
+                folder = root
+                filename = fname
+                size = os.path.getsize(path)
+                read = {
+                    'folder': folder,
+                    'filename': fname,
+                    'size': size,
+                    'path': path
+                }
+                reads.append(read)
+        return reads
 
     def get_raw_reads(self):
         """
