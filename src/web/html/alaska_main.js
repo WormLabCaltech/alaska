@@ -274,6 +274,8 @@ function parse_reads(out) {
   // Then, parse into json.
   var reads = JSON.parse(dump);
 
+  console.log(reads);
+
   // Pass on the parsed reads to set the table values.
   set_raw_reads_table(reads);
 }
