@@ -7,7 +7,7 @@ if (isset($_POST['path'])) {
 }
 
 # Then, run the md5sum utility.
-$cmd = "md5sum " . $path;
+$cmd = "docker exec alaska_server md5sum " . $path;
 $out = shell_exec($cmd);
 
 # Simply spit out the output.
