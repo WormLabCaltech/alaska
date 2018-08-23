@@ -372,7 +372,11 @@ function fetch_reads() {
  * Refetch reads.
  */
 function refetch_reads() {
+  // Reset the raw reads div.
+  $('#raw_reads_div').replaceWith(raw_reads_div);
 
+  // Then, call fetch.
+  fetch_reads();
 }
 
 // Global raw reads div variable.
