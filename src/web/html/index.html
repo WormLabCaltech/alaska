@@ -53,7 +53,7 @@
             </div>
         </div>
     </section>
-    <div id="ftp_info_div" style="margin-top:10rem;display:none">
+    <div id="ftp_info_div" style="margin-top:10rem;">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -98,7 +98,36 @@
                 <dd id="ftp_pw" class="col-sm-6">password</dd>
             </dl>-->
             <p class="card-text">If you aren't familiar with transferring files via FTP, an FTP client, like Cyberduck, may be helpful.</p>
-            <p class="card-text text-center"><button id="ftp_info_btn" class="btn btn-danger mt-2" type="button">View FTP details</button></p>
+            <p class="card-text text-center">
+                <!--FTP button trigger for modal-->
+                <button id="ftp_info_btn" class="btn btn-danger mt-2" type="button" data-toggle="modal" data-target="#exampleModal">View FTP details</button>
+            </p>
+            <!--FTP modal-->
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header alert-danger">
+                            <h5 class="modal-title">FTP Info</h5>
+                        </div>
+                        <div class="modal-body text-dark">
+                            <!--Description list for FTP info-->
+                            <dl class="row">
+                                <dt class="col-md-3">Server</dt>
+                                <dd class="col-md-9">alaska.caltech.edu</dd>
+                                <dt class="col-md-3">Port</dt>
+                                <dd class="col-md-9">21</dd>
+                                <dt class="col-md-3">Username</dt>
+                                <dd class="col-md-9" id="ftp_id">Project ID</dd>
+                                <dt class="col-md-3">Password</dt>
+                                <dd class="col-md-9" pw="ftp_pw">pw</dd>
+                            </dl>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card text-white border-primary" style="background-color:transparent;">

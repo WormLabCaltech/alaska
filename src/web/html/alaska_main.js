@@ -137,6 +137,8 @@ function show_ftp_info(id, pw) {
 
   // First, set the project id and ftp info before showing.
   $('#proj_id').text(id);
+  $('#ftp_id').text(id);
+  $('#ftp_pw').text(pw);
 
   // Show the div.
   ftp_div.show();
