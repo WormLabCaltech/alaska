@@ -204,6 +204,101 @@ function new_proj() {
   });
 }
 
+/**
+ * Get the md5 sum of the given file.
+ */
+function get_md5(path) {
+
+}
+
+/**
+ * Set raw reads table.
+ */
+function set_raw_reads_table(reads) {
+  var row_id = 'raw_reads_table_row_num';
+  var folder_id = 'folder_num';
+  var filename_id = 'filename_num';
+  var size_id = 'size_num';
+  var md5_id = 'md5_num';
+
+  // Loop through each read and add rows.
+  for (var i = 0; i < reads.length; i++) {
+    // Get values from reads array.
+    var folder = reads[i].folder;
+    var filename = reads[i].filename;
+    var size = reads[i].size;
+    var path = reads[i].path;
+
+    var new_row_id = row_id.replace('num', i);
+    var new_folder_id = folder_id.replace('num', i);
+    var new_filename_id = filename_id.replace('num', i);
+    var new_size_id = size_id.replace('num', i);
+    var new_md5_id = md5_id.replace('num', i);
+
+    var row = $('#' + row_id).clone();
+
+    // Set row id.
+    row.attr('id', row_id.replace('num', i));
+
+    // Replace children id's.
+    row.children('#' + folder_id).attr('id', new_folder_id);
+    row.children('#' + filename_id).attr('id', new_filename_id);
+    row.children('#' + size_id).attr('id', new_size_id);
+    row.children('#' + md5_id).attr('id', new_md5_id);
+
+    // Then, set the values.
+    row.children('#' + new_folder_id).text(folder);
+    row.children('#' + new_filename_id).text(filename);
+    row.children('#' + new_size_id).text(size);
+
+    // Append the row to the table.
+    $('#raw_reads_table').append(row);
+
+    // Calculate md5 sum.
+
+  }
+
+}
+
+/**
+ * Parse fetch_reads output.
+ */
+function parse_reads(out) {
+  // Split by the array brackets
+  var split = out.split('[');
+  var split2 = split[1].split(']');
+
+  // Then, we have the raw json dump.
+  var dump = '[' + split2[0] + ']';
+
+  // Then, parse into json.
+  var reads = JSON.parse(dump);
+
+  // Pass on the parsed reads to set the table values.
+  set_raw_reads_table(reads);
+}
+
+/**
+ * Fetch files in raw reads folder.
+ */
+function fetch_reads() {
+  var proj_id = $('#proj_id').text();
+
+  // Send fetch_reads request.
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'fetch_reads',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      parse_reads(out);
+    }
+  });
+}
+
 // To run when page is loaded.
 $(document).ready(function() {
   // initialize tooltips
@@ -218,6 +313,9 @@ $(document).ready(function() {
 
   // Add on click handler for start project button.
   $('#new_proj_btn').click(new_proj);
+
+  // Add on click handler for fetch reads button.
+  $('#fetch_reads_btn').click(fetch_reads);
 
   // Fetch server status.
   get_server_status();
