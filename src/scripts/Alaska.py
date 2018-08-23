@@ -101,7 +101,8 @@ class Alaska():
         'new_proj':             b'\x01', # create new project
         'load_proj':            b'\x02', # load project from JSON
         'save_proj':            b'\x03', # save project to JSON
-        'infer_samples':        b'\x04', # extract raw reads and infer samples
+        'fetch_reads':          b'\x04',
+        'infer_samples':        b'\x05', # extract raw reads and infer samples
         # 'get_idx':              b'\x05', # get list of avaliable indices
         # 'new_sample':           b'\x06', # create new sample with unique id
         'set_proj':             b'\x07', # set project data by reading temporary JSON

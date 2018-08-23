@@ -71,7 +71,7 @@ class AlaskaProject(Alaska):
         for root, dirs, files in os.walk(self.raw_dir):
             for fname in files:
                 # skip files that are not one of the recognized extensions.
-                extensions = Alaska.RAW_EXT + Alaska.ARCH_EXT:
+                extensions = Alaska.RAW_EXT + Alaska.ARCH_EXT
                 if not fname.endswith(extension):
                     continue
 
