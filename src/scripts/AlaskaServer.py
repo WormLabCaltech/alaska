@@ -943,7 +943,7 @@ class AlaskaServer(Alaska):
         # fetch read files
         reads = proj.fetch_reads()
 
-        self.respond(_id, json.dumps(reads))
+        self.respond(_id, json.dumps(reads, indent=4))
 
         if close:
             self.close(_id)
