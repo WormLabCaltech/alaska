@@ -76,8 +76,8 @@ class AlaskaProject(Alaska):
                     continue
 
                 # otherwise, save info about the file
-                path = '{}/{}'.format(root, fname)
-                folder = root
+                path = '{}/{}/{}'.format(Alaska.ROOT_PATH, root, fname)
+                folder = root.replace(self.raw_dir, '')
                 filename = fname
                 size = os.path.getsize(path)
                 read = {
