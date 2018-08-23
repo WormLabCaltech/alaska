@@ -375,8 +375,19 @@ function refetch_reads() {
   // Reset the raw reads div.
   $('#raw_reads_div').replaceWith(raw_reads_div);
 
+  // Rebind.
+  bind_raw_reads();
+
   // Then, call fetch.
   fetch_reads();
+}
+
+/**
+ * Binds events for raw reads div.
+ */
+function bind_raw_reads() {
+  // Add on click handler for refetch reads button.
+  $('#refetch_reads_btn_1').click(refetch_reads);
 }
 
 // Global raw reads div variable.
@@ -400,9 +411,7 @@ $(document).ready(function() {
   // Add on click handler for fetch reads button.
   $('#fetch_reads_btn').click(fetch_reads);
 
-  // Add on click handler for refetch reads button.
-  $('#refetch_reads_btn_1').click(refetch_reads);
-  $('#refetch_reads_btn_2').click(refetch_reads);
+  bind_raw_reads();
   raw_reads_div = $('#raw_reads_div').clone(true);
 
   // Fetch server status.
