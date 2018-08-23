@@ -253,6 +253,7 @@ function set_raw_reads_table(reads) {
 
     // Append the row to the table.
     $('#raw_reads_table').append(row);
+    row.show();
 
     // Calculate md5 sum.
 
