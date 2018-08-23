@@ -373,7 +373,8 @@ function fetch_reads() {
  */
 function refetch_reads() {
   // Reset the raw reads div.
-  $('#raw_reads_div').replaceWith(raw_reads_div);
+  var replacement = raw_reads_div.clone(true);
+  $('#raw_reads_div').replaceWith(replacement);
 
   // Rebind.
   bind_raw_reads();
