@@ -291,6 +291,9 @@ function set_raw_reads_table(reads) {
     // Calculate md5 sum.
     get_md5(new_md5_id, new_md5_loading_spinner_id, path);
   }
+
+  // After everything has been added, set this table as a DataTable.
+  $('#raw_reads_table').DataTable();
 }
 
 /**
