@@ -298,7 +298,11 @@ function set_raw_reads_table(reads) {
     'order': [[0, 'asc']],
     'searching': false,
     'paging': false,
-    'scrollY': 300
+    'scrollY': 300,
+    'columnDefs':[{
+      'targets':[2,3],
+      'orderable': false
+    }]
   });
 }
 
