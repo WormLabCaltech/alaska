@@ -293,7 +293,13 @@ function set_raw_reads_table(reads) {
   }
 
   // After everything has been added, set this table as a DataTable.
-  $('#raw_reads_table').DataTable();
+  $('#raw_reads_table').DataTable({
+    'ordering': true,
+    'order': [[0, 'asc']],
+    'searching': false,
+    'paging': false,
+    'scrollY': 300
+  });
 }
 
 /**
