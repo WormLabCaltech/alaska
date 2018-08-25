@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alaska</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
     <link rel="stylesheet" href="assets/css/check.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
     <link rel="stylesheet" href="assets/css/loading.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
     <link rel="stylesheet" href="assets/css/spinner.css">
@@ -34,10 +36,10 @@
         <div class="container-fluid" id="main_content_div">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
-                    <h1 class="text-center" style="color:rgb(255,255,255);font-size:5em;margin:0px;">Alaska</h1>
+                    <h1 class="text-center text-white" style="font-size:5em;margin:0px;">Alaska</h1>
                     <div class="row">
                         <div class="col">
-                            <h2 class="text-center" style="color:#ffffff;font-weight:100;font-size:2.5em;">A complete, automatic RNA-seq analysis pipeline.</h2>
+                            <h2 class="text-center text-white" style="font-weight:100;font-size:2.5em;">A complete, automatic RNA-seq analysis pipeline.</h2>
                         </div>
                     </div>
                 </div>
@@ -54,11 +56,11 @@
             </div>
         </div>
     </section>
-    <div id="ftp_info_div" style="margin-top:10rem;display:none">
+    <div id="ftp_info_div" class="d-none" style="margin-top:10rem">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center" style="color:rgb(255,255,255);font-size:3em;margin-bottom:0px;">We've created a new project for you.</h1>
+                    <h1 class="text-center text-white" style="font-size:3em;margin-bottom:0px;">We've created a new project for you.</h1>
                 </div>
             </div>
             <div class="row">
@@ -143,16 +145,16 @@
             </div>
         </div>
     </div>
-    <div id="raw_reads_div" style="margin-top:10rem;">
+    <div id="raw_reads_div" class="d-none" style="margin-top:10rem;">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center" id="fetch_reads_results_header_1" style="color:rgb(255,255,255);font-size:3em;margin-bottom:0px;">Here's what we found.</h1>
+                    <h1 class="text-center text-white" id="fetch_reads_results_header_1" style="font-size:3em;margin-bottom:0px;">Here's what we found.</h1>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center" id="fetch_reads_results_header_2" style="color:rgb(255,255,255);font-weight:100;font-size:1.8em;">Any files not listed here will be ignored.</h2>
+                    <h2 class="text-center text-white" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.8em;">Any files not listed here will be ignored.</h2>
                 </div>
             </div>
             <div class="row">
@@ -181,7 +183,7 @@
             </div>
             <div class="row mt-3">
                 <div class="col">
-                    <h2 class="text-center" style="color:rgb(255,255,255);">Is all the above correct?</h2>
+                    <h2 class="text-center text-white">Is all the above correct?</h2>
                 </div>
             </div>
             <div class="row">
@@ -198,7 +200,7 @@
                 <p>Alaska will begin to infer your samples when you press the button below. Depending on the number, size, and format of your reads, this may take a few minutes. The page will automatcially refresh when this is finished.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary d-flex align-items-center">
+                <button id="infer_samples_btn" type="button" class="btn btn-primary d-flex align-items-center">
                     Infer samples
                     <!--Div for the loading spinner.-->
                     <div id="infer_samples_loading_spinner" class="spinner-light ml-2" style="width:20px;height:20px;display:none"></div>

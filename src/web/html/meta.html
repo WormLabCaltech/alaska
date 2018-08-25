@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html style="background-color:#3f6075;">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alaska</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+    <link rel="stylesheet" href="assets/css/check.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <link rel="stylesheet" href="assets/css/loading.css">
+    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="assets/css/spinner.css">
+</head>
+
+<body style="background-color:transparent;">
+    <div class="container"><div class="progress mt-5" style="height:1.8em">
+    <div class="progress-bar bg-success" role="progressbar" style="width: 20%">Upload reads</div>
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%">Fill out metadata</div>
+    <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 25%">Alignment &amp; quantification</div>
+    <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 25%">Differential expression analysis</div>
+    <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%">Done!</div>
+</div></div>
+    <div class="container" id="meta_container">
+        <div id="meta_header" class="mt-5">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="col">
+                    <h1 class="text-center text-white" style="font-size:3em;">We just need some more information!</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 class="text-center text-white" style="font-weight:100;font-size:2em;">Please fill out the form below.</h2>
+                </div>
+            </div>
+        </div>
+        <div id="meta_proj" class="mt-5"><div class="card mx-2">
+    <div class="card-header alert-primary h2">
+        <i class="fas fa-cube"></i>
+        Project Metadata Form
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Project ID</h4>
+        <form>
+            <div class="form-group row">
+                <label for="title" class="col-form-label col-sm-3">Title</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="title" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="summary" class="col-form-label col-sm-3">Summary</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <legend class="col-form-label col-sm-3">Contributors</legend>
+                <div id="contributors" class="col">
+                    <div class="d-flex">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="contributor_1" required>
+                        <button id="add_contributor_btn" class="btn btn-primary" type="button">Add</button>
+                    </div>
+                    <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
+                    <div class="d-none mt-1" id="more_contributors_div">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="contributor_num">
+                        <button id="remove_contributor_btn_num" class="btn btn-danger" type="button">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="email" class="col-form-label col-sm-3">Email</label>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="sra_center_code" class="col-form-label col-sm-3">SRA Center Code</label>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="sra_center_code">
+                </div>
+            </div>
+            <div class="form-group row">
+                <legend class="col-form-label col-sm-3 pt-0">Design</legend>
+                <div class="col-sm-9">
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="design_1_radio" name="design" class="custom-control-input" checked="">
+                        <label class="custom-control-label active" for="design_1_radio">1-factor</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="design_2_radio" name="design" class="custom-control-input">
+                        <label class="custom-control-label" for="design_2_radio">2-factor</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div></div>
+        <div id="meta_sample" class="mt-5"><div class="card mx-2">
+    <div class="card-header alert-warning h2">
+        <i class="fas fa-cubes"></i>
+        Samples Metadata Form
+        <div class="dropdown d-inline">
+            <button class="btn btn-warning dropdown-toggle ml-3" type="button" id="choose_sample_btn" data-toggle="dropdown">Choose a sample</button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+             </div>
+        </div>
+        <div class="float-right">
+            <div class="btn-group">
+                <button class="btn btn-outline-success btn-sm" type="button" id="copy_from_btn">
+                    <i class="fas fa-file-import"></i>
+                    Import data from
+                </button>
+                <button class="btn btn-outline-danger btn-sm" type="button" id="copy_to_btn">
+                    <i class="fas fa-file-export"></i>
+                    Export data to
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Sample ID</h4>
+        <form>
+            <div class="form-group row">
+                <label for="title" class="col-form-label col-sm-3">Title</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="title" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="summary" class="col-form-label col-sm-3">Summary</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <legend class="col-form-label col-sm-3">Contributors</legend>
+                <div id="contributors" class="col">
+                    <div class="d-flex">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="contributor_1" required>
+                        <button id="add_contributor_btn" class="btn btn-primary" type="button">Add</button>
+                    </div>
+                    <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
+                    <div class="d-none mt-1" id="more_contributors_div">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="contributor_num">
+                        <button id="remove_contributor_btn_num" class="btn btn-danger" type="button">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="email" class="col-form-label col-sm-3">Email</label>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="sra_center_code" class="col-form-label col-sm-3">SRA Center Code</label>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="sra_center_code">
+                </div>
+            </div>
+            <div class="form-group row">
+                <legend class="col-form-label col-sm-3 pt-0">Design</legend>
+                <div class="col-sm-9">
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="design_1_radio" name="design" class="custom-control-input" checked="">
+                        <label class="custom-control-label active" for="design_1_radio">1-factor</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="design_2_radio" name="design" class="custom-control-input">
+                        <label class="custom-control-label" for="design_2_radio">2-factor</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="assets/js/alaska_main.js"></script>
+    <script src="assets/js/anime.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
+</body>
+
+</html>
