@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="assets/css/check.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
     <link rel="stylesheet" href="assets/css/loading.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
@@ -17,7 +18,7 @@
 </head>
 
 <body style="background-color:transparent;">
-    <div class="container"><div class="progress mt-5" style="height:1.8em">
+    <div class="container" id="progress_bar_container"><div class="progress mt-5" style="height:1.8em">
     <div class="progress-bar bg-success" role="progressbar" style="width: 20%">Upload reads</div>
     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%">Fill out metadata</div>
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 25%">Alignment &amp; quantification</div>
@@ -46,19 +47,28 @@
         <h4 class="card-title">Project ID</h4>
         <form>
             <div class="form-group row">
-                <label for="title" class="col-form-label col-sm-3">Title</label>
+                <div class="col-sm-3">
+                    <label for="title" class="col-form-label">Title</label>
+                    <small id="title_help" class="form-text text-muted">Some description.</small>
+                </div>
                 <div class="col-sm-3">
                     <input type="text" class="form-control" id="title" required>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="summary" class="col-form-label col-sm-3">Summary</label>
+                <div class="col-sm-3">
+                    <label for="summary" class="col-form-label">Summary</label>
+                    <small id="summary_help" class="form-text text-muted">Some description.</small>
+                </div>
                 <div class="col-sm-9">
                     <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
                 </div>
             </div>
             <div class="form-group row">
-                <legend class="col-form-label col-sm-3">Contributors</legend>
+                <div class="col-sm-3">
+                    <legend class="col-form-label">Contributors</legend>
+                    <small id="contributors_help" class="form-text text-muted">Some description.</small>
+                </div>
                 <div id="contributors" class="col">
                     <div class="d-flex">
                         <input type="text" class="form-control col-sm-3 mr-2" id="contributor_1" required>
@@ -72,19 +82,28 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="email" class="col-form-label col-sm-3">Email</label>
+                <div class="col-sm-3">
+                    <label for="email" class="col-form-label">Email</label>
+                    <small id="email_help" class="form-text text-muted">Some description.</small>
+                </div>
                 <div class="col-sm-3">
                     <input type="email" class="form-control" id="email" required>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="sra_center_code" class="col-form-label col-sm-3">SRA Center Code</label>
+                <div class="col-sm-3">
+                    <label for="sra_center_code" class="col-form-label">SRA Center Code</label>
+                    <small id="sra_center_code_help" class="form-text text-muted">Some description.</small>
+                </div>
                 <div class="col-sm-3">
                     <input type="email" class="form-control" id="sra_center_code">
                 </div>
             </div>
             <div class="form-group row">
-                <legend class="col-form-label col-sm-3 pt-0">Design</legend>
+                <div class="col-sm-3">
+                    <legend class="col-form-label pt-0">Design</legend>
+                    <small id="sra_center_code_help" class="form-text text-muted">Click here for more information.</small>
+                </div>
                 <div class="col-sm-9">
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="design_1_radio" name="design" class="custom-control-input" checked="">
@@ -128,7 +147,7 @@
         <h4 class="card-title">Sample ID</h4>
         <form>
             <div class="form-group row">
-                <label for="title" class="col-form-label col-sm-3">Title</label>
+                <label for="title" class="col-form-label col-sm-3">Name</label>
                 <div class="col-sm-3">
                     <input type="text" class="form-control" id="title" required>
                 </div>
@@ -188,6 +207,7 @@
     <script src="assets/js/alaska_main.js"></script>
     <script src="assets/js/anime.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 </body>
 
 </html>
