@@ -948,7 +948,7 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def get_raw_reads(self, _id, close=True, md5=True):
+    def get_raw_reads(self, _id, close=True, md5=False):
         """
         Retrieves list of uploaded sample files.
         """
@@ -997,7 +997,7 @@ class AlaskaServer(Alaska):
 
         return md5.hexdigest()
 
-    def infer_samples(self, _id, close=True, md5=True):
+    def infer_samples(self, _id, close=True, md5=False):
         """
         Infers samples from raw reads.
         """
