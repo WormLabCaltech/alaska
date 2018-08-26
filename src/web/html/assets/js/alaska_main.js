@@ -528,8 +528,10 @@ function show_sample_form(form) {
   // If the global current_sample_form is not empty,
   // then we need to hide it first.
   if (current_sample_form != null) {
-    // Set on-hide handler to show the new sample form.
+    // First, remove previous handlers.
+    current_sample_form.off('hidden.bs.collapse');
 
+    // Set on-hide handler to show the new sample form.
     current_sample_form.on('hidden.bs.collapse', function () {
       form.collapse('show');
     });
