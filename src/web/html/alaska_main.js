@@ -454,7 +454,7 @@ function set_sample_name_input(proj) {
     var new_name_id = name_id.replace('num', id);
 
     var row = $('#' + row_id).clone();
-    var default = proj.samples[id].name;
+    var def = proj.samples[id].name;
 
     // Set row id.
     row.attr('id', row_id.replace('num', id));
@@ -464,8 +464,8 @@ function set_sample_name_input(proj) {
     row.children('#' + name_id).attr('id', new_name_id);
 
     // Then, set the values.
-    row.children('#' + new_folder_id).text(default);
-    row.children('#' + new_name_id).attr('placeholder', 'Default: ' + default);
+    row.children('#' + new_folder_id).text(def);
+    row.children('#' + new_name_id).attr('placeholder', 'Default: ' + def);
 
     // Append the row to the table.
     $('#sample_names_form').append(row);
