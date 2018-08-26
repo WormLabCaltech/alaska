@@ -433,7 +433,7 @@ function set_sample_name_input(proj) {
   var n_samples = Object.keys(proj.samples).length;
 
   var header = $('#sample_names_header');
-  header.text(header.text().replace('num', n_samples));\
+  header.text(header.text().replace('num', n_samples));
 
   // Before going on, create a separate list that has the
   // sample ids sorted by name.
