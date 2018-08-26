@@ -525,6 +525,11 @@ function set_sample_reads(table, reads) {
  * Show sample form.
  */
 function show_sample_form(form) {
+  // If the form is already being shown, just return.
+  if (current_sample_form == form) {
+    return;
+  }
+
   // If the global current_sample_form is not empty,
   // then we need to hide it first.
   if (current_sample_form != null) {
@@ -593,8 +598,8 @@ function set_meta_input() {
     sample_form.html(html.replace('SAMPLEID', id));
 
     // Change the header to be the id.
-    sample_form.children('#sample_id_' + id).text(id);
-    sample_form.children('#sample_name_' + id).text(id);
+    sample_form.find('#sample_id_' + id).text(id);
+    sample_form.find('#sample_name_' + id).text(id);
 
     sample_forms[id] = sample_form;
 
