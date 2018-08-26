@@ -356,10 +356,10 @@ function parse_reads(out) {
   if (reads.length < 1) {
     set_fetch_failed();
   } else {
-    set_fetch_succeeded();
-
     // Pass on the parsed reads to set the table values.
     set_raw_reads_table(reads);
+
+    set_fetch_succeeded();
   }
 
 }
