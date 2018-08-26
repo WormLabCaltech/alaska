@@ -33,7 +33,7 @@ class AlaskaSample(Alaska):
         self.length = 0 # used for single-end
         self.stdev = 0 # used for single-end
         self.bootstrap_n = 100 # number of bootstraps to perform
-        self.reads = [] # list of paths if single-end
+        self.reads = {} # list of paths if single-end
                         # list of lsit of paths, if pair-end
         self.projects = [] # list of projects that refer to this sample
 

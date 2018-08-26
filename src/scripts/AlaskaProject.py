@@ -122,21 +122,28 @@ class AlaskaProject(Alaska):
             if not len(dirs) == 0:
                 continue
 
-            reads = [] # list to contain read files for each directory
+            reads = {} # list to contain read files for each directory
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
                 if fname.endswith(Alaska.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
+                    full_path = '{}/{}'.format(root, fname)
+
                     # remove project folder from root
                     split = root.split('/')
                     split.remove(Alaska.PROJECTS_DIR)
                     split.remove(self.id)
 
-                    read = {}
-                    read['path'] = '{}/{}'.format('/'.join(split), fname)
-                    read['md5'] = None
+                    path = '{}/{}'.format('/'.join(split), fname)
+                    size = os.path.getsize(full_path) / (1024 ** 2)
+                    md5 = None
 
-                    reads.append(read)
+                    read = {}
+                    read['size'] = size
+                    read['md5'] = md5
+
+                    reads[path] = read
+
 
             # assign list to dictionary
             if not len(reads) == 0:
@@ -173,8 +180,8 @@ class AlaskaProject(Alaska):
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
-            for read in reads:
-                sample.reads.append(read)
+            for read, item in reads.items():
+                sample.reads[read] = item
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
