@@ -579,6 +579,60 @@ function set_choose_sample_button(dropdown, forms) {
   }
 }
 
+/**
+ * Set reads table for the specified sample.
+ */
+function set_reads_table(id) {
+  // Set the reads table.
+  var sample_reads_table_id = 'sample_reads_table_' + id + '_row_num';
+  var folder_id = 'folder_' + id + '_num';
+  var filename_id = 'filename_' + id + '_num';
+  var size_id = 'size_' + id + '_num';
+  var md5_id = 'md5_' + id + '_num';
+  for (var path in proj.samples[id].reads) {
+    // Extract folder, filename, size and md5.
+    split = read.split('/');
+
+    var filename = split[split.length - 1];
+    var folder = path.replace('0_raw_reads', '');
+    folder = folder.replace('/' + filename, '');
+
+    var size = proj.samples[id].reads[path].size / Math.pow(1024, 2);
+    var md5 = proj.samples[id].reads[path].md5;
+
+    // Construct row.
+    var new_sample_reads_table_id = sample_reads_table_id.replace('num', path);
+    var new_folder_id = folder_id.replace('num', path);
+    var new_filename_id = filename_id.replace('num', path);
+    var new_size_id = size_id.replace('num', path);
+    var new_md5_id = md5_id.replace('num', path);
+
+    // Change row id.
+    var row = sample_form.find('#' + sample_reads_table_id).clone();
+    row.attr('id', new_sample_reads_table_id);
+
+    // Change cell ids.
+    var folder_cell = row.children('#' + folder_id);
+    var filename_cell = row.children('#' + filename_id);
+    var size_cell = row.children('#' + size_id);
+    var md5_cell = row.children('#' + md5_id);
+    folder_cell.attr('id', new_folder_id);
+    filename_cell.attr('id', new_filename_id);
+    size_cell.attr('id', new_size_id);
+    md5_cell.attr('id', new_md5_id);
+
+    // Then, set the values.
+    folder_cell.text(folder);
+    filename_cell.text(filename);
+    size_cell.text(size);
+    md5_cell.text(md5);
+
+    // Append row.
+    $('#sample_reads_table_' + id).append(row);
+    row.show();
+  }
+}
+
 /*
  * Set meta input form.
  */
@@ -600,6 +654,9 @@ function set_meta_input() {
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
+
+    // Set the reads table for this sample.
+    set_reads_table(id);
 
     sample_forms[id] = sample_form;
 
@@ -648,7 +705,12 @@ function fetch_sample_names() {
 
   for (var id in proj.samples) {
     var input = $('#' + input_id.replace('SAMPLEID', id));
-    proj.samples[id].name = input.val();
+    var val = input.val();
+
+    // If the input is empty, just use default (i.e. do nothing).
+    if (input.val() != '') {
+      proj.samples[id].name = input.val();
+    }
   }
 }
 
