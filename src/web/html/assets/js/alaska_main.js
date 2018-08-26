@@ -592,8 +592,8 @@ function set_meta_input() {
     sample_form.html(html.replace('SAMPLEID', id));
 
     // Change the header to be the id.
-    $('#sample_id_' + id).text(id);
-    $('#sample_name_' + id).text(id);
+    sample_form.children('#sample_id_' + id).text(id);
+    sample_form.children('#sample_name_' + id).text(id);
 
     sample_forms[id] = sample_form;
 
