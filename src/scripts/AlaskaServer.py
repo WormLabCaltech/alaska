@@ -1025,7 +1025,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
 
         # Then, output the JSON.
-        get_json(_id, close=False)
+        self.get_json(_id, close=False)
 
         # 11/27/2017
         # self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
