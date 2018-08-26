@@ -967,10 +967,9 @@ class AlaskaServer(Alaska):
         if md5:
             self.broadcast(_id, '{}: calculating MD5 checksums'.format(_id))
             for folder, reads in proj.raw_reads.items():
-                proj.chk_md5[folder] = []
                 for read in reads:
-                    md5 = self.md5_chksum('{}/{}'.format(proj.dir, read))
-                    proj.chk_md5[folder].append(md5)
+                    md5 = self.md5_chksum('{}/{}'.format(proj.dir, read['path']))
+                    read['md5'] = md5
 
         self.broadcast(_id, '{}: successfully retrieved raw reads'.format(_id))
 

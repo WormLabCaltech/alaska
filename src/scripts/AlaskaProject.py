@@ -45,7 +45,6 @@ class AlaskaProject(Alaska):
         self.temp_dir = '{}/{}'.format(self.dir, Alaska.TEMP_DIR)
         self.jobs = [] # jobs related to this project
         self.raw_reads = {}
-        self.chk_md5 = {} # md5 checksums
         self.samples = {}
         self.design = 1 # 1: single-factor, 2: two-factor
         self.ctrls = {} # controls
@@ -132,7 +131,12 @@ class AlaskaProject(Alaska):
                     split = root.split('/')
                     split.remove(Alaska.PROJECTS_DIR)
                     split.remove(self.id)
-                    reads.append('{}/{}'.format('/'.join(split), fname))
+
+                    read = {}
+                    read['path'] = '{}/{}'.format('/'.join(split), fname))
+                    read['md5'] = None
+
+                    reads.append(read)
 
             # assign list to dictionary
             if not len(reads) == 0:
@@ -156,9 +160,9 @@ class AlaskaProject(Alaska):
         w.warn('{}: Alaska is currently unable to infer paired-end samples'
                 .format(self.id), Warning)
 
-        # make sure that md5 checksums have been calculated
-        if md5 and len(self.chk_md5) == 0:
-            raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+        # # make sure that md5 checksums have been calculated
+        # if md5 and len(self.chk_md5) == 0:
+        #     raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
 
         # loop through each folder with sample
         for folder, reads in self.raw_reads.items():
@@ -169,13 +173,8 @@ class AlaskaProject(Alaska):
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
-            if md5:
-                for read, md5 in zip(reads, self.chk_md5[folder]):
-                    sample.reads.append(read)
-                    sample.chk_md5.append(md5)
-            else:
-                for read in reads:
-                    sample.reads.append(read)
+            for read in reads:
+                sample.reads.append(read)
 
             sample.projects.append(self.id)
             self.samples[_id] = sample

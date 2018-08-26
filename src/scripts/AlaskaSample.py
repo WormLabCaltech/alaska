@@ -35,7 +35,6 @@ class AlaskaSample(Alaska):
         self.bootstrap_n = 100 # number of bootstraps to perform
         self.reads = [] # list of paths if single-end
                         # list of lsit of paths, if pair-end
-        self.chk_md5 = [] # MD5 checksums of read files
         self.projects = [] # list of projects that refer to this sample
 
         self.meta = {} # variable for all metadata
