@@ -528,12 +528,10 @@ function show_sample_form(form) {
   // If the global current_sample_form is not empty,
   // then we need to hide it first.
   if (current_sample_form != null) {
-    // First, remove previous handlers.
-    current_sample_form.off('hidden.bs.collapse');
-
     // Set on-hide handler to show the new sample form.
     current_sample_form.on('hidden.bs.collapse', function () {
       form.collapse('show');
+      current_sample_form.off('hidden.bs.collapse');
     });
 
     current_sample_form.collapse('hide');
@@ -566,6 +564,7 @@ function set_choose_sample_button(dropdown, forms) {
 
     // Set on click handler.
     dropdown_item.click(function () {
+      console.log('clicked ' + id);
       show_sample_form(sample_forms[id]);
     });
 
