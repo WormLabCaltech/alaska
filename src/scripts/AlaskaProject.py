@@ -133,7 +133,7 @@ class AlaskaProject(Alaska):
                     split.remove(self.id)
 
                     read = {}
-                    read['path'] = '{}/{}'.format('/'.join(split), fname))
+                    read['path'] = '{}/{}'.format('/'.join(split), fname)
                     read['md5'] = None
 
                     reads.append(read)
