@@ -141,7 +141,7 @@
             <div class="dropdown d-inline">
                 <button class="btn btn-warning dropdown-toggle ml-3" type="button" id="choose_sample_btn" data-toggle="dropdown">Choose a sample</button>
                 <div class="dropdown-menu" id="sample_choices">
-                    <a class="dropdown-item" id="show_sample_num" style="display:none">Test</a>
+                    <a class="dropdown-item" id="show_sample_SAMPLEID" style="display:none">Test</a>
                  </div>
             </div>
             <div class="float-right">
@@ -157,102 +157,102 @@
                 </div>
             </div>
         </div>
-        <div class="collapse" id="sample_num">
+        <div class="collapse" id="sample_SAMPLEID">
             <div class="card-body">
-                <h4 class="card-title">Sample ID</h4>
+                <h4 class="card-title" id="sample_id_SAMPLEID">Sample ID</h4>
                 <form>
                     <div class="form-group row">
                         <div class="col-sm-3">
-                            <label for="sample_name" class="col-form-label">Name</label>
-                            <small id="sample_name_help" class="form-text text-muted">Some description.</small>
+                            <label for="sample_name_SAMPLEID" class="col-form-label">Name</label>
+                            <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="sample_name" required>
+                            <input type="text" class="form-control" id="sample_name_SAMPLEID" required>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
-                            <label for="sample_description" class="col-form-label">Description</label>
-                            <small id="sample_description_help" class="form-text text-muted">Some description.</small>
+                            <label for="sample_description_SAMPLEID" class="col-form-label">Description</label>
+                            <small id="sample_description_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div class="col-sm-7">
-                            <textarea class="form-control" id="sample_description" rows="3" required></textarea>
+                            <textarea class="form-control" id="sample_description_SAMPLEID" rows="3" required></textarea>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <legend class="col-form-label">Contributors</legend>
-                            <small id="sample_contributors_help" class="form-text text-muted">Some description.</small>
+                            <small id="sample_contributors_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
-                        <div id="sample_contributors" class="col">
+                        <div id="sample_contributors_SAMPLEID" class="col">
                             <div class="d-flex">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_1" required>
-                                <button id="sample_add_contributor_btn" class="btn btn-primary" type="button">Add</button>
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_SAMPLEID_1" required>
+                                <button id="sample_add_contributor_SAMPLEID_btn" class="btn btn-primary" type="button">Add</button>
                             </div>
                             <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                            <div class="mt-1" id="sample_more_contributors_div" style="display:none">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_num">
-                                <button id="sample_remove_contributor_btn_num" class="btn btn-danger" type="button">Remove</button>
+                            <div class="mt-1" id="sample_more_contributors_SAMPLEID_div" style="display:none">
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_SAMPLEID_num">
+                                <button id="sample_remove_contributor_SAMPLEID_btn_num" class="btn btn-danger" type="button">Remove</button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
-                            <label for="sample_source" class="col-form-label">Source</label>
-                            <small id="sample_source_help" class="form-text text-muted">Some description.</small>
+                            <label for="sample_source_SAMPLEID" class="col-form-label">Source</label>
+                            <small id="sample_source_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="sample_source" required>
+                            <input type="text" class="form-control" id="sample_source_SAMPLEID" required>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
-                            <label for="sample_organism" class="col-form-label">Organism</label>
-                            <small id="sample_organism_help" class="form-text text-muted">Some description.</small>
+                            <label for="sample_organism_SAMPLEID" class="col-form-label">Organism</label>
+                            <small id="sample_organism_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div class="col-sm-3">
                             <select class="custom-select">
                                 <option selected>Please select an organism.</option>
-                                <option value="" id="organism_option_num" class="d-none"></option>
+                                <option value="" id="sample_organism_SAMPLEID_option" class="d-none"></option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
-                            <label for="sample_organism" class="col-form-label">Characteristics</label>
-                            <small id="sample_organism_help" class="form-text text-muted">Some description.</small>
+                            <legend class="col-form-label">Characteristics</legend>
+                            <small id="sample_characteristics_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
-                        <div id="sample_characteristics" class="col">
+                        <div id="sample_characteristics_SAMPLEID" class="col">
                             <div class="d-flex">
                                 <label class="col-sm-3 pl-0 mr-2">Characteristic</label>
                                 <label class="col-sm-5 pl-0">Detail</label>
                             </div>
                             <div class="d-flex">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_1" required>
-                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_contributor_1" required>
-                                <button id="add_contributor_btn" class="btn btn-primary" type="button">Add</button>
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_characteristic_SAMPLEID_1" required>
+                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_detail_SAMPLEID_1" required>
+                                <button id="add_characteristic_SAMPLEID_btn" class="btn btn-primary" type="button">Add</button>
                             </div>
                             <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
                             <div class="mt-1 d-none" id="more_characteristics_div">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_num" required>
-                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_contributor_num" required>
-                                <button id="remove_contributor_btn_num" class="btn btn-danger" type="button">Remove</button>
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_characteristic_SAMPLEID_num" required>
+                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_detail_SAMPLEID_num" required>
+                                <button id="remove_characteristic_SAMPLEID_btn_num" class="btn btn-danger" type="button">Remove</button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <legend class="col-form-label pt-0">Read type</legend>
-                            <small id="proj_design_help" class="form-text text-muted">Click here for more information.</small>
+                            <small id="sample_type_help" class="form-text text-muted">Click here for more information.</small>
                         </div>
                         <div class="col-sm-9">
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="proj_design_1_radio" name="design" class="custom-control-input" checked="">
-                                <label class="custom-control-label active" for="proj_design_1_radio">Single-end</label>
+                                <input type="radio" id="sample_type_SAMPLEID_1_radio" name="design" class="custom-control-input" checked="">
+                                <label class="custom-control-label active" for="sample_type_SAMPLEID_1_radio">Single-end</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="proj_design_2_radio" name="design" class="custom-control-input">
-                                <label class="custom-control-label" for="proj_design_2_radio">Paired-end</label>
+                                <input type="radio" id="sample_type_SAMPLEID_2_radio" name="design" class="custom-control-input">
+                                <label class="custom-control-label" for="sample_type_SAMPLEID_2_radio">Paired-end</label>
                             </div>
                         </div>
                     </div>
@@ -478,9 +478,9 @@
                         <label class="col-sm-5 pl-0">Name</label>
                     </div>
                     <!--Reminder to add class d-flex when showing this.-->
-                    <div id="name_input_row_num" style="display:none">
-                        <label class="col-sm-3 pl-0 text-monospace" id="name_input_folder_num"></label>
-                        <input type="text" class="form-control form-control-sm col-sm-5" id="name_input_num">
+                    <div id="name_input_row_SAMPLEID" style="display:none">
+                        <label class="col-sm-3 pl-0 text-monospace" id="name_input_folder_SAMPLEID"></label>
+                        <input type="text" class="form-control form-control-sm col-sm-5" id="name_input_SAMPLEID">
                     </div>
                 </form>
             </div>

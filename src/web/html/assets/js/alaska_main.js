@@ -409,13 +409,6 @@ function bind_raw_reads() {
 }
 
 /**
- * Change window to the metadat input form.
- */
-function go_to_meta_form(proj_id) {
-
-}
-
-/**
  * Show sample name input form.
  */
 function show_sample_name_input() {
@@ -444,20 +437,20 @@ function set_sample_name_input(proj) {
 
 
   // Then, set the rows.
-  var row_id = 'name_input_row_num';
-  var folder_id = 'name_input_folder_num';
-  var name_id = 'name_input_num';
+  var row_id = 'name_input_row_SAMPLEID';
+  var folder_id = 'name_input_folder_SAMPLEID';
+  var name_id = 'name_input_SAMPLEID';
 
   for (var id in proj.samples) {
 
-    var new_folder_id = folder_id.replace('num', id);
-    var new_name_id = name_id.replace('num', id);
+    var new_folder_id = folder_id.replace('SAMPLEID', id);
+    var new_name_id = name_id.replace('SAMPLEID', id);
 
     var row = $('#' + row_id).clone();
     var def = proj.samples[id].name;
 
     // Set row id.
-    row.attr('id', row_id.replace('num', id));
+    row.attr('id', row_id.replace('SAMPLEID', id));
 
     // Replace children id's.
     row.children('#' + folder_id).attr('id', new_folder_id);
@@ -555,10 +548,10 @@ function show_sample_form(form) {
  * Set choose sample button.
  */
 function set_choose_sample_button(dropdown, forms) {
-  var dropdown_item_id = 'show_sample_num';
+  var dropdown_item_id = 'show_sample_SAMPLEID';
 
   for (var id in forms) {
-    var new_dropdown_item_id = dropdown_item_id.replace('num', id);
+    var new_dropdown_item_id = dropdown_item_id.replace('SAMPLEID', id);
 
     var dropdown_item = $('#' + dropdown_item_id).clone();
 
@@ -584,15 +577,23 @@ function set_choose_sample_button(dropdown, forms) {
  * Set meta input form.
  */
 function set_meta_input() {
-  var sample_form_id = 'sample_num'
+  var sample_form_id = 'sample_SAMPLEID'
 
   for (var id in proj.samples) {
-    var new_sample_form_id = sample_form_id.replace('num', id);
+    var new_sample_form_id = sample_form_id.replace('SAMPLEID', id);
 
     var sample_form = $('#' + sample_form_id).clone(true);
 
     // Change sample form id.
     sample_form.attr('id', new_sample_form_id);
+
+    // Replace all instances of SAMPLEID to the id.
+    var html = sample_form.html();
+    sample_form.html(html.replace('SAMPLEID', id));
+
+    // Change the header to be the id.
+    $('#sample_id_' + id).text(id);
+    $('#sample_name_' + id).text(id);
 
     sample_forms[id] = sample_form;
 
@@ -633,10 +634,24 @@ function show_meta_input() {
   $('#meta_container').show();
 }
 
+/**
+ * Fetch custom sample names and replace the default names.
+ */
+function fetch_sample_names() {
+  var input_id = 'name_input_SAMPLEID';
+
+  for (var id in proj.samples) {
+    var input = $('#' + input_id.replace('SAMPLEID', id));
+    proj.samples[id].name = input.val();
+  }
+}
+
 /*
  * Set and show meta input form.
  */
 function meta_input() {
+  fetch_sample_names();
+
   set_meta_input();
 
   show_meta_input();
