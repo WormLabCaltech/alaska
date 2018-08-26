@@ -189,7 +189,7 @@
                 <div class="col d-flex justify-content-center"><button class="btn btn-primary btn-lg d-flex align-items-center" type="button" id="raw_reads_confirm_btn" style="font-size:1em;margin:0;border-radius:20px;padding:8px 16px;" data-toggle="modal" data-target="#infer_samples_modal">Yes</button>
                     <button
                         class="btn btn-info btn-lg d-flex align-items-center ml-5" type="button" id="refetch_reads_btn_1" style="font-size:1em;margin:0;border-radius:20px;padding:8px 16px;">Re-fetch reads</button><!--Infer samples modal-->
-<div class="modal fade" id="infer_samples_modal" tabindex="-1" role="dialog">
+<div class="modal fade" id="infer_samples_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header alert-primary">
@@ -228,7 +228,7 @@
                     <!--Reminder to add class d-flex when showing this.-->
                     <div id="name_input_row_num" style="display:none">
                         <label class="col-sm-3 pl-0 mr-2 text-monospace" id="name_input_folder_num"></label>
-                        <input type="text" class="form-control col-sm-5 mr-2" id="name_input_num" required>
+                        <input type="text" class="form-control form-control-sm col-sm-5 mr-2" id="name_input_num">
                     </div>
                 </form>
             </div>

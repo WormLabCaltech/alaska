@@ -89,10 +89,8 @@ class Alaska():
 
     TEST_RAW_READS_FULL = ['test_samples/raw/full/mt1',
                             'test_samples/raw/full/mt2',
-                            'test_samples/raw/full/mt3',
                             'test_samples/raw/full/wt1',
-                            'test_samples/raw/full/wt2',
-                            'test_samples/raw/full/wt3']
+                            'test_samples/raw/full/wt2']
 
 
     # messeging codes
