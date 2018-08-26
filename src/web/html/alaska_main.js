@@ -521,11 +521,88 @@ function infer_samples() {
   });
 }
 
+/**
+ * Set sample reads table.
+ */
+function set_sample_reads(table, reads) {
+
+}
+
+/**
+ * Show sample form.
+ */
+function show_sample_form(form) {
+  // If the global current_sample_form is not empty,
+  // then we need to hide it first.
+  if (current_sample_form != null) {
+    // Set on-hide handler to show the new sample form.
+
+    current_sample_form.on('hidden.bs.collapse', function () {
+      form.collapse('show');
+    });
+
+    current_sample_form.collapse('hide');
+  }
+  else {
+    form.collapse('show');
+  }
+
+  // Replace current sample.
+  current_sample_form = form;
+}
+
+/**
+ * Set choose sample button.
+ */
+function set_choose_sample_button(dropdown, forms) {
+  var dropdown_item_id = 'show_sample_num';
+
+  for (var id in forms) {
+    var new_dropdown_item_id = dropdown_item_id.replace('num', id);
+
+    var dropdown_item = $('#' + dropdown_item_id).clone();
+
+    // Change id, text.
+    dropdown_item.attr('id', new_dropdown_item_id);
+    dropdown_item.text(id);
+
+    // Append to global variable.
+    dropdown_items[id] = dropdown_item;
+
+    // Set on click handler.
+    dropdown_item.click(function () {
+      show_sample_form(sample_forms[id]);
+    });
+
+    // Append to html and show.
+    dropdown.append(dropdown_item);
+    dropdown_item.show();
+  }
+}
+
 /*
  * Set meta input form.
  */
 function set_meta_input() {
+  var sample_form_id = 'sample_num'
 
+  for (var id in proj.samples) {
+    var new_sample_form_id = sample_form_id.replace('num', id);
+
+    var sample_form = $('#' + sample_form_id).clone(true);
+
+    // Change sample form id.
+    sample_form.attr('id', new_sample_form_id);
+
+    sample_forms[id] = sample_form;
+
+    // Append new form.
+    $('#sample_card').append(sample_form);
+  }
+
+  // Then, set the button handler.
+  var dropdown = $('#sample_choices');
+  set_choose_sample_button(dropdown, sample_forms);
 }
 
 /*
@@ -565,11 +642,15 @@ function meta_input() {
   show_meta_input();
 }
 
-// Global raw reads div variable.
+// Global variables.
 var proj_id;
 var proj;
 var ftp_pw;
 var raw_reads_div;
+var dropdown_items = {};
+var proj_form;
+var current_sample_form;
+var sample_forms = {};
 
 // To run when page is loaded.
 $(document).ready(function() {

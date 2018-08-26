@@ -135,7 +135,7 @@ class AlaskaProject(Alaska):
                     split.remove(self.id)
 
                     path = '{}/{}'.format('/'.join(split), fname)
-                    size = os.path.getsize(full_path) / (1024 ** 2)
+                    size = os.path.getsize(full_path)
                     md5 = None
 
                     read = {}
