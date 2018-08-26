@@ -628,7 +628,7 @@ function set_reads_table(id, form) {
     md5_cell.text(md5);
 
     // Append row.
-    $('#sample_reads_table_' + id).append(row);
+    form.find('#sample_reads_table_' + id).append(row);
     row.show();
   }
 }
