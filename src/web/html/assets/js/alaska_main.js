@@ -595,7 +595,7 @@ function set_meta_input() {
 
     // Replace all instances of SAMPLEID to the id.
     var html = sample_form.html();
-    sample_form.html(html.replace('SAMPLEID', id));
+    sample_form.html(html.replace(new RegExp('SAMPLEID', 'g'), id));
 
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
