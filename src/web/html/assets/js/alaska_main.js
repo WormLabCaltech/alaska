@@ -295,19 +295,6 @@ function set_raw_reads_table(reads) {
     // Calculate md5 sum.
     get_md5(new_md5_id, new_md5_loading_spinner_id, path);
   }
-
-  // After everything has been added, set this table as a DataTable.
-  $('#raw_reads_table').DataTable({
-    'ordering': true,
-    'order': [[0, 'asc']],
-    'searching': false,
-    'paging': false,
-    'scrollY': $('#raw_reads_table_div').height(),
-    'columnDefs':[{
-      'targets':[2,3],
-      'orderable': false
-    }]
-  });
 }
 
 /**
@@ -360,6 +347,19 @@ function parse_reads(out) {
     set_raw_reads_table(reads);
 
     set_fetch_succeeded();
+
+    // After everything has been added, set this table as a DataTable.
+    $('#raw_reads_table').DataTable({
+      'ordering': true,
+      'order': [[0, 'asc']],
+      'searching': false,
+      'paging': false,
+      'scrollY': 500,
+      'columnDefs':[{
+        'targets':[2,3],
+        'orderable': false
+      }]
+    });
   }
 
 }
