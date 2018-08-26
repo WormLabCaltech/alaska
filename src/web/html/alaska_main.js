@@ -591,7 +591,7 @@ function set_reads_table(id) {
   var md5_id = 'md5_' + id + '_num';
   for (var path in proj.samples[id].reads) {
     // Extract folder, filename, size and md5.
-    split = read.split('/');
+    split = path.split('/');
 
     var filename = split[split.length - 1];
     var folder = path.replace('0_raw_reads', '');
