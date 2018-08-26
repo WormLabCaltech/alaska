@@ -441,7 +441,9 @@ function set_sample_name_input(proj) {
   for (var id in proj.samples) {
     names_to_ids[proj.samples[id].name] = id;
   }
+  console.log(names_to_ids);
   var sorted_names = Object.keys(names_to_ids).sort();
+  console.log(sorted_names);
 
   // Then, set the rows.
   var row_id = 'name_input_row_SAMPLEID';
@@ -449,6 +451,7 @@ function set_sample_name_input(proj) {
   var name_id = 'name_input_SAMPLEID';
 
   for (var name in sorted_names) {
+    console.log(name);
     var id = names_to_ids[name];
 
     var new_folder_id = folder_id.replace('SAMPLEID', id);
