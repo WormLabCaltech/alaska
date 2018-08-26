@@ -418,7 +418,7 @@ function go_to_meta_form(proj_id) {
 /**
  * Show sample name input form.
  */
-function show_sample_name_input(proj) {
+function show_sample_name_input() {
   var first = $('#infer_samples_modal');
   var second = $('#sample_names_modal');
 
@@ -430,6 +430,45 @@ function show_sample_name_input(proj) {
   // Then, hide infer samples modal,
   // which will also show the second modal.
   first.modal('hide');
+}
+
+/**
+ * Set the sample name input form.
+ */
+function set_sample_name_input(proj) {
+  // First, set the header to say how many samples were detected.
+  var n_samples = Object.keys(proj.samples).length;
+
+  var header = $('#sample_names_header');
+  header.text(header.text().replace('num', n_samples));
+
+
+  // Then, set the rows.
+  var row_id = 'name_input_row_num';
+  var folder_id = 'name_input_folder_num';
+  var name_id = 'name_input_num';
+
+  for (var id in Object.keys(proj.samples)) {
+    var new_folder_id = folder_id.replace('num', id);
+    var new_name_id = name_id.replace('num', id);
+
+    var row = $('#' + row_id).clone();
+
+    // Set row id.
+    row.attr('id', row_id.replace('num', id));
+
+    // Replace children id's.
+    row.children('#' + folder_id).attr('id', new_folder_id);
+    row.children('#' + name_id).attr('id', new_name_id);
+
+    // Then, set the values.
+    row.children('#' + new_folder_id).text(proj.samples[id].name);
+
+    // Append the row to the table.
+    $('#sample_names_form').append(row);
+    row.show();
+    row.addClass('d-flex');
+  }
 }
 
 /**
@@ -451,7 +490,8 @@ function parse_infer_samples(out) {
   // Parse json.
   proj = JSON.parse(dump);
 
-  show_sample_name_input(proj);
+  set_sample_name_input(proj);
+  show_sample_name_input();
 }
 
 /**
