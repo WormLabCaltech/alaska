@@ -562,7 +562,7 @@ function set_choose_sample_button(dropdown, forms) {
 
     // Change id, text.
     dropdown_item.attr('id', new_dropdown_item_id);
-    dropdown_item.text(id);
+    dropdown_item.text(proj.samples[id].name);
 
     // Append to global variable.
     dropdown_items[id] = dropdown_item;
@@ -599,7 +599,7 @@ function set_meta_input() {
 
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
-    sample_form.find('#sample_name_' + id).val(id);
+    sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
     sample_forms[id] = sample_form;
 
