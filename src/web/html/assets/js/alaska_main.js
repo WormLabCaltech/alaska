@@ -582,7 +582,7 @@ function set_choose_sample_button(dropdown, forms) {
 /**
  * Set reads table for the specified sample.
  */
-function set_reads_table(id) {
+function set_reads_table(id, form) {
   // Set the reads table.
   var sample_reads_table_id = 'sample_reads_table_' + id + '_row_num';
   var folder_id = 'folder_' + id + '_num';
@@ -608,7 +608,7 @@ function set_reads_table(id) {
     var new_md5_id = md5_id.replace('num', path);
 
     // Change row id.
-    var row = sample_forms[id].find('#' + sample_reads_table_id).clone();
+    var row = form.find('#' + sample_reads_table_id).clone();
     row.attr('id', new_sample_reads_table_id);
 
     // Change cell ids.
@@ -656,7 +656,7 @@ function set_meta_input() {
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
     // Set the reads table for this sample.
-    set_reads_table(id);
+    set_reads_table(id, sample_form);
 
     sample_forms[id] = sample_form;
 
