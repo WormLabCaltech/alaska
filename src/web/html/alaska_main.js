@@ -302,7 +302,7 @@ function set_raw_reads_table(reads) {
     'order': [[0, 'asc']],
     'searching': false,
     'paging': false,
-    'scrollY': 500,
+    'scrollY': $('#raw_reads_table_div').height(),
     'columnDefs':[{
       'targets':[2,3],
       'orderable': false
