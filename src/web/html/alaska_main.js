@@ -433,15 +433,23 @@ function set_sample_name_input(proj) {
   var n_samples = Object.keys(proj.samples).length;
 
   var header = $('#sample_names_header');
-  header.text(header.text().replace('num', n_samples));
+  header.text(header.text().replace('num', n_samples));\
 
+  // Before going on, create a separate list that has the
+  // sample ids sorted by name.
+  var names_to_ids = {};
+  for (var id in proj.samples) {
+    names_to_ids[proj.samples[id].name] = id;
+  }
+  var sorted_names = Object.keys(names_to_ids).sort();
 
   // Then, set the rows.
   var row_id = 'name_input_row_SAMPLEID';
   var folder_id = 'name_input_folder_SAMPLEID';
   var name_id = 'name_input_SAMPLEID';
 
-  for (var id in proj.samples) {
+  for (var name in sorted_names) {
+    var id = names_to_ids[name];
 
     var new_folder_id = folder_id.replace('SAMPLEID', id);
     var new_name_id = name_id.replace('SAMPLEID', id);
@@ -575,6 +583,7 @@ function set_choose_sample_button(dropdown, forms) {
 
     // Append to html and show.
     dropdown.append(dropdown_item);
+
     dropdown_item.show();
   }
 }
@@ -637,6 +646,10 @@ function set_reads_table(id, form) {
  * Set meta input form.
  */
 function set_meta_input() {
+  // Before doing anything, let's sort.
+
+
+
   var sample_form_id = 'sample_SAMPLEID'
 
   for (var id in proj.samples) {
