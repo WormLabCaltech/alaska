@@ -203,8 +203,12 @@ function new_proj() {
       spinner.hide();
       $('#success_check').show();
 
+      // Set global variables.
+      proj_id = id_pw.id;
+      ftp_pw = id_pw.pw;
+
       // Then, show ftp info.
-      show_ftp_info(id_pw.id, id_pw.pw);
+      show_ftp_info(proj_id, ftp_pw);
     }
   });
 }
@@ -298,7 +302,7 @@ function set_raw_reads_table(reads) {
     'order': [[0, 'asc']],
     'searching': false,
     'paging': false,
-    'scrollY': 300,
+    'scrollY': 500,
     'columnDefs':[{
       'targets':[2,3],
       'orderable': false
@@ -404,7 +408,41 @@ function bind_raw_reads() {
   $('#refetch_reads_btn_1').click(refetch_reads);
 }
 
+/**
+ * Change window to the metadat input form.
+ */
+function go_to_meta_form(proj_id) {
+
+}
+
+/**
+ * Infer samples.
+ */
+function infer_samples() {
+  // Show the loading spinner.
+  var button = $('#infer_samples_btn');
+  var spinner = $('#infer_samples_loading_spinner');
+  set_loading_spinner(button, spinner);
+
+  // Send fetch_reads request.
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'infer_samples',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      go_to_meta_form(proj_id);
+    }
+  });
+
+}
+
 // Global raw reads div variable.
+var proj_id;
+var ftp_pw;
 var raw_reads_div;
 
 // To run when page is loaded.
@@ -428,6 +466,9 @@ $(document).ready(function() {
   bind_raw_reads();
   $('#refetch_reads_btn_2').click(refetch_reads);
   raw_reads_div = $('#raw_reads_div').clone(true);
+
+  // Bind infer samples button.
+  $('#infer_samples_btn').click(infer_samples);
 
   // Fetch server status.
   get_server_status();

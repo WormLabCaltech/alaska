@@ -1006,7 +1006,7 @@ class AlaskaServer(Alaska):
         # Project we are concerned about.
         proj = self.projects_temp[_id]
 
-        self.get_raw_reads(_id, close=close, md5=md5) # make sure raw reads have been extracted
+        self.get_raw_reads(_id, close=False, md5=md5) # make sure raw reads have been extracted
 
         self.broadcast(_id, '{}: inferring samples from raw reads'.format(_id))
 
@@ -1015,17 +1015,37 @@ class AlaskaServer(Alaska):
         f = lambda : self.rand_str_except(self.PROJECT_L, ids())
 
         proj.infer_samples(f, temp=self.samples_temp, md5=md5)
-        self.broadcast(_id, '{}: samples successfully inferred'.format(_id))
+        self.broadcast(_id, '{}: {} samples successfully inferred'.format(len(proj.samples), _id))
 
         if proj.progress < 2:
             proj.progress = 2
 
         # output project JSON to temp folder
-        self.projects_temp[_id].save(Alaska.TEMP_DIR)
+        proj.save(Alaska.TEMP_DIR)
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
+
+        # Then, output the JSON.
+        get_json(_id, close=False)
 
         # 11/27/2017
         # self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
+
+        if close:
+            self.close(_id)
+
+    def get_json(self, _id, close=True):
+        """
+        Sends the project as json.
+        """
+        if self.exists_temp(_id):
+            proj = self.projects_temp[_id]
+        elif self.exists_var(_id):
+            proj = self.projects[_id]
+        else:
+            raise Exception('This project does not exist.')
+
+        # Project we are concerned about.
+        self.respond(_id, json.dumps(proj.__dict__, default=self.encode_json, indent=4))
 
         if close:
             self.close(_id)
