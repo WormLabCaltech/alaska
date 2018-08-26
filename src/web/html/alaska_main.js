@@ -448,8 +448,7 @@ function set_sample_name_input(proj) {
   var folder_id = 'name_input_folder_num';
   var name_id = 'name_input_num';
 
-  for (var id in Object.keys(proj.samples)) {
-    console.log(id);
+  for (var id in proj.samples) {
 
     var new_folder_id = folder_id.replace('num', id);
     var new_name_id = name_id.replace('num', id);
