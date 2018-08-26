@@ -519,7 +519,49 @@ function infer_samples() {
       parse_infer_samples(out);
     }
   });
+}
 
+/*
+ * Set meta input form.
+ */
+function set_meta_input() {
+
+}
+
+/*
+ * Show meta input form. Note that all other elements
+ * will be hidden at this point.
+ */
+function show_meta_input() {
+  // Begin scrolling to the top.
+  var obj = {pos: $(window).scrollTop()};
+  var transform = anime({
+    targets: obj,
+    pos: 0,
+    round: 1,
+    easing: 'easeInOutQuart',
+    update: function() {
+      $(window).scrollTop(obj.pos);
+    }
+  });
+
+  // Show meta input.
+  $('#progress_bar_container').show();
+  $('#meta_container').show();
+
+  // Hide all other elements.
+  $('#main_content_div').hide();
+  $('#ftp_info_div').hide();
+  $('#raw_reads_div').hide();
+}
+
+/*
+ * Set and show meta input form.
+ */
+function meta_input() {
+  set_meta_input();
+
+  show_meta_input();
 }
 
 // Global raw reads div variable.
@@ -552,6 +594,9 @@ $(document).ready(function() {
 
   // Bind infer samples button.
   $('#infer_samples_btn').click(infer_samples);
+
+  // Bind done button for inputing sample names.
+  $('#sample_names_btn').click(meta_input);
 
   // Fetch server status.
   get_server_status();
