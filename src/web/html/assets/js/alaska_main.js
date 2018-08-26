@@ -599,7 +599,7 @@ function set_meta_input() {
 
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
-    sample_form.find('#sample_name_' + id).text(id);
+    sample_form.find('#sample_name_' + id).val(id);
 
     sample_forms[id] = sample_form;
 
