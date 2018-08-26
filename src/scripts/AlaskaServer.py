@@ -1015,7 +1015,7 @@ class AlaskaServer(Alaska):
         f = lambda : self.rand_str_except(self.PROJECT_L, ids())
 
         proj.infer_samples(f, temp=self.samples_temp, md5=md5)
-        self.broadcast(_id, '{}: {} samples successfully inferred'.format(len(proj.samples), _id))
+        self.broadcast(_id, '{}: {} samples successfully inferred'.format(_id, len(proj.samples)))
 
         if proj.progress < 2:
             proj.progress = 2

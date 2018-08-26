@@ -416,6 +416,45 @@ function go_to_meta_form(proj_id) {
 }
 
 /**
+ * Show sample name input form.
+ */
+function show_sample_name_input() {
+  var first = $('#infer_samples_modal');
+  var second = $('#sample_names_modal');
+
+  // First, add event listener for modal hide.
+  first.on('hidden.bs.modal', function (e) {
+    second.modal('show');
+  });
+
+  // Then, hide infer samples modal,
+  // which will also show the second modal.
+  first.modal('hide');
+}
+
+/**
+ * Parse the string returned by infer_samples.
+ */
+function parse_infer_samples(out) {
+  // Split by first opening bracket.
+  var i = out.indexOf('{');
+  var split = out.slice(i);
+
+  // Then, split by ending string.
+  var split2 = split.split('END');
+
+  // Then, we have the raw json dump.
+  var dump = split2[0];
+
+  console.out(dump);
+
+  // Parse json.
+  proj = JSON.parse(dump);
+
+
+}
+
+/**
  * Infer samples.
  */
 function infer_samples() {
@@ -434,7 +473,7 @@ function infer_samples() {
     },
     success:function(out) {
       console.log(out);
-      go_to_meta_form(proj_id);
+      parse_infer_samples(out);
     }
   });
 
@@ -442,6 +481,7 @@ function infer_samples() {
 
 // Global raw reads div variable.
 var proj_id;
+var proj;
 var ftp_pw;
 var raw_reads_div;
 

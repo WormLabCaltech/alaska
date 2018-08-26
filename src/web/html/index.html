@@ -55,7 +55,7 @@
             </span>
         </div>
     </div>
-    <div id="ftp_info_div" style="margin-top:10rem;display:none">
+    <div id="ftp_info_div" style="margin-top:15rem;display:none">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -203,6 +203,28 @@
                     Infer samples
                     <!--Div for the loading spinner.-->
                     <div id="infer_samples_loading_spinner" class="spinner-light ml-2" style="width:20px;height:20px;display:none"></div>
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Go back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Sample names modal-->
+<div class="modal fade" id="sample_names_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-warning">
+                <h5 class="modal-title">Alaska will infer your samples.</h5>
+            </div>
+            <div class="modal-body text-dark">
+                <p>Alaska will begin to infer your samples when you press the button below. Depending on the number, size, and format of your reads, this may take a few minutes. The page will automatcially refresh when this is finished.
+            </div>
+            <div class="modal-footer">
+                <button id="" type="button" class="btn btn-primary d-flex align-items-center">
+                    Infer samples
+                    <!--Div for the loading spinner.-->
+                    <div id="" class="spinner-light ml-2" style="width:20px;height:20px;display:none"></div>
                 </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Go back</button>
             </div>
