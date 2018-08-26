@@ -608,7 +608,7 @@ function set_reads_table(id) {
     var new_md5_id = md5_id.replace('num', path);
 
     // Change row id.
-    var row = sample_form.find('#' + sample_reads_table_id).clone();
+    var row = sample_forms[id].find('#' + sample_reads_table_id).clone();
     row.attr('id', new_sample_reads_table_id);
 
     // Change cell ids.
