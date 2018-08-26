@@ -542,7 +542,7 @@ function show_meta_input() {
     easing: 'easeInOutQuart',
     update: function() {
       $(window).scrollTop(obj.pos);
-    }
+    },
     complete: function(anim) {
       // Hide all other elements.
       $('#main_content_div').hide();
