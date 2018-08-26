@@ -563,9 +563,9 @@ function set_choose_sample_button(dropdown, forms) {
     dropdown_items[id] = dropdown_item;
 
     // Set on click handler.
-    dropdown_item.click(function () {
-      console.log('clicked ' + id);
-      show_sample_form(sample_forms[id]);
+    dropdown_item.click({'id': id}, function (e) {
+      console.log('clicked ' + e.data.id);
+      show_sample_form(sample_forms[e.data.id]);
     });
 
     // Append to html and show.
