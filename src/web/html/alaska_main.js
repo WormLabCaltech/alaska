@@ -418,7 +418,7 @@ function go_to_meta_form(proj_id) {
 /**
  * Show sample name input form.
  */
-function show_sample_name_input() {
+function show_sample_name_input(proj) {
   var first = $('#infer_samples_modal');
   var second = $('#sample_names_modal');
 
@@ -446,12 +446,12 @@ function parse_infer_samples(out) {
   // Then, we have the raw json dump.
   var dump = split2[0];
 
-  console.out(dump);
+  console.log(dump);
 
   // Parse json.
   proj = JSON.parse(dump);
 
-
+  show_sample_name_input(proj);
 }
 
 /**
