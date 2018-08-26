@@ -543,16 +543,17 @@ function show_meta_input() {
     update: function() {
       $(window).scrollTop(obj.pos);
     }
+    complete: function(anim) {
+      // Hide all other elements.
+      $('#main_content_div').hide();
+      $('#ftp_info_div').hide();
+      $('#raw_reads_div').hide();
+    }
   });
 
   // Show meta input.
   $('#progress_bar_container').show();
   $('#meta_container').show();
-
-  // Hide all other elements.
-  $('#main_content_div').hide();
-  $('#ftp_info_div').hide();
-  $('#raw_reads_div').hide();
 }
 
 /*
