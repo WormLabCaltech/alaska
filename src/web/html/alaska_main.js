@@ -756,6 +756,9 @@ function set_meta_input() {
     sample_form.find('#sample_id_' + id).text(id);
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
+    // Set paired end listener.
+    set_paired_end(id, sample_form);
+
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
 
