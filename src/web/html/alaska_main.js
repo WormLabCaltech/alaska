@@ -726,6 +726,7 @@ function add_sample_forms() {
 
     // Append new form.
     $('#sample_card').append(sample_form);
+  }
 }
 
 /*
