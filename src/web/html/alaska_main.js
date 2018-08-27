@@ -501,6 +501,7 @@ function set_organisms_dropdown() {
       // Set the value and remove id (because we don't need the id).
       option.attr('value', org);
       option.attr('id', '');
+      option.text(org);
 
       // Add it to the dropdown.
       dropdown.append(option);
