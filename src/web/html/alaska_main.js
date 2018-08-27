@@ -474,25 +474,32 @@ function set_sample_name_input(proj) {
 /**
  * Sets the dropdown of available organisms.
  */
-function set_organisms_dropdown(id, dropdown) {
-  var option_id = 'sample_organism_' + id + '_option';
+function set_organisms_dropdown() {
+  var dropdown_id = 'sample_organism_SAMPLEID';
+  var option_id = 'sample_organism_SAMPLEID_option';
 
-  // Loop through each organism.
-  for (var i = 0; i < organisms.length; i++) {
-    var org = organisms[i];
+  for (var id in sample_forms) {
+    var new_dropdown_id = dropdown_id.replace('SAMPLEID', id);
+    var new_option_id = option_id.replace('SAMPLEID', id);
+    var dropdown = sample_forms[id].find(new_dropdown_id);
 
-    // Get clone of placeholder option.
-    var option = dropdown.children('#' + option_id).clone();
+    // Loop through each organism.
+    for (var i = 0; i < organisms.length; i++) {
+      var org = organisms[i];
 
-    // Set the value and remove id (because we don't need the id).
-    option.attr('value', org);
-    option.attr('id', '');
+      // Get clone of placeholder option.
+      var option = dropdown.children('#' + new_option_id).clone();
 
-    // Add it to the dropdown.
-    dropdown.append(option);
+      // Set the value and remove id (because we don't need the id).
+      option.attr('value', org);
+      option.attr('id', '');
 
-    // Then, show it.
-    option.show();
+      // Add it to the dropdown.
+      dropdown.append(option);
+
+      // Then, show it.
+      option.show();
+    }
   }
 }
 
@@ -516,6 +523,9 @@ function set_organisms() {
       var dump = '[' + split2[0] + ']';
 
       organisms = JSON.parse(dump);
+
+      // Set the dropdowns.
+      set_organisms_dropdown();
     }
   });
 }
@@ -696,9 +706,6 @@ function set_meta_input() {
   // Set sorted names.
   set_sorted_names();
 
-  // Set organisms.
-  set_organisms();
-
   // Add samples in sorted order (by name).
   for (var i = 0; i < sorted_names.length; i++) {
     var name = sorted_names[i];
@@ -730,6 +737,9 @@ function set_meta_input() {
     // Append new form.
     $('#sample_card').append(sample_form);
   }
+
+  // Set organisms dropdown.
+  set_organisms();
 
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
