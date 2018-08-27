@@ -458,7 +458,7 @@ function set_sample_name_input(proj) {
     var new_name_id = name_id.replace('SAMPLEID', id);
 
     var row = $('#' + row_id).clone();
-    var def = proj.samples[id]['name'];
+    var def = name;
 
     // Set row id.
     row.attr('id', row_id.replace('SAMPLEID', id));
