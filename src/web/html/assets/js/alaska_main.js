@@ -435,15 +435,8 @@ function set_sample_name_input(proj) {
   var header = $('#sample_names_header');
   header.text(header.text().replace('num', n_samples));
 
-  // Before going on, create a separate list that has the
-  // sample ids sorted by name.
-  names_to_ids = {};
-  for (var id in proj.samples) {
-    names_to_ids[proj.samples[id].name] = id;
-  }
-  console.log(names_to_ids);
-  sorted_names = Object.keys(names_to_ids).sort().reverse();
-  console.log(sorted_names);
+  // Set sorted names.
+  set_sorted_names();
 
   // Then, set the rows.
   var row_id = 'name_input_row_SAMPLEID';
@@ -649,13 +642,15 @@ function set_reads_table(id, form) {
  * Set meta input form.
  */
 function set_meta_input() {
-  // Before doing anything, let's sort.
-
-
-
   var sample_form_id = 'sample_SAMPLEID'
 
-  for (var id in proj.samples) {
+  // Set sorted names.
+  set_sorted_names();
+
+  // Add samples in sorted order (by name).
+  for (var i = 0; i < sorted_names.length; i++) {
+    var name = sorted_names[i];
+    var id = names_to_ids[name];
     var new_sample_form_id = sample_form_id.replace('SAMPLEID', id);
 
     var sample_form = $('#' + sample_form_id).clone(true);
@@ -728,6 +723,21 @@ function fetch_sample_names() {
       proj.samples[id].name = input.val();
     }
   }
+}
+
+/**
+ * Sets the global variables for sorting samples by name.
+ */
+function set_sorted_names() {
+  // Before going on, create a separate list that has the
+  // sample ids sorted by name.
+  names_to_ids = {};
+  for (var id in proj.samples) {
+    names_to_ids[proj.samples[id].name] = id;
+  }
+  console.log(names_to_ids);
+  sorted_names = Object.keys(names_to_ids).sort();
+  console.log(sorted_names);
 }
 
 /*
