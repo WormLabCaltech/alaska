@@ -481,7 +481,7 @@ function set_organisms_dropdown() {
   for (var id in sample_forms) {
     var new_dropdown_id = dropdown_id.replace('SAMPLEID', id);
     var new_option_id = option_id.replace('SAMPLEID', id);
-    var dropdown = sample_forms[id].find(new_dropdown_id);
+    var dropdown = sample_forms[id].find('#' + new_dropdown_id);
 
     // Loop through each organism.
     for (var i = 0; i < organisms.length; i++) {
