@@ -406,6 +406,14 @@ function refetch_reads() {
 function bind_raw_reads() {
   // Add on click handler for refetch reads button.
   $('#refetch_reads_btn_1').click(refetch_reads);
+
+  // Bind infer samples button.
+  $('#infer_samples_btn').click(infer_samples);
+
+  // Bind done button for inputing sample names.
+  $('#sample_names_btn').click(meta_input);
+
+
 }
 
 /**
@@ -864,12 +872,6 @@ $(document).ready(function() {
   bind_raw_reads();
   $('#refetch_reads_btn_2').click(refetch_reads);
   raw_reads_div = $('#raw_reads_div').clone(true);
-
-  // Bind infer samples button.
-  $('#infer_samples_btn').click(infer_samples);
-
-  // Bind done button for inputing sample names.
-  $('#sample_names_btn').click(meta_input);
 
   // Fetch server status.
   get_server_status();
