@@ -720,7 +720,7 @@ function set_meta_input() {
 
     // Set the organism selection dropdown.
     var orgs_dropdown = $('#sample_organism_' + id);
-    set_organisms_dropdown(id, orgs_dropdown);
+    // set_organisms_dropdown(id, orgs_dropdown);
 
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
