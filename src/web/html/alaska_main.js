@@ -751,6 +751,15 @@ function meta_input() {
   show_meta_input();
 }
 
+/**
+ * Gets query parameters from url.
+ */
+function get_url_params() {
+  var url_params = new URLSearchParams(window.location.search);
+
+  return url_params;
+}
+
 // Global variables.
 var proj_id;
 var proj;
@@ -765,6 +774,10 @@ var sorted_names;
 
 // To run when page is loaded.
 $(document).ready(function() {
+  url_params = get_url_params();
+
+  console.log(url_params);
+
   // initialize tooltips
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
