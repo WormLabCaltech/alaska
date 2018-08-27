@@ -710,17 +710,19 @@ function set_reads_table(id, form) {
  * Set paired end listener.
  */
 function set_paired_end(id, form) {
-  var radio_id = 'sample_type_SAMPLEID_2_radio';
+  var paired_radio_id = 'sample_type_SAMPLEID_2_radio';
   var paired_id = 'sample_paired_SAMPLEID';
   var new_radio_id = radio_id.replace('SAMPLEID', id);
   var new_paired_id = paired_id.replace('SAMPLEID', id);
 
   var radio = form.find('#' + new_radio_id);
+  var paired = form.find('#' + new_paired_id);
 
   // Set listener for click.
-  radio.change(function () {
-    var paired = form.find('#' + new_paired_id);
-    if (radio.checked) {
+  radio.change({'paired': paired}, function (e) {
+    paired = e.data.paired;
+    
+    if (this.checked) {
       paired.collapse('show');
     } else {
       paired.collapse('hide');
