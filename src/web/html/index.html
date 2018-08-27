@@ -157,7 +157,7 @@
                 </div>
             </div>
         </div>
-        <div class="collapse" id="sample_SAMPLEID">
+        <div class="collapse show" id="sample_SAMPLEID">
             <div class="card-body">
                 <h4 class="card-title" id="sample_id_SAMPLEID">Sample ID</h4>
                 <form>
@@ -253,6 +253,18 @@
                             <div class="custom-control custom-radio custom-control-inline">
                                 <input type="radio" id="sample_type_SAMPLEID_2_radio" name="design" class="custom-control-input">
                                 <label class="custom-control-label" for="sample_type_SAMPLEID_2_radio">Paired-end</label>
+                            </div>
+                            <div class="collapse show" id="sample_paired_SAMPLEID">
+                                <div class="d-flex mt-2" id="sample_paired_SAMPLEID_row_num">
+                                    <legend class="col-form-label col-sm-2">Pair</legend>
+                                    <select class='custom-select mr-2 list_of_reads' id="sample_paired_SAMPLEID_row_num_1">
+                                        <option selected disabled hidden>Please select a read.</option>
+                                    </select>
+                                    <select class='custom-select list_of_reads' id="sample_paired_SAMPLEID_row_num_2">
+                                        <option selected disabled hidden>Please select its pair.</option>
+                                    </select>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>

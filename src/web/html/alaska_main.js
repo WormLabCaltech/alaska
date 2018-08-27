@@ -706,6 +706,28 @@ function set_reads_table(id, form) {
   }
 }
 
+/**
+ * Set paired end listener.
+ */
+function set_paired_end(id, form) {
+  var radio_id = 'sample_type_SAMPLEID_2_radio';
+  var paired_id = 'sample_paired_SAMPLEID';
+  var new_radio_id = radio_id.replace('SAMPLEID', id);
+  var new_paired_id = paired_id.replace('SAMPLEID', id);
+
+  var radio = form.find('#' + new_radio_id);
+
+  // Set listener for click.
+  radio.change(function () {
+    var paired = form.find('#' + new_paired_id);
+    if (radio.checked) {
+      paired.collapse('show');
+    } else {
+      paired.collapse('hide');
+    }
+  });
+}
+
 /*
  * Set meta input form.
  */
@@ -733,10 +755,6 @@ function set_meta_input() {
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
-
-    // Set the organism selection dropdown.
-    var orgs_dropdown = $('#sample_organism_' + id);
-    // set_organisms_dropdown(id, orgs_dropdown);
 
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
