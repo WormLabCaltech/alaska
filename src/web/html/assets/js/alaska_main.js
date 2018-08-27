@@ -437,12 +437,12 @@ function set_sample_name_input(proj) {
 
   // Before going on, create a separate list that has the
   // sample ids sorted by name.
-  var names_to_ids = {};
+  names_to_ids = {};
   for (var id in proj.samples) {
     names_to_ids[proj.samples[id].name] = id;
   }
   console.log(names_to_ids);
-  var sorted_names = Object.keys(names_to_ids).sort();
+  sorted_names = Object.keys(names_to_ids).sort().reverse();
   console.log(sorted_names);
 
   // Then, set the rows.
@@ -450,8 +450,8 @@ function set_sample_name_input(proj) {
   var folder_id = 'name_input_folder_SAMPLEID';
   var name_id = 'name_input_SAMPLEID';
 
-  for (var name in sorted_names) {
-    console.log(name);
+  for (var i = 0; i < sorted_names.length; i++) {
+    var name = sorted_names[i];
     var id = names_to_ids[name];
 
     var new_folder_id = folder_id.replace('SAMPLEID', id);
@@ -750,6 +750,8 @@ var dropdown_items = {};
 var proj_form;
 var current_sample_form;
 var sample_forms = {};
+var names_to_ids;
+var sorted_names;
 
 // To run when page is loaded.
 $(document).ready(function() {
