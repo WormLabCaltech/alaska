@@ -487,7 +487,6 @@ function set_organisms_dropdown(id, dropdown) {
     // Set the value and remove id (because we don't need the id).
     option.attr('value', org);
     option.attr('id', '');
-    option.text(org);
 
     // Add it to the dropdown.
     dropdown.append(option);
@@ -517,9 +516,6 @@ function set_organisms() {
       var dump = '[' + split2[0] + ']';
 
       organisms = JSON.parse(dump);
-
-      // Then, set sample forms.
-      add_sample_forms();
     }
   });
 }
@@ -691,11 +687,17 @@ function set_reads_table(id, form) {
   }
 }
 
-/**
- * Add sample forms.
+/*
+ * Set meta input form.
  */
-function add_sample_forms() {
+function set_meta_input() {
   var sample_form_id = 'sample_SAMPLEID'
+
+  // Set sorted names.
+  set_sorted_names();
+
+  // Set organisms.
+  set_organisms();
 
   // Add samples in sorted order (by name).
   for (var i = 0; i < sorted_names.length; i++) {
@@ -717,7 +719,7 @@ function add_sample_forms() {
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
     // Set the organism selection dropdown.
-    var orgs_dropdown = sample_form.find('#sample_organism_' + id);
+    var orgs_dropdown = $('#sample_organism_' + id);
     set_organisms_dropdown(id, orgs_dropdown);
 
     // Set the reads table for this sample.
@@ -732,17 +734,6 @@ function add_sample_forms() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
-}
-
-/*
- * Set meta input form.
- */
-function set_meta_input() {
-  // Set sorted names.
-  set_sorted_names();
-
-  // Set organisms.
-  set_organisms();
 }
 
 /*
