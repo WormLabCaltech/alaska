@@ -1053,11 +1053,15 @@ class AlaskaServer(Alaska):
         """
         Sends a list of available organisms.
         """
+        orgs = []
         for genus, item in self.organisms.items():
             for species, org in item.items():
                 for ref in org.refs:
-                    name = '{}_{}'.format(org.short, ref)
-                    self.respond(_id, name)
+                    name = '{}_{}'.format(org.full, ref)
+                    orgs.append(name)
+
+        # dump as a json list
+        self.respond(_id, json.dumps(sorted(orgs), indent=4))
 
         if close:
             self.close(_id)

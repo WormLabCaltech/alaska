@@ -472,6 +472,58 @@ function set_sample_name_input(proj) {
 }
 
 /**
+ * Sets the dropdown of available organisms.
+ */
+function set_organisms_dropdown(id, dropdown) {
+  var option_id = 'sample_organism_' + id + '_option';
+
+  // Loop through each organism.
+  for (var i = 0; i < organisms.length; i++) {
+    var org = organisms[i];
+
+    // Get clone of placeholder option.
+    var option = dropdown.children('#' + option_id).clone();
+
+    // Set the value and remove id (because we don't need the id).
+    option.attr('value', org);
+    option.attr('id', '');
+
+    // Add it to the dropdown.
+    dropdown.append(option);
+
+    // Then, show it.
+    option.show();
+  }
+}
+
+
+/**
+ * Sets the internal list of available organisms.
+ */
+function set_organisms() {
+  // Send get_organisms request.
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'get_organisms'
+    },
+    success:function(out) {
+      console.log(out);
+
+      var split = out.split('[');
+      var split2 = split[1].split(']');
+      var dump = '[' + split2[0] + ']';
+
+      organisms = JSON.parse(dump);
+
+      // Then, set sample forms.
+      add_sample_forms();
+    }
+  });
+}
+
+/**
  * Parse the string returned by infer_samples.
  */
 function parse_infer_samples(out) {
@@ -638,14 +690,11 @@ function set_reads_table(id, form) {
   }
 }
 
-/*
- * Set meta input form.
+/**
+ * Add sample forms.
  */
-function set_meta_input() {
+function add_sample_forms() {
   var sample_form_id = 'sample_SAMPLEID'
-
-  // Set sorted names.
-  set_sorted_names();
 
   // Add samples in sorted order (by name).
   for (var i = 0; i < sorted_names.length; i++) {
@@ -666,6 +715,10 @@ function set_meta_input() {
     sample_form.find('#sample_id_' + id).text(id);
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
+    // Set the organism selection dropdown.
+    var orgs_dropdown = sample_form.find('#sample_organism_' + id);
+    set_organisms_dropdown(id, orgs_dropdown);
+
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
 
@@ -673,6 +726,17 @@ function set_meta_input() {
 
     // Append new form.
     $('#sample_card').append(sample_form);
+}
+
+/*
+ * Set meta input form.
+ */
+function set_meta_input() {
+  // Set sorted names.
+  set_sorted_names();
+
+  // Set organisms.
+  set_organisms();
   }
 
   // Then, set the button handler.
@@ -771,6 +835,7 @@ var current_sample_form;
 var sample_forms = {};
 var names_to_ids;
 var sorted_names;
+var organisms;
 
 // To run when page is loaded.
 $(document).ready(function() {
