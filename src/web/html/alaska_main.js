@@ -738,7 +738,6 @@ function set_meta_input() {
 
   // Set organisms.
   set_organisms();
-  }
 
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
