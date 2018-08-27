@@ -487,6 +487,7 @@ function set_organisms_dropdown(id, dropdown) {
     // Set the value and remove id (because we don't need the id).
     option.attr('value', org);
     option.attr('id', '');
+    option.text(org);
 
     // Add it to the dropdown.
     dropdown.append(option);
@@ -727,6 +728,10 @@ function add_sample_forms() {
     // Append new form.
     $('#sample_card').append(sample_form);
   }
+
+  // Then, set the button handler.
+  var dropdown = $('#sample_choices');
+  set_choose_sample_button(dropdown, sample_forms);
 }
 
 /*
@@ -738,10 +743,6 @@ function set_meta_input() {
 
   // Set organisms.
   set_organisms();
-
-  // Then, set the button handler.
-  var dropdown = $('#sample_choices');
-  set_choose_sample_button(dropdown, sample_forms);
 }
 
 /*
