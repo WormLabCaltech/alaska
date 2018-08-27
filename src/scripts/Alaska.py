@@ -103,6 +103,7 @@ class Alaska():
         'infer_samples':        b'\x05', # extract raw reads and infer samples
         # 'get_idx':              b'\x05', # get list of avaliable indices
         # 'new_sample':           b'\x06', # create new sample with unique id
+        'get_organisms':        b'\x06',
         'set_proj':             b'\x07', # set project data by reading temporary JSON
         'finalize_proj':        b'\x08', # finalize project
         'qc':                   b'\x09',

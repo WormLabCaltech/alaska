@@ -1049,6 +1049,20 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+    def get_organisms(self, _id, close=True):
+        """
+        Sends a list of available organisms.
+        """
+        for genus, item in self.organisms.items():
+            for species, org in item.items():
+                for ref in org.refs:
+                    name = '{}_{}'.format(org.short, ref)
+                    self.respond(_id, name)
+
+        if close:
+            self.close(_id)
+
+
     # def get_idx(self, _id, close=True):
     #     """
     #     Responds with the list of available indices.
