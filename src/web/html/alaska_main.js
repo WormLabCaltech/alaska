@@ -1092,8 +1092,8 @@ function set_samples_meta_input() {
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
 
     // Add first contributor field to the list of fields.
-    var sample_contributor_0 = $('sample_contributor_' + id + '_0_div');
-    var add_contributor_btn = $('sample_add_contributor_' + id + '_btn');
+    var sample_contributor_0 = $('#sample_contributor_' + id + '_0_div');
+    var add_contributor_btn = $('#sample_add_contributor_' + id + '_btn');
     sample_contributor_fields[id] = [sample_contributor_0];
     add_contributor_btn.click(add_contributor);
 
