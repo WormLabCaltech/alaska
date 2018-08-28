@@ -727,6 +727,16 @@ function set_paired_end(id, form) {
   // If there are an odd number of reads, automatically disable.
   if (n_reads % 2 == 1) {
     form.find('#' + pair_2_id).prop('disabled', true);
+    return;
+  }
+
+  // First, generate list of options for each read.
+  var option = row.children('#' + pair_1_id).children('option').clone();
+  for (var i = 0; i < n_reads; i++) {
+    var read = reads[i];
+
+    option.text(read);
+    option.val(read);
   }
 
   // Add row for each pair.
@@ -750,19 +760,9 @@ function set_paired_end(id, form) {
     new_pair_1.attr('id', new_pair_1_id);
     new_pair_2.attr('id', new_pair_2_id);
 
-    // Construct new select element for each read.
-    for (var j = 0; j < reads.length; j++) {
-      var read = reads[j];
-      console.log('creating ' + read);
-      var read_select = $('<option></option>', {
-        value: read,
-        text: read,
-      });
-
-      // Then, append the new element to both dropdowns.
-      new_pair_1.append(read_select);
-      new_pair_2.append(read_select);
-    }
+    // Add list of reads.
+    new_pair_1.append(option.clone());
+    new_pair_2.append(option.clone());
 
     // Finally, append the new row.
     paired.append(new_row);
