@@ -939,24 +939,33 @@ function remove_contributor(n) {
   // Get the div of the contributor.
   var div = proj_contributor_fields[n];
 
-  // First, remove item from the array. Then, delete it from DOM.
-  proj_contributor_fields.splice(n, 1);
-  div.remove();
+  // Set on-hide listener to destroy this div.
+  div.on('hidden.bs.collapse', {'div': div, 'n': n}, function (e) {
+    var div = e.data.div;
+    var n = e.data.n;
 
-  // Then, update the ids of all the following elements.
-  var more_div_id = 'proj_contributor_num_div';
-  var more_input_id = 'proj_contributor_num';
-  var more_btn_id = 'proj_remove_contributor_btn_num';
-  var n_contributors = proj_contributor_fields.length;
-  for (var i = n; i < n_contributors; i++) {
-    var new_more_div_id = more_div_id.replace('num', i);
-    var new_more_input_id = more_input_id.replace('num', i);
-    var new_more_btn_id = more_btn_id.replace('num', i);
+    // Remove item from the array. Then, delete it from DOM.
+    proj_contributor_fields.splice(n, 1);
+    div.remove();
 
-    var div = proj_contributor_fields[i];
-    div.attr('id', new_more_div_id);
-    new_div.children('input').attr('id', new_more_input_id);
-    new_div.children('button').attr('id', new_more_btn_id);
+    // Then, update the ids of all the following elements.
+    var more_div_id = 'proj_contributor_num_div';
+    var more_input_id = 'proj_contributor_num';
+    var more_btn_id = 'proj_remove_contributor_btn_num';
+    var n_contributors = proj_contributor_fields.length;
+    for (var i = n; i < n_contributors; i++) {
+      var new_more_div_id = more_div_id.replace('num', i);
+      var new_more_input_id = more_input_id.replace('num', i);
+      var new_more_btn_id = more_btn_id.replace('num', i);
+
+      var div = proj_contributor_fields[i];
+      div.attr('id', new_more_div_id);
+      div.children('input').attr('id', new_more_input_id);
+      div.children('button').attr('id', new_more_btn_id);
+  });
+
+  // Hide collapse.
+  div.collapse('hide');
   }
 }
 
@@ -1007,6 +1016,9 @@ function add_proj_contributor() {
   $('#proj_contributors').append(new_div);
   new_div.show();
   new_div.addClass('d-flex');
+
+  // Show the collapse.
+  new_div.collapse('show');
 
   // Add the div to the global list of contributor fields.
   proj_contributor_fields.push(new_div);
