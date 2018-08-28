@@ -986,6 +986,8 @@ function set_remove_contributor_button(button) {
     var split = id.split('_');
     var n = split[split.length - 1];
 
+    console.log(id);
+
     if (id.startsWith('proj')) {
       remove_contributor(proj_contributor_fields, n);
     } else if (id.startsWith('sample')) {
