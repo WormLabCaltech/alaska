@@ -1127,6 +1127,7 @@ function set_remove_characteristic_button(button) {
 
     var sample_id = split[split.length - 3];
     remove_characteristic(sample_characteristic_fields[sample_id], n);
+  });
 }
 
 /**
