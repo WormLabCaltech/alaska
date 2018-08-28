@@ -965,7 +965,7 @@ function remove_contributor(n) {
  */
 function set_remove_contributor_button(button) {
   button.click(function () {
-    var id = this.attr('id');
+    var id = $(this).attr('id');
     var split = id.split('_');
     var n = split[split.length - 1];
 
