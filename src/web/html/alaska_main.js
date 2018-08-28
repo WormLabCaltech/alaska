@@ -1180,9 +1180,9 @@ function add_characteristic() {
   });
   new_more_detail.focusin({char: new_more_char}, function(e) {
     var char = e.data.char.val();
+    var characteristics = get_all_characteristics();
 
     if (char != '' && char != null && characteristics[char] != null) {
-      var characteristics = get_all_characteristics();
       set_suggestions($(this), characteristics[char]);
     }
   });
@@ -1381,17 +1381,17 @@ function set_samples_meta_input() {
     var detail_id = 'sample_detail_' + id + '_0';
     var sample_characteristic_0_char = sample_characteristic_0.children('#' + char_id);
     var sample_characteristic_0_detail = sample_characteristic_0.children('#' + detail_id);
-    new_more_char.focusin({'id':id}, function(e) {
+    sample_characteristic_0_char.focusin({'id':id}, function(e) {
       var id = e.data.id;
       var characteristics = get_all_characteristics_except(id);
 
       set_suggestions($(this), Object.keys(characteristics));
     });
-    new_more_detail.focusin({char: sample_characteristic_0_char}, function(e) {
+    sample_characteristic_0_detail.focusin({char: sample_characteristic_0_char}, function(e) {
       var char = e.data.char.val();
+      var characteristics = get_all_characteristics();
 
       if (char != '' && char != null && characteristics[char] != null) {
-        var characteristics = get_all_characteristics();
         set_suggestions($(this), characteristics[char]);
       }
     });
