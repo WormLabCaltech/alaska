@@ -1025,7 +1025,7 @@ function add_contributor() {
   var n_contributors = fields.length;
 
   // Make new div by cloning.
-  var new_div = more_div.clone();
+  var new_div = more_div.clone(true);
 
   // Then, change the ids.
   var new_more_div_id = more_div_id.replace('num', n_contributors);
@@ -1036,11 +1036,6 @@ function add_contributor() {
   new_div.attr('id', new_more_div_id);
   new_more_input.attr('id', new_more_input_id);
   new_more_btn.attr('id', new_more_btn_id);
-
-  // Set up suggestions.
-  new_more_input.focusin(function() {
-    set_suggestions($(this), get_all_contributors());
-  });
 
   // Then, set the remove button handler.
   set_remove_contributor_button(new_more_btn);
@@ -1105,13 +1100,16 @@ function get_all_contributors() {
 
   // Then, loop through each sample.
   for (var id in sample_contributor_fields) {
-    var field = sample_contributor_fields[id];
-    var contributor = field.children('input').val();
+    for (var i = 0; i < sample_contributor_fields[id].length; i++) {
+      var field = sample_contributor_fields[id][i];
+      var contributor = field.children('input').val();
 
-    if (contributor != '') {
-      if (!contributors.includes(contributor)) {
-        contributors.push(contributor);
+      if (contributor != '') {
+        if (!contributors.includes(contributor)) {
+          contributors.push(contributor);
+        }
       }
+
     }
   }
 
@@ -1156,6 +1154,11 @@ function set_samples_meta_input() {
     sample_contributor_0_input.focusin(function() {
       set_suggestions($(this), get_all_contributors());
     });
+    // Set up suggestions (if this is for a sample)
+    $('#sample_contributor_' + id + '_num').focusin(function() {
+      set_suggestions($(this), get_all_contributors());
+    });
+
 
     // Set paired end listener.
     set_paired_end(id, sample_form);
