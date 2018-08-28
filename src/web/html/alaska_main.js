@@ -855,12 +855,14 @@ function add_import_export_sample(name, id) {
 
   import_dropdown.append(option.clone());
   export_dropdown.append(option.clone());
+
+  set_import_export_popover_btn();
 }
 
 /**
  * Set import/export button.
  */
-function set_import_export_btn() {
+function set_import_export_popover_btn() {
   // Set data input/export button.
   var import_btn = $('#sample_import_btn');
   var export_btn = $('#sample_export_btn');
