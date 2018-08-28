@@ -930,15 +930,100 @@ function set_import_export_popover_btn() {
   export_btn.on('show.bs.popover', function() {
     import_btn.popover('hide');
   });
+}
 
-  // Once the listeners are set, add samples to list.
+/**
+ * Remove contributor with index n.
+ */
+function remove_contributor(n) {
+  // Get the div of the contributor.
+  var div = proj_contributor_fields[n];
+
+  // First, remove item from the array. Then, delete it from DOM.
+  proj_contributor_fields.splice(n, 1);
+  div.remove();
+
+  // Then, update the ids of all the following elements.
+  var more_div_id = 'proj_contributor_num_div';
+  var more_input_id = 'proj_contributor_num';
+  var more_btn_id = 'proj_remove_contributor_btn_num';
+  var n_contributors = proj_contributor_fields.length;
+  for (var i = n; i < n_contributors; i++) {
+    var new_more_div_id = more_div_id.replace('num', i);
+    var new_more_input_id = more_input_id.replace('num', i);
+    var new_more_btn_id = more_btn_id.replace('num', i);
+
+    var div = proj_contributor_fields[i];
+    div.attr('id', new_more_div_id);
+    new_div.children('input').attr('id', new_more_input_id);
+    new_div.children('button').attr('id', new_more_btn_id);
+  }
+}
+
+/**
+ * Set up the remove contributor button.
+ */
+function set_remove_contributor_button(button) {
+  button.click(function () {
+    var id = this.attr('id');
+    var split = id.split('_');
+    var n = split[split.length - 1];
+
+    remove_contributor(n);
+  });
 
 }
 
 /**
- * Set meta input form.
+ * Add project contributors.
  */
-function set_meta_input() {
+function add_proj_contributor() {
+  var contributors_div = $('#proj_contributors');
+  var more_div_id = 'proj_contributor_num_div';
+  var more_input_id = 'proj_contributor_num';
+  var more_btn_id = 'proj_remove_contributor_btn_num';
+  var more_div = $('#' + more_div_id);
+
+  // Current number of project contributor fields.
+  var n_contributors = proj_contributor_fields.length;
+
+  // Make new div by cloning.
+  var new_div = more_div.clone();
+
+  // Then, change the ids.
+  var new_more_div_id = more_div_id.replace('num', n_contributors);
+  var new_more_input_id = more_input_id.replace('num', n_contributors);
+  var new_more_btn_id = more_btn_id.replace('num', n_contributors);
+  var new_more_input = new_div.children('input');
+  var new_more_btn = new_div.children('button');
+  new_div.attr('id', new_more_div_id);
+  new_more_input.attr('id', new_more_input_id);
+  new_more_btn.attr('id', new_more_btn_id);
+
+  // Then, set the remove button handler.
+  set_remove_contributor_button(new_more_btn);
+
+  // Append the new field to DOM.
+  $('#proj_contributors').append(new_div);
+  new_div.show();
+
+  // Add the div to the global list of contributor fields.
+  proj_contributor_fields.push(new_div);
+}
+
+/**
+ * Set project meta input.
+ */
+function set_proj_meta_input() {
+  var add_contributor_btn = $('#proj_add_contributor_btn');
+
+  add_contributor_btn.click(add_proj_contributor);
+}
+
+/**
+ * Set samples meta input.
+ */
+function set_samples_meta_input() {
   var sample_form_id = 'sample_SAMPLEID'
 
   // Set sorted names.
@@ -984,6 +1069,18 @@ function set_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
+
+}
+
+/**
+ * Set meta input form.
+ */
+function set_meta_input() {
+  // Deal with project meta input form first.
+  set_proj_meta_input();
+
+
+
 }
 
 /*
@@ -1046,7 +1143,7 @@ function set_sorted_names() {
   console.log(sorted_names);
 }
 
-/*
+/**
  * Set and show meta input form.
  */
 function meta_input() {
@@ -1055,6 +1152,13 @@ function meta_input() {
   set_meta_input();
 
   show_meta_input();
+}
+
+/**
+ * Sets the global contributors list.
+ */
+function set_contributors() {
+
 }
 
 /**
@@ -1079,6 +1183,8 @@ var names_to_ids;
 var sorted_names;
 var organisms;
 var import_export_dropdown;
+var proj_contributor_fields = [];
+var sample_contributor_fields = {};
 
 // To run when page is loaded.
 $(document).ready(function() {
