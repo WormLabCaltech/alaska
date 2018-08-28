@@ -594,11 +594,12 @@ function set_sample_reads(table, reads) {
 /**
  * Show sample form.
  */
-function show_sample_form(form) {
+function show_sample_form(id, form) {
   // First, hide the import/export popover.
-  $('#sample_import_outer_btn').popover('hide');
-  $('#sample_export_outer_btn').popover('hide');
-
+  var import_btn = $('#sample_import_outer_btn');
+  var export_btn = $('#sample_export_outer_btn');
+  import_btn.popover('hide');
+  export_btn.popover('hide');
 
   // If the form is already being shown, just return.
   if (current_sample_form == form) {
@@ -610,6 +611,10 @@ function show_sample_form(form) {
   if (current_sample_form != null) {
     // Set on-hide handler to show the new sample form.
     current_sample_form.on('hidden.bs.collapse', function () {
+      // Update popover title.
+      import_btn.popover({title: proj.samples[id].name});
+      export_btn.popover({title: proj.samples[id].name});
+
       form.collapse('show');
       current_sample_form.off('hidden.bs.collapse');
     });
@@ -646,7 +651,7 @@ function set_choose_sample_button(dropdown, forms) {
     // Set on click handler.
     dropdown_item.click({'id': id}, function (e) {
       console.log('clicked ' + e.data.id);
-      show_sample_form(sample_forms[e.data.id]);
+      show_sample_form(e.data.id, sample_forms[e.data.id]);
     });
 
     // Append to html and show.
