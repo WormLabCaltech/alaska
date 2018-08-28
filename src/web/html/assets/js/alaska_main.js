@@ -1170,15 +1170,23 @@ function add_characteristic() {
   new_more_detail.attr('id', new_more_detail_id);
   new_more_btn.attr('id', new_more_btn_id);
 
-  // Set up suggestions (if this is for a sample)
-  // if (more_div_id.startsWith('sample')) {
-  //   new_more_input.focusin(function() {
-  //     var split = $(this).attr('id').split('_');
-  //     var id = split[split.length - 2];
-  //
-  //     set_suggestions($(this), get_all_contributors_except(id));
-  //   });
-  // }
+  // Set up suggestions
+  new_more_char.focusin(function() {
+    var split = $(this).attr('id').split('_');
+    var id = split[split.length - 2];
+    var characteristics = get_all_characteristics_except(id);
+
+    set_suggestions($(this), Object.keys(characteristics));
+  };
+  new_more_detail.focusin({char: new_more_char}, function(e) {
+    var char = e.data.char.val();
+
+    if (char != '' && char != null && characteristics[char] != null) {
+      var characteristics = get_all_characteristics();
+      set_suggestions($(this), characteristics[char]);
+    }
+  };
+
 
   // Then, set the remove button handler.
   set_remove_characteristic_button(new_more_btn);
@@ -1217,11 +1225,52 @@ function set_suggestions(field, suggestions) {
 }
 
 /**
+ * Get all characteristics except those in this sample.
+ */
+function get_all_characteristics_except(id) {
+  var characteristics = get_all_characteristics();
+
+  var fields = sample_characteristic_fields[id];
+  for (var i = 0; i < field.length; i++) {
+    var field = fields[i];
+    var char_id = 'sample_characteristic_' + id  + '_' + i;
+    var char = field.children('#' + char_id);
+
+    if (characteristics[char] != null) {
+      delete characteristics[char];
+    }
+  }
+
+  return characteristics;
+}
+
+/**
  * Get all characteristics.
  */
 function get_all_characteristics() {
   characteristics = {};
 
+
+  for (var id in sample_characteristic_fields) {
+    var fields = sample_characteristic_fields[id];
+
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      var char_id = 'sample_characteristic_' + id  + '_' + i;
+      var detail_id = 'sample_detail_' + id + '_' + i;
+
+      var char = field.children('#' + char_id);
+      var detail = field.children('#' + detail_id);
+
+      if (characteristics[char] == null) {
+        characteristics[char] = [detail];
+      } else if (!characteristics[char].includes(detail)){
+        characteristics[char].push(detail);
+      }
+    }
+  }
+
+  return characteristics;
 }
 
 /**
@@ -1317,7 +1366,8 @@ function set_samples_meta_input() {
     add_contributor_btn.click(add_contributor);
 
     var sample_contributor_0_input = sample_contributor_0.children('input');
-    sample_contributor_0_input.focusin({'id':id}, function() {
+    sample_contributor_0_input.focusin({'id':id}, function(e) {
+      var id = e.data.id;
       set_suggestions($(this), get_all_contributors_except(id));
     });
 
@@ -1326,6 +1376,26 @@ function set_samples_meta_input() {
     var add_characteristic_btn = sample_form.find('#sample_add_characteristic_' + id + '_btn');
     sample_characteristic_fields[id] = [sample_characteristic_0];
     add_characteristic_btn.click(add_characteristic);
+
+    var char_id = 'sample_characteristic_' + id + '_0';
+    var detail_id = 'sample_detail_' + id + '_0';
+    var sample_characteristic_0_char = sample_characteristic_0.children('#' + char_id);
+    var sample_characteristic_0_detail = sample_characteristic_0.children('#' + detail_id);
+    new_more_char.focusin({'id':id}, function(e) {
+      var id = e.data.id;
+      var characteristics = get_all_characteristics_except(id);
+
+      set_suggestions($(this), Object.keys(characteristics));
+    };
+    new_more_detail.focusin({char: sample_characteristic_0_char}, function(e) {
+      var char = e.data.char.val();
+
+      if (char != '' && char != null && characteristics[char] != null) {
+        var characteristics = get_all_characteristics();
+        set_suggestions($(this), characteristics[char]);
+      }
+    };
+
 
     // Set paired end listener.
     set_paired_end(id, sample_form);
