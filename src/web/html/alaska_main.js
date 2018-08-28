@@ -1006,6 +1006,7 @@ function add_proj_contributor() {
   // Append the new field to DOM.
   $('#proj_contributors').append(new_div);
   new_div.show();
+  new_div.addClass('d-flex');
 
   // Add the div to the global list of contributor fields.
   proj_contributor_fields.push(new_div);
@@ -1015,8 +1016,10 @@ function add_proj_contributor() {
  * Set project meta input.
  */
 function set_proj_meta_input() {
+  var proj_contributor_0 = $('#proj_contributor_0_div');
   var add_contributor_btn = $('#proj_add_contributor_btn');
 
+  proj_contributor_fields.push(proj_contributor_0);
   add_contributor_btn.click(add_proj_contributor);
 }
 
