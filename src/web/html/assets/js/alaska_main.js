@@ -731,13 +731,17 @@ function set_paired_end(id, form) {
   }
 
   // First, generate list of options for each read.
-  var option = row.children('#' + pair_1_id).children('option').clone();
+  var options = [];
+  var option = row.children('#' + pair_1_id).children('option');
   for (var i = 0; i < n_reads; i++) {
+    var new_option = option.clone();
     var read = reads[i];
     var short = read.replace('0_raw_reads/', '');
 
-    option.text(short);
-    option.val(read);
+    new_option.text(short);
+    new_option.val(read);
+
+    options.push(new_option);
   }
 
   // Add row for each pair.
@@ -762,8 +766,12 @@ function set_paired_end(id, form) {
     new_pair_2.attr('id', new_pair_2_id);
 
     // Add list of reads.
-    new_pair_1.append(option.clone());
-    new_pair_2.append(option.clone());
+    for (var j = 0; j < options.length; j++) {
+      var opt = options[j];
+
+      new_pair_1.append(opt.clone());
+      new_pair_2.append(opt.clone());
+    }
 
     // Finally, append the new row.
     paired.append(new_row);
