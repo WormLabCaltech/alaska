@@ -1146,7 +1146,7 @@ function add_characteristic() {
   var more_char_id = 'sample_characteristic_' + id + '_num';
   var more_detail_id = 'sample_detail_' + id + '_num';
 
-  var more_btn = more_div('button');
+  var more_btn = more_div.children('button');
   var more_btn_id = more_btn.attr('id');
 
   var fields = sample_characteristic_fields[sample_id];
