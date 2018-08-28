@@ -1233,10 +1233,10 @@ function get_all_characteristics_except(id) {
   var fields = sample_characteristic_fields[id];
   for (var i = 0; i < fields.length; i++) {
     var field = fields[i];
-    var char_id = 'sample_characteristic_' + id  + '_' + i;
-    var char = field.children('#' + char_id);
+    var char_id = 'sample_characteristic_' + id + '_' + i;
+    var char = field.children('#' + char_id).val();
 
-    if (characteristics[char] != null) {
+    if (characteristics[char] != null && char != '' && char != null) {
       delete characteristics[char];
     }
   }
@@ -1249,7 +1249,6 @@ function get_all_characteristics_except(id) {
  */
 function get_all_characteristics() {
   characteristics = {};
-
 
   for (var id in sample_characteristic_fields) {
     var fields = sample_characteristic_fields[id];
