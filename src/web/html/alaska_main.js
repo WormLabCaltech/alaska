@@ -611,10 +611,6 @@ function show_sample_form(id, form) {
   if (current_sample_form != null) {
     // Set on-hide handler to show the new sample form.
     current_sample_form.on('hidden.bs.collapse', function () {
-      // Update popover title.
-      import_btn.popover({title: proj.samples[id].name});
-      export_btn.popover({title: proj.samples[id].name});
-
       form.collapse('show');
       current_sample_form.off('hidden.bs.collapse');
     });
@@ -882,24 +878,34 @@ function set_import_export_popover_btn() {
 
   import_btn.popover({
     html: true,
-    placement: "right",
+    placement: "bottom",
     content: function() {
       if (current_sample_form != null) {
         return import_popover.html();
       }
 
       return 'Please choose a sample first.';
+    },
+    title: function() {
+      if (current_sample_form != null) {
+        return current_sample_form.attr('id').replace('sample_', '');
+      }
     }
   });
   export_btn.popover({
     html: true,
-    placement: "left",
+    placement: "bottom",
     content: function() {
       if (current_sample_form != null) {
         return export_popover.html();
       }
 
       return 'Please choose a sample first.';
+    },
+    title: function() {
+      if (current_sample_form != null) {
+        return current_sample_form.attr('id').replace('sample_', '');
+      }
     }
   });
   import_btn.on('show.bs.popover', function() {
