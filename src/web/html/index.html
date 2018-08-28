@@ -242,13 +242,13 @@
                                 <label class="col-sm-3 pl-0 mr-2">Characteristic</label>
                                 <label class="col-sm-5 pl-0">Detail</label>
                             </div>
-                            <div class="d-flex">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_characteristic_SAMPLEID_1" required>
-                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_detail_SAMPLEID_1" required>
-                                <button id="add_characteristic_SAMPLEID_btn" class="btn btn-primary" type="button">Add</button>
+                            <div class="d-flex" id="sample_characteristic_SAMPLEID_0_div">
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_characteristic_SAMPLEID_0" required>
+                                <input type="text" class="form-control col-sm-5 mr-2" id="sample_detail_SAMPLEID_0" required>
+                                <button id="sample_add_characteristic_SAMPLEID_btn" class="btn btn-primary" type="button">Add</button>
                             </div>
                             <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                            <div class="mt-1 d-none" id="more_characteristics_div">
+                            <div class="mt-1" id="sample_characteristic_SAMPLEID_num_div" style="display:none">
                                 <input type="text" class="form-control col-sm-3 mr-2" id="sample_characteristic_SAMPLEID_num" required>
                                 <input type="text" class="form-control col-sm-5 mr-2" id="sample_detail_SAMPLEID_num" required>
                                 <button id="remove_characteristic_SAMPLEID_btn_num" class="btn btn-danger" type="button">Remove</button>

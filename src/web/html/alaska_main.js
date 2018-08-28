@@ -949,11 +949,11 @@ function remove_contributor(fields, n) {
     var contributors_div = div.parent();
     var more_div = contributors_div.children('div[style*="display:none"]');
     var more_input = more_div.children('input');
-    var more_btn_id = more_div.children('button');
+    var more_btn = more_div.children('button');
 
     var more_div_id = more_div.attr('id');
     var more_input_id = more_input.attr('id');
-    var more_btn_id = more_btn_id.attr('id');
+    var more_btn_id = more_btn.attr('id');
 
     // Remove item from the array. Then, delete it from DOM.
     fields.splice(n, 1);
@@ -1006,11 +1006,11 @@ function add_contributor() {
   var contributors_div = btn.parent().parent();
   var more_div = contributors_div.children('div[style*="display:none"]');
   var more_input = more_div.children('input');
-  var more_btn_id = more_div.children('button');
+  var more_btn = more_div.children('button');
 
   var more_div_id = more_div.attr('id');
   var more_input_id = more_input.attr('id');
-  var more_btn_id = more_btn_id.attr('id');
+  var more_btn_id = more_btn.attr('id');
 
   var fields;
   if (more_div_id.startsWith('proj')) {
@@ -1042,7 +1042,7 @@ function add_contributor() {
     new_more_input.focusin(function() {
       var split = $(this).attr('id').split('_');
       var id = split[split.length - 2];
-      
+
       set_suggestions($(this), get_all_contributors_except(id));
     });
   }
@@ -1063,6 +1063,139 @@ function add_contributor() {
 }
 
 /**
+ * Remove contributor with index n.
+ */
+function remove_characteristic(fields, n) {
+  // Get the div of the contributor.
+  var div = fields[n];
+
+  // Set on-hide listener to destroy this div.
+  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+  function (e) {
+    var div = e.data.div;
+    var fields = e.data.fields;
+    var n = e.data.n;
+
+    var characteristics_div = div.parent();
+    var more_div = characteristics_div.children('div[style*="display:none"]');
+    var more_div_id = more_div.attr('id');
+
+    // Extract sample id.
+    var split = more_div_id.split('_');
+    var id = split[split.length - 3];
+
+    var more_char_id = 'sample_characteristic_' + id + '_num';
+    var more_detail_id = 'sample_detail_' + id + '_num';
+
+    var more_btn = more_div('button');
+    var more_btn_id = more_btn.attr('id');
+
+    // Remove item from the array. Then, delete it from DOM.
+    fields.splice(n, 1);
+    div.remove();
+
+    // Then, update the ids of all the following elements.
+    var n_characteristics = fields.length;
+    for (var i = n; i < n_characteristics; i++) {
+      var new_more_div_id = more_div_id.replace('num', i);
+      var new_more_char_id = more_char_id.replace('num', i);
+      var new_more_detail_id = more_detail_id.replace('num', i);
+      var new_more_btn_id = more_btn_id.replace('num', i);
+
+      var div = fields[i];
+      div.attr('id', new_more_div_id);
+      div.children('#' + more_char_id).attr('id', new_more_char_id);
+      div.children('#' + more_detail_id).attr('id', new_more_detail_id);
+      div.children('button').attr('id', new_more_btn_id);
+    }
+  });
+
+  // Hide collapse.
+  div.collapse('hide');
+}
+
+/**
+ * Set up the remove contributor button.
+ */
+function set_remove_characteristic_button(button) {
+  button.click(function () {
+    var id = $(this).attr('id');
+    var split = id.split('_');
+    var n = split[split.length - 1];
+
+    console.log(id);
+
+    var sample_id = split[split.length - 3];
+    remove_characteristic(sample_characteristic_fields[sample_id], n);
+}
+
+/**
+ * Add contributors.
+ */
+function add_characteristic() {
+  var btn = $(this);
+  var characteristics_div = btn.parent().parent();
+  var more_div = characteristics_div.children('div[style*="display:none"]');
+  var more_div_id = more_div.attr('id');
+
+  // Extract sample id.
+  var split = more_div_id.split('_');
+  var id = split[split.length - 3];
+
+  var more_char_id = 'sample_characteristic_' + id + '_num';
+  var more_detail_id = 'sample_detail_' + id + '_num';
+
+  var more_btn = more_div('button');
+  var more_btn_id = more_btn.attr('id');
+
+  var fields = sample_characteristic_fields[sample_id];
+
+  // Current number of project contributor fields.
+  var n_characteristics = fields.length;
+
+  // Make new div by cloning.
+  var new_div = more_div.clone();
+
+  // Then, change the ids.
+  var new_more_div_id = more_div_id.replace('num', n_characteristics);
+  var new_more_char_id = more_char_id.replace('num', n_characteristics);
+  var new_more_detail_id = more_detail_id.replace('num', n_characteristics);
+  var new_more_btn_id = more_btn_id.replace('num', n_characteristics);
+  var new_more_char = new_div.children('#' + more_char_id);
+  var new_more_detail = new_div.children('#' + more_detail_id);
+  var new_more_btn = new_div.children('button');
+  new_div.attr('id', new_more_div_id);
+  new_more_char.attr('id', new_more_char_id);
+  new_more_detail.attr('id', new_more_detail_id);
+  new_more_btn.attr('id', new_more_btn_id);
+
+  // Set up suggestions (if this is for a sample)
+  // if (more_div_id.startsWith('sample')) {
+  //   new_more_input.focusin(function() {
+  //     var split = $(this).attr('id').split('_');
+  //     var id = split[split.length - 2];
+  //
+  //     set_suggestions($(this), get_all_contributors_except(id));
+  //   });
+  // }
+
+  // Then, set the remove button handler.
+  set_remove_characteristic_button(new_more_btn);
+
+  // Append the new field to DOM.
+  characteristics_div.append(new_div);
+  new_div.show();
+  new_div.addClass('d-flex');
+
+  // Show the collapse.
+  new_div.collapse('show');
+
+  // Add the div to the global list of contributor fields.
+  fields.push(new_div);
+}
+
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
@@ -1080,6 +1213,14 @@ function set_suggestions(field, suggestions) {
   field.autocomplete({
     source: suggestions
   });
+}
+
+/**
+ * Get all characteristics.
+ */
+function get_all_characteristics() {
+  characteristics = {};
+
 }
 
 /**
@@ -1178,6 +1319,12 @@ function set_samples_meta_input() {
     sample_contributor_0_input.focusin({'id':id}, function() {
       set_suggestions($(this), get_all_contributors_except(id));
     });
+
+    // Add the first characteristic field to the list of fields.
+    var sample_characteristic_0 = sample_form.find('#sample_characteristic_' + id + '_0_div');
+    var add_characteristic_btn = sample_form.find('#sample_add_characteristic_' + id + '_btn');
+    sample_characteristic_fields[id] = [sample_characteristic_0];
+    add_characteristic_btn.click(add_characteristic);
 
     // Set paired end listener.
     set_paired_end(id, sample_form);
@@ -1331,6 +1478,7 @@ var organisms;
 var import_export_dropdown;
 var proj_contributor_fields = [];
 var sample_contributor_fields = {};
+var sample_characteristic_fields = {};
 
 // To run when page is loaded.
 $(document).ready(function() {
