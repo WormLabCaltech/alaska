@@ -907,14 +907,22 @@ function set_import_export_popover_btn() {
   import_btn.popover({
     html: true,
     placement: "bottom",
-    content: get_import_export_popover_body(import_popover),
-    title: get_import_export_popover_title()
+    content: function() {
+      return get_import_export_popover_body(export_popover);
+    },
+    title: function() {
+      return get_import_export_popover_title();
+    }
   });
   export_btn.popover({
     html: true,
     placement: "bottom",
-    content: get_import_export_popover_body(export_popover),
-    title: get_import_export_popover_title()
+    content: function() {
+      return get_import_export_popover_body(export_popover);
+    },
+    title: function() {
+      return get_import_export_popover_title();
+    }
   });
   import_btn.on('show.bs.popover', function() {
     export_btn.popover('hide');
