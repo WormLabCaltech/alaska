@@ -595,6 +595,11 @@ function set_sample_reads(table, reads) {
  * Show sample form.
  */
 function show_sample_form(form) {
+  // First, hide the import/export popover.
+  $('#sample_import_outer_btn').popover('hide');
+  $('#sample_export_outer_btn').popover('hide');
+
+
   // If the form is already being shown, just return.
   if (current_sample_form == form) {
     return;
@@ -624,6 +629,7 @@ function show_sample_form(form) {
  */
 function set_choose_sample_button(dropdown, forms) {
   var dropdown_item_id = 'show_sample_SAMPLEID';
+
 
   for (var id in forms) {
     var new_dropdown_item_id = dropdown_item_id.replace('SAMPLEID', id);
@@ -864,8 +870,8 @@ function add_import_export_sample(name, id) {
  */
 function set_import_export_popover_btn() {
   // Set data input/export button.
-  var import_btn = $('#sample_import_btn');
-  var export_btn = $('#sample_export_btn');
+  var import_btn = $('#sample_import_outer_btn');
+  var export_btn = $('#sample_export_outer_btn');
   var import_popover = $('#import_popover');
   var export_popover = $('#export_popover');
 
@@ -890,6 +896,12 @@ function set_import_export_popover_btn() {
 
       return 'Please choose a sample first.';
     }
+  });
+  import_btn.on('show.bs.popover', function() {
+    export_btn.popover('hide');
+  });
+  export_btn.on('show.bs.popover', function() {
+    import_btn.popover('hide');
   });
 
   // Once the listeners are set, add samples to list.
