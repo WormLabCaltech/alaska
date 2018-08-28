@@ -1040,7 +1040,10 @@ function add_contributor() {
   // Set up suggestions (if this is for a sample)
   if (more_div_id.startsWith('sample')) {
     new_more_input.focusin(function() {
-      set_suggestions($(this), get_all_contributors());
+      var split = $(this).attr('id').split('_');
+      var id = split[split.length - 2];
+      
+      set_suggestions($(this), get_all_contributors_except(id));
     });
   }
 
@@ -1080,8 +1083,27 @@ function set_suggestions(field, suggestions) {
 }
 
 /**
- * Set contributors fields focusin.
+ * Get all contributors except those in this sample.
  */
+function get_all_contributors_except(id) {
+  var contributors = get_all_contributors();
+
+  var fields = sample_contributor_fields[id];
+  for (var i = 0; i < fields.length; i++) {
+    var field = fields[i];
+    var contributor = field.children('input').val();
+
+    if (contributor != '' && contributor != null) {
+      var index = contributors.indexOf(contributor);
+
+      if (index > -1) {
+        contributors.splice(index, 1);
+      }
+    }
+  }
+
+  return contributors;
+}
 
 /**
 * Gets all contributors.
@@ -1153,8 +1175,8 @@ function set_samples_meta_input() {
     add_contributor_btn.click(add_contributor);
 
     var sample_contributor_0_input = sample_contributor_0.children('input');
-    sample_contributor_0_input.focusin(function() {
-      set_suggestions($(this), get_all_contributors());
+    sample_contributor_0_input.focusin({'id':id}, function() {
+      set_suggestions($(this), get_all_contributors_except(id));
     });
 
     // Set paired end listener.
