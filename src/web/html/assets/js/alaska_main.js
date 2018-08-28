@@ -412,8 +412,6 @@ function bind_raw_reads() {
 
   // Bind done button for inputing sample names.
   $('#sample_names_btn').click(meta_input);
-
-
 }
 
 /**
@@ -707,9 +705,64 @@ function set_reads_table(id, form) {
 }
 
 /**
- * Set paired end listener.
+ * Set DOM of paired end input form.
  */
 function set_paired_end(id, form) {
+  var pair_1_id = 'sample_paired_' + id + '_row_num_1';
+  var pair_2_id = 'sample_paired_' + id + '_row_num_2';
+  var row_id = 'sample_paired_' + id + '_row_num';
+  var row = form.find('#' + row_id);
+
+  // Get how many reads this sample has.
+  var n_reads = proj.samples[id].raw_reads.length;
+  var n_pairs = n_reads / 2;
+
+  // Get the list of paths (to the reads).
+  var reads = Object.keys(proj.samples[id].raw_reads);
+
+  // Add row for each pair.
+  for (var i = 0; i < n_pairs; i++) {
+    // Define new ids for this row.
+    var new_row_id = row_id.replace('num', i);
+    var new_pair_1_id = pair_1_id.replace('num', i);
+    var new_pair_2_id = pair_2_id.replace('num', i);
+
+    var new_row = row.clone();
+
+    // First change this row's id.
+    new_row.attr('id', new_row_id);
+
+    // Set the legend.
+    new_row.children('legend').text('Pair ' + i);
+
+    // Set the id of each pair.
+    var new_pair_1 = new_row.children('#' + pair_1_id);
+    var new_pair_2 = new_row.children('#' + pair_2_id);
+    new_pair_1.attr('id', new_pair_1_id);
+    new_pair_2.attr('id', new_pair_2_id);
+
+    // Construct new select element for each read.
+    for (var j = 0; j < reads.length; j++) {
+      var read = reads[j];
+      var read_select = $('<option/>', {
+        value: read,
+        text: read,
+      });
+
+      // Then, append the new element to both dropdowns.
+      new_pair_1.append(read_select);
+      new_pair_2.append(read_select);
+    }
+  }
+
+  // attach listener.
+  set_paired_end_listener(id, form);
+}
+
+/**
+ * Set paired end listener.
+ */
+function set_paired_end_listener(id, form) {
   var single_radio_id = 'sample_type_SAMPLEID_1_radio'
   var paired_radio_id = 'sample_type_SAMPLEID_2_radio';
   var paired_id = 'sample_paired_SAMPLEID';
