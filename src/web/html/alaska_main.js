@@ -1107,7 +1107,7 @@ function get_all_contributors() {
     var field = proj_contributor_fields[i];
     var contributor = field.children('input').val();
 
-    if (contributor != '') {
+    if (contributor != '' && contributor != null) {
       if (!contributors.includes(contributor)) {
         contributors.push(contributor);
       }
