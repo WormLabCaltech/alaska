@@ -869,7 +869,7 @@ function add_import_export_sample(name, id) {
 /**
  * Returns content for import/export popover title.
  */
-function get_import_export_popover_title(popover) {
+function get_import_export_popover_title() {
   if (current_sample_form != null) {
     var id = current_sample_form.attr('id').replace('sample_', '');
     return proj.samples[id].name;
@@ -881,8 +881,13 @@ function get_import_export_popover_title(popover) {
  */
 function get_import_export_popover_body(popover) {
   if (current_sample_form != null) {
+    var new_popover = popover.clone(true);
+    var id = current_sample_form.attr('id').replace('sample_', '');
 
-    return import_popover.html();
+    var to_hide = new_popover.children('select').children('option[value="' + id + '"]');
+    to_hide.prop('hidden', true);
+
+    return new_popover.html();
   }
 
   return 'Please choose a sample first.';
@@ -901,36 +906,14 @@ function set_import_export_popover_btn() {
   import_btn.popover({
     html: true,
     placement: "bottom",
-    content: function() {
-      if (current_sample_form != null) {
-        return import_popover;
-      }
-
-      return 'Please choose a sample first.';
-    },
-    title: function() {
-      if (current_sample_form != null) {
-        var id = current_sample_form.attr('id').replace('sample_', '');
-        return proj.samples[id].name;
-      }
-    }
+    content: get_import_export_popover_body(import_popover),
+    title: get_import_export_popover_title()
   });
   export_btn.popover({
     html: true,
     placement: "bottom",
-    content: function() {
-      if (current_sample_form != null) {
-        return export_popover;
-      }
-
-      return 'Please choose a sample first.';
-    },
-    title: function() {
-      if (current_sample_form != null) {
-        var id = current_sample_form.attr('id').replace('sample_', '');
-        return proj.samples[id].name;
-      }
-    }
+    content: get_import_export_popover_body(export_popover),
+    title: get_import_export_popover_title()
   });
   import_btn.on('show.bs.popover', function() {
     export_btn.popover('hide');
