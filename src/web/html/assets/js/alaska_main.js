@@ -1040,7 +1040,13 @@ function add_contributor() {
   // Set up suggestions (if this is for a sample)
   if (more_div_id.startsWith('sample')) {
     new_more_input.focusin(function() {
-      set_suggestions($(this), get_all_contributors());
+      $(this).typeahead({
+        hint: true,
+        highlight: true
+      },
+      {
+        source: substring_matcher(get_all_contributors())
+      });
     });
     new_more_input.focusout(function() {
       $(this).typeahead('destroy');
