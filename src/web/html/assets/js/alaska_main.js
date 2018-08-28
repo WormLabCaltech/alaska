@@ -734,8 +734,9 @@ function set_paired_end(id, form) {
   var option = row.children('#' + pair_1_id).children('option').clone();
   for (var i = 0; i < n_reads; i++) {
     var read = reads[i];
+    var short = read.replace('0_raw_reads/', '');
 
-    option.text(read);
+    option.text(short);
     option.val(read);
   }
 
@@ -766,6 +767,8 @@ function set_paired_end(id, form) {
 
     // Finally, append the new row.
     paired.append(new_row);
+    new_row.show();
+    new_row.addClass('d-flex');
   }
 
   // attach listener.
