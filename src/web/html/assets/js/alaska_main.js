@@ -1040,16 +1040,7 @@ function add_contributor() {
   // Set up suggestions (if this is for a sample)
   if (more_div_id.startsWith('sample')) {
     new_more_input.focusin(function() {
-      $(this).typeahead({
-        hint: true,
-        highlight: true
-      },
-      {
-        source: substring_matcher(get_all_contributors())
-      });
-    });
-    new_more_input.focusout(function() {
-      $(this).typeahead('destroy');
+      set_suggestions($(this), get_all_contributors());
     });
   }
 
@@ -1083,12 +1074,8 @@ function set_proj_meta_input() {
  * Set autocomplete suggestions for the given button.
  */
 function set_suggestions(field, suggestions) {
-  field.typeahead({
-    hint: true,
-    highlight: true
-  },
-  {
-    source: substring_matcher(suggestions)
+  field.autocomplete({
+    source: suggestions
   });
 }
 
