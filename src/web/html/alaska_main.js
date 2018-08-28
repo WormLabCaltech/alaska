@@ -713,12 +713,17 @@ function set_paired_end(id, form) {
   var row_id = 'sample_paired_' + id + '_row_num';
   var row = form.find('#' + row_id);
 
-  // Get how many reads this sample has.
-  var n_reads = proj.samples[id].raw_reads.length;
-  var n_pairs = n_reads / 2;
-
   // Get the list of paths (to the reads).
   var reads = Object.keys(proj.samples[id].raw_reads);
+
+  // Get how many reads this sample has.
+  var n_reads = reads.length;
+  var n_pairs = n_reads / 2;
+
+  // If there are an odd number of reads, automatically disable.
+  if (n_reads % 2 == 1) {
+    form.find('#' + pair_2_id).prop('disabled', true);
+  }
 
   // Add row for each pair.
   for (var i = 0; i < n_pairs; i++) {
