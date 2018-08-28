@@ -714,7 +714,7 @@ function set_paired_end(id, form) {
   var row = form.find('#' + row_id);
 
   // Get the list of paths (to the reads).
-  var reads = Object.keys(proj.samples[id].raw_reads);
+  var reads = Object.keys(proj.samples[id].reads);
 
   // Get how many reads this sample has.
   var n_reads = reads.length;
