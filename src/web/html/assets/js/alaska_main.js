@@ -1037,6 +1037,11 @@ function add_contributor() {
   new_more_input.attr('id', new_more_input_id);
   new_more_btn.attr('id', new_more_btn_id);
 
+  // Set up suggestions.
+  new_more_input.focusin(function() {
+    set_suggestions($(this), get_all_contributors());
+  });
+
   // Then, set the remove button handler.
   set_remove_contributor_button(new_more_btn);
 
@@ -1061,6 +1066,56 @@ function set_proj_meta_input() {
 
   proj_contributor_fields.push(proj_contributor_0);
   add_contributor_btn.click(add_contributor);
+}
+
+/**
+ * Set autocomplete suggestions for the given button.
+ */
+function set_suggestions(field, suggestions) {
+  field.typeahead({
+    hint: true,
+    highlight: true
+  },
+  {
+    source: substring_matcher(suggestions)
+  });
+}
+
+/**
+ * Set contributors fields focusin.
+ */
+
+/**
+* Gets all contributors.
+*/
+function get_all_contributors() {
+  contributors = [];
+
+  // First loop through project contributors.
+  for (var i = 0; i < proj_contributor_fields.length; i++) {
+    var field = proj_contributor_fields[i];
+    var contributor = field.children('input').val();
+
+    if (contributor != '') {
+      if (!contributors.includes(contributor)) {
+        contributors.push(contributor);
+      }
+    }
+  }
+
+  // Then, loop through each sample.
+  for (var id in sample_contributor_fields) {
+    var field = sample_contributor_fields[id];
+    var contributor = field.children('input').val();
+
+    if (contributor != '') {
+      if (!contributors.includes(contributor)) {
+        contributors.push(contributor);
+      }
+    }
+  }
+
+  return contributors;
 }
 
 /**
@@ -1096,6 +1151,11 @@ function set_samples_meta_input() {
     var add_contributor_btn = sample_form.find('#sample_add_contributor_' + id + '_btn');
     sample_contributor_fields[id] = [sample_contributor_0];
     add_contributor_btn.click(add_contributor);
+
+    var sample_contributor_0_input = sample_contributor_0.children('input');
+    sample_contributor_0_input.focusin(function() {
+      set_suggestions($(this), get_all_contributors());
+    });
 
     // Set paired end listener.
     set_paired_end(id, sample_form);
@@ -1204,13 +1264,6 @@ function meta_input() {
 }
 
 /**
- * Sets the global contributors list.
- */
-function set_contributors() {
-
-}
-
-/**
  * Gets query parameters from url.
  */
 function get_url_params() {
@@ -1218,6 +1271,28 @@ function get_url_params() {
 
   return url_params;
 }
+
+function substring_matcher(strs) {
+  return function findMatches(q, cb) {
+    var matches, substringRegex;
+
+    // an array that will be populated with substring matches
+    matches = [];
+
+    // regex used to determine if a string contains the substring `q`
+    substrRegex = new RegExp(q, 'i');
+
+    // iterate through the pool of strings and for any string that
+    // contains the substring `q`, add it to the `matches` array
+    $.each(strs, function(i, str) {
+      if (substrRegex.test(str)) {
+        matches.push(str);
+      }
+    });
+
+    cb(matches);
+  };
+};
 
 // Global variables.
 var proj_id;
@@ -1260,6 +1335,8 @@ $(document).ready(function() {
   bind_raw_reads();
   $('#refetch_reads_btn_2').click(refetch_reads);
   raw_reads_div = $('#raw_reads_div').clone(true);
+
+
 
   // Fetch server status.
   get_server_status();
