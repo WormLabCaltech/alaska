@@ -732,19 +732,16 @@ function set_paired_end(id, form) {
 
   // First, generate list of options for each read.
   var options = [];
-  var option = row.children('#' + pair_1_id).children('option');
   for (var i = 0; i < n_reads; i++) {
-    var new_option = option.clone();
     var read = reads[i];
     var short = read.replace('0_raw_reads/', '');
 
-    new_option.prop('selected', false);
-    new_option.prop('disabled', false);
-    new_option.prop('hidden', false);
-    new_option.text(short);
-    new_option.val(read);
+    var option = $('<option>', {
+      text: short,
+      value: read
+    });
 
-    options.push(new_option);
+    options.push(option);
   }
 
   // Add row for each pair.
