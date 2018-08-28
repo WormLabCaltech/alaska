@@ -738,6 +738,9 @@ function set_paired_end(id, form) {
     var read = reads[i];
     var short = read.replace('0_raw_reads/', '');
 
+    new_option.prop('selected', false);
+    new_option.prop('disabled', false);
+    new_option.prop('hidden', false);
     new_option.text(short);
     new_option.val(read);
 
