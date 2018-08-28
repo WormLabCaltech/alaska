@@ -946,10 +946,6 @@ function remove_contributor(fields, n) {
     var fields = e.data.fields;
     var n = e.data.n;
 
-    // Remove item from the array. Then, delete it from DOM.
-    fields.splice(n, 1);
-    div.remove();
-
     var contributors_div = div.parent();
     var more_div = contributors_div.children('div[style*="display:none"]');
     var more_input = more_div.children('input');
@@ -958,6 +954,10 @@ function remove_contributor(fields, n) {
     var more_div_id = more_div.attr('id');
     var more_input_id = more_input.attr('id');
     var more_btn_id = more_btn_id.attr('id');
+
+    // Remove item from the array. Then, delete it from DOM.
+    fields.splice(n, 1);
+    div.remove();
 
     // Then, update the ids of all the following elements.
     var n_contributors = fields.length;
