@@ -1259,17 +1259,22 @@ function get_all_characteristics() {
       var char_id = 'sample_characteristic_' + id  + '_' + i;
       var detail_id = 'sample_detail_' + id + '_' + i;
 
-      var char = field.children('#' + char_id);
-      var detail = field.children('#' + detail_id);
+      var char = field.children('#' + char_id).val();
+      var detail = field.children('#' + detail_id).val();
 
-      if (characteristics[char] == null) {
-        characteristics[char] = [detail];
-      } else if (!characteristics[char].includes(detail)){
-        characteristics[char].push(detail);
+      if (char != '' && char != null) {
+        if (characteristics[char] == null) {
+          if (detail != '' && detail != null) {
+            characteristics[char] = [detail];
+          } else {
+            characteristics[char] = [];
+          }
+        } else if (!characteristics[char].includes(detail) && detail != '' && detail != null) {
+          characteristics[char].push(detail);
+        }
       }
     }
   }
-
   return characteristics;
 }
 
