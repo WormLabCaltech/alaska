@@ -935,30 +935,38 @@ function set_import_export_popover_btn() {
 /**
  * Remove contributor with index n.
  */
-function remove_contributor(n) {
+function remove_contributor(fields, n) {
   // Get the div of the contributor.
-  var div = proj_contributor_fields[n];
+  var div = fields[n];
 
   // Set on-hide listener to destroy this div.
-  div.on('hidden.bs.collapse', {'div': div, 'n': n}, function (e) {
+  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+  function (e) {
     var div = e.data.div;
+    var fields = e.data.fields;
     var n = e.data.n;
 
     // Remove item from the array. Then, delete it from DOM.
-    proj_contributor_fields.splice(n, 1);
+    fields.splice(n, 1);
     div.remove();
 
+    var contributors_div = div.parent();
+    var more_div = contributors_div.children('div[style*="display:none"]');
+    var more_input = more_div.children('input');
+    var more_btn_id = more_div.children('button');
+
+    var more_div_id = more_div.attr('id');
+    var more_input_id = more_input.attr('id');
+    var more_btn_id = more_btn_id.attr('id');
+
     // Then, update the ids of all the following elements.
-    var more_div_id = 'proj_contributor_num_div';
-    var more_input_id = 'proj_contributor_num';
-    var more_btn_id = 'proj_remove_contributor_btn_num';
-    var n_contributors = proj_contributor_fields.length;
+    var n_contributors = fields.length;
     for (var i = n; i < n_contributors; i++) {
       var new_more_div_id = more_div_id.replace('num', i);
       var new_more_input_id = more_input_id.replace('num', i);
       var new_more_btn_id = more_btn_id.replace('num', i);
 
-      var div = proj_contributor_fields[i];
+      var div = fields[i];
       div.attr('id', new_more_div_id);
       div.children('input').attr('id', new_more_input_id);
       div.children('button').attr('id', new_more_btn_id);
@@ -978,23 +986,41 @@ function set_remove_contributor_button(button) {
     var split = id.split('_');
     var n = split[split.length - 1];
 
-    remove_contributor(n);
+    if (id.startsWith('proj')) {
+      remove_contributor(proj_contributor_fields, n);
+    } else if (id.startsWith('sample')) {
+      var sample_id = split[split.length - 3];
+      remove_contributor(sample_contributor_fields[sample_id], n);
+    }
   });
 
 }
 
 /**
- * Add project contributors.
+ * Add contributors.
  */
-function add_proj_contributor() {
-  var contributors_div = $('#proj_contributors');
-  var more_div_id = 'proj_contributor_num_div';
-  var more_input_id = 'proj_contributor_num';
-  var more_btn_id = 'proj_remove_contributor_btn_num';
-  var more_div = $('#' + more_div_id);
+function add_contributor() {
+  var btn = $(this);
+  var contributors_div = btn.parent().parent();
+  var more_div = contributors_div.children('div[style*="display:none"]');
+  var more_input = more_div.children('input');
+  var more_btn_id = more_div.children('button');
+
+  var more_div_id = more_div.attr('id');
+  var more_input_id = more_input.attr('id');
+  var more_btn_id = more_btn_id.attr('id');
+
+  var fields;
+  if (more_div_id.startsWith('proj')) {
+    fields = proj_contributor_fields;
+  } else if (more_div_id.startsWith('sample')) {
+    var split = more_div_id.split('_');
+    var sample_id = split[split.length - 3];
+    fields = sample_contributor_fields[sample_id];
+  }
 
   // Current number of project contributor fields.
-  var n_contributors = proj_contributor_fields.length;
+  var n_contributors = fields.length;
 
   // Make new div by cloning.
   var new_div = more_div.clone();
@@ -1013,7 +1039,7 @@ function add_proj_contributor() {
   set_remove_contributor_button(new_more_btn);
 
   // Append the new field to DOM.
-  $('#proj_contributors').append(new_div);
+  contributors_div.append(new_div);
   new_div.show();
   new_div.addClass('d-flex');
 
@@ -1021,7 +1047,6 @@ function add_proj_contributor() {
   new_div.collapse('show');
 
   // Add the div to the global list of contributor fields.
-  proj_contributor_fields.push(new_div);
 }
 
 /**
@@ -1032,7 +1057,7 @@ function set_proj_meta_input() {
   var add_contributor_btn = $('#proj_add_contributor_btn');
 
   proj_contributor_fields.push(proj_contributor_0);
-  add_contributor_btn.click(add_proj_contributor);
+  add_contributor_btn.click(add_contributor);
 }
 
 /**
@@ -1062,6 +1087,12 @@ function set_samples_meta_input() {
     // Change the header to be the id.
     sample_form.find('#sample_id_' + id).text(id);
     sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
+
+    // Add first contributor field to the list of fields.
+    var sample_contributor_0 = $('sample_contributor_' + id + '_0_div');
+    var add_contributor_btn = $('sample_add_contributor_' + id + '_btn');
+    sample_contributor_fields[id] = [sample_contributor_0];
+    add_contributor_btn.click(add_contributor);
 
     // Set paired end listener.
     set_paired_end(id, sample_form);

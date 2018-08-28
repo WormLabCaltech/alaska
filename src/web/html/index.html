@@ -199,12 +199,12 @@
                             <small id="sample_contributors_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div id="sample_contributors_SAMPLEID" class="col">
-                            <div class="d-flex">
-                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_SAMPLEID_1" required>
+                            <div class="d-flex" id="sample_contributor_SAMPLEID_0_div">
+                                <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_SAMPLEID_0" required>
                                 <button id="sample_add_contributor_SAMPLEID_btn" class="btn btn-primary" type="button">Add</button>
                             </div>
                             <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                            <div class="mt-1" id="sample_more_contributors_SAMPLEID_div" style="display:none">
+                            <div class="collapse mt-1" id="sample_contributor_SAMPLEID_num_div" style="display:none">
                                 <input type="text" class="form-control col-sm-3 mr-2" id="sample_contributor_SAMPLEID_num">
                                 <button id="sample_remove_contributor_SAMPLEID_btn_num" class="btn btn-danger" type="button">Remove</button>
                             </div>
