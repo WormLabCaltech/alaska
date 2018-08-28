@@ -1049,6 +1049,7 @@ function add_contributor() {
   new_div.collapse('show');
 
   // Add the div to the global list of contributor fields.
+  fields.push(new_div);
 }
 
 /**
