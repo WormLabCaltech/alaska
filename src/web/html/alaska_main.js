@@ -749,7 +749,7 @@ function set_paired_end(id, form) {
     // Construct new select element for each read.
     for (var j = 0; j < reads.length; j++) {
       var read = reads[j];
-      var read_select = $('<option/>', {
+      var read_select = $('<option>', {
         value: read,
         text: read,
       });
