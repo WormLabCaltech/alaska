@@ -742,7 +742,7 @@ function set_paired_end(id, form) {
     new_row.attr('id', new_row_id);
 
     // Set the legend.
-    new_row.children('legend').text('Pair ' + i);
+    new_row.children('legend').text('Pair ' + (i+1));
 
     // Set the id of each pair.
     var new_pair_1 = new_row.children('#' + pair_1_id);
@@ -753,7 +753,8 @@ function set_paired_end(id, form) {
     // Construct new select element for each read.
     for (var j = 0; j < reads.length; j++) {
       var read = reads[j];
-      var read_select = $('<option>', {
+      console.log('creating ' + read);
+      var read_select = $('<option></option>', {
         value: read,
         text: read,
       });
