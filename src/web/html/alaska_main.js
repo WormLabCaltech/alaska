@@ -1128,8 +1128,8 @@ function set_meta_input() {
   // Deal with project meta input form first.
   set_proj_meta_input();
 
-
-
+  // Then, set the samples metadata.
+  set_samples_meta_input();
 }
 
 /*
