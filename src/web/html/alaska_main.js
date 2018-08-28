@@ -711,7 +711,11 @@ function set_paired_end(id, form) {
   var pair_1_id = 'sample_paired_' + id + '_row_num_1';
   var pair_2_id = 'sample_paired_' + id + '_row_num_2';
   var row_id = 'sample_paired_' + id + '_row_num';
+  var paired_id = 'sample_paired_' + id;
+
+  // Get elements.
   var row = form.find('#' + row_id);
+  var paired = form.find('#' + paired_id);
 
   // Get the list of paths (to the reads).
   var reads = Object.keys(proj.samples[id].reads);
@@ -758,6 +762,9 @@ function set_paired_end(id, form) {
       new_pair_1.append(read_select);
       new_pair_2.append(read_select);
     }
+
+    // Finally, append the new row.
+    paired.append(new_row);
   }
 
   // attach listener.
