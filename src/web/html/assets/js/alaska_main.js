@@ -1177,7 +1177,7 @@ function add_characteristic() {
     var characteristics = get_all_characteristics_except(id);
 
     set_suggestions($(this), Object.keys(characteristics));
-  };
+  });
   new_more_detail.focusin({char: new_more_char}, function(e) {
     var char = e.data.char.val();
 
@@ -1185,7 +1185,7 @@ function add_characteristic() {
       var characteristics = get_all_characteristics();
       set_suggestions($(this), characteristics[char]);
     }
-  };
+  });
 
 
   // Then, set the remove button handler.
@@ -1386,7 +1386,7 @@ function set_samples_meta_input() {
       var characteristics = get_all_characteristics_except(id);
 
       set_suggestions($(this), Object.keys(characteristics));
-    };
+    });
     new_more_detail.focusin({char: sample_characteristic_0_char}, function(e) {
       var char = e.data.char.val();
 
@@ -1394,8 +1394,7 @@ function set_samples_meta_input() {
         var characteristics = get_all_characteristics();
         set_suggestions($(this), characteristics[char]);
       }
-    };
-
+    });
 
     // Set paired end listener.
     set_paired_end(id, sample_form);
