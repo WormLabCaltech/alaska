@@ -1231,7 +1231,7 @@ function get_all_characteristics_except(id) {
   var characteristics = get_all_characteristics();
 
   var fields = sample_characteristic_fields[id];
-  for (var i = 0; i < field.length; i++) {
+  for (var i = 0; i < fields.length; i++) {
     var field = fields[i];
     var char_id = 'sample_characteristic_' + id  + '_' + i;
     var char = field.children('#' + char_id);
