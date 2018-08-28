@@ -874,6 +874,7 @@ function get_import_export_popover_title() {
     var id = current_sample_form.attr('id').replace('sample_', '');
     return proj.samples[id].name;
   }
+  return '';
 }
 
 /**
