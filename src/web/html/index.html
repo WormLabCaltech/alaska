@@ -146,7 +146,7 @@
             </div>
             <div class="float-right">
                 <div class="btn-group">
-                    <button class="btn btn-outline-success btn-sm" type="button" id="sample_import_btn" tabindex="0" role="button" data-trigger="focus">
+                    <button class="btn btn-outline-success btn-sm" type="button" id="sample_import_btn" tabindex="0" role="button" data-trigger="click">
                         <i class="fas fa-file-import"></i>
                         Import data from
                         <div id="import_popover" style="display:none">
@@ -154,12 +154,19 @@
                             <select class="custom-select" id="import_popover_dropdown">
                                 <option selected disabled hidden>Choose a project</option>
                             </select>
-                            <a class="btn btn-primary"></a>
+                            <a class="btn btn-sm btn-outline-success text-success mt-2">Import</a>
                         </div>
                     </button>
                     <button class="btn btn-outline-danger btn-sm" type="button" id="sample_export_btn">
                         <i class="fas fa-file-export"></i>
                         Export data to
+                        <div id="export_popover" style="display:none">
+                            This will copy all inputs from this sample to another. Which sample would you like to export to?
+                            <select class="custom-select" id="export_popover_dropdown">
+                                <option selected disabled hidden>Choose a project</option>
+                            </select>
+                            <a class="btn btn-sm btn-outline-danger text-danger mt-2">Export</a>
+                        </div>
                     </button>
                 </div>
             </div>

@@ -814,11 +814,87 @@ function set_paired_end_listener(id, form) {
   });
 }
 
-/*
+/**
  * Import data from sample.
  */
+function import_sample() {
 
-/*
+}
+
+/**
+ * Refreshes the names in the import/export dropdown.
+ */
+function refresh_import_export_samples() {
+  var import_dropdown = $('#import_popover_dropdown');
+  var export_dropdown = $('#export_popover_dropdown');
+
+  for (var name in names_to_ids) {
+    var id = names_to_ids[name];
+
+    // These are samples that we will refresh in this iteration.
+    var import_sample = import_dropdown.children('option[value="' + id + '"]');
+    var export_sample = export_dropdown.children('option[value="' + id + '"]');
+
+    // Refresh the text.
+    import_sample.text(name);
+    export_sample.text(name);
+  }
+}
+
+/**
+ * Set import/export samples list.
+ */
+function add_import_export_sample(name, id) {
+  var import_dropdown = $('#import_popover_dropdown');
+  var export_dropdown = $('#export_popover_dropdown');
+
+  var option = $('<option>', {
+    text: name,
+    value: id,
+  });
+
+  import_dropdown.append(option.clone());
+  export_dropdown.append(option.clone());
+}
+
+/**
+ * Set import/export button.
+ */
+function set_import_export_btn() {
+  // Set data input/export button.
+  var import_btn = $('#sample_import_btn');
+  var export_btn = $('#sample_export_btn');
+  var import_popover = $('#import_popover');
+  var export_popover = $('#export_popover');
+
+  import_btn.popover({
+    html: true,
+    placement: "right",
+    content: function() {
+      if (current_sample_form != null) {
+        return import_popover.html();
+      }
+
+      return 'Please choose a sample first.';
+    }
+  });
+  export_btn.popover({
+    html: true,
+    placement: "left",
+    content: function() {
+      if (current_sample_form != null) {
+        return export_popover.html();
+      }
+
+      return 'Please choose a sample first.';
+    }
+  });
+
+  // Once the listeners are set, add samples to list.
+
+}
+
+/**
  * Set meta input form.
  */
 function set_meta_input() {
@@ -852,6 +928,9 @@ function set_meta_input() {
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
 
+    // Add this project to the import/export samples list.
+    add_import_export_sample(name, id);
+
     sample_forms[id] = sample_form;
 
     // Append new form.
@@ -864,18 +943,6 @@ function set_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
-
-  // Set data input/export button.
-  var import_btn = $('#sample_import_btn');
-  var export_btn = $('#sample_export_btn');
-  var import_popover = $('#import_popover');
-
-  import_btn.popover({
-    html: true,
-    content: function() {
-      return import_popover.html();
-    }
-  });
 }
 
 /*
@@ -970,6 +1037,7 @@ var sample_forms = {};
 var names_to_ids;
 var sorted_names;
 var organisms;
+var import_export_dropdown;
 
 // To run when page is loaded.
 $(document).ready(function() {
