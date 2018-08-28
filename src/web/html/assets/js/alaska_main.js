@@ -1149,7 +1149,7 @@ function add_characteristic() {
   var more_btn = more_div.children('button');
   var more_btn_id = more_btn.attr('id');
 
-  var fields = sample_characteristic_fields[sample_id];
+  var fields = sample_characteristic_fields[id];
 
   // Current number of project contributor fields.
   var n_characteristics = fields.length;
