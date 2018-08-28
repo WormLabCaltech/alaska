@@ -146,18 +146,25 @@
             </div>
             <div class="float-right">
                 <div class="btn-group">
-                    <button class="btn btn-outline-success btn-sm" type="button" id="copy_from_btn">
+                    <button class="btn btn-outline-success btn-sm" type="button" id="sample_import_btn" tabindex="0" role="button" data-trigger="focus">
                         <i class="fas fa-file-import"></i>
                         Import data from
+                        <div id="import_popover" style="display:none">
+                            This will copy all inputs from another sample to this. Which sample would you like to import from?
+                            <select class="custom-select" id="import_popover_dropdown">
+                                <option selected disabled hidden>Choose a project</option>
+                            </select>
+                            <a class="btn btn-primary"></a>
+                        </div>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" type="button" id="copy_to_btn">
+                    <button class="btn btn-outline-danger btn-sm" type="button" id="sample_export_btn">
                         <i class="fas fa-file-export"></i>
                         Export data to
                     </button>
                 </div>
             </div>
         </div>
-        <div class="collapse" id="sample_SAMPLEID">
+        <div class="collapse show" id="sample_SAMPLEID">
             <div class="card-body">
                 <h4 class="card-title" id="sample_id_SAMPLEID">Sample ID</h4>
                 <form>
@@ -240,6 +247,7 @@
                             </div>
                         </div>
                     </div>
+                    <hr />
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <legend class="col-form-label pt-0">Read type</legend>
@@ -247,11 +255,11 @@
                         </div>
                         <div class="col-sm-9">
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="sample_type_SAMPLEID_1_radio" name="read_type" class="custom-control-input" checked="" value="1">
+                                <input type="radio" id="sample_type_SAMPLEID_1_radio" name="read_type_SAMPLEID" class="custom-control-input" checked="" value="1">
                                 <label class="custom-control-label active" for="sample_type_SAMPLEID_1_radio">Single-end</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="sample_type_SAMPLEID_2_radio" name="read_type" class="custom-control-input" value="2">
+                                <input type="radio" id="sample_type_SAMPLEID_2_radio" name="read_type_SAMPLEID" class="custom-control-input" value="2">
                                 <label class="custom-control-label" for="sample_type_SAMPLEID_2_radio">Paired-end</label>
                             </div>
                             <div class="collapse" id="sample_paired_SAMPLEID">
@@ -264,8 +272,25 @@
                                         <option selected disabled hidden>Please select its pair.</option>
                                     </select>
                                 </div>
-                                
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-3">
+                            <label for="sample_length_SAMPLEID" class="col-form-label">Read length</label>
+                            <small id="sample_length_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="number" class="form-control" id="sample_length_SAMPLEID" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-3">
+                            <label for="sample_stdev_SAMPLEID" class="col-form-label">Read standard deviation</label>
+                            <small id="sample_stdev_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="number" class="form-control" id="sample_stdev_SAMPLEID" required>
                         </div>
                     </div>
                     <div class="form-group row">

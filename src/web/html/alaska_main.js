@@ -815,6 +815,10 @@ function set_paired_end_listener(id, form) {
 }
 
 /*
+ * Import data from sample.
+ */
+
+/*
  * Set meta input form.
  */
 function set_meta_input() {
@@ -860,6 +864,18 @@ function set_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
+
+  // Set data input/export button.
+  var import_btn = $('#sample_import_btn');
+  var export_btn = $('#sample_export_btn');
+  var import_popover = $('#import_popover');
+
+  import_btn.popover({
+    html: true,
+    content: function() {
+      return import_popover.html();
+    }
+  });
 }
 
 /*
