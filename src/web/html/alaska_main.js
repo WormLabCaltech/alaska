@@ -962,11 +962,11 @@ function remove_contributor(n) {
       div.attr('id', new_more_div_id);
       div.children('input').attr('id', new_more_input_id);
       div.children('button').attr('id', new_more_btn_id);
+    }
   });
 
   // Hide collapse.
   div.collapse('hide');
-  }
 }
 
 /**
