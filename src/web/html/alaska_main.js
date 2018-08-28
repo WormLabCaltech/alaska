@@ -867,6 +867,28 @@ function add_import_export_sample(name, id) {
 }
 
 /**
+ * Returns content for import/export popover title.
+ */
+function get_import_export_popover_title(popover) {
+  if (current_sample_form != null) {
+    var id = current_sample_form.attr('id').replace('sample_', '');
+    return proj.samples[id].name;
+  }
+}
+
+/**
+ * Returns content for import/export popover body.
+ */
+function get_import_export_popover_body(popover) {
+  if (current_sample_form != null) {
+
+    return import_popover.html();
+  }
+
+  return 'Please choose a sample first.';
+}
+
+/**
  * Set import/export button.
  */
 function set_import_export_popover_btn() {
@@ -881,14 +903,15 @@ function set_import_export_popover_btn() {
     placement: "bottom",
     content: function() {
       if (current_sample_form != null) {
-        return import_popover.html();
+        return import_popover;
       }
 
       return 'Please choose a sample first.';
     },
     title: function() {
       if (current_sample_form != null) {
-        return current_sample_form.attr('id').replace('sample_', '');
+        var id = current_sample_form.attr('id').replace('sample_', '');
+        return proj.samples[id].name;
       }
     }
   });
@@ -897,14 +920,15 @@ function set_import_export_popover_btn() {
     placement: "bottom",
     content: function() {
       if (current_sample_form != null) {
-        return export_popover.html();
+        return export_popover;
       }
 
       return 'Please choose a sample first.';
     },
     title: function() {
       if (current_sample_form != null) {
-        return current_sample_form.attr('id').replace('sample_', '');
+        var id = current_sample_form.attr('id').replace('sample_', '');
+        return proj.samples[id].name;
       }
     }
   });
