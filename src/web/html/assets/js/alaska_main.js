@@ -1789,7 +1789,7 @@ function validate_sample_meta(id) {
     switch (cat) {
       // Characteristics must be dealt slightly different.
       case 'chars':
-        var n_chars = Object.keys(val[cat]).length;
+        var n_chars = Object.keys(val).length;
         var field = field[0];
         if (n_chars > 0) {
           field.removeClass('is-invalid');
