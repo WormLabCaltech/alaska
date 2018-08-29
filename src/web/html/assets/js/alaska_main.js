@@ -1726,8 +1726,8 @@ function validate_sample_meta(id) {
     if (cat == 'meta') {
       continue;
     }
-    
-    var field = meta_input_fields[id][cat];
+
+    var field = meta_input_fields.samples[id][cat];
     var val = sample_meta[id][cat];
 
     switch (cat) {
