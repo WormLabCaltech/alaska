@@ -1208,7 +1208,7 @@ function add_characteristic() {
  * Set project meta input.
  */
 function set_proj_meta_input() {
-  proj_form = $('#proj_form');
+  proj_form = $('#proj');
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
