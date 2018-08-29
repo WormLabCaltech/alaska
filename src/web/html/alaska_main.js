@@ -122,8 +122,26 @@ function parse_proj_status(out) {
   switch (status) {
     // Project created.
     case 0:
+    case 1:
+      console.log('status: created');
       goto_ftp_info();
       break;
+
+    // Samples inferred
+    case 2:
+      console.log('status: samples inferred');
+      break;
+    case 3:
+      console.log('status: set');
+      break;
+    case 4:
+      console.log('status: finalized');
+      break;
+    case 4:
+      console.log('status: in queue');
+      break;
+
+
   }
 }
 
