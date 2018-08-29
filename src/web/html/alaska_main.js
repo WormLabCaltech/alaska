@@ -832,7 +832,6 @@ function set_paired_end(id, form) {
   // If there are an odd number of reads, automatically disable.
   if (n_reads % 2 == 1) {
     form.find('#' + pair_2_id).prop('disabled', true);
-    return;
   }
 
   // First, generate list of options for each read.
@@ -850,6 +849,7 @@ function set_paired_end(id, form) {
   }
 
   // Add row for each pair.
+  sample_pair_fields[id] = [];
   for (var i = 0; i < n_pairs; i++) {
     // Define new ids for this row.
     var new_row_id = row_id.replace('num', i);
@@ -882,6 +882,9 @@ function set_paired_end(id, form) {
     paired.append(new_row);
     new_row.show();
     new_row.addClass('d-flex');
+
+    // Also append to the global variable.
+    sample_pair_fields[id].push(new_row);
   }
 
   // attach listener.
@@ -1700,11 +1703,88 @@ function validate_proj_meta() {
 }
 
 /**
+ * Validate pairs (only for paired-end samples).
+ */
+function validate_read_pairs() {
+
+}
+
+/**
  * Validates sample meta input. If everything is good, returns
  * the inputs in a nice JSON format.
  */
 function validate_sample_meta(id) {
+  var sample_meta = get_sample_meta(id);
+  var meta = sample_meta.meta;
 
+  // Loop through each field.
+  for (var cat in sample_meta) {
+    var field = meta_input_fields[id][cat];
+    var val = sample_meta[id][cat];
+
+    switch (cat) {
+      case 'name':
+      case 'organism':
+      case 'ref_ver':
+      case 'length':
+      case 'stdev':
+        // These just have to be filled out.
+        if (val != '' && val != null) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
+        }
+        break;
+
+      case 'type':
+        // If the reads are paired-end, we need to make sure
+        // correct pairs were selected.
+        if (val == 2) {
+
+        }
+
+      case 'meta':
+      default:
+        break;
+    }
+  }
+
+  // Loop through fields in meta.
+  for (var cat in meta) {
+    var field = meta_input_fields[id].meta[cat];
+    var val = sample_meta[id].meta[cat];
+
+    switch (cat) {
+      // Characteristics must be dealt slightly different.
+      case 'chars':
+        var n_chars = Object.keys(val[cat]).length;
+        var field = field[0];
+        if (n_chars > 0) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
+        }
+        break;
+
+      // Contributors must be dealt slightly differently.
+      // We just need to make sure the FIRST field is populated.
+      case 'contributors':
+        field = field[0];
+        val = field.val();
+      case 'title':
+      case 'description':
+      case 'source':
+        // These just have to be filled out.
+        if (val != '' && val != null) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
+        }
+        break;
+
+
+    }
+  }
 }
 
 /**
@@ -1826,6 +1906,19 @@ function get_sample_meta(id) {
   sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
   sample_meta['type'] = parseInt(sample_input_fields['type'].find('input').val());
 
+  // If reads are paired-end, we need to replace the reads dictionary as well.
+  if (sample_meta['type'] == 2) {
+    sample_meta['reads'] = [];
+    for (var i = 0; i < sample_pair_fields[id].length; i++) {
+      var field = sample_pair_fields[id][i];
+      var pair_1 = field.children('select:nth-child(1)').val();
+      var pair_2 = field.children('select:nth-child(2)').val();
+
+      var pair = [pair_1, pair_2];
+      sample_meta['reads'].push(pair);
+    }
+  }
+
   // Parse organism.
   var org = sample_input_fields['organism'].val();
   if (org != '' && org != null) {
@@ -1856,6 +1949,7 @@ var import_export_dropdown;
 var proj_contributor_fields = [];
 var sample_contributor_fields = {};
 var sample_characteristic_fields = {};
+var sample_pair_fields = {};
 
 // To run when page is loaded.
 $(document).ready(function() {
