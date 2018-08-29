@@ -1722,6 +1722,11 @@ function validate_sample_meta(id) {
 
   // Loop through each field.
   for (var cat in sample_meta) {
+    // Skip meta.
+    if (cat == 'meta') {
+      continue;
+    }
+    
     var field = meta_input_fields[id][cat];
     var val = sample_meta[id][cat];
 
@@ -1771,7 +1776,6 @@ function validate_sample_meta(id) {
           }
         }
 
-      case 'meta':
       default:
         break;
     }
