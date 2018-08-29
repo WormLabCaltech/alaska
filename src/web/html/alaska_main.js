@@ -1795,7 +1795,7 @@ function get_sample_meta(id) {
     }
   }
   sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
-  sample['type'] = parseInt(sample_input_fields['type'].find('input').val());
+  sample_meta['type'] = parseInt(sample_input_fields['type'].find('input').val());
 
   // Parse organism.
   var org = sample_input_fields['organism'].val();
