@@ -1642,9 +1642,6 @@ function substring_matcher(strs) {
  * the inputs in a nice JSON format.
  */
 function validate_all_meta() {
-  var proj_meta = validate_proj_meta();
-
-  proj_meta['samples'] = {}
   for (var id in proj.samples) {
     proj_meta.samples[id] = validate_sample_meta(id);
   }
@@ -1653,36 +1650,52 @@ function validate_all_meta() {
 }
 
 /**
+ * Helper function to test whether a string is an email.
+ */
+function isEmail(email) {
+  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+  return regex.test(email);
+}
+
+/**
  * Validates project meta input. If everything is good, returns
  * the inputs in a nice JSON format.
  */
 function validate_proj_meta() {
-    var proj_meta = {};
+  var proj_meta = get_proj_meta();
+  var meta = proj_meta.meta;
 
-    // Loop through all the keys in the global meta dictionary.
-    for (var cat in meta_input_fields) {
-      switch (cat) {
-        case 'design':
-          var field = meta_input_fields['design'];
-          break;
-      }
+  // We don't have to check design because it is a radio button.
+  for (var cat in meta) {
+    var field = meta_input_fields.meta[cat];
+    var val = proj_meta.meta[cat];
 
-
-      // Skip samples, because that's not what this function deals with.
-      if (cat == 'samples') {
-        continue;
-      }
-
-      // If cat == 'meta', we have to deal with a nested dictionary.
-      if (cat == 'meta') {
-        proj_meta['meta'] = {};
-        for (var meta_cat in meta_input_fields[cat]) {
-          var field = meta_input_fields[cat][meta_cat];
+    switch (cat) {
+      // Contributors must be dealt slightly differently.
+      // We just need to make sure the FIRST field is populated.
+      case 'contributors':
+        field = field[0];
+        val = val[0];
+      case 'email':
+        if (isEmail(val)) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
         }
-      } else {
-        // Otherwise, just naively add the value.
-      }
+      case 'title':
+      case 'summary':
+      case 'SRA_center_code':
+        // These just have to be filled out.
+        if (val != '' && val != null) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
+        }
+        break;
+      case default:
+        break;
     }
+  }
 }
 
 /**
