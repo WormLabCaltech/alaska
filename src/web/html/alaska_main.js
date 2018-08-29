@@ -1749,13 +1749,23 @@ function validate_sample_meta(id) {
           for (var i = 0; i < pairs.length; i++) {
             for (var j = 0; j < pairs[i].length; j++) {
               var read = pairs[i][j];
-              var dropdown = meta_input_fields.samples[id][cat]
-                .find('select option[value="' + read + '"]:selected').parent();
-              if (!reads.includes(read)) {
-                dropdown.removeClass('is-invalid');
+
+              // If the read is null or empty, we need to prompt the user
+              // to make a selection.
+              if (read != '' && read != null) {
+                var dropdown = meta_input_fields.samples[id][cat]
+                  .find('select option[value="' + read + '"]:selected').parent();
+                if (!reads.includes(read)) {
+                  dropdown.removeClass('is-invalid');
+                } else {
+                  dropdown.addClass('is-invalid');
+                  reads.push(read);
+                }
               } else {
-                dropdown.addClass('is-invalid');
-                reads.push(read);
+                var dropdowns = meta_input_fields.samples[id][cat].find('select option:selected');
+                dropdowns.filter(':disabled');
+                dropdowns.filter(':hidden');
+                dropdowns.addClass('is-invalid');
               }
             }
           }
