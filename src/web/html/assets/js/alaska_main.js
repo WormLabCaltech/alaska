@@ -1586,7 +1586,7 @@ function get_sample_meta(id) {
     }
   }
   sample.meta['source'] = form.find('#sample_source_' + id).val();
-  sample.['type'] = parseInt(form.find('input[name="read_type_' + id + '"]').val());
+  sample['type'] = parseInt(form.find('input[name="read_type_' + id + '"]').val());
 
   // Parse organism.
   var org = form.find('#sample_organism_' + id).val();
