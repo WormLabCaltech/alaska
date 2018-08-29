@@ -1499,7 +1499,7 @@ class AlaskaServer(Alaska):
         else:
             raise Exception('{}: does not exist'.format(_id))
 
-        self.respond(_id, proj.progress)
+        self.respond(_id, str(proj.progress))
 
         if close:
             self.close(_id)
