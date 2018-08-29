@@ -1728,7 +1728,7 @@ function get_sample_input_fields(id) {
   var form = sample_forms[id];
   var sample_input_fields = {};
   sample_input_fields['meta'] = {};
-  sample_input_fields['name'] = form.find('#sample_name_' + id).val();
+  sample_input_fields['name'] = form.find('#sample_name_' + id);
   sample_input_fields.meta['description'] = form.find('#sample_description_' + id);
   sample_input_fields.meta['contributors'] = sample_contributor_fields[id];
   sample_input_fields.meta['source'] = form.find('#sample_source_' + id);
