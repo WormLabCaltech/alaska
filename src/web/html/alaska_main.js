@@ -1743,7 +1743,22 @@ function validate_sample_meta(id) {
         // If the reads are paired-end, we need to make sure
         // correct pairs were selected.
         if (val == 2) {
-
+          // Each selection must be unique.
+          var reads = [];
+          var pairs = sample_meta[id].reads;
+          for (var i = 0; i < pairs.length; i++) {
+            for (var j = 0; j < pairs[i].length; j++) {
+              var read = pairs[i][j];
+              var dropdown = meta_input_fields.samples[id][cat]
+                .find('select option[value="' + read + '"]:selected').parent();
+              if (!reads.includes(read)) {
+                dropdown.removeClass('is-invalid');
+              } else {
+                dropdown.addClass('is-invalid');
+                reads.push(read);
+              }
+            }
+          }
         }
 
       case 'meta':
