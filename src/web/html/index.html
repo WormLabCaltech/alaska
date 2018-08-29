@@ -122,20 +122,23 @@
                     <small id="proj_design_help" class="form-text text-muted">Click here for more information.</small>
                 </div>
                 <div class="col-sm-9">
-                    <div class="custom-control custom-radio custom-control-inline">
+                    <div class="custom-control custom-radio custom-control-inline" id="proj_design">
                         <input type="radio" id="proj_design_1_radio" name="proj_design" class="custom-control-input" checked="" value="1">
                         <label class="custom-control-label active" for="proj_design_1_radio">1-factor</label>
                     </div>
                     <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2">
+                        <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2" disabled>
                         <label class="custom-control-label" for="proj_design_2_radio">2-factor</label>
                     </div>
                 </div>
             </div>
+            <div class="text-right">
+                <button class="btn btn-primary" id="proj_save_btn">Save changes</button>
+            </div>
         </form>
     </div>
 </div></div>
-        <div id="meta_sample" class="mt-5"><div style="height:50em">
+        <div id="meta_sample" class="mt-5"><div style="height:70em">
     <div class="card mx-2" id="sample_card">
         <div class="card-header alert-warning h2">
             <i class="fas fa-cubes"></i>
@@ -183,7 +186,7 @@
                             <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="sample_name_SAMPLEID" required>
+                            <input type="text" class="form-control" id="sample_name_SAMPLEID" required disabled>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -263,7 +266,7 @@
                             <small id="sample_type_help" class="form-text text-muted">Click here for more information.</small>
                         </div>
                         <div class="col-sm-9">
-                            <div class="custom-control custom-radio custom-control-inline">
+                            <div class="custom-control custom-radio custom-control-inline" id="read_type_SAMPLEID">
                                 <input type="radio" id="sample_type_SAMPLEID_1_radio" name="read_type_SAMPLEID" class="custom-control-input" checked="" value="1">
                                 <label class="custom-control-label active" for="sample_type_SAMPLEID_1_radio">Single-end</label>
                             </div>
@@ -325,9 +328,72 @@
                             </table>
                         </div>
                     </div>
+                    <div class="text-right">
+                        <button class="btn btn-warning" id="sample_SAMPLEID_save_btn">Save changes</button>
+                    </div>
                 </form>
             </div>
         </div>
+    </div>
+</div></div>
+        <div id="meta_controls" class="mt-5"><div class="card mx-2" id="proj_controls">
+    <div class="card-header alert-success h2">
+        <i class="fas fa-vial"></i>
+        Project Controls Form
+        <div class="dropdown d-inline float-right">
+            <button class="btn btn-success ml-3" type="button" id="choose_sample_btn">Reload</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="card-title">
+            <h3>Please choose your control characteristic and details.</h3>
+            <p>The characteristic must be present in <u><strong>all samples</strong></u> for it to be selected as a control characteristic. Alaska will automatically select all samples with matching characteristics and details as controls.</p>
+        </div>
+        <hr />
+        <div class="card-title">
+            <h5 id="">This project is a FACTOR design.</h5>
+            <p>Please press the reload button after any changes to the project or samples.</p>
+        </div>
+        <hr />
+        <form>
+            <div class="form-group" id="proj_control_0">
+                <div class="row">
+                    <label for="proj_control_char_0" class="col-form-label col-sm-4">Control Characteristic 1</label>
+                    <div class="col-sm-6">
+                        <select class="custom-select" id="proj_control_char_0" required>
+                            <option selected disabled hidden>Please select a characteristic.</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <label for="proj_control_detail_0" class="col-form-label col-sm-4">Control Detail 1</label>
+                    <div class="col-sm-6">
+                        <select class="custom-select" id="proj_control_detail_0" required>
+                            <option selected disabled hidden>Please select a detail.</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="proj_control_1" style="display:none">
+            <hr />
+                <div class="row">
+                    <label for="proj_control_char_1" class="col-form-label col-sm-4">Control Characteristic 1</label>
+                    <div class="col-sm-6">
+                        <select class="custom-select" id="proj_control_char_1" required>
+                            <option selected disabled hidden>Please select a characteristic.</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <label for="proj_control_detail_1" class="col-form-label col-sm-4">Control Detail 1</label>
+                    <div class="col-sm-6">
+                        <select class="custom-select" id="proj_control_detail_1" required>
+                            <option selected disabled hidden>Please select a detail.</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div></div>
     </div>

@@ -122,8 +122,26 @@ function parse_proj_status(out) {
   switch (status) {
     // Project created.
     case 0:
+    case 1:
+      console.log('status: created');
       goto_ftp_info();
       break;
+
+    // Samples inferred
+    case 2:
+      console.log('status: samples inferred');
+      break;
+    case 3:
+      console.log('status: set');
+      break;
+    case 4:
+      console.log('status: finalized');
+      break;
+    case 4:
+      console.log('status: in queue');
+      break;
+
+
   }
 }
 
@@ -1620,72 +1638,182 @@ function substring_matcher(strs) {
 };
 
 /**
+ * Validates all meta input. If everything is good, returns
+ * the inputs in a nice JSON format.
+ */
+function validate_all_meta() {
+  var proj_meta = validate_proj_meta();
+
+  proj_meta['samples'] = {}
+  for (var id in proj.samples) {
+    proj_meta.samples[id] = validate_sample_meta(id);
+  }
+
+  return proj_meta;
+}
+
+/**
+ * Validates project meta input. If everything is good, returns
+ * the inputs in a nice JSON format.
+ */
+function validate_proj_meta() {
+    var proj_meta = {};
+
+    // Loop through all the keys in the global meta dictionary.
+    for (var cat in meta_input_fields) {
+      switch (cat) {
+        case 'design':
+          var field = meta_input_fields[]
+          break;
+      }
+
+
+      // Skip samples, because that's not what this function deals with.
+      if (cat == 'samples') {
+        continue;
+      }
+
+      // If cat == 'meta', we have to deal with a nested dictionary.
+      if (cat == 'meta') {
+        proj_meta['meta'] = {};
+        for (var meta_cat in meta_input_fields[cat]) {
+          var field = meta_input_fields[cat][meta_cat];
+        }
+      } else {
+        // Otherwise, just naively add the value.
+      }
+    }
+}
+
+/**
+ * Validates sample meta input. If everything is good, returns
+ * the inputs in a nice JSON format.
+ */
+function validate_sample_meta(id) {
+
+}
+
+/**
+ * Sets global dictionary for meta input fields (proj + sample).
+ */
+function set_meta_input_fields() {
+  meta_input_fields = get_proj_input_fields();
+  meta_input_fields['samples'] = {};
+
+  for (var id in proj.samples) {
+    meta_input_fields.samples[id] = get_sample_input_fields(id);
+  }
+}
+
+/**
+ * Returns a dictionary for project input fields.
+ */
+function get_proj_input_fields() {
+  var proj_input_fields = {}
+  proj_input_fields['meta'] = {};
+  proj_input_fields.meta['title'] = proj_form.find('#proj_title');
+  proj_input_fields.meta['summary'] = proj_form.find('#proj_summary');
+  proj_input_fields.meta['contributors'] = proj_contributor_fields;
+  proj_input_fields.meta['email'] = proj_form.find('#proj_email');
+  proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
+  proj_input_fields['design'] = proj_form.find('#proj_design');
+
+  return proj_input_fields;
+}
+
+/**
+ * Returns a dictionary for sample input fields.
+ */
+function get_sample_input_fields(id) {
+  var form = sample_forms[id];
+  var sample_input_fields = {};
+  sample_input_fields['meta'] = {};
+  sample_input_fields['name'] = form.find('#sample_name_' + id).val();
+  sample_input_fields.meta['description'] = form.find('#sample_description_' + id);
+  sample_input_fields.meta['contributors'] = sample_contributor_fields[id];
+  sample_input_fields.meta['source'] = form.find('#sample_source_' + id);
+  sample_input_fields['type'] = form.find('#read_type_' + id);
+  sample_input_fields['organism'] = form.find('#sample_organism_' + id);
+  sample_input_fields['length'] = form.find('#sample_length_' + id);
+  sample_input_fields['stdev'] = form.find('#sample_stdev_' + id);
+
+  return sample_input_fields;
+}
+
+/**
  * Get project metadata inputs.
  */
 function get_proj_meta() {
-  proj = {};
-  proj['meta'] = {};
-  proj.meta['title'] = proj_form.find('#proj_title').val();
-  proj.meta['summary'] = proj_form.find('#proj_summary').val();
+  var proj_meta = {};
+  proj_meta['meta'] = {};
+  proj_meta.meta['title'] = proj_input_fields.meta['title'].val();
+  proj_meta.meta['summary'] = proj_input_fields.meta['summary'].val();
 
   // Get contributors.
-  proj.meta['contributors'] = [];
+  proj_meta.meta['contributors'] = [];
   for (var i = 0; i < proj_contributor_fields.length; i++) {
     var field = proj_contributor_fields[i];
     var contributor = field.children('input').val();
 
     if (contributor != '' && contributor != null) {
-      proj.meta['contributors'].push(contributor);
+      proj_meta.meta['contributors'].push(contributor);
     }
   }
-  proj.meta['email'] = proj_form.find('#proj_email').val();
-  proj.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code').val();
-  proj['design'] = parseInt(proj_form.find('input[name="proj_design"]:checked').val());
+  proj_meta.meta['email'] = proj_input_fields.meta['email'].val();
+  proj_meta.meta['SRA_center_code'] = proj_input_fields.meta['SRA_center_code'].val();
+  proj_meta['design'] = parseInt(proj_input_fields['design'].find('input:checked').val());
 
-  return proj;
+  return proj_meta;
 }
+
+/**
+ * Checks to project meta.
+ */
+
 
 /**
  * Get sample metadata inputs.
  */
 function get_sample_meta(id) {
   var form = sample_forms[id];
+  var sample_input_fields = meta_input_fields.samples[id];
 
-  sample = {};
-  sample['meta'] = {};
+  var sample_meta = {};
+  sample_meta['meta'] = {};
 
-  sample['name'] = form.find('#sample_name_' + id).val();
-  sample.meta['description'] = form.find('#sample_description_' + id).val();
+  sample_meta['name'] = sample_input_fields['name'].val();
+  sample_meta.meta['description'] = sample_input_fields.meta['description'].val();
 
   // Get contributors.
-  sample.meta['contributors'] = [];
+  sample_meta.meta['contributors'] = [];
   for (var i = 0; i < sample_contributor_fields[id].length; i++) {
     var field = sample_contributor_fields[id][i];
     var contributor = field.children('input').val();
 
     if (contributor != '' && contributor != null) {
-      sample.meta['contributors'].push(contributor);
+      sample_meta.meta['contributors'].push(contributor);
     }
   }
-  sample.meta['source'] = form.find('#sample_source_' + id).val();
-  sample['type'] = parseInt(form.find('input[name="read_type_' + id + '"]').val());
+  sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
+  sample['type'] = parseInt(sample_input_fields['type'].find('input').val());
 
   // Parse organism.
-  var org = form.find('#sample_organism_' + id).val();
+  var org = sample_input_fields['organism'].val();
   if (org != '' && org != null) {
     var split = org.split('_');
-    sample['organism'] = split[0] + '_' + split[1];
-    sample['ref_ver'] = split.slice(2).join('_');
-    sample['length'] = parseInt(form.find('#sample_length_' + id).val());
-    sample['stdev'] = parseInt(form.find('#sample_stdev_' + id).val());
+    sample_meta['organism'] = split[0] + '_' + split[1];
+    sample_meta['ref_ver'] = split.slice(2).join('_');
   }
+  sample_meta['length'] = parseInt(sample_input_fields['length'].val());
+  sample_meta['stdev'] = parseInt(sample_input_fields['stdev'].val());
 
-  return sample;
+  return sample_meta;
 }
 
 // Global variables.
 var proj_id;
 var proj;
+var meta_input_fields;
 var ftp_pw;
 var raw_reads_div;
 var dropdown_items = {};
