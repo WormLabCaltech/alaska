@@ -1733,7 +1733,6 @@ function validate_sample_meta(id) {
     switch (cat) {
       case 'name':
       case 'organism':
-      case 'ref_ver':
       case 'length':
       case 'stdev':
         // These just have to be filled out.
@@ -1968,7 +1967,7 @@ function get_sample_meta(id) {
   } else {
     sample_meta['length'] = null;
   }
-  
+
   var stdev = sample_input_fields['stdev'].val();
   if (stdev != '' && stdev != null) {
     sample_meta['stdev'] = parseInt(stdev);
