@@ -1728,7 +1728,7 @@ function validate_sample_meta(id) {
     }
 
     var field = meta_input_fields.samples[id][cat];
-    var val = sample_meta[id][cat];
+    var val = sample_meta[cat];
 
     switch (cat) {
       case 'name':
