@@ -1663,7 +1663,7 @@ function validate_proj_meta() {
     for (var cat in meta_input_fields) {
       switch (cat) {
         case 'design':
-          var field = meta_input_fields[]
+          var field = meta_input_fields['design'];
           break;
       }
 
