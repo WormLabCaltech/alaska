@@ -90,7 +90,7 @@ function goto_ftp_info() {
       console.log(out);
       // Parse pw.
       var split = out.split('\n');
-      var pw = split[split.length - 2];
+      var pw = split[split.length - 3];
       show_ftp_info(proj_id, pw);
     }
   });
@@ -115,7 +115,9 @@ function goto_analysis_status() {
  */
 function parse_proj_status(out) {
   var split = out.split('\n');
-  var status = parseInt(split[split.length - 2]);
+  var status = parseInt(split[split.length - 3]);
+  console.log(split);
+  console.log(status);
 
   switch (status) {
     // Project created.
