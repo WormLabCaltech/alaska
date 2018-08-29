@@ -908,7 +908,7 @@ function set_import_export_popover_btn() {
     html: true,
     placement: "bottom",
     content: function() {
-      return get_import_export_popover_body(export_popover);
+      return get_import_export_popover_body(import_popover);
     },
     title: function() {
       return get_import_export_popover_title();
@@ -1536,6 +1536,66 @@ function substring_matcher(strs) {
     cb(matches);
   };
 };
+
+/**
+ * Get project metadata inputs.
+ */
+function get_proj_meta() {
+  proj = {};
+  proj['meta'] = {};
+  proj.meta['title'] = proj_form.find('#proj_title').val();
+  proj.meta['summary'] = proj_form.find('#proj_summary').val();
+
+  // Get contributors.
+  proj.meta['contributors'] = [];
+  for (var i = 0; i < proj_contributor_fields.length; i++) {
+    var field = proj_contributor_fields[i];
+    var contributor = field.children('input').val();
+
+    if (contributor != '' && contributor != null) {
+      proj.meta['contributors'].push(contributor);
+    }
+  }
+  proj.meta['email'] = proj_form.find('#proj_email').val();
+  proj.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code').val();
+  proj['design'] = parseInt(proj_form.find('input[name="proj_design"]:checked').val());
+
+  return proj;
+}
+
+/**
+ * Get sample metadata inputs.
+ */
+function get_sample_meta(id) {
+  var form = sample_forms[id];
+
+  sample = {};
+  sample['meta'] = {};
+
+  sample['name'] = form.find('#sample_name_' + id).val();
+  sample.meta['description'] = form.find('#sample_description_' + id).val();
+
+  // Get contributors.
+  sample.meta['contributors'] = [];
+  for (var i = 0; i < sample_contributor_fields[id].length; i++) {
+    var field = sample_contributor_fields[id][i];
+    var contributor = field.children('input').val();
+
+    if (contributor != '' && contributor != null) {
+      sample.meta['contributors'].push(contributor);
+    }
+  }
+  sample.meta['source'] = form.find('#sample_source_' + id).val();
+  sample.['type'] = parseInt(form.find('input[name="read_type_' + id + '"]').val());
+
+  // Parse organism.
+  var org = form.find('#sample_organism_' + id).val();
+  var split = org.split('_');
+  sample['organism'] = split[0] + '_' + split[1];
+  sample['ref_ver'] = split.slice(2).join('_');
+  sample['length'] = parseInt(form.find('#sample_length_' + id).val());
+  sample['stdev'] = parseInt(form.find('#sample_stdev_' + id).val());
+}
 
 // Global variables.
 var proj_id;
