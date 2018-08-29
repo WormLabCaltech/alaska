@@ -834,6 +834,9 @@ function set_paired_end(id, form) {
     form.find('#' + pair_2_id).prop('disabled', true);
   }
 
+  // Sort reads.
+  reads = reads.sort();
+
   // First, generate list of options for each read.
   var options = [];
   for (var i = 0; i < n_reads; i++) {
@@ -1894,8 +1897,8 @@ function get_sample_meta(id) {
   sample_meta.meta['chars'] = {};
   for (var i = 0; i < sample_characteristic_fields[id].length; i++) {
     var field = sample_characteristic_fields[id][i];
-    var char = field.children('input:nth-child(1)').val();
-    var detail = field.children('input:nth-child(2)').val();
+    var char = field.children('input:nth-of-type(1)').val();
+    var detail = field.children('input:nth-of-type(2)').val();
 
     // Add to dictionary only if both char and detail is populated.
     if (char != '' && char != null && detail != '' && detail != null) {
@@ -1911,8 +1914,8 @@ function get_sample_meta(id) {
     sample_meta['reads'] = [];
     for (var i = 0; i < sample_pair_fields[id].length; i++) {
       var field = sample_pair_fields[id][i];
-      var pair_1 = field.children('select:nth-child(1)').val();
-      var pair_2 = field.children('select:nth-child(2)').val();
+      var pair_1 = field.children('select:nth-of-type(1)').val();
+      var pair_2 = field.children('select:nth-of-type(2)').val();
 
       var pair = [pair_1, pair_2];
       sample_meta['reads'].push(pair);
