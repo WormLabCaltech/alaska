@@ -1675,18 +1675,19 @@ function validate_proj_meta() {
       // We just need to make sure the FIRST field is populated.
       case 'contributors':
         field = field[0];
-        val = val[0];
-      case 'email':
-        if (isEmail(val)) {
-          field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-        }
+        val = field.val();
       case 'title':
       case 'summary':
       case 'SRA_center_code':
         // These just have to be filled out.
         if (val != '' && val != null) {
+          field.removeClass('is-invalid');
+        } else {
+          field.addClass('is-invalid');
+        }
+        break;
+      case 'email':
+        if (isEmail(val)) {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
