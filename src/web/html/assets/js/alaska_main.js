@@ -1783,8 +1783,8 @@ function validate_sample_meta(id) {
 
   // Loop through fields in meta.
   for (var cat in meta) {
-    var field = meta_input_fields[id].meta[cat];
-    var val = sample_meta[id].meta[cat];
+    var field = meta_input_fields.samples[id].meta[cat];
+    var val = sample_meta.meta[cat];
 
     switch (cat) {
       // Characteristics must be dealt slightly different.
