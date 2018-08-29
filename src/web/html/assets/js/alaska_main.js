@@ -1732,6 +1732,7 @@ function get_sample_input_fields(id) {
   sample_input_fields.meta['description'] = form.find('#sample_description_' + id);
   sample_input_fields.meta['contributors'] = sample_contributor_fields[id];
   sample_input_fields.meta['source'] = form.find('#sample_source_' + id);
+  sample_input_fields.meta['chars'] = sample_characteristic_fields[id];
   sample_input_fields['type'] = form.find('#read_type_' + id);
   sample_input_fields['organism'] = form.find('#sample_organism_' + id);
   sample_input_fields['length'] = form.find('#sample_length_' + id);
@@ -1794,6 +1795,20 @@ function get_sample_meta(id) {
       sample_meta.meta['contributors'].push(contributor);
     }
   }
+
+  // Get characteristics.
+  sample_meta.meta['chars'] = {};
+  for (var i = 0; i < sample_characteristic_fields[id].length; i++) {
+    var field = sample_characteristic_fields[id][i];
+    var char = field.children('input:nth-child(1)').val();
+    var detail = field.children('input:nth-child(2)').val();
+
+    // Add to dictionary only if both char and detail is populated.
+    if (char != '' && char != null && detail != '' && detail != null) {
+      sample_meta.meta['chars'][char] = detail;
+    }
+  }
+
   sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
   sample_meta['type'] = parseInt(sample_input_fields['type'].find('input').val());
 
