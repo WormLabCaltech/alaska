@@ -1692,7 +1692,7 @@ function validate_proj_meta() {
           field.addClass('is-invalid');
         }
         break;
-      case default:
+      default:
         break;
     }
   }
