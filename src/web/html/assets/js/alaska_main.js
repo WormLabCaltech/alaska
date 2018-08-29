@@ -1680,7 +1680,7 @@ function validate_proj_meta() {
       // Contributors must be dealt slightly differently.
       // We just need to make sure the FIRST field is populated.
       case 'contributors':
-        field = field[0];
+        field = field[0].children('input');
         val = field.val();
       case 'title':
       case 'summary':
@@ -1750,7 +1750,7 @@ function validate_sample_meta(id) {
         if (val == 2) {
           // Each selection must be unique.
           var reads = [];
-          var pairs = sample_meta[id].reads;
+          var pairs = sample_meta.reads;
           for (var i = 0; i < pairs.length; i++) {
             for (var j = 0; j < pairs[i].length; j++) {
               var read = pairs[i][j];
@@ -1790,7 +1790,7 @@ function validate_sample_meta(id) {
       // Characteristics must be dealt slightly different.
       case 'chars':
         var n_chars = Object.keys(val).length;
-        var field = field[0];
+        var field = field[0].children('input');
         if (n_chars > 0) {
           field.removeClass('is-invalid');
         } else {
@@ -1801,7 +1801,7 @@ function validate_sample_meta(id) {
       // Contributors must be dealt slightly differently.
       // We just need to make sure the FIRST field is populated.
       case 'contributors':
-        field = field[0];
+        field = field[0].children('input');
         val = field.val();
       case 'title':
       case 'description':
@@ -1957,9 +1957,24 @@ function get_sample_meta(id) {
     var split = org.split('_');
     sample_meta['organism'] = split[0] + '_' + split[1];
     sample_meta['ref_ver'] = split.slice(2).join('_');
+  } else {
+    sample_meta['organism'] = null;
+    sample_meta['ref_ver'] = null;
   }
-  sample_meta['length'] = parseInt(sample_input_fields['length'].val());
-  sample_meta['stdev'] = parseInt(sample_input_fields['stdev'].val());
+
+  var length = sample_input_fields['length'].val();
+  if (length != '' && length != null) {
+    sample_meta['length'] = parseInt(length);
+  } else {
+    sample_meta['length'] = null;
+  }
+  
+  var stdev = sample_input_fields['stdev'].val();
+  if (stdev != '' && stdev != null) {
+    sample_meta['stdev'] = parseInt(stdev);
+  } else {
+    sample_meta['stdev'] = null;
+  }
 
   return sample_meta;
 }
