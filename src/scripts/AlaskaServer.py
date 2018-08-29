@@ -68,6 +68,7 @@ class AlaskaServer(Alaska):
         # have not been finalized yet.
         self.projects_temp = {} # temporary projects
         self.samples_temp = {} # temporary samples
+        self.ftp = {}
 
         self.workers_n = 1 # number of workers
         self.queue = queue.Queue()  # job queue
@@ -836,9 +837,24 @@ class AlaskaServer(Alaska):
             # once we know that the ftp is running,
             pw = make_ftp(__id, ftp)
 
+            # add to global variable
+            self.ftp[__id] = pw
+
             self.broadcast(_id, '{}: ftp user created with password {}'.format(__id, pw))
         except docker.errors.NotFound as e:
             self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+
+        if close:
+            self.close(_id)
+
+    def get_ftp_info(self, _id, close=True):
+        """
+        Responds with the ftp password.
+        """
+        if _id not in self.ftp:
+            raise Exception('{}: no ftp account'.format(_id))
+
+        self.respond(_id, self.ftp[_id])
 
         if close:
             self.close(_id)
@@ -1476,7 +1492,14 @@ class AlaskaServer(Alaska):
         """
         Checks project status.
         """
-        pass
+        if self.exists_temp(_id):
+            proj = self.projects_temp[_id]
+        elif self.exists_var(_id):
+            proj = self.projects[id]
+        else:
+            raise Exception('{}: does not exist'.format(_id))
+
+        self.respond(_id, proj.progress)
 
         if close:
             self.close(_id)
