@@ -1904,7 +1904,7 @@ function get_sample_meta(id) {
   }
 
   sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
-  sample_meta['type'] = parseInt(sample_input_fields['type'].find('input').val());
+  sample_meta['type'] = parseInt(sample_input_fields['type'].find('input:checked').val());
 
   // If reads are paired-end, we need to replace the reads dictionary as well.
   if (sample_meta['type'] == 2) {
