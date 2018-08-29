@@ -1746,8 +1746,8 @@ function get_sample_input_fields(id) {
 function get_proj_meta() {
   var proj_meta = {};
   proj_meta['meta'] = {};
-  proj_meta.meta['title'] = proj_input_fields.meta['title'].val();
-  proj_meta.meta['summary'] = proj_input_fields.meta['summary'].val();
+  proj_meta.meta['title'] = meta_input_fields.meta['title'].val();
+  proj_meta.meta['summary'] = meta_input_fields.meta['summary'].val();
 
   // Get contributors.
   proj_meta.meta['contributors'] = [];
@@ -1759,9 +1759,9 @@ function get_proj_meta() {
       proj_meta.meta['contributors'].push(contributor);
     }
   }
-  proj_meta.meta['email'] = proj_input_fields.meta['email'].val();
-  proj_meta.meta['SRA_center_code'] = proj_input_fields.meta['SRA_center_code'].val();
-  proj_meta['design'] = parseInt(proj_input_fields['design'].find('input:checked').val());
+  proj_meta.meta['email'] = meta_input_fields.meta['email'].val();
+  proj_meta.meta['SRA_center_code'] = meta_input_fields.meta['SRA_center_code'].val();
+  proj_meta['design'] = parseInt(meta_input_fields['design'].find('input:checked').val());
 
   return proj_meta;
 }
