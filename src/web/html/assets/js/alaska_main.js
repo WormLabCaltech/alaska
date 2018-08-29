@@ -72,6 +72,78 @@ function get_server_status() {
 }
 
 /**
+ * Go to ftp upload page.
+ */
+function goto_ftp_info() {
+  $('#success_check').show();
+  $('#new_proj_btn').prop('disabled', true);
+
+  // Send ajax request to get ftp password again.
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'get_ftp_info',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      // Parse pw.
+      var split = out.split('\n');
+      var pw = split[split.length - 2];
+      show_ftp_info(proj_id, pw);
+    }
+  });
+}
+
+/**
+ * Go to meta input page.
+ */
+function goto_meta_input() {
+
+}
+
+/**
+ * Go to analysis status page.
+ */
+function goto_analysis_status() {
+
+}
+
+/**
+ * Parse project status.
+ */
+function parse_proj_status(out) {
+  var split = out.split('\n');
+  var status = parseInt(split[split.length - 2]);
+
+  switch (status) {
+    // Project created.
+    case 0:
+      goto_ftp_info();
+      break;
+  }
+}
+
+/**
+ * Get project status.
+ */
+function get_proj_status() {
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'get_proj_status',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      parse_proj_status(out);
+    }
+  });
+}
+
+/**
  * Set loading spinner in given span/div.
  */
 function set_loading_spinner(button, spinner) {
@@ -164,6 +236,12 @@ function show_ftp_info(id, pw) {
   $('#proj_id').text(id);
   $('#ftp_id').text(id);
   $('#ftp_pw').text(pw);
+
+  // Add on click handler for fetch reads button.
+  $('#fetch_reads_btn').click(fetch_reads);
+
+  bind_raw_reads();
+  $('#refetch_reads_btn_2').click(refetch_reads);
 
   // Show the div.
   ftp_div.show();
@@ -1592,11 +1670,15 @@ function get_sample_meta(id) {
 
   // Parse organism.
   var org = form.find('#sample_organism_' + id).val();
-  var split = org.split('_');
-  sample['organism'] = split[0] + '_' + split[1];
-  sample['ref_ver'] = split.slice(2).join('_');
-  sample['length'] = parseInt(form.find('#sample_length_' + id).val());
-  sample['stdev'] = parseInt(form.find('#sample_stdev_' + id).val());
+  if (org != '' && org != null) {
+    var split = org.split('_');
+    sample['organism'] = split[0] + '_' + split[1];
+    sample['ref_ver'] = split.slice(2).join('_');
+    sample['length'] = parseInt(form.find('#sample_length_' + id).val());
+    sample['stdev'] = parseInt(form.find('#sample_stdev_' + id).val());
+  }
+
+  return sample;
 }
 
 // Global variables.
@@ -1619,8 +1701,14 @@ var sample_characteristic_fields = {};
 // To run when page is loaded.
 $(document).ready(function() {
   url_params = get_url_params();
-
   console.log(url_params);
+  // If we are given an id, we need to resume where we left off with that project.
+  if (url_params.has('id')) {
+    proj_id = url_params.get('id');
+
+    // Go to whatever step we need to go to.
+    get_proj_status();
+  }
 
   // initialize tooltips
   $(function () {
@@ -1635,14 +1723,7 @@ $(document).ready(function() {
   // Add on click handler for start project button.
   $('#new_proj_btn').click(new_proj);
 
-  // Add on click handler for fetch reads button.
-  $('#fetch_reads_btn').click(fetch_reads);
-
-  bind_raw_reads();
-  $('#refetch_reads_btn_2').click(refetch_reads);
   raw_reads_div = $('#raw_reads_div').clone(true);
-
-
 
   // Fetch server status.
   get_server_status();
