@@ -1648,8 +1648,21 @@ function substring_matcher(strs) {
  * the inputs in a nice JSON format.
  */
 function validate_all_meta() {
+  // First, validate individual forms.
+  var proj_meta = validate_proj_meta();
+  proj_meta['samples'] = {};
   for (var id in proj.samples) {
     proj_meta.samples[id] = validate_sample_meta(id);
+  }
+
+  // Then, we must check whether all samples share either 1 (for
+  // 1-factor design) or 2 (for 2-factor design) characteristics.
+  var design = proj_meta.design;
+  // Loop through each sample and check characteristic.
+  if (design == 1) {
+
+  } else if (design == 2) {
+
   }
 
   return proj_meta;
@@ -1769,7 +1782,7 @@ function validate_sample_meta(id) {
                 var dropdowns = meta_input_fields.samples[id][cat].find('select option:selected');
                 dropdowns.filter(':disabled');
                 dropdowns.filter(':hidden');
-                dropdowns.addClass('is-invalid');
+                dropdowns.parent().addClass('is-invalid');
               }
             }
           }
@@ -1788,9 +1801,29 @@ function validate_sample_meta(id) {
     switch (cat) {
       // Characteristics must be dealt slightly different.
       case 'chars':
-        var n_chars = Object.keys(val).length;
+        var chars = Object.keys(val);
+        var n_chars = chars.length;
         var field = field[0].children('input');
         if (n_chars > 0) {
+          // Then, make sure each characteristic is unique.
+          for (var i = 0; i < n_chars; i++) {
+            var char = chars[i];
+            var fields = meta_input_fields.samples[id].meta[cat];
+            var duplicates = [];
+            for (var j = 0; j < fields.length; j++) {
+              var char_field = fields[j].find('input:nth-of-type(1)');
+              if (char_field.val() == char) {
+                duplicates.push(char_field);
+              } else {
+                char_field.removeClass('is-invalid');
+              }
+            }
+          }
+          if (duplicates.length > 1) {
+            for (var j = 0; j < duplicates.length; j++) {
+              duplicates[j].addClass('is-invalid');
+            }
+          }
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
