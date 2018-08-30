@@ -1919,6 +1919,9 @@ function set_proj_meta(meta) {
     var val = meta[cat];
 
     switch (cat) {
+      case 'meta':
+        break;
+
       case 'design':
       default:
         proj[cat] = val;
@@ -1950,6 +1953,9 @@ function set_sample_meta(id, meta) {
     var val = meta[cat];
 
     switch (cat) {
+      case 'meta':
+        break;
+
       // If reads is present, that means it is paired.
       case 'reads':
         var new_reads = [];
@@ -1973,7 +1979,19 @@ function set_sample_meta(id, meta) {
       case 'stdev':
       default:
         proj.samples[id][cat] = val;
+    }
+  }
 
+  for (var cat in meta.meta) {
+    var val = meta.meta[cat];
+
+    switch (cat) {
+      case 'title':
+      case 'contributors':
+      case 'source':
+      case 'chars':
+      case 'description'
+        proj.samples[id].meta[cat] = val;
     }
   }
 }
