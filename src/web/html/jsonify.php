@@ -18,8 +18,8 @@ $path = "/alaska/root/projects/";
 $temp = "_temp";
 
 # full path to output json
-$path = $path . $id . "/" . $temp . "/" . $id . ".json";
-echo $path;
+$path = $id . ".json";
+echo $path . "\n";
 echo $json;
 
 # Sanity check, and then write the json.
