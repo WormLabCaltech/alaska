@@ -100,7 +100,7 @@ function goto_ftp_info() {
  * Go to meta input page.
  */
 function goto_meta_input() {
-
+  read_proj();
 }
 
 /**
@@ -130,6 +130,7 @@ function parse_proj_status(out) {
     // Samples inferred
     case 2:
       console.log('status: samples inferred');
+      goto_meta_input()
       break;
     case 3:
       console.log('status: set');
@@ -1308,6 +1309,188 @@ function add_characteristic() {
 }
 
 /**
+ * Sets project meta fields with the values from the global proj object.
+ */
+function set_proj_meta_fields() {
+  var fields = proj_input_fields;
+
+  for (var cat in fields) {
+    var field = fields[cat];
+    var val = proj[cat];
+
+    switch (cat) {
+      case 'meta':
+        break;
+
+      case 'design':
+        field.find('input[value="' + val + '"]').prop('checked', true);
+        break;
+
+      default:
+        field.val(val);
+    }
+  }
+
+  var meta_fields = fields.meta;
+
+  for (var cat in meta_fields) {
+    var field = meta_fields[cat];
+    var val = proj.meta[cat];
+
+    switch (cat) {
+      case 'contributors':
+        if (val.length > 0) {
+          // Set first row first.
+          var first_row = field[0];
+          var add_btn = first_row.children('button');
+          first_row.children('input').val(val[0]);
+
+          // Then, deal with subsequent contributors.
+          for (var i = 1; i < val.length; i++) {
+            var contributor = val[i];
+
+            // Simulate add button click.
+            add_btn.click();
+            var row = field[i];
+            row.children('input').val(val[0]);
+          }
+        }
+        break;
+
+      case 'title':
+      case 'summary':
+      case 'SRA_center_code':
+      case 'email':
+      default:
+        field.val(val);
+    }
+  }
+}
+
+/**
+ * Sets sample meta fields with the values from the global proj object.
+ */
+function set_sample_meta_fields(id) {
+  var fields = meta_input_fields.samples[id];
+
+  for (var cat in fields) {
+    var field = fields[cat];
+    var val = proj.samples[id][cat];
+
+    switch (cat) {
+      case 'meta':
+        break;
+
+      case 'type':
+        var radio = field.find('input[value="' + val + '"]');
+        radio.prop('checked', true);
+        radio.click();
+        break;
+
+      case 'organism':
+        var org = val;
+        var ver = proj.samples[id]['ref_ver'];
+        var selection = val + '_' + ver;
+        field.children('option[value="' + selection + '"]').prop('selected', true);
+        break;
+
+      case 'name':
+      case 'length':
+      case 'stdev':
+      default:
+        field.val(val);
+    }
+  }
+
+  var meta_fields = fields.meta;
+
+  for (var cat in meta_fields) {
+    var field = meta_fields[cat];
+    var val = proj.samples[id].meta[cat];
+
+    switch (cat) {
+      case 'contributors':
+        if (val.length > 0) {
+          // Set first row first.
+          var first_row = field[0];
+          var add_btn = first_row.children('button');
+          first_row.children('input').val(val[0]);
+
+          // Then, deal with subsequent contributors.
+          for (var i = 1; i < val.length; i++) {
+            var contributor = val[i];
+
+            // Simulate add button click.
+            add_btn.click();
+            var row = field[i];
+            row.children('input').val(val[0]);
+          }
+        }
+        break;
+
+      case 'chars':
+        var chars = Object.keys(val);
+        if (chars.length > 0) {
+          // Set first row first.
+          var first_row = field[0];
+          var add_btn = first_row.children('button');
+          first_row.children('input:nth-of-type(1)').val(chars[0]);
+          first_row.children('input:nth-of-type(1)').val(val[chars[0]]);
+
+          // Then, deal with subsequent contributors.
+          for (var i = 1; i < Object.keys(val).length; i++) {
+            var char = chars[i];
+            var detail = val[char];
+
+            // Simulate add button click.
+            add_btn.click();
+            var row = field[i];
+            row.children('input:nth-of-type(1)').val(char);
+            row.children('input:nth-of-type(2)').val(detail);
+          }
+        }
+        break;
+
+      case 'source':
+      case 'description':
+      default:
+        field.val(val);
+    }
+  }
+}
+
+/**
+ * Sets all meta fields with the values from the global proj object.
+ */
+function set_all_meta_fields() {
+  set_proj_meta_fields();
+  set_sample_meta_fields();
+}
+
+/**
+ * Read project from temporary json.
+ */
+function read_proj() {
+  // Send ajax request.
+  $.ajax({
+    type: 'POST',
+    url: 'read_proj.php',
+    data: { id: proj_id },
+    success:function(out) {
+      console.log(out);
+      proj = JSON.parse(out);
+
+      set_meta_input();
+
+      show_meta_input();
+
+      // Then, set all the meta fields.
+      set_all_meta_fields();
+    }
+  });
+}
+
+/**
  * Save project to temporary json.
  */
 function save_proj() {
@@ -1320,6 +1503,9 @@ function save_proj() {
  */
 function set_proj_meta_input() {
   proj_form = $('#proj');
+
+  // Set the project id header
+  proj_form.children('h4').text(proj_id);
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
@@ -1708,7 +1894,7 @@ function validate_all_meta() {
 
   }
 
-  console.log('proj: ' + proj_valid);
+  console.log('entire proj: ' + proj_valid);
   return proj_valid;
 }
 
@@ -1742,7 +1928,6 @@ function validate_proj_meta() {
         val = field.val();
       case 'title':
       case 'summary':
-      case 'SRA_center_code':
         // These just have to be filled out.
         if (val != '' && val != null) {
           field.removeClass('is-invalid');
@@ -1865,18 +2050,24 @@ function validate_sample_meta(id) {
             var duplicates = [];
             for (var j = 0; j < fields.length; j++) {
               var char_field = fields[j].find('input:nth-of-type(1)');
+              var detail_field = fields[j].find('input:nth-of-type(2)');
               if (char_field.val() == char) {
-                duplicates.push(char_field);
+                duplicates.push([char_field, detail_field]);
               } else {
                 char_field.removeClass('is-invalid');
+                detail_field.removeClass('is-invalid');
               }
             }
           }
           if (duplicates.length > 1) {
             for (var j = 0; j < duplicates.length; j++) {
-              duplicates[j].addClass('is-invalid');
+              duplicates[j][0].addClass('is-invalid');
+              duplicates[j][1].addClass('is-invalid');
               valid = false;
             }
+          } else if (duplicates.length == 1) {
+            duplicates[0][0].removeClass('is-invalid');
+            duplicates[0][1].removeClass('is-invalid');
           }
           // field.removeClass('is-invalid');
         } else {
