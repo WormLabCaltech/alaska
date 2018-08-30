@@ -1312,7 +1312,7 @@ function add_characteristic() {
  * Sets project meta fields with the values from the global proj object.
  */
 function set_proj_meta_fields() {
-  var fields = proj_input_fields;
+  var fields = meta_input_fields;
 
   for (var cat in fields) {
     var field = fields[cat];
@@ -1320,6 +1320,7 @@ function set_proj_meta_fields() {
 
     switch (cat) {
       case 'meta':
+      case 'samples':
         break;
 
       case 'design':
@@ -1464,7 +1465,10 @@ function set_sample_meta_fields(id) {
  */
 function set_all_meta_fields() {
   set_proj_meta_fields();
-  set_sample_meta_fields();
+
+  for (var id in proj.samples) {
+    set_sample_meta_fields(id);
+  }
 }
 
 /**
