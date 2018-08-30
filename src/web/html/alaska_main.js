@@ -1553,8 +1553,15 @@ function show_verify_meta_modal() {
   save_proj();
 
   // Verify.
-  validate_all_meta();
+  var valid = validate_all_meta();
 
+  // Depending on whether or not all the input is valid,
+  // show different modal.
+  if (valid) {
+    $('#choose_controls_modal').modal('show');
+  } else {
+    $('#check_meta_modal').modal('show');
+  }
 
 }
 
@@ -1683,8 +1690,12 @@ function substring_matcher(strs) {
 function validate_all_meta() {
   // First, validate individual forms.
   proj_valid = validate_proj_meta();
+  console.log('proj: ' + proj_valid);
+
   for (var id in proj.samples) {
-    proj_valid = proj_valid && validate_sample_meta(id);
+    var sample_valid = validate_sample_meta(id)\
+    console.log(id + ': ' + sample_valid);
+    proj_valid = proj_valid && sample_valid;
   }
 
   // Then, we must check whether all samples share either 1 (for
@@ -1697,6 +1708,7 @@ function validate_all_meta() {
 
   }
 
+  console.log('proj: ' + proj_valid);
   return proj_valid;
 }
 
