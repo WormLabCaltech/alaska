@@ -1708,7 +1708,7 @@ function validate_all_meta() {
 
   }
 
-  console.log('proj: ' + proj_valid);
+  console.log('entire proj: ' + proj_valid);
   return proj_valid;
 }
 
@@ -1742,7 +1742,6 @@ function validate_proj_meta() {
         val = field.val();
       case 'title':
       case 'summary':
-      case 'SRA_center_code':
         // These just have to be filled out.
         if (val != '' && val != null) {
           field.removeClass('is-invalid');
