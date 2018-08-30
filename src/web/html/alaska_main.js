@@ -1685,7 +1685,7 @@ function substring_matcher(strs) {
 
 /**
  * Validates all meta input. If everything is good, returns
- * the inputs in a nice JSON format.
+ * whether everything is valid as a boolean.
  */
 function validate_all_meta() {
   // First, validate individual forms.
@@ -1700,7 +1700,7 @@ function validate_all_meta() {
 
   // Then, we must check whether all samples share either 1 (for
   // 1-factor design) or 2 (for 2-factor design) characteristics.
-  var design = proj_meta.design;
+  var design = proj.design;
   // Loop through each sample and check characteristic.
   if (design == 1) {
 
@@ -1722,7 +1722,7 @@ function isEmail(email) {
 
 /**
  * Validates project meta input. If everything is good, returns
- * the inputs in a nice JSON format.
+ * whether the project is valid.
  */
 function validate_proj_meta() {
   var proj_meta = get_proj_meta();
@@ -1776,7 +1776,7 @@ function validate_read_pairs() {
 
 /**
  * Validates sample meta input. If everything is good, returns
- * the inputs in a nice JSON format.
+ * whether the sample is valid.
  */
 function validate_sample_meta(id) {
   var sample_meta = get_sample_meta(id);
