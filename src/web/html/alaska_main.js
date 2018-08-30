@@ -2023,11 +2023,6 @@ function get_proj_meta() {
 }
 
 /**
- * Checks to project meta.
- */
-
-
-/**
  * Get sample metadata inputs.
  */
 function get_sample_meta(id) {
@@ -2106,6 +2101,26 @@ function get_sample_meta(id) {
   }
 
   return sample_meta;
+}
+
+/**
+ * Writes the global proj variable as json to the project temp
+ * directory.
+ */
+var write_proj() {
+  // Send ajax request.
+  $.ajax({
+    type: 'POST',
+    url: 'jsonify.php',
+    data: {
+      id: proj_id,
+      json: JSON.stringify(proj, null, 4)
+    },
+    success:function(out) {
+      console.log(out);
+    }
+  });
+
 }
 
 // Global variables.
