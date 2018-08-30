@@ -2107,7 +2107,7 @@ function get_sample_meta(id) {
  * Writes the global proj variable as json to the project temp
  * directory.
  */
-var write_proj() {
+function write_proj() {
   // Send ajax request.
   $.ajax({
     type: 'POST',
