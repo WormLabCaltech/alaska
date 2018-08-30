@@ -248,6 +248,32 @@ function scroll_to_ele(ele) {
 }
 
 /**
+ * Copy test reads.
+ */
+function copy_test_reads() {
+  // Show the loading spinner.
+  var button = $(this);
+  var spinner = button.children('div:nth-of-type(1)');
+  var success = button.children('div:nth-of-type(2)');
+  set_loading_spinner(button, spinner);
+
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'test_copy_reads',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+
+      spinner.hide();
+      success.show();
+    }
+  });
+}
+
+/**
  * Show ftp info.
  */
 function show_ftp_info(id, pw) {
@@ -260,6 +286,9 @@ function show_ftp_info(id, pw) {
 
   // Add on click handler for fetch reads button.
   $('#fetch_reads_btn').click(fetch_reads);
+
+  // Add on click handler for copy test reads.
+  $('#copy_test_reads_btn').click(copy_test_reads);
 
   bind_raw_reads();
   $('#refetch_reads_btn_2').click(refetch_reads);

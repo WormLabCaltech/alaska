@@ -42,7 +42,7 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%">Done!</div>
 </div></div>
-    <div class="container" id="meta_container">
+    <div class="container" id="meta_container" style="display:none">
         <div id="meta_header">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
@@ -271,7 +271,7 @@
                 </div>
             </div>
         </div>
-        <div class="collapse show" id="sample_SAMPLEID">
+        <div class="collapse" id="sample_SAMPLEID">
             <div class="card-body">
                 <h4 class="card-title" id="sample_id_SAMPLEID">Sample ID</h4>
                 <form novalidate>
@@ -536,6 +536,17 @@
         <div class="card-body">
             <h4 class="card-title">Begin pipeline</h4>
             <p class="card-text">Once all your reads are uploaded, Alaska can start its data analysis pipeline. Please click the button below <strong>ONLY</strong> once all your reads are uploaded.</p>
+            <!--Copy test reads button for testing purposes-->
+            <p class="card-text text-center"><button id="copy_test_reads_btn" class="btn btn-warning mt-2" type="button">
+                Copy test reads
+                <div id="copy_loading_spinner" class="spinner-light ml-3" style="display:none"></div>
+                <div id="copy_success_check" class="ml-3" style="display:none">
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                        <circle class="path circle" fill="none" stroke="#97e570" stroke-width="14" stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1"/>
+                        <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+                    </svg>
+                </div>
+            </button></p>
             <p class="card-text text-center"><button id="fetch_reads_btn" class="btn btn-primary mt-2" type="button">Fetch reads</button></p>
         </div>
     </div>
