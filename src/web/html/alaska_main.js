@@ -1307,6 +1307,13 @@ function add_characteristic() {
   fields.push(new_div);
 }
 
+/**
+ * Save project to temporary json.
+ */
+function save_proj() {
+  set_all_meta();
+  write_proj();
+}
 
 /**
  * Set project meta input.
@@ -1316,9 +1323,13 @@ function set_proj_meta_input() {
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
+  var save_changes_btn = proj_form.find('#proj_save_btn');
 
   proj_contributor_fields.push(proj_contributor_0);
+
+  // Button handlers.
   add_contributor_btn.click(add_contributor);
+  save_changes_btn.click(save_proj);
 }
 
 /**
@@ -1512,6 +1523,10 @@ function set_samples_meta_input() {
     // Set the reads table for this sample.
     set_reads_table(id, sample_form);
 
+    // Save changes button.
+    var save_changes_btn = sample_form.find('#sample_' + id + '_save_btn');
+    save_changes_btn.click(save_proj);
+
     // Add this project to the import/export samples list.
     add_import_export_sample(name, id);
 
@@ -1531,9 +1546,15 @@ function set_samples_meta_input() {
 }
 
 /**
- *
+ * Saves all inputs to temporary json, then
  */
 function show_verify_meta_modal() {
+  // Save all inputs.
+  save_proj();
+
+  // Verify.
+  validate_all_meta();
+
 
 }
 
@@ -1661,10 +1682,9 @@ function substring_matcher(strs) {
  */
 function validate_all_meta() {
   // First, validate individual forms.
-  var proj_meta = validate_proj_meta();
-  proj_meta['samples'] = {};
+  proj_valid = validate_proj_meta();
   for (var id in proj.samples) {
-    proj_meta.samples[id] = validate_sample_meta(id);
+    proj_valid = proj_valid && validate_sample_meta(id);
   }
 
   // Then, we must check whether all samples share either 1 (for
@@ -1677,7 +1697,7 @@ function validate_all_meta() {
 
   }
 
-  return proj_meta;
+  return proj_valid;
 }
 
 /**
@@ -1695,6 +1715,7 @@ function isEmail(email) {
 function validate_proj_meta() {
   var proj_meta = get_proj_meta();
   var meta = proj_meta.meta;
+  var valid = true;
 
   // We don't have to check design because it is a radio button.
   for (var cat in meta) {
@@ -1715,6 +1736,7 @@ function validate_proj_meta() {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
+          valid = false;
         }
         break;
       case 'email':
@@ -1722,12 +1744,15 @@ function validate_proj_meta() {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
+          valid = false;
         }
         break;
       default:
         break;
     }
   }
+
+  return valid;
 }
 
 /**
@@ -1744,6 +1769,7 @@ function validate_read_pairs() {
 function validate_sample_meta(id) {
   var sample_meta = get_sample_meta(id);
   var meta = sample_meta.meta;
+  var valid = true;
 
   // Loop through each field.
   for (var cat in sample_meta) {
@@ -1765,6 +1791,7 @@ function validate_sample_meta(id) {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
+          valid = false;
         }
         break;
 
@@ -1788,6 +1815,7 @@ function validate_sample_meta(id) {
                   dropdown.removeClass('is-invalid');
                 } else {
                   dropdown.addClass('is-invalid');
+                  valid = false;
                   reads.push(read);
                 }
               } else {
@@ -1795,6 +1823,7 @@ function validate_sample_meta(id) {
                 dropdowns.filter(':disabled');
                 dropdowns.filter(':hidden');
                 dropdowns.parent().addClass('is-invalid');
+                valid = false;
               }
             }
           }
@@ -1834,11 +1863,13 @@ function validate_sample_meta(id) {
           if (duplicates.length > 1) {
             for (var j = 0; j < duplicates.length; j++) {
               duplicates[j].addClass('is-invalid');
+              valid = false;
             }
           }
           // field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
+          valid = false;
         }
         break;
 
@@ -1855,12 +1886,13 @@ function validate_sample_meta(id) {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
+          valid = false;
         }
         break;
-
-
     }
   }
+
+  return valid;
 }
 
 /**
@@ -1909,6 +1941,18 @@ function get_sample_input_fields(id) {
   sample_input_fields['stdev'] = form.find('#sample_stdev_' + id);
 
   return sample_input_fields;
+}
+
+/**
+ * Sets all the metadata with values from the form.
+ */
+function set_all_meta() {
+  // Set project meta.
+  set_proj_meta(get_proj_meta());
+
+  for (var id in sample_forms) {
+    set_sample_meta(id, get_sample_meta(id));
+  }
 }
 
 /**
