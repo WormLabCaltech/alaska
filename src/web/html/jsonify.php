@@ -20,6 +20,7 @@ $temp = "_temp";
 # full path to output json
 $path = $path . $id . "/" . $temp . "/" . $id . ".json";
 echo $path;
+echo $json;
 
 # Sanity check, and then write the json.
 if (json_decode($json) != null) {
