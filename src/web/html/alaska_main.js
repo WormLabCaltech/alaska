@@ -1693,7 +1693,7 @@ function validate_all_meta() {
   console.log('proj: ' + proj_valid);
 
   for (var id in proj.samples) {
-    var sample_valid = validate_sample_meta(id)\
+    var sample_valid = validate_sample_meta(id);
     console.log(id + ': ' + sample_valid);
     proj_valid = proj_valid && sample_valid;
   }
