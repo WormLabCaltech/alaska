@@ -23,6 +23,7 @@ import sys
 import zmq
 import time
 import json
+import stat
 import queue
 import signal
 import docker
@@ -1037,6 +1038,9 @@ class AlaskaServer(Alaska):
 
         # output project JSON to temp folder
         proj.save(Alaska.TEMP_DIR)
+        # Set read & write permissions for everyone for this file.
+        permission = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+        os.chmod('{}/{}.json'.format(proj.temp_dir, _id), permission)
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
 
         # Then, output the JSON.
