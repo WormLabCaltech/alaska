@@ -264,6 +264,10 @@ function show_ftp_info(id, pw) {
   bind_raw_reads();
   $('#refetch_reads_btn_2').click(refetch_reads);
 
+  // Change url.
+  history.pushState(null, '', '/?id=' + id);
+  $('#proj_url').text(window.location.href);
+
   // Show the div.
   ftp_div.show();
 
@@ -1436,7 +1440,7 @@ function set_sample_meta_fields(id) {
           var first_row = field[0];
           var add_btn = first_row.children('button');
           first_row.children('input:nth-of-type(1)').val(chars[0]);
-          first_row.children('input:nth-of-type(1)').val(val[chars[0]]);
+          first_row.children('input:nth-of-type(2)').val(val[chars[0]]);
 
           // Then, deal with subsequent contributors.
           for (var i = 1; i < Object.keys(val).length; i++) {
