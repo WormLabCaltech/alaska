@@ -1547,6 +1547,8 @@ function set_meta_input() {
   // Then, set the samples metadata.
   set_samples_meta_input();
 
+  set_meta_input_fields();
+
   // Then, add listener to verify metadata button.
   $('#verify_meta_btn').click(show_verify_meta_modal);
 }
