@@ -1531,6 +1531,13 @@ function set_samples_meta_input() {
 }
 
 /**
+ *
+ */
+function show_verify_meta_modal() {
+
+}
+
+/**
  * Set meta input form.
  */
 function set_meta_input() {
@@ -1539,6 +1546,9 @@ function set_meta_input() {
 
   // Then, set the samples metadata.
   set_samples_meta_input();
+
+  // Then, add listener to verify metadata button.
+  $('#verify_meta_btn').click(show_verify_meta_modal);
 }
 
 /*
@@ -1749,7 +1759,7 @@ function validate_sample_meta(id) {
       case 'length':
       case 'stdev':
         // These just have to be filled out.
-        if (val != '' && val != null) {
+        if (val != '' && val != null && val != 0) {
           field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
@@ -1824,7 +1834,7 @@ function validate_sample_meta(id) {
               duplicates[j].addClass('is-invalid');
             }
           }
-          field.removeClass('is-invalid');
+          // field.removeClass('is-invalid');
         } else {
           field.addClass('is-invalid');
         }
@@ -1990,22 +2000,22 @@ function get_sample_meta(id) {
     sample_meta['organism'] = split[0] + '_' + split[1];
     sample_meta['ref_ver'] = split.slice(2).join('_');
   } else {
-    sample_meta['organism'] = null;
-    sample_meta['ref_ver'] = null;
+    sample_meta['organism'] = '';
+    sample_meta['ref_ver'] = '';
   }
 
   var length = sample_input_fields['length'].val();
   if (length != '' && length != null) {
     sample_meta['length'] = parseInt(length);
   } else {
-    sample_meta['length'] = null;
+    sample_meta['length'] = 0;
   }
 
   var stdev = sample_input_fields['stdev'].val();
   if (stdev != '' && stdev != null) {
     sample_meta['stdev'] = parseInt(stdev);
   } else {
-    sample_meta['stdev'] = null;
+    sample_meta['stdev'] = 0;
   }
 
   return sample_meta;

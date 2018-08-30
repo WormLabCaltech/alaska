@@ -54,7 +54,102 @@
                     <h2 class="text-center text-white" style="font-weight:100;font-size:2em;">Please fill out the form below.</h2>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center text-white" style="font-weight:100;font-size:1.2em;">Once you're done, click this button.</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal">Verify metadata</button></div>
+            </div><!--Choose samples modal.-->
+<div class="modal fade" id="check_meta_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header alert-danger">
+                <h4 class="modal-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Metadata Validation Failed
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-title">
+                    <h5>There are some fields that did not pass validation.</h5>
+                </div>
+                <p>Problematic input fields have been highlighted with red. Please fix those inputs and press the verify metadata button again.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
+    </div>
+</div><!--Choose samples modal.-->
+<div class="modal fade" id="choose_controls_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h2 class="modal-title">
+                    <i class="fas fa-vial"></i>
+                    Project Controls Form
+                </h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-title">
+                    <h3>Please choose your control characteristic and details.</h3>
+                    <p>The characteristic must be present in <u><strong>all samples</strong></u> for it to be selected as a control characteristic. Alaska will automatically select all samples with matching characteristics and details as controls.</p>
+                </div>
+                <hr />
+                <div class="modal-title">
+                    <h5 id="">This project is a FACTOR design.</h5>
+                    <p>Please dismiss this window if you need to make any changes.</p>
+                </div>
+                <hr />
+                <form>
+                    <div class="form-group" id="proj_control_0">
+                        <div class="row">
+                            <label for="proj_control_char_0" class="col-form-label col-sm-4">Control Characteristic 1</label>
+                            <div class="col-sm-6">
+                                <select class="custom-select" id="proj_control_char_0" required>
+                                    <option selected disabled hidden>Please select a characteristic.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <label for="proj_control_detail_0" class="col-form-label col-sm-4">Control Detail 1</label>
+                            <div class="col-sm-6">
+                                <select class="custom-select" id="proj_control_detail_0" required>
+                                    <option selected disabled hidden>Please select a detail.</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" id="proj_control_1" style="display:none">
+                    <hr />
+                        <div class="row">
+                            <label for="proj_control_char_1" class="col-form-label col-sm-4">Control Characteristic 1</label>
+                            <div class="col-sm-6">
+                                <select class="custom-select" id="proj_control_char_1" required>
+                                    <option selected disabled hidden>Please select a characteristic.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <label for="proj_control_detail_1" class="col-form-label col-sm-4">Control Detail 1</label>
+                            <div class="col-sm-6">
+                                <select class="custom-select" id="proj_control_detail_1" required>
+                                    <option selected disabled hidden>Please select a detail.</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="start_analysis_btn" class="btn btn-success btn-lg text-bold">Start analysis</button>
+            </div>
+        </div>
+    </div>
+</div></div>
         <div id="meta_proj" class="mt-5"><div class="card mx-2">
     <div class="card-header alert-primary h2">
         <i class="fas fa-cube"></i>
@@ -334,66 +429,6 @@
                 </form>
             </div>
         </div>
-    </div>
-</div></div>
-        <div id="meta_controls" class="mt-5"><div class="card mx-2" id="proj_controls">
-    <div class="card-header alert-success h2">
-        <i class="fas fa-vial"></i>
-        Project Controls Form
-        <div class="dropdown d-inline float-right">
-            <button class="btn btn-success ml-3" type="button" id="choose_sample_btn">Reload</button>
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="card-title">
-            <h3>Please choose your control characteristic and details.</h3>
-            <p>The characteristic must be present in <u><strong>all samples</strong></u> for it to be selected as a control characteristic. Alaska will automatically select all samples with matching characteristics and details as controls.</p>
-        </div>
-        <hr />
-        <div class="card-title">
-            <h5 id="">This project is a FACTOR design.</h5>
-            <p>Please press the reload button after any changes to the project or samples.</p>
-        </div>
-        <hr />
-        <form>
-            <div class="form-group" id="proj_control_0">
-                <div class="row">
-                    <label for="proj_control_char_0" class="col-form-label col-sm-4">Control Characteristic 1</label>
-                    <div class="col-sm-6">
-                        <select class="custom-select" id="proj_control_char_0" required>
-                            <option selected disabled hidden>Please select a characteristic.</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <label for="proj_control_detail_0" class="col-form-label col-sm-4">Control Detail 1</label>
-                    <div class="col-sm-6">
-                        <select class="custom-select" id="proj_control_detail_0" required>
-                            <option selected disabled hidden>Please select a detail.</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group" id="proj_control_1" style="display:none">
-            <hr />
-                <div class="row">
-                    <label for="proj_control_char_1" class="col-form-label col-sm-4">Control Characteristic 1</label>
-                    <div class="col-sm-6">
-                        <select class="custom-select" id="proj_control_char_1" required>
-                            <option selected disabled hidden>Please select a characteristic.</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <label for="proj_control_detail_1" class="col-form-label col-sm-4">Control Detail 1</label>
-                    <div class="col-sm-6">
-                        <select class="custom-select" id="proj_control_detail_1" required>
-                            <option selected disabled hidden>Please select a detail.</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </form>
     </div>
 </div></div>
     </div>
