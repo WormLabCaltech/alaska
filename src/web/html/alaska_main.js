@@ -1990,7 +1990,7 @@ function set_sample_meta(id, meta) {
       case 'contributors':
       case 'source':
       case 'chars':
-      case 'description'
+      case 'description':
         proj.samples[id].meta[cat] = val;
     }
   }
