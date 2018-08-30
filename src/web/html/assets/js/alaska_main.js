@@ -1912,6 +1912,73 @@ function get_sample_input_fields(id) {
 }
 
 /**
+ * Set global proj dictionary with the values given.
+ */
+function set_proj_meta(meta) {
+  for (var cat in meta) {
+    var val = meta[cat];
+
+    switch (cat) {
+      case 'design':
+      default:
+        proj[cat] = val;
+    }
+  }
+
+  // Deal with meta field separately.
+  for (var cat in meta.meta) {
+    var val = meta.meta[cat];
+
+    switch (cat) {
+      case 'title':
+      case 'summary':
+      case 'contributors':
+      case 'SRA_center_code':
+      case 'email':
+      default:
+        proj.meta[cat] = val;
+    }
+  }
+}
+
+/**
+ * Set the specified sample in the global proj dictionary with
+ * the values given.
+ */
+function set_sample_meta(id, meta) {
+  for (var cat in meta) {
+    var val = meta[cat];
+
+    switch (cat) {
+      // If reads is present, that means it is paired.
+      case 'reads':
+        var new_reads = [];
+        for (var i = 0; i < val.length; i++) {
+          var pair = val[i];
+          var read_1 = pair[0];
+          var read_2 = pair[1];
+          var new_pair = [proj.samples[id][cat][read_1],
+                            proj.samples[id][cat][read_2]];
+
+          new_reads.push(new_pair);
+        }
+        proj.samples[id][cat] = new_reads;
+        break;
+
+      case 'name':
+      case 'type':
+      case 'organism':
+      case 'ref_ver':
+      case 'length':
+      case 'stdev':
+      default:
+        proj.samples[id][cat] = val;
+
+    }
+  }
+}
+
+/**
  * Get project metadata inputs.
  */
 function get_proj_meta() {
