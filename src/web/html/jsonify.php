@@ -18,9 +18,13 @@ $path = "/alaska/root/projects/";
 $temp = "_temp";
 
 # full path to output json
-$path = $id . ".json";
+$path = $path . $id . "/" . $temp . "/" . $id . ".json";
 echo $path . "\n";
 echo $json;
+
+if (is_writable($path)) {
+  echo "writable";
+}
 
 # Sanity check, and then write the json.
 if (json_decode($json) != null) {
