@@ -151,17 +151,6 @@ class Alaska():
     # 13: Diff exp finished.
     # 14: Server opened
 
-    def send_email(self, to, fr, subject, msg):
-        """
-        Send mail with the given arguments.
-        """
-        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'
-                .format(msg, fr, subject, to)
-
-        try:
-            
-
-
     def rand_str(self, l):
         """
         Generates a random string with lowercase and numbers.
