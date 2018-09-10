@@ -788,7 +788,6 @@ class AlaskaServer(Alaska):
                                                 Alaska.RAW_DIR,
                                                 __id)
             out = ftp.exec_run(cmd)
-            print(out)
             exit_code = out[0]
             if exit_code != 0:
                 raise Exception('{}: FTP user creation exited with non-zero status.'
@@ -798,7 +797,6 @@ class AlaskaServer(Alaska):
                                                 Alaska.FTP_COUNT_LIMIT,
                                                 Alaska.FTP_SIZE_LIMIT)
             out = ftp.exec_run(cmd)
-            print(out)
             exit_code = out[0]
             if exit_code != 0:
                 raise Exception('{}: FTP user modification exited with non-zero status.'
@@ -859,6 +857,23 @@ class AlaskaServer(Alaska):
 
         if close:
             self.close(_id)
+
+    def send_email(self, to, fr, subject, msg):
+        """
+        Send mail with the given arguments.
+        """
+        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'
+                .format(msg, fr, subject, to)
+
+        try:
+            server = self.DOCKER.containers.get(Alaska.DOCKER_SERVER_TAG)
+            out = server.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception('ERROR: mail send to {} failed.'.format(to))
+        except docker.errors.NotFound as e:
+            self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+
 
     def exists(self, _id):
         """
@@ -1680,6 +1695,23 @@ class AlaskaServer(Alaska):
                 self.out('INFO: removing folder {}'.format(path))
                 shutil.rmtree(path)
 
+                # Then, if an ftp account was created, remove that too.
+                if fname in self.ftp:
+                    del self.ftp[fname]
+
+                    try:
+                        ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+                        if ftp.status != 'running':
+                            self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+
+                        cmd = 'pure-pw userdel {}'.format(fname)
+                        out = ftp.exec_run(cmd)
+                        exit_code = out[0]
+                        if exit_code != 0:
+                            raise Exception('ERROR: failed to remove ftp for {}'.format(fname))
+                    except docker.errors.NotFound as e:
+                        self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+
         # Then, deal with jobs.
         self.out('INFO: cleaning up jobs')
         for fname in os.listdir(Alaska.JOBS_DIR):
@@ -1998,6 +2030,8 @@ if __name__ == '__main__':
         # Register signal handler for SIGTERM.
         signal.signal(signal.SIGTERM, server.stop)
         signal.signal(signal.SIGILL, server.stop)
+
+        server.send_email('kmin@caltech.edu', 'noreply@alaska.caltech.edu', 'test', 'this is a test')
 
         # Start the server.
         server.start(force=True)

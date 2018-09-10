@@ -80,6 +80,7 @@ class Alaska():
     DOCKER_QC_TAG = 'alaska_qc:latest'
     DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest' # kallisto image version to use
     DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest' # sleuth image version to use
+    DOCKER_SERVER_TAG = 'alaska_server'
     DOCKER_FTP_TAG = 'ftpd_server'
 
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
@@ -150,6 +151,15 @@ class Alaska():
     # 13: Diff exp finished.
     # 14: Server opened
 
+    def send_email(self, to, fr, subject, msg):
+        """
+        Send mail with the given arguments.
+        """
+        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'
+                .format(msg, fr, subject, to)
+
+        try:
+            
 
 
     def rand_str(self, l):
