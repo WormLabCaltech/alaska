@@ -862,7 +862,7 @@ class AlaskaServer(Alaska):
         """
         Send mail with the given arguments.
         """
-        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'.format(msg, fr, subject, to)
+        cmd = 'echo "{}" | mail -r {} -s "{}" {}'.format(msg, fr, subject, to)
 
         try:
             server = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
