@@ -1792,23 +1792,37 @@ function set_choose_controls_modal(modal) {
 }
 
 /**
- * Sets the global charicteristic-to-samples dictionary.
+ * Sets the global charicteristic-details-to-samples dictionary.
  */
-function set_chars_to_samples() {
+function set_chars_details_to_samples() {
+  // Reset
+  chars_to_samples = {};
+  chars_details_to_samples = {};
+
   for (var id in proj.samples) {
     var sample = proj.samples[id];
 
     for (var char in sample.meta.chars) {
       var detail = sample.meta.chars[char];
 
-      if (char in chars_to_samples) {
-        if (detail in chars_to_samples[char]) {
-          chars_to_samples[char][detail].push(id);
-        } else {
-          chars_to_samples[char][detail] = [];
-        }
+      // Deal with chars_details_to_samples first
+      if (!(char in chars_details_to_samples)) {
+        chars_details_to_samples[char] = {};
+      }
+
+      if (!(detail in chars_details_to_samples[char])) {
+        chars_details_to_samples[char][detail] = [id];
       } else {
-        chars_to_samples[char] = {};
+        chars_details_to_samples[char][detail].push(id);
+      }
+
+      // Then, deal with chars_to_samples.
+      if (!(char in chars_to_samples)) {
+        chars_to_samples[char] = [id];
+      } else {
+        if (!chars_to_samples.includes(id)) {
+          chars_to_samples[char].push(id);
+        }
       }
     }
   }
@@ -2475,6 +2489,7 @@ var sample_contributor_fields = {};
 var sample_characteristic_fields = {};
 var sample_pair_fields = {};
 var chars_to_samples = {};
+var chars_details_to_samples = {};
 
 // To run when page is loaded.
 $(document).ready(function() {
