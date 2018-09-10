@@ -1822,6 +1822,8 @@ function set_choose_controls_modal(modal) {
   var control_1 = modal.find('#proj_control_1');
   var controls = [control_0, control_1];
 
+  tooltip.tooltip();
+
   // Set characteristic and detail dropdowns.
   for (var i = 0; i < controls.length; i++) {
     var ctrl = controls[i];
