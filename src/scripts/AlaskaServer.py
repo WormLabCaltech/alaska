@@ -865,11 +865,11 @@ class AlaskaServer(Alaska):
         cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'.format(msg, fr, subject, to)
 
         try:
-            server = self.DOCKER.containers.get(Alaska.DOCKER_SERVER_TAG)
+            server = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
             out = server.exec_run(cmd)
             exit_code = out[0]
             if exit_code != 0:
-                raise Exception('ERROR: mail send to {} failed.'.format(to))
+                raise Exception('ERROR: email send to {} failed.'.format(to))
         except docker.errors.NotFound as e:
             self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
 
