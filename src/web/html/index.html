@@ -158,7 +158,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" id="validate_controls_btn" class="btn btn-primary">Validate</button>
-                <button type="button" id="start_analysis_btn" class="btn btn-success btn-lg text-bold" disabled>Start analysis</button>
+                <span class="d-inline-block" tabindex="0", data-toggle="tooltip"  title="Please verify first." id="start_analysis_tooltip">
+                    <button type="button" id="start_analysis_btn" class="btn btn-success btn-lg text-bold" style="pointer-events: none" disabled>Start analysis</button>
+                </span>
             </div>
         </div>
     </div>

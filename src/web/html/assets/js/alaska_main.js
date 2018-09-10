@@ -1816,6 +1816,8 @@ function set_choose_controls_modal(modal) {
   var design = proj.design;
   var description = modal.find('#design_description');
   var header = description.children('#design_header');
+  var tooltip = modal.find('#start_analysis_tooltip');
+  var start_btn = modal.find('#start_analysis_btn');
   var control_0 = modal.find('#proj_control_0');
   var control_1 = modal.find('#proj_control_1');
   var controls = [control_0, control_1];
@@ -1834,7 +1836,18 @@ function set_choose_controls_modal(modal) {
     set_characteristic_options(char);
 
     // Then, bind to change.
-    char.change({'detail': detail, 'list': list}, function (e) {
+    char.change({
+      'tooltip': tooltip,
+      'btn': start_btn,
+      'detail': detail,
+      'list': list
+    }, function (e) {
+      // First, disable start analysis button,
+      var tooltip = e.data.tooltip;
+      var btn = e.data.btn;
+      tooltip.tooltip('enable');
+      btn.prop('disabled', true);
+
       // Hide list of samples.
       e.data.list.hide();
 
@@ -1842,7 +1855,18 @@ function set_choose_controls_modal(modal) {
       set_detail_options(e.data.detail, val);
     });
 
-    detail.change({'list': list}, function (e) {
+    detail.change({
+      'list': list,
+      'tooltip': tooltip,
+      'btn': start_btn
+    }, function (e) {
+      // First, disable start analysis button,
+      var tooltip = e.data.tooltip;
+      var btn = e.data.btn;
+      tooltip.tooltip('enable');
+      btn.prop('disabled', true);
+
+
       // Hide list of samples.
       e.data.list.hide();
     });
@@ -1850,12 +1874,26 @@ function set_choose_controls_modal(modal) {
 
     // Bind validate button.
     var validate_btn = modal.find('#validate_controls_btn');
-    validate_btn.click({'controls': controls}, function (e) {
-      verify_controls(e.data.controls);
+    validate_btn.click({
+      'tooltip': tooltip,
+      'btn': start_btn,
+      'controls': controls
+    }, function (e) {
+      var tooltip = e.data.tooltip;
+      var btn = e.data.btn;
+      var valid = verify_controls(e.data.controls);
+
+      // If the controls are valid, enable the start analysis button.
+      if (valid) {
+        tooltip.tooltip('disable');
+        btn.prop('disabled', false);
+      } else {
+        tooltip.tooltip('enable');
+        btn.prop('disabled', true);
+      }
     });
 
     // Finally, bind start analysis button.
-    var start_btn = modal.find('#start_analysis_btn');
     start_btn.click(function () {
     });
   }
@@ -1920,6 +1958,7 @@ function verify_controls(controls) {
   }
 
   // Then, show selected controls for ones that are not invalid.
+  var valid = true;
   for (var i = 0; i < controls.length; i++) {
     var ctrl = controls[i];
 
@@ -1942,8 +1981,12 @@ function verify_controls(controls) {
         list.children('ul').append(item);
       }
       list.show();
+    } else {
+      valid = false;
     }
   }
+
+  return valid;
 }
 
 /**
