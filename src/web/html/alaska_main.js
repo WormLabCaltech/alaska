@@ -1826,16 +1826,25 @@ function set_choose_controls_modal(modal) {
 
     var char_id = 'proj_control_char_' + i;
     var detail_id = 'proj_control_detail_' + i;
+    var list_id = 'control_samples_' + i;
     var char = ctrl.find('#' + char_id);
     var detail = ctrl.find('#' + detail_id);
+    var list = ctrl.find('#' + list_id);
 
     set_characteristic_options(char);
 
     // Then, bind to change.
-    char.change({'detail': detail}, function (e) {
-      var val = $(this).children('option:selected').val();
+    char.change({'detail': detail, 'list': list}, function (e) {
+      // Hide list of samples.
+      e.data.list.hide();
 
+      var val = $(this).children('option:selected').val();
       set_detail_options(e.data.detail, val);
+    });
+
+    detail.change('list': list}, function (e) {
+      // Hide list of samples.
+      e.data.list.hide();
     });
 
 
@@ -1888,7 +1897,7 @@ function verify_controls(controls) {
     char_dropdown.removeClass('is-invalid');
     detail_dropdown.removeClass('is-invalid');
     list.hide();
-    list.children('ul li').remove();
+    list.find('ul li').remove();
 
     // First, make sure something is selected.
     if (char == null || char == '') {
