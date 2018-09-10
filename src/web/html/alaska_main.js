@@ -1792,6 +1792,29 @@ function set_choose_controls_modal(modal) {
 }
 
 /**
+ * Sets the global charicteristic-to-samples dictionary.
+ */
+function set_chars_to_samples() {
+  for (var id in proj.samples) {
+    var sample = proj.samples[id];
+
+    for (var char in sample.meta.chars) {
+      var detail = sample.meta.chars[char];
+
+      if (char in chars_to_samples) {
+        if (detail in chars_to_samples[char]) {
+          chars_to_samples[char][detail].push(id);
+        } else {
+          chars_to_samples[char][detail] = [];
+        }
+      } else {
+        chars_to_samples[char] = {};
+      }
+    }
+  }
+}
+
+/**
  * Saves all inputs to temporary json, then
  */
 function show_verify_meta_modal() {
@@ -2451,6 +2474,7 @@ var proj_contributor_fields = [];
 var sample_contributor_fields = {};
 var sample_characteristic_fields = {};
 var sample_pair_fields = {};
+var chars_to_samples = {};
 
 // To run when page is loaded.
 $(document).ready(function() {
