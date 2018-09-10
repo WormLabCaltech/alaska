@@ -1902,7 +1902,7 @@ function set_choose_controls_modal(modal) {
     // Finally, bind start analysis button.
     start_btn.click({'controls': controls}, function (e) {
       set_controls(e.data.controls);
-      save_proj(start_analysis);
+      write_proj(start_analysis);
     });
   }
 
@@ -2198,17 +2198,17 @@ function fetch_sample_names() {
     var val = input.val();
     input.removeClass('is-invalid');
 
-    if (!(val in names)) {
-      names[val] = input;
-    } else {
-      input.addClass('is-invalid');
-      names[val].addClass('is-invalid');
-      valid = false;
-    }
-
     // If the input is empty, just use default (i.e. do nothing).
-    if (valid && input.val() != '') {
-      proj.samples[id].name = input.val();
+    if (val != '') {
+      if (!(val in names)) {
+        names[val] = input;
+      } else {
+        input.addClass('is-invalid');
+        names[val].addClass('is-invalid');
+        valid = false;
+      }
+
+      proj.samples[id].name = val;
     }
   }
 
@@ -2237,6 +2237,8 @@ function meta_input() {
   var valid = fetch_sample_names();
 
   if (valid) {
+    $('#sample_names_modal').modal('hide');
+
     set_meta_input();
 
     show_meta_input();
