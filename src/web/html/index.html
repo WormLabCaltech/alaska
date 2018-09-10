@@ -123,11 +123,16 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="mt-4" id="control_samples_0" style="display:none">
+                            The following samples will be selected as controls for this characteristic:
+                            <ul id="control_samples_list_0">
+                            </ul>
+                        </div>
                     </div>
                     <div class="form-group" id="proj_control_1" style="display:none">
                     <hr />
                         <div class="row">
-                            <label for="proj_control_char_1" class="col-form-label col-sm-4">Control Characteristic 1</label>
+                            <label for="proj_control_char_1" class="col-form-label col-sm-4">Control Characteristic 2</label>
                             <div class="col-sm-6">
                                 <select class="custom-select" id="proj_control_char_1" required>
                                     <option selected disabled hidden>Please select a characteristic.</option>
@@ -135,19 +140,25 @@
                             </div>
                         </div>
                         <div class="row mt-2">
-                            <label for="proj_control_detail_1" class="col-form-label col-sm-4">Control Detail 1</label>
+                            <label for="proj_control_detail_1" class="col-form-label col-sm-4">Control Detail 2</label>
                             <div class="col-sm-6">
                                 <select class="custom-select" id="proj_control_detail_1" disabled required>
                                     <option selected disabled hidden>Please select a detail.</option>
                                 </select>
                             </div>
                         </div>
+                        <div class="mt-4" id="control_samples_1" style="display:none">
+                            The following samples will be selected as controls for this characteristic:
+                            <ul id="control_samples_list_1">
+                            </ul>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" id="start_analysis_btn" class="btn btn-success btn-lg text-bold">Start analysis</button>
+                <button type="button" id="validate_controls_btn" class="btn btn-primary">Validate</button>
+                <button type="button" id="start_analysis_btn" class="btn btn-success btn-lg text-bold" disabled>Start analysis</button>
             </div>
         </div>
     </div>

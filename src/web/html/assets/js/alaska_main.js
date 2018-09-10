@@ -1776,11 +1776,16 @@ function set_characteristic_options(dropdown) {
     // the total number of samples, this means that every sample has
     // this characteristic.
     if (Object.keys(proj.samples).length == chars_to_samples[char].length) {
-      var option = $('<option>', {
-        text: char,
-        value: char
-      });
-      dropdown.append(option);
+      // The characteristic is valid to be a control only if it has
+      // 2+ details.
+      if (Object.keys(chars_details_to_samples[char]).length > 1) {
+        var option = $('<option>', {
+          text: char,
+          value: char
+        });
+        dropdown.append(option);
+
+      }
     }
   }
 }
@@ -1789,15 +1794,16 @@ function set_characteristic_options(dropdown) {
  * Sets detail selection dropdown options for the control modal.
  */
 function set_detail_options(dropdown, characteristic) {
+  // First, reset the details dropdown.
+  dropdown.children('option:disabled').prop('selected', true);
+  dropdown.children('option:not(:disabled)').remove();
+
   for (var detail in chars_details_to_samples[characteristic]) {
-    // Valid option only if there are more than one detail.
-    if (Object.keys(chars_details_to_samples[characteristic]).length > 1) {
-      var option = $('<option>', {
-        text: detail,
-        value: detail
-      });
-      dropdown.append(option);
-    }
+    var option = $('<option>', {
+      text: detail,
+      value: detail
+    });
+    dropdown.append(option);
   }
 
   dropdown.prop('disabled', false);
@@ -1831,6 +1837,18 @@ function set_choose_controls_modal(modal) {
 
       set_detail_options(e.data.detail, val);
     });
+
+
+    // Bind validate button.
+    var validate_btn = modal.find('#validate_controls_btn');
+    validate_btn.click({'controls': controls}, function (e) {
+      verify_controls(e.data.controls);
+    });
+
+    // Finally, bind start analysis button.
+    var start_btn = modal.find('#start_analysis_btn');
+    start_btn.click(function () {
+    });
   }
 
   // Depending on the project design, show a different description.
@@ -1847,6 +1865,76 @@ function set_choose_controls_modal(modal) {
 
   header.text(header.text().replace('FACTOR', text));
   to_hide.hide();
+}
+
+/**
+ * Verifies the controls.
+ * We only need to verify whether the two controls are different.
+ * (This only applies to 2-factor design.)
+ */
+function verify_controls(controls) {
+  chars = {};
+  for (var i = 0; i < controls.length; i++) {
+    var ctrl = controls[i];
+
+    var char_id = 'proj_control_char_' + i;
+    var detail_id = 'proj_control_detail_' + i;
+    var list_id = 'control_samples_' + i;
+    var char_dropdown = ctrl.find('#' + char_id);
+    var detail_dropdown = ctrl.find('#' + detail_id);
+    var list = ctrl.find('#' + list_id);
+    var char = char_dropdown.children('option:selected').val();
+    var detail = detail_dropdown.children('option:selected').val();
+    char_dropdown.removeClass('is-invalid');
+    detail_dropdown.removeClass('is-invalid');
+    list.hide();
+    list.children('ul li').remove();
+
+    // First, make sure something is selected.
+    if (char == null || char == '') {
+      char_dropdown.addClass('is-invalid');
+    }
+    if (detail == null || detail == '') {
+      detail_dropdown.addClass('is-invalid');
+    }
+
+    // Then, check whether any has the same characteristic-detail pair.
+    if (!(char in chars)) {
+      chars[char] = {};
+    }
+    if (!(detail in chars[char])) {
+      chars[char][detail] = detail_dropdown;
+    } else {
+      detail_dropdown.addClass('is-invalid');
+      chars[char][detail].addClass('is-invalid');
+    }
+  }
+
+  // Then, show selected controls for ones that are not invalid.
+  for (var i = 0; i < controls.length; i++) {
+    var ctrl = controls[i];
+
+    var char_id = 'proj_control_char_' + i;
+    var detail_id = 'proj_control_detail_' + i;
+    var list_id = 'control_samples_' + i;
+    var char_dropdown = ctrl.find('#' + char_id);
+    var detail_dropdown = ctrl.find('#' + detail_id);
+    var list = ctrl.find('#' + list_id);
+    var char = char_dropdown.children('option:selected').val();
+    var detail = detail_dropdown.children('option:selected').val();
+
+    if (!char_dropdown.hasClass('is-invalid') && !detail_dropdown.hasClass('is-invalid')) {
+      var samples = chars_details_to_samples[char][detail];
+      for (var j = 0; j < samples.length; j++) {
+        var sample = samples[j];
+        var item = $('<li>', {
+          text: proj.samples[sample].name;
+        });
+        list.children('ul').append(item);
+      }
+      list.show();
+    }
+  }
 }
 
 /**
