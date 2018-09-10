@@ -1928,7 +1928,7 @@ function verify_controls(controls) {
       for (var j = 0; j < samples.length; j++) {
         var sample = samples[j];
         var item = $('<li>', {
-          text: proj.samples[sample].name;
+          text: proj.samples[sample].name
         });
         list.children('ul').append(item);
       }
