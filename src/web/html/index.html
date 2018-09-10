@@ -42,7 +42,7 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%">Done!</div>
 </div></div>
-    <div class="container" id="meta_container" style="display:none">
+    <div class="container" id="meta_container">
         <div id="meta_header">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
@@ -60,7 +60,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal">Verify metadata</button></div>
+                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal" data-target="#choose_controls_modal">Verify metadata</button></div>
             </div><!--Choose samples modal.-->
 <div class="modal fade" id="check_meta_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -98,8 +98,10 @@
                     <p>The characteristic must be present in <u><strong>all samples</strong></u> for it to be selected as a control characteristic. Alaska will automatically select all samples with matching characteristics and details as controls.</p>
                 </div>
                 <hr />
-                <div class="modal-title">
-                    <h5 id="">This project is a FACTOR design.</h5>
+                <div class="modal-title" id="design_description">
+                    <h5 id="design_header">This project is a FACTOR design.</h5>
+                    <p id="design_1_description">All sample must have at least <strong>one</strong> common characteristic. There must be at least <strong>two</strong> different details, among all the samples, for this common characteristic.</p>
+                    <p id="design_2_description">All samples must have at least <strong>two</strong> common characteristics. There must be at least <strong>two</strong> different details, among all the samples, for each common characteristic.</p>
                     <p>Please dismiss this window if you need to make any changes.</p>
                 </div>
                 <hr />

@@ -1769,6 +1769,28 @@ function set_samples_meta_input() {
 }
 
 /**
+ * Sets the choose controls modal with the appropriate information.
+ */
+function set_choose_controls_modal(modal) {
+  var design = proj.design;
+  var description = modal.find('#design_description');
+
+  // Depending on the project design, show a different description.
+  var text;
+  var to_hide;
+  if (design == 1) {
+    text = '1-factor';
+    to_hide = description.children('#design_2_description');
+  } else if (design == 2) {
+    text = '2-factor';
+    to_hide = description.children('#design_1_description');
+  }
+
+  description.text(description.text().replace('FACTOR', text));
+  to_hide.hide();
+}
+
+/**
  * Saves all inputs to temporary json, then
  */
 function show_verify_meta_modal() {
@@ -1780,12 +1802,15 @@ function show_verify_meta_modal() {
 
   // Depending on whether or not all the input is valid,
   // show different modal.
+  var modal;
   if (valid) {
-    $('#choose_controls_modal').modal('show');
+    modal = $('#choose_controls_modal');
+    set_choose_controls_modal(modal);
   } else {
-    $('#check_meta_modal').modal('show');
+    modal = $('#check_meta_modal');
   }
 
+  modal.modal('show');
 }
 
 /**

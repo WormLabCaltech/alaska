@@ -2030,8 +2030,6 @@ if __name__ == '__main__':
         signal.signal(signal.SIGTERM, server.stop)
         signal.signal(signal.SIGILL, server.stop)
 
-        server.send_email('kmin@caltech.edu', 'noreply@alaska.caltech.edu', 'test', 'this is a test')
-
         # Start the server.
         server.start(force=True)
     except KeyboardInterrupt:
