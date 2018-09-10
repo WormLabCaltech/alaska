@@ -1842,7 +1842,7 @@ function set_choose_controls_modal(modal) {
       set_detail_options(e.data.detail, val);
     });
 
-    detail.change('list': list}, function (e) {
+    detail.change({'list': list}, function (e) {
       // Hide list of samples.
       e.data.list.hide();
     });
