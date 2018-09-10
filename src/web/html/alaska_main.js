@@ -1810,6 +1810,7 @@ function show_verify_meta_modal() {
     modal = $('#check_meta_modal');
   }
 
+  modal = $('#choose_controls_modal');
   modal.modal('show');
 }
 
