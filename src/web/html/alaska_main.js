@@ -1848,6 +1848,7 @@ function set_choose_controls_modal(modal) {
       var tooltip = e.data.tooltip;
       var btn = e.data.btn;
       tooltip.tooltip('enable');
+      btn.css('pointer-events', 'none');
       btn.prop('disabled', true);
 
       // Hide list of samples.
@@ -1866,6 +1867,7 @@ function set_choose_controls_modal(modal) {
       var tooltip = e.data.tooltip;
       var btn = e.data.btn;
       tooltip.tooltip('enable');
+      btn.css('pointer-events', 'none');
       btn.prop('disabled', true);
 
 
@@ -1888,9 +1890,11 @@ function set_choose_controls_modal(modal) {
       // If the controls are valid, enable the start analysis button.
       if (valid) {
         tooltip.tooltip('disable');
+        btn.css('pointer-events', 'auto');
         btn.prop('disabled', false);
       } else {
         tooltip.tooltip('enable');
+        btn.css('pointer-events', 'none');
         btn.prop('disabled', true);
       }
     });
@@ -1914,6 +1918,38 @@ function set_choose_controls_modal(modal) {
 
   header.text(header.text().replace('FACTOR', text));
   to_hide.hide();
+}
+
+/**
+ * Sets controls to the global proj object.
+ */
+function set_controls(controls) {
+  ctrls = {};
+  for (var i = 0; i < controls.length; i++) {
+    var ctrl = controls[i];
+    var char = ctrl.children('div:nth-of-type(1)').find('option:selected').val();
+
+    var items = ctrl.find('li');
+    if (items == null) {
+      ctrl.find('select').addClass('is-invalid');
+    } else {
+      var names = [];
+      items.each(function() {
+        names.push($(this).text());
+      });
+
+      // Add these to the dictionary.
+      for (var j = 0; j < names.length; j++) {
+        var name = names[j];
+        var id = names_to_ids[name];
+
+        ctrls[id] = char;
+      }
+
+      // Once this is done, set the project chars dictionary.
+      proj.ctrls = ctrls;
+    }
+  }
 }
 
 /**
@@ -2106,16 +2142,29 @@ function show_meta_input() {
  */
 function fetch_sample_names() {
   var input_id = 'name_input_SAMPLEID';
+  var valid = true;
 
+  var names = {};
   for (var id in proj.samples) {
     var input = $('#' + input_id.replace('SAMPLEID', id));
     var val = input.val();
+    input.removeClass('is-invalid');
+
+    if (!(val in names)) {
+      names[val] = input;
+    } else {
+      input.addClass('is-invalid');
+      names[val].addClass('is-invalid');
+      valid = false;
+    }
 
     // If the input is empty, just use default (i.e. do nothing).
-    if (input.val() != '') {
+    if (valid && input.val() != '') {
       proj.samples[id].name = input.val();
     }
   }
+
+  return valid;
 }
 
 /**
@@ -2137,11 +2186,13 @@ function set_sorted_names() {
  * Set and show meta input form.
  */
 function meta_input() {
-  fetch_sample_names();
+  var valid = fetch_sample_names();
 
-  set_meta_input();
+  if (valid) {
+    set_meta_input();
 
-  show_meta_input();
+    show_meta_input();
+  }
 }
 
 /**
@@ -2673,8 +2724,12 @@ function write_proj() {
       console.log(out);
     }
   });
-
 }
+
+/**
+ *
+ *
+ */
 
 // Global variables.
 var proj_id;
