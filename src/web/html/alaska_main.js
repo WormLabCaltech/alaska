@@ -1774,6 +1774,7 @@ function set_samples_meta_input() {
 function set_choose_controls_modal(modal) {
   var design = proj.design;
   var description = modal.find('#design_description');
+  var header = description.children('#design_header');
 
   // Depending on the project design, show a different description.
   var text;
@@ -1786,7 +1787,7 @@ function set_choose_controls_modal(modal) {
     to_hide = description.children('#design_1_description');
   }
 
-  description.text(description.text().replace('FACTOR', text));
+  header.text(header.text().replace('FACTOR', text));
   to_hide.hide();
 }
 
@@ -1803,14 +1804,13 @@ function show_verify_meta_modal() {
   // Depending on whether or not all the input is valid,
   // show different modal.
   var modal;
-  if (valid) {
+  if (true) {
     modal = $('#choose_controls_modal');
     set_choose_controls_modal(modal);
   } else {
     modal = $('#check_meta_modal');
   }
 
-  modal = $('#choose_controls_modal');
   modal.modal('show');
 }
 
