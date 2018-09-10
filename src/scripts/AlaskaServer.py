@@ -862,8 +862,7 @@ class AlaskaServer(Alaska):
         """
         Send mail with the given arguments.
         """
-        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'
-                .format(msg, fr, subject, to)
+        cmd = '/bin/bash -c "echo "{}" | mail -r {} -s "{}" {}"'.format(msg, fr, subject, to)
 
         try:
             server = self.DOCKER.containers.get(Alaska.DOCKER_SERVER_TAG)
