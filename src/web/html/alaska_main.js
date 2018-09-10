@@ -1765,7 +1765,42 @@ function set_samples_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
+}
 
+/**
+ * Sets characteristic selection dropdown options for the control modal.
+ */
+function set_characteristic_options(dropdown) {
+  for (var char in chars_to_samples) {
+    // If the number of samples with this characteristic is equal to
+    // the total number of samples, this means that every sample has
+    // this characteristic.
+    if (Object.keys(proj.samples).length == chars_to_samples[char].length) {
+      var option = $('<option>', {
+        text: char,
+        value: char
+      });
+      dropdown.append(option);
+    }
+  }
+}
+
+/**
+ * Sets detail selection dropdown options for the control modal.
+ */
+function set_detail_options(dropdown, characteristic) {
+  for (var detail in chars_details_to_samples[characteristic]) {
+    // Valid option only if there are more than one detail.
+    if (Object.keys(chars_details_to_samples[characteristic]).length > 1) {
+      var option = $('<option>', {
+        text: detail,
+        value: detail
+      });
+      dropdown.append(option);
+    }
+  }
+
+  dropdown.prop('disabled', false);
 }
 
 /**
@@ -1775,6 +1810,28 @@ function set_choose_controls_modal(modal) {
   var design = proj.design;
   var description = modal.find('#design_description');
   var header = description.children('#design_header');
+  var control_0 = modal.find('#proj_control_0');
+  var control_1 = modal.find('#proj_control_1');
+  var controls = [control_0, control_1];
+
+  // Set characteristic and detail dropdowns.
+  for (var i = 0; i < controls.length; i++) {
+    var ctrl = controls[i];
+
+    var char_id = 'proj_control_char_' + i;
+    var detail_id = 'proj_control_detail_' + i;
+    var char = ctrl.find('#' + char_id);
+    var detail = ctrl.find('#' + detail_id);
+
+    set_characteristic_options(char);
+
+    // Then, bind to change.
+    char.change({'detail': detail}, function (e) {
+      var val = $(this).children('option:selected').val();
+
+      set_detail_options(e.data.detail, val);
+    });
+  }
 
   // Depending on the project design, show a different description.
   var text;
@@ -1785,6 +1842,7 @@ function set_choose_controls_modal(modal) {
   } else if (design == 2) {
     text = '2-factor';
     to_hide = description.children('#design_1_description');
+    modal.find('#proj_control_1').show();
   }
 
   header.text(header.text().replace('FACTOR', text));
@@ -1820,7 +1878,7 @@ function set_chars_details_to_samples() {
       if (!(char in chars_to_samples)) {
         chars_to_samples[char] = [id];
       } else {
-        if (!chars_to_samples.includes(id)) {
+        if (!chars_to_samples[char].includes(id)) {
           chars_to_samples[char].push(id);
         }
       }
@@ -1843,6 +1901,12 @@ function show_verify_meta_modal() {
   var modal;
   if (true) {
     modal = $('#choose_controls_modal');
+
+    var replacement = controls_modal.clone(true);
+    modal.replaceWith(replacement);
+    modal = replacement;
+
+    set_chars_details_to_samples();
     set_choose_controls_modal(modal);
   } else {
     modal = $('#check_meta_modal');
@@ -2476,6 +2540,7 @@ var proj;
 var meta_input_fields;
 var ftp_pw;
 var raw_reads_div;
+var controls_modal;
 var dropdown_items = {};
 var proj_form;
 var current_sample_form;
@@ -2517,6 +2582,7 @@ $(document).ready(function() {
   $('#new_proj_btn').click(new_proj);
 
   raw_reads_div = $('#raw_reads_div').clone(true);
+  controls_modal = $('#choose_controls_modal').clone(true);
 
   // Fetch server status.
   get_server_status();
