@@ -1900,7 +1900,8 @@ function set_choose_controls_modal(modal) {
     });
 
     // Finally, bind start analysis button.
-    start_btn.click(function () {
+    start_btn.click({'controls': controls}, function (e) {
+      set_controls(e.data.controls);
     });
   }
 
