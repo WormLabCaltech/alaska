@@ -1530,9 +1530,9 @@ function read_proj() {
 /**
  * Save project to temporary json.
  */
-function save_proj() {
+function save_proj(callback) {
   set_all_meta();
-  write_proj();
+  write_proj(callback);
 }
 
 /**
@@ -1902,6 +1902,7 @@ function set_choose_controls_modal(modal) {
     // Finally, bind start analysis button.
     start_btn.click({'controls': controls}, function (e) {
       set_controls(e.data.controls);
+      save_proj(start_analysis);
     });
   }
 
@@ -1920,6 +1921,52 @@ function set_choose_controls_modal(modal) {
   header.text(header.text().replace('FACTOR', text));
   to_hide.hide();
 }
+
+/**
+ * Set and finalize project. Then, start analysis.
+ */
+function start_analysis() {
+  // Set project.
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'set_proj',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      if (out.includes("successfully")) {
+        // Finalize project.
+        $.ajax({
+          type: 'POST',
+          url: 'cgi_request.php',
+          data: {
+            action: 'finalize_proj',
+            id: proj_id
+          },
+          success:function(out) {
+            console.log(out);
+            if (out.includes("successfully")) {
+              $.ajax({
+                type: 'POST',
+                url: 'cgi_request.php',
+                data: {
+                  action: 'do_all',
+                  id: proj_id
+                },
+                success:function(out) {
+                  console.log(out);
+                }
+              });
+            }
+          }
+        });
+      }
+    }
+  });
+}
+
 
 /**
  * Sets controls to the global proj object.
@@ -2712,7 +2759,7 @@ function get_sample_meta(id) {
  * Writes the global proj variable as json to the project temp
  * directory.
  */
-function write_proj() {
+function write_proj(callback) {
   // Send ajax request.
   $.ajax({
     type: 'POST',
@@ -2723,6 +2770,10 @@ function write_proj() {
     },
     success:function(out) {
       console.log(out);
+
+      if (callback != null) {
+        callback();
+      }
     }
   });
 }
