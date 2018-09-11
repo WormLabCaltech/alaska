@@ -3254,7 +3254,7 @@ function write_proj(callback) {
     success:function(out) {
       console.log(out);
 
-      if (typeof function === 'function') {
+      if (typeof callback === 'function') {
         callback();
       }
     }
