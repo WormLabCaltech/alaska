@@ -208,7 +208,7 @@ def run_qc(proj, nthreads):
         args += ['-p']
         run_sys(args, prefix=_id)
 
-    def multiqc(_id):
+    def multiqc(_id=''):
         """
         Helper function to run multiqc.
         """

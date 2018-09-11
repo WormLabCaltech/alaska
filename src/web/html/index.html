@@ -30,7 +30,7 @@
                     <li class="dropdown"><a class="dropdown-toggle nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#" style="color:#ffffff;">Dropdown </a>
                         <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
                     </li>
-                </ul><span class="ml-auto navbar-text" style="color:#ffffff;">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span></span>
+                </ul><span class="ml-auto navbar-text text-white">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span></span>
         </div>
         </div>
     </nav>
@@ -43,6 +43,99 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%" id="diff">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%" id="done">Done!</div>
 </div></div>
+    <div class="container" id="progress_container">
+        <div>
+            <div class="row">
+                <div class="col">
+                    <h1 class="text-center text-white" style="font-size:3.5em;">Analysis Results</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center text-white mb-5" style="font-weight:100;">For project PROJECT_ID</h3>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="server_status_badge">Queued</span><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col"><div class="table-responsive">
+    <table class="table bg-white">
+        <thead>
+            <tr>
+                <th style="width:8%"></th>
+                <th style="width:30%">Analysis Step</th>
+                <th style="width:15%">Status</th>
+                <th>Results</th>
+                <th style="width:12%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="align-middle">1</td>
+                <td class="align-middle">Quality Control</td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle">
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#qc_output_collapse" disabled>View live output</button>
+                    <button class="btn btn-success btn-sm" type="button" disabled><i class="fas fa-external-link-alt mr-1"></i>View MultiQC report</button>
+                </td>
+                <td class="align-middle">
+                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="align-middle bg-secondary border-white p-0">
+                    <div class="collapse m-3 p-0", id="qc_output_collapse">
+                        <textarea class="form-control" id="" rows="10" readonly></textarea>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="align-middle">2</td>
+                <td class="align-middle">Alignment &amp; Quantification</td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle">
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#quant_output_collapse" disabled>View live output</button>
+                </td>
+                <td class="align-middle">
+                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="align-middle bg-secondary border-white p-0">
+                    <div class="collapse m-3 p-0", id="quant_output_collapse">
+                        <textarea class="form-control" id="" rows="10" readonly></textarea>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="align-middle">3</td>
+                <td class="align-middle">Differential Expression Analysis</td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle">
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#diff_output_collapse" disabled>View live output</button>
+                    <button class="btn btn-success btn-sm" type="button" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
+                </td>
+                <td class="align-middle">
+                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="align-middle bg-secondary border-white p-0">
+                    <div class="collapse m-3 p-0", id="diff_output_collapse">
+                        <textarea class="form-control" id="" rows="10" readonly></textarea>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></div>
+            </div>
+        </div>
+    </div>
     <div class="container" id="meta_container">
         <div id="meta_header">
             <div class="row d-flex justify-content-center align-items-center">

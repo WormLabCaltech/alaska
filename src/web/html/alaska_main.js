@@ -119,9 +119,97 @@ function goto_progress(status) {
 
 /**
  * Sets the progress page to the given status.
+ * This function assumes the project has been queued.
  */
 function set_progress(status) {
-  
+  var progress_container = $('#progress_container');
+  var project_status_badge = progress_container.find('#project_status_badge');
+  var project_download_btn = progress_container.find('#project_download_btn');
+
+  ids = [
+    'qc_status_badge',
+    'qc_output_btn',
+    'qc_report_btn',
+    'qc_download_btn',
+    'quant_status_badge',
+    'quant_output_btn',
+    'quant_download_btn',
+    'diff_status_badge',
+    'diff_output_btn',
+    'diff_server_btn',
+    'diff_download_btn'
+  ];
+
+  // Construct elements dictionary
+  elements = {};
+  for (var i = 0; i < ids.length; i++) {
+    var id = ids[i];
+    elements[id] = progress_container.find('#' + id);
+  }
+
+  // Deal with enabling buttons first.
+  switch (status) {
+    case progress.server_open:
+      elements.diff_server_btn.prop('disabled', false);
+    case progress.diff_finished:
+      elements.diff_download_btn.prop('disabled', false);
+    case progress.diff_started:
+      elements.diff_output_btn.prop('disabled', false);
+    case progress.quant_finished:
+      elements.quant_download_btn.prop('disabled', false);
+    case progress.quant_started:
+      elements.quant_output_btn.prop('disabled', false);
+    case progress.qc_finished:
+      elements.qc_download_btn.prop('disabled', false);
+      elements.qc_report_btn.prop('disabled', false);
+    case progress.qc_started:
+      elements.qc_output_btn.prop('disabled', false);
+  }
+
+  // Then, disable everything after.
+  ``
+}
+
+/**
+ * Set qc started.
+ */
+function set_qc_started(container) {
+
+}
+
+/**
+ * Set qc_finished.
+ */
+function set_qc_finished(container) {
+
+}
+
+/**
+ * Set quant started.
+ */
+function set_quant_started(container) {
+
+}
+
+/**
+ * Set quant finished.
+ */
+function set_quant_finished(container) {
+
+}
+
+/**
+ * Set diff started.
+ */
+function set_diff_started(container) {
+
+}
+
+/**
+ * Set diff finished.
+ */
+function set_diff_finished(container) {
+
 }
 
 /**
