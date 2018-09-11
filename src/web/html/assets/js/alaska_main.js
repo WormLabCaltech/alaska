@@ -124,23 +124,18 @@ function goto_progress(status) {
  * Update progress.
  */
 function update_progress() {
-  /**
-   * Get project status.
-   */
-  function get_proj_status() {
-    $.ajax({
-      type: 'POST',
-      url: 'cgi_request.php',
-      data: {
-        action: 'get_proj_status',
-        id: proj_id
-      },
-      success:function(out) {
-        console.log(out);
-        update_proj_status(out);
-      }
-    });
-  }
+  $.ajax({
+    type: 'POST',
+    url: 'cgi_request.php',
+    data: {
+      action: 'get_proj_status',
+      id: proj_id
+    },
+    success:function(out) {
+      console.log(out);
+      update_proj_status(out);
+    }
+  });
 }
 
 /**
