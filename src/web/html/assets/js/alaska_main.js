@@ -133,6 +133,7 @@ function get_output(type, textarea) {
     },
     success:function(out) {
       textarea.val(out);
+      textarea.scrollTop(textarea[0].scrollHeight);
     }
   });
 
@@ -149,14 +150,37 @@ function set_output_listeners() {
   var quant_textarea = $('#quant_textarea');
   var diff_textarea = $('#diff_textarea');
 
+  // qc textarea
   qc_output_collapse.on('show.bs.collapse', {
     textarea: qc_textarea
   }, function (e) {
     var textarea = e.data.textarea;
-    qc_output_interval = setInterval(get_output('qc', textarea), 1000);
+    qc_output_interval = setInterval(get_output, 1000, 'qc', textarea);
   });
   qc_output_collapse.on('hide.bs.collapse', function () {
     clearInterval(qc_output_interval);
+  });
+
+  // quant textarea
+  quant_output_collapse.on('show.bs.collapse', {
+    textarea: quant_textarea
+  }, function (e) {
+    var textarea = e.data.textarea;
+    quant_output_interval = setInterval(get_output, 1000, 'quant', textarea);
+  });
+  quant_output_collapse.on('hide.bs.collapse', function () {
+    clearInterval(quant_output_interval);
+  });
+
+  // diff textarea
+  diff_output_collapse.on('show.bs.collapse', {
+    textarea: diff_textarea
+  }, function (e) {
+    var textarea = e.data.textarea;
+    diff_output_interval = setInterval(get_output, 1000, 'diff', textarea);
+  });
+  diff_output_collapse.on('hide.bs.collapse', function () {
+    clearInterval(diff_output_interval);
   });
 }
 
@@ -253,6 +277,7 @@ function set_progress(status) {
 
   // Then, disable everything after.
   switch (status) {
+    case progress.finalized:
     case progress.qc_queued:
       elements.qc_output_btn.prop('disabled', true);
     case progress.qc_started:
@@ -3229,7 +3254,7 @@ function write_proj(callback) {
     success:function(out) {
       console.log(out);
 
-      if (callback != null) {
+      if (typeof function === 'function') {
         callback();
       }
     }
