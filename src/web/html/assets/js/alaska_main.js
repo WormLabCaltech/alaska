@@ -113,11 +113,51 @@ function goto_progress(status) {
   $('#raw_reads_div').hide();
   $('#fetch_failed_div').hide();
 
+  // Set output listeners for live output.
+  set_output_listeners();
+
   // Set the progress page to the given progress.
   set_progress(status);
 
   // Then, call update_progress regularly.
-  setInterval(update_progress, 3000);
+  project_progress_interval = setInterval(update_progress, 3000);
+}
+
+function get_output(type, textarea) {
+  $.ajax({
+    type: 'POST',
+    url: 'get_output.php',
+    data: {
+      'type': type,
+      'id': proj_id
+    },
+    success:function(out) {
+      textarea.val(out);
+    }
+  });
+
+}
+
+/**
+ * Sets listeners for each of the three live output views.
+ */
+function set_output_listeners() {
+  var qc_output_collapse = $('#qc_output_collapse');
+  var quant_output_collapse = $('#quant_output_collapse');
+  var diff_output_collapse = $('#diff_output_collapse');
+  var qc_textarea = $('#qc_textarea');
+  var quant_textarea = $('#quant_textarea');
+  var diff_textarea = $('#diff_textarea');
+
+  qc_output_collapse.on('show.bs.collapse', {
+    textarea: qc_textarea
+  }, function (e) {
+    var textarea = e.data.textarea;
+    qc_output_interval = setInterval(get_output('qc', textarea));
+  });
+  qc_output_collapse.on('hide.bs.collapse', function () {
+    clearInterval(qc_output_interval);
+  });
 }
 
 /**
@@ -3238,8 +3278,13 @@ var progress = {
   'diff_started':     12,
   'diff_finished':    13,
   'server_open':      14
-
   }
+
+// Global variables for holding interval ids.
+var project_progress_interval;
+var qc_output_interval;
+var quant_output_interval;
+var diff_output_interval;
 
 // To run when page is loaded.
 $(document).ready(function() {
