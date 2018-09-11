@@ -106,12 +106,242 @@ function goto_meta_input() {
 /**
  * Go to analysis progress page.
  */
-function goto_progress() {
+function goto_progress(status) {
   $('#meta_container').hide();
   $('#main_content_div').hide();
   $('#ftp_info_div').hide();
   $('#raw_reads_div').hide();
   $('#fetch_failed_div').hide();
+
+  // Set the progress page to the given progress.
+  set_progress(status);
+
+  // Then, call update_progress regularly.
+  setInterval(update_progress, 3000);
+}
+
+/**
+ * Update progress.
+ */
+function update_progress() {
+  /**
+   * Get project status.
+   */
+  function get_proj_status() {
+    $.ajax({
+      type: 'POST',
+      url: 'cgi_request.php',
+      data: {
+        action: 'get_proj_status',
+        id: proj_id
+      },
+      success:function(out) {
+        console.log(out);
+        update_proj_status(out);
+      }
+    });
+  }
+}
+
+/**
+ * Helper function to parse output.
+ */
+function update_proj_status(out) {
+  var split = out.split('\n');
+  var status = parseInt(split[split.length - 3]);
+
+  set_progress(status);
+}
+
+/**
+ * Sets the progress page to the given status.
+ * This function assumes the project has been queued.
+ */
+function set_progress(status) {
+  var progress_container = $('#progress_container');
+  var project_status_badge = progress_container.find('#project_status_badge');
+  var project_download_btn = progress_container.find('#project_download_btn');
+
+  // Set the project status badge
+  if (status >= progress.diff_finished) {
+    set_progress_badge(project_status_badge, 'finished');
+    project_download_btn.prop('disabled', false);
+  } else if (status >= progress.qc_started) {
+    set_progress_badge(project_status_badge, 'started');
+    project_download_btn.prop('disabled', true);
+  } else {
+    set_progress_badge(project_status_badge, 'queued');
+    project_download_btn.prop('disabled', true);
+  }
+
+  ids = [
+    'qc_status_badge',
+    'qc_output_btn',
+    'qc_report_btn',
+    'qc_download_btn',
+    'quant_status_badge',
+    'quant_output_btn',
+    'quant_download_btn',
+    'diff_status_badge',
+    'diff_output_btn',
+    'diff_server_btn',
+    'diff_download_btn'
+  ];
+
+  // Construct elements dictionary
+  elements = {};
+  for (var i = 0; i < ids.length; i++) {
+    var id = ids[i];
+    elements[id] = progress_container.find('#' + id);
+  }
+
+  // Deal with enabling buttons first.
+  switch (status) {
+    case progress.server_open:
+      elements.diff_server_btn.prop('disabled', false);
+    case progress.diff_finished:
+      elements.diff_download_btn.prop('disabled', false);
+    case progress.diff_started:
+      elements.diff_output_btn.prop('disabled', false);
+    case progress.diff_queued:
+    case progress.quant_finished:
+      elements.quant_download_btn.prop('disabled', false);
+    case progress.quant_started:
+      elements.quant_output_btn.prop('disabled', false);
+    case progress.quant_queued:
+    case progress.qc_finished:
+      elements.qc_download_btn.prop('disabled', false);
+      elements.qc_report_btn.prop('disabled', false);
+    case progress.qc_started:
+      elements.qc_output_btn.prop('disabled', false);
+  }
+
+  // Then, disable everything after.
+  switch (status) {
+    case progress.qc_queued:
+      elements.qc_output_btn.prop('disabled', true);
+    case progress.qc_started:
+      elements.qc_report_btn.prop('disabled', true);
+      elements.qc_download_btn.prop('disabled', true);
+    case progress.qc_finished:
+    case progress.quant_queued:
+      elements.quant_output_btn.prop('disabled', true);
+    case progress.quant_started:
+      elements.quant_download_btn.prop('disabled', true);
+    case progress.quant_finished:
+    case progress.diff_queued:
+      elements.diff_output_btn.prop('disabled', true);
+    case progress.diff_started:
+      elements.diff_download_btn.prop('disabled', true);
+    case progress.diff_finished:
+      elements.diff_server_btn.prop('disabled', true);
+  }
+
+
+  // Finally, set status badges.
+  if (status < progress.qc_started) {
+    set_progress_badge(elements.qc_status_badge, 'queued');
+    set_progress_badge(elements.quant_status_badge, 'queued');
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  } else if (status < progress.quant_started) {
+    set_progress_badge(elements.quant_status_badge, 'queued');
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  } else if (status < progress.diff_started) {
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  }
+
+  if (status >= progress.diff_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+    set_progress_badge(elements.quant_status_badge, 'finished');
+    set_progress_badge(elements.diff_status_badge, 'finished');
+  } else if (status >= progress.quant_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+    set_progress_badge(elements.quant_status_badge, 'finished');
+  } else if (status >= progress.qc_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+  }
+  switch (status) {
+    case progress.qc_started:
+      set_progress_badge(elements.qc_status_badge, 'started');
+      break;
+    case progress.quant_started:
+      set_progress_badge(elements.quant_status_badge, 'started');
+      break;
+    case progress.diff_started:
+      set_progress_badge(elements.diff_status_badge, 'started');
+      break;
+  }
+}
+
+/**
+ * Sets status badge to a certain state.
+ */
+function set_progress_badge(badge, state) {
+  // Reset badge.
+  badge.removeClass('badge-secondary badge-info badge-success badge-danger');
+  badge.removeClass('flash animated infinite')
+
+  switch (state) {
+    case 'queued':
+      badge.addClass('badge-secondary');
+      badge.text('Queued');
+      break;
+    case 'started':
+      badge.addClass('badge-info');
+      badge.addClass('flash animated infinite');
+      badge.text('Running');
+      break;
+    case 'finished':
+      badge.addClass('badge-success');
+      badge.text('Success');
+      break;
+    case 'error':
+    default:
+      badge.addClass('badge-danger');
+      badge.text('Error');
+  }
+}
+
+/**
+ * Set qc started.
+ */
+function set_qc_started(container) {
+
+}
+
+/**
+ * Set qc_finished.
+ */
+function set_qc_finished(container) {
+
+}
+
+/**
+ * Set quant started.
+ */
+function set_quant_started(container) {
+
+}
+
+/**
+ * Set quant finished.
+ */
+function set_quant_finished(container) {
+
+}
+
+/**
+ * Set diff started.
+ */
+function set_diff_started(container) {
+
+}
+
+/**
+ * Set diff finished.
+ */
+function set_diff_finished(container) {
+
 }
 
 /**
@@ -290,27 +520,38 @@ function parse_proj_status(out) {
 
   switch (status) {
     // Project created.
-    case 0:
-    case 1:
+    case progress.new:
+    case progress.raw_reads:
       console.log('status: created');
       goto_ftp_info();
       break;
 
     // Samples inferred
-    case 2:
+    case progress.inferred:
       console.log('status: samples inferred');
       goto_meta_input()
       break;
-    case 3:
+    case progress.set:
       console.log('status: set');
       break;
-    case 4:
-      console.log('status: finalized');
-      break;
-    case 4:
-      console.log('status: in queue');
-      break;
 
+    // For all of these cases, we go to the progress page.
+    case progress.finalized:
+      console.log('status: finalized');
+
+    case progress.qc_queued:
+    case progress.qc_started:
+    case progress.qc_finished:
+    case progress.quant_queued:
+    case progress.quant_started:
+    case progress.quant_finished:
+    case progress.diff_queued:
+    case progress.diff_started:
+    case progress.diff_finished:
+    case progress.server_open:
+      goto_progress(status);
+
+      break;
 
   }
 }
@@ -2986,6 +3227,24 @@ var sample_characteristic_fields = {};
 var sample_pair_fields = {};
 var chars_to_samples = {};
 var chars_details_to_samples = {};
+var progress = {
+  'new':              0,
+  'raw_reads':        1,
+  'inferred':         2,
+  'set':              3,
+  'finalized':        4,
+  'qc_queued':        5,
+  'qc_started':       6,
+  'qc_finished':      7,
+  'quant_queued':     8,
+  'quant_started':    9,
+  'quant_finished':   10,
+  'diff_queued':      11,
+  'diff_started':     12,
+  'diff_finished':    13,
+  'server_open':      14
+
+  }
 
 // To run when page is loaded.
 $(document).ready(function() {

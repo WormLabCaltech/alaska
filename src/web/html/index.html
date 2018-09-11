@@ -58,7 +58,7 @@
         </div>
         <div>
             <div class="row">
-                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="server_status_badge">Queued</span><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
+                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="project_status_badge">Queued</span><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
                 </div>
             </div>
             <div class="row">
@@ -77,13 +77,13 @@
             <tr>
                 <td class="align-middle">1</td>
                 <td class="align-middle">Quality Control</td>
-                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="qc_status_badge">Queued</span></td>
                 <td class="align-middle">
-                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#qc_output_collapse" disabled>View live output</button>
-                    <button class="btn btn-success btn-sm" type="button" disabled><i class="fas fa-external-link-alt mr-1"></i>View MultiQC report</button>
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#qc_output_collapse" id="qc_output_btn" disabled>View live output</button>
+                    <button class="btn btn-success btn-sm" type="button" id="qc_report_btn" disabled><i class="fas fa-external-link-alt mr-1"></i>View MultiQC report</button>
                 </td>
                 <td class="align-middle">
-                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                    <button class="btn btn-secondary btn-sm" type="button" id="qc_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
                 </td>
             </tr>
             <tr>
@@ -96,12 +96,12 @@
             <tr>
                 <td class="align-middle">2</td>
                 <td class="align-middle">Alignment &amp; Quantification</td>
-                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="quant_status_badge">Queued</span></td>
                 <td class="align-middle">
-                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#quant_output_collapse" disabled>View live output</button>
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#quant_output_collapse" id="quant_output_btn" disabled>View live output</button>
                 </td>
                 <td class="align-middle">
-                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                    <button class="btn btn-secondary btn-sm" type="button" id="quant_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
                 </td>
             </tr>
             <tr>
@@ -114,13 +114,13 @@
             <tr>
                 <td class="align-middle">3</td>
                 <td class="align-middle">Differential Expression Analysis</td>
-                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="server_status_badge">Queued</span></td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="diff_status_badge">Queued</span></td>
                 <td class="align-middle">
-                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#diff_output_collapse" disabled>View live output</button>
-                    <button class="btn btn-success btn-sm" type="button" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#diff_output_collapse" id="diff_output_btn" disabled>View live output</button>
+                    <button class="btn btn-success btn-sm" type="button" id="diff_server_btn" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
                 </td>
                 <td class="align-middle">
-                    <button class="btn btn-secondary btn-sm" type="button" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                    <button class="btn btn-secondary btn-sm" type="button" id="diff_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
                 </td>
             </tr>
             <tr>

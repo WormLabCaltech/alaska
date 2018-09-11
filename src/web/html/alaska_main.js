@@ -115,6 +115,42 @@ function goto_progress(status) {
 
   // Set the progress page to the given progress.
   set_progress(status);
+
+  // Then, call update_progress regularly.
+  setInterval(update_progress, 3000);
+}
+
+/**
+ * Update progress.
+ */
+function update_progress() {
+  /**
+   * Get project status.
+   */
+  function get_proj_status() {
+    $.ajax({
+      type: 'POST',
+      url: 'cgi_request.php',
+      data: {
+        action: 'get_proj_status',
+        id: proj_id
+      },
+      success:function(out) {
+        console.log(out);
+        update_proj_status(out);
+      }
+    });
+  }
+}
+
+/**
+ * Helper function to parse output.
+ */
+function update_proj_status(out) {
+  var split = out.split('\n');
+  var status = parseInt(split[split.length - 3]);
+
+  set_progress(status);
 }
 
 /**
@@ -125,6 +161,18 @@ function set_progress(status) {
   var progress_container = $('#progress_container');
   var project_status_badge = progress_container.find('#project_status_badge');
   var project_download_btn = progress_container.find('#project_download_btn');
+
+  // Set the project status badge
+  if (status >= progress.diff_finished) {
+    set_progress_badge(project_status_badge, 'finished');
+    project_download_btn.prop('disabled', false);
+  } else if (status >= progress.qc_started) {
+    set_progress_badge(project_status_badge, 'started');
+    project_download_btn.prop('disabled', true);
+  } else {
+    set_progress_badge(project_status_badge, 'queued');
+    project_download_btn.prop('disabled', true);
+  }
 
   ids = [
     'qc_status_badge',
@@ -155,10 +203,12 @@ function set_progress(status) {
       elements.diff_download_btn.prop('disabled', false);
     case progress.diff_started:
       elements.diff_output_btn.prop('disabled', false);
+    case progress.diff_queued:
     case progress.quant_finished:
       elements.quant_download_btn.prop('disabled', false);
     case progress.quant_started:
       elements.quant_output_btn.prop('disabled', false);
+    case progress.quant_queued:
     case progress.qc_finished:
       elements.qc_download_btn.prop('disabled', false);
       elements.qc_report_btn.prop('disabled', false);
@@ -167,7 +217,89 @@ function set_progress(status) {
   }
 
   // Then, disable everything after.
-  ``
+  switch (status) {
+    case progress.qc_queued:
+      elements.qc_output_btn.prop('disabled', true);
+    case progress.qc_started:
+      elements.qc_report_btn.prop('disabled', true);
+      elements.qc_download_btn.prop('disabled', true);
+    case progress.qc_finished:
+    case progress.quant_queued:
+      elements.quant_output_btn.prop('disabled', true);
+    case progress.quant_started:
+      elements.quant_download_btn.prop('disabled', true);
+    case progress.quant_finished:
+    case progress.diff_queued:
+      elements.diff_output_btn.prop('disabled', true);
+    case progress.diff_started:
+      elements.diff_download_btn.prop('disabled', true);
+    case progress.diff_finished:
+      elements.diff_server_btn.prop('disabled', true);
+  }
+
+
+  // Finally, set status badges.
+  if (status < progress.qc_started) {
+    set_progress_badge(elements.qc_status_badge, 'queued');
+    set_progress_badge(elements.quant_status_badge, 'queued');
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  } else if (status < progress.quant_started) {
+    set_progress_badge(elements.quant_status_badge, 'queued');
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  } else if (status < progress.diff_started) {
+    set_progress_badge(elements.diff_status_badge, 'queued');
+  }
+
+  if (status >= progress.diff_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+    set_progress_badge(elements.quant_status_badge, 'finished');
+    set_progress_badge(elements.diff_status_badge, 'finished');
+  } else if (status >= progress.quant_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+    set_progress_badge(elements.quant_status_badge, 'finished');
+  } else if (status >= progress.qc_finished) {
+    set_progress_badge(elements.qc_status_badge, 'finished');
+  }
+  switch (status) {
+    case progress.qc_started:
+      set_progress_badge(elements.qc_status_badge, 'started');
+      break;
+    case progress.quant_started:
+      set_progress_badge(elements.quant_status_badge, 'started');
+      break;
+    case progress.diff_started:
+      set_progress_badge(elements.diff_status_badge, 'started');
+      break;
+  }
+}
+
+/**
+ * Sets status badge to a certain state.
+ */
+function set_progress_badge(badge, state) {
+  // Reset badge.
+  badge.removeClass('badge-secondary badge-info badge-success badge-danger');
+  badge.removeClass('flash animated infinite')
+
+  switch (state) {
+    case 'queued':
+      badge.addClass('badge-secondary');
+      badge.text('Queued');
+      break;
+    case 'started':
+      badge.addClass('badge-info');
+      badge.addClass('flash animated infinite');
+      badge.text('Running');
+      break;
+    case 'finished':
+      badge.addClass('badge-success');
+      badge.text('Success');
+      break;
+    case 'error':
+    default:
+      badge.addClass('badge-danger');
+      badge.text('Error');
+  }
 }
 
 /**
@@ -408,11 +540,8 @@ function parse_proj_status(out) {
       console.log('status: finalized');
 
     case progress.qc_queued:
-      console.log('status: in queue');
     case progress.qc_started:
-      console.log('status: qc started');
     case progress.qc_finished:
-      console.log('status: qc finished');
     case progress.quant_queued:
     case progress.quant_started:
     case progress.quant_finished:
@@ -423,9 +552,6 @@ function parse_proj_status(out) {
       goto_progress(status);
 
       break;
-
-
-
 
   }
 }
