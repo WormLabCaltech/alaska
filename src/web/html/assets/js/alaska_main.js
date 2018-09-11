@@ -153,7 +153,7 @@ function set_output_listeners() {
     textarea: qc_textarea
   }, function (e) {
     var textarea = e.data.textarea;
-    qc_output_interval = setInterval(get_output('qc', textarea));
+    qc_output_interval = setInterval(get_output('qc', textarea), 1000);
   });
   qc_output_collapse.on('hide.bs.collapse', function () {
     clearInterval(qc_output_interval);

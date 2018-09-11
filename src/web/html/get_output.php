@@ -26,7 +26,7 @@ switch ($type) {
     $path = $path . "/2_alignment/kallisto_out.txt";
     break;
   case "diff":
-    $path = $path . "/3_diff_exp/sleuth_out.txt"
+    $path = $path . "/3_diff_exp/sleuth_out.txt";
     break;
   default:
     throw new Exception("unrecognized type");
