@@ -106,12 +106,22 @@ function goto_meta_input() {
 /**
  * Go to analysis progress page.
  */
-function goto_progress() {
+function goto_progress(status) {
   $('#meta_container').hide();
   $('#main_content_div').hide();
   $('#ftp_info_div').hide();
   $('#raw_reads_div').hide();
   $('#fetch_failed_div').hide();
+
+  // Set the progress page to the given progress.
+  set_progress(status);
+}
+
+/**
+ * Sets the progress page to the given status.
+ */
+function set_progress(status) {
+  
 }
 
 /**
@@ -290,26 +300,43 @@ function parse_proj_status(out) {
 
   switch (status) {
     // Project created.
-    case 0:
-    case 1:
+    case progress.new:
+    case progress.raw_reads:
       console.log('status: created');
       goto_ftp_info();
       break;
 
     // Samples inferred
-    case 2:
+    case progress.inferred:
       console.log('status: samples inferred');
       goto_meta_input()
       break;
-    case 3:
+    case progress.set:
       console.log('status: set');
       break;
-    case 4:
+
+    // For all of these cases, we go to the progress page.
+    case progress.finalized:
       console.log('status: finalized');
-      break;
-    case 4:
+
+    case progress.qc_queued:
       console.log('status: in queue');
+    case progress.qc_started:
+      console.log('status: qc started');
+    case progress.qc_finished:
+      console.log('status: qc finished');
+    case progress.quant_queued:
+    case progress.quant_started:
+    case progress.quant_finished:
+    case progress.diff_queued:
+    case progress.diff_started:
+    case progress.diff_finished:
+    case progress.server_open:
+      goto_progress(status);
+
       break;
+
+
 
 
   }
@@ -2986,6 +3013,24 @@ var sample_characteristic_fields = {};
 var sample_pair_fields = {};
 var chars_to_samples = {};
 var chars_details_to_samples = {};
+var progress = {
+  'new':              0,
+  'raw_reads':        1,
+  'inferred':         2,
+  'set':              3,
+  'finalized':        4,
+  'qc_queued':        5,
+  'qc_started':       6,
+  'qc_finished':      7,
+  'quant_queued':     8,
+  'quant_started':    9,
+  'quant_finished':   10,
+  'diff_queued':      11,
+  'diff_started':     12,
+  'diff_finished':    13,
+  'server_open':      14
+
+  }
 
 // To run when page is loaded.
 $(document).ready(function() {

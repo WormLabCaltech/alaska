@@ -86,7 +86,7 @@ def read_distribution(_id, bed_path):
     Helper function to run read_distribution.py
     """
     args = ['read_distribution.py']
-    args += ['-i', 'sorted.bam']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
     args += ['-r', bed_path]
 
     # print_with_flush(args)
@@ -101,7 +101,7 @@ def geneBody_coverage(_id, bed_path):
     Helper function to run geneBody_coverage.py
     """
     args = ['geneBody_coverage.py']
-    args += ['-i', 'sorted.bam']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
     args += ['-r', bed_path]
     args += ['-o', '{}_coverage'.format(_id)]
 
@@ -112,7 +112,7 @@ def tin(_id, bed_path):
     Helper function to run tin.py
     """
     args = ['tin.py']
-    args += ['-i', 'sorted.bam']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
     args += ['-r', bed_path]
 
     output = run_sys(args, prefix=_id)
@@ -124,7 +124,7 @@ def fastqc(_id):
     """
     Helper function to run fastqc.
     """
-    args = ['fastqc', 'sorted.bam']
+    args = ['fastqc', '{}_sorted.bam'.format(_id)]
     run_sys(args, prefix=_id)
 
 def mp_helper(f, args, name, _id):
@@ -160,7 +160,7 @@ def run_qc(proj, nthreads):
             args += ['-1', ','.join(pair1)]
             args += ['-2', ','.join(pair2)]
 
-        args += ['-S', '{}/alignments.sam'.format(path)]
+        args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
         args += ['-u', str(2 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
         # args += ['--verbose']
@@ -171,9 +171,9 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to sort .bam
         """
-        sam_path = 'alignments.sam'
+        sam_path = '{}_alignments.sam'.format(_id)
         args = ['samtools', 'sort', sam_path]
-        sorted_bam = 'sorted.bam'
+        sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-@', str(nthreads-1)]
         args += ['-m', '4G']
@@ -183,7 +183,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to index .bam
         """
-        args = ['samtools', 'index', 'sorted.bam']
+        args = ['samtools', 'index', '{}_sorted.bam'.format(_id)]
         args += ['-@', str(nthreads-1)]
         run_sys(args, prefix=_id)
 
@@ -191,9 +191,9 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to sort .bam
         """
-        sam_path = 'alignments.sam'
+        sam_path = '{}_alignments.sam'.format(_id)
         args = ['sambamba', 'sort', sam_path]
-        sorted_bam = 'sorted.bam'
+        sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-t', str(nthreads-1)]
         args += ['-m', '4G']
@@ -203,7 +203,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to index .bam
         """
-        args = ['sambamba', 'index', 'sorted.bam']
+        args = ['sambamba', 'index', '{}_sorted.bam'.format(_id)]
         args += ['-t', str(nthreads-1)]
         args += ['-p']
         run_sys(args, prefix=_id)
@@ -224,10 +224,11 @@ def run_qc(proj, nthreads):
     # run kallisto to get pseudobam
     # run_kallisto(proj, nthreads, qc=True, nbootstraps=0, ver=235)
 
+    wdir = os.getcwd()
+
     for _id in proj['samples']:
         # define necessary variables
         name = proj['samples'][_id]['name']
-        wdir = os.getcwd()
         path = '1_qc/{}'.format(name)
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
@@ -288,11 +289,18 @@ def run_qc(proj, nthreads):
             # FastQC
             fastqc(_id)
 
-        # MultiQC
-        multiqc(_id)
+        # # MultiQC
+        # multiqc(_id)
 
         os.chdir(wdir)
         print_with_flush('# returned to {}'.format(wdir))
+
+    print('# running multiqc for all samples')
+    path = '1_qc'
+    os.chdir(path)
+    multiqc()
+    os.chdir(wdir)
+
 
 
 def run_kallisto(proj, nthreads):

@@ -150,6 +150,24 @@ class Alaska():
     # 12: Diff exp started
     # 13: Diff exp finished.
     # 14: Server opened
+    PROGRESS = {
+        'new':              0,
+        'raw_reads':        1,
+        'inferred':         2,
+        'set':              3,
+        'finalized':        4,
+        'qc_queued':        5,
+        'qc_started':       6,
+        'qc_finished':      7,
+        'quant_queued':     8,
+        'quant_started':    9,
+        'quant_finished':   10,
+        'diff_queued':      11,
+        'diff_started':     12,
+        'diff_finished':    13,
+        'server_open':      14
+
+    }
 
     def rand_str(self, l):
         """

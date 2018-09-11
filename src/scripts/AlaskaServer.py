@@ -312,13 +312,13 @@ class AlaskaServer(Alaska):
 
                     # change progress
                     if job.name == 'qc':
-                        proj.progress = 6
+                        proj.progress = Alaska.PROGRESS['qc_started']
                         out_dir = proj.qc_dir
                     elif job.name == 'kallisto':
-                        proj.progress = 9
+                        proj.progress = Alaska.PROGRESS['quant_started']
                         out_dir = proj.align_dir
                     elif job.name == 'sleuth':
-                        proj.progress = 12
+                        proj.progress = Alaska.PROGRESS['diff_started']
                         out_dir = proj.diff_dir
                     else:
                         self.out('ERROR: job {} has unrecognized name'.format(job.id))
@@ -1005,7 +1005,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: successfully retrieved raw reads'.format(_id))
 
         if proj.progress < 1:
-            proj.progress = 1
+            proj.progress = Alaska.PROGRESS['raw_reads']
 
         # 11/27/2017
         # self.respond(_id, json.dumps(self.projects_temp[_id].raw_reads, default=self.encode_json, indent=4))
@@ -1048,7 +1048,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: {} samples successfully inferred'.format(_id, len(proj.samples)))
 
         if proj.progress < 2:
-            proj.progress = 2
+            proj.progress = Alaska.PROGRESS['inferred']
 
         # output project JSON to temp folder
         proj.save(Alaska.TEMP_DIR)
@@ -1121,7 +1121,7 @@ class AlaskaServer(Alaska):
         # Project we are concerned about.
         proj = self.projects_temp[_id]
 
-        if proj.progress < 2:
+        if proj.progress < Alaska.PROGRESS['inferred']:
             raise Exception('{}: Samples have not yet been inferred!'
                             .format(_id))
 
@@ -1132,7 +1132,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: validating data'.format(_id))
         proj.check()
 
-        proj.progress = 3
+        proj.progress = Alaska.PROGRESS['set']
 
         msg = '{}: project data successfully set'.format(_id)
         self.broadcast(_id, msg)
@@ -1166,7 +1166,7 @@ class AlaskaServer(Alaska):
         # Project we are concerned about.
         proj = self.projects_temp[_id]
 
-        if proj.progress < 3:
+        if proj.progress < Alaska.PROGRESS['set']:
             raise Exception('Project data has not been set yet!')
 
         self.broadcast(_id, '{}: finalizing'.format(_id))
@@ -1190,7 +1190,7 @@ class AlaskaServer(Alaska):
             del self.samples_temp[__id]
         del self.projects_temp[_id]
 
-        new_proj.progress = 4
+        new_proj.progress = Alaska.PROGRESS['finalized']
         new_proj.save()
 
         # copy analysis script to project folder.
@@ -1279,7 +1279,7 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = 5 # added to queue
+        proj.progress = Alaska.PROGRESS['qc_queued'] # added to queue
 
         if close:
             self.close(_id)
@@ -1290,7 +1290,7 @@ class AlaskaServer(Alaska):
         Checks if another analysis is running,
         then performs read quantification.
         """
-        if check and self.projects[_id].progress < 7:
+        if check and self.projects[_id].progress < Alaska.PROGRESS['qc_finished']:
             raise Exception('{}: Quality control has not been performed.'
                             .format(_id))
         # The project we are interested in.
@@ -1346,7 +1346,7 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = 8 # added to queue
+        proj.progress = Alaska.PROGRESS['quant_queued'] # added to queue
 
         if close:
             self.close(_id)
@@ -1355,7 +1355,7 @@ class AlaskaServer(Alaska):
         """
         Perform differential expression analysis.
         """
-        if check and self.projects[_id].progress < 10:
+        if check and self.projects[_id].progress < Alaska.PROGRESS['quant_finished']:
             raise Exception('{}: project must be aligned before differential expression analysis'
                             .format(_id))
         # The project we are interested in.
@@ -1408,7 +1408,7 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = 11 # added to queue
+        proj.progress = Alaska.PROGRESS['diff_queued'] # added to queue
 
         if close:
             self.close(_id)
@@ -1431,7 +1431,7 @@ class AlaskaServer(Alaska):
         """
         proj = self.projects[_id]
 
-        if proj.progress < 13:
+        if proj.progress < Alaska.PROGRESS['diff_finished']:
             raise Exception('{}: Sleuth not yet run'.format(_id))
 
         # If the server for this project is already open, just return the
