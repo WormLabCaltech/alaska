@@ -243,11 +243,9 @@ def run_qc(proj, nthreads):
         for read in proj['samples'][_id]['reads']:
             reads.append(read)
 
-        _id = name
-
         # Align with bowtie2
         if (proj['samples'][_id]['type'] == 1):
-            bowtie2(_id, path, bt2_path, reads, 1)
+            bowtie2(name, path, bt2_path, reads, 1)
         elif (proj['samples'][_id]['type'] == 2):
             # TODO: implement
             pass
@@ -256,6 +254,7 @@ def run_qc(proj, nthreads):
 
         os.chdir(path)
         print_with_flush('# changed working directory to {}'.format(path))
+        _id = name
 
         # Sort and index reads with samtools first.
         samtools_sort(_id)
