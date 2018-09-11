@@ -1513,7 +1513,7 @@ class AlaskaServer(Alaska):
         if self.exists_temp(_id):
             proj = self.projects_temp[_id]
         elif self.exists_var(_id):
-            proj = self.projects[id]
+            proj = self.projects[_id]
         else:
             raise Exception('{}: does not exist'.format(_id))
 
