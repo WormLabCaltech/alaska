@@ -104,10 +104,179 @@ function goto_meta_input() {
 }
 
 /**
- * Go to analysis status page.
+ * Go to analysis progress page.
  */
-function goto_analysis_status() {
+function goto_progress() {
+  $('#meta_container').hide();
+  $('#main_content_div').hide();
+  $('#ftp_info_div').hide();
+  $('#raw_reads_div').hide();
+  $('#fetch_failed_div').hide();
+}
 
+/**
+ * Set progress bar to queued.
+ */
+function set_progress_bar_queued() {
+  var bar = $('#progress_bar');
+  var queued = bar.children('#queued');
+  var qc = bar.children('#qc');
+  var quant = bar.children('#quant');
+  var diff = bar.children('#diff');
+  var done = bar.children('#done');
+
+  bar.children().removeClass('progress-bar-striped progress-bar-animated');
+
+  // Set queued classes.
+  queued.removeClass('bg-secondary border-right border-dark');
+  queued.addClass('bg-dark progress-bar-striped progress-bar-animated');
+
+  // Set qc classes.
+  qc.removeClass('bg-warning');
+  qc.addClass('bg-secondary border-right border-dark');
+
+  // Set quant classes.
+  quant.removeClass('bg-info');
+  quant.addClass('bg-secondary border-right border-dark');
+
+  // Set diff classes.
+  diff.removeClass('bg-danger');
+  diff.addClass('bg-secondary border-right border-dark');
+
+  // Set done classes.
+  done.removeClass('bg-success');
+  done.addClass('bg-secondary');
+}
+
+/**
+ * Set progress bar to quality control.
+ */
+function set_progress_bar_qc() {
+  var bar = $('#progress_bar');
+  var queued = bar.children('#queued');
+  var qc = bar.children('#qc');
+  var quant = bar.children('#quant');
+  var diff = bar.children('#diff');
+  var done = bar.children('#done');
+
+  bar.children().removeClass('progress-bar-striped progress-bar-animated');
+
+  // Set queued classes.
+  queued.removeClass('bg-secondary border-right border-dark');
+  queued.addClass('bg-dark');
+
+  // Set qc classes.
+  qc.removeClass('bg-secondary border-right border-dark');
+  qc.addClass('bg-warning progress-bar-striped progress-bar-animated');
+
+  // Set quant classes.
+  quant.removeClass('bg-info');
+  quant.addClass('bg-secondary border-right border-dark');
+
+  // Set diff classes.
+  diff.removeClass('bg-danger');
+  diff.addClass('bg-secondary border-right border-dark');
+
+  // Set done classes.
+  done.removeClass('bg-success');
+  done.addClass('bg-secondary');
+}
+
+/**
+ * Set progress bar to alignment & quantification.
+ */
+function set_progress_bar_quant() {
+  var bar = $('#progress_bar');
+  var queued = bar.children('#queued');
+  var qc = bar.children('#qc');
+  var quant = bar.children('#quant');
+  var diff = bar.children('#diff');
+  var done = bar.children('#done');
+
+  bar.children().removeClass('progress-bar-striped progress-bar-animated');
+
+  // Set queued classes.
+  queued.removeClass('bg-secondary border-right border-dark');
+  queued.addClass('bg-dark');
+
+  // Set qc classes.
+  qc.removeClass('bg-secondary border-right border-dark');
+  qc.addClass('bg-warning');
+
+  // Set quant classes.
+  quant.removeClass('bg-secondary border-right border-dark');
+  quant.addClass('bg-info progress-bar-striped progress-bar-animated');
+
+  // Set diff classes.
+  diff.removeClass('bg-danger');
+  diff.addClass('bg-secondary border-right border-dark');
+
+  // Set done classes.
+  done.removeClass('bg-success');
+  done.addClass('bg-secondary');
+}
+
+/**
+ * Set progress bar to diff exp
+ */
+function set_progress_bar_diff() {
+  var bar = $('#progress_bar');
+  var queued = bar.children('#queued');
+  var qc = bar.children('#qc');
+  var quant = bar.children('#quant');
+  var diff = bar.children('#diff');
+  var done = bar.children('#done');
+
+  bar.children().removeClass('progress-bar-striped progress-bar-animated');
+
+  // Set queued classes.
+  queued.removeClass('bg-secondary border-right border-dark');
+  queued.addClass('bg-dark');
+
+  // Set qc classes.
+  qc.removeClass('bg-secondary border-right border-dark');
+  qc.addClass('bg-warning');
+
+  // Set quant classes.
+  quant.removeClass('bg-secondary border-right border-dark');
+  quant.addClass('bg-info');
+
+  // Set diff classes.
+  diff.removeClass('bg-secondary border-right border-dark');
+  diff.addClass('bg-danger progress-bar-striped progress-bar-animated');
+
+  // Set done classes.
+  done.removeClass('bg-success');
+  done.addClass('bg-secondary');
+}
+
+/**
+ * Set progress bar to done.
+ */
+function set_progress_bar_done() {
+  var bar = $('#progress_bar');
+  var queued = bar.children('#queued');
+  var qc = bar.children('#qc');
+  var quant = bar.children('#quant');
+  var diff = bar.children('#diff');
+  var done = bar.children('#done');
+
+  bar.children().removeClass('progress-bar-striped progress-bar-animated bg-secondary border-right border-dark');
+
+  // Set queued classes.
+  queued.addClass('bg-dark');
+
+  // Set qc classes.
+  qc.addClass('bg-warning');
+
+  // Set quant classes.
+  quant.addClass('bg-info');
+
+  // Set diff classes.
+  diff.addClass('bg-danger');
+
+  // Set done classes.
+  done.addClass('bg-success');
 }
 
 /**
@@ -1820,7 +1989,13 @@ function set_choose_controls_modal(modal) {
   var start_btn = modal.find('#start_analysis_btn');
   var control_0 = modal.find('#proj_control_0');
   var control_1 = modal.find('#proj_control_1');
-  var controls = [control_0, control_1];
+
+  var controls;
+  if (proj.design == 1) {
+    controls = [control_0];
+  } else {
+    controls = [control_0, control_1];
+  }
 
   tooltip.tooltip();
 
@@ -1903,6 +2078,11 @@ function set_choose_controls_modal(modal) {
     start_btn.click({'controls': controls}, function (e) {
       set_controls(e.data.controls);
       write_proj(start_analysis);
+
+      // Then, dismiss the project controls form and show progress screen.
+      $('#choose_controls_modal').modal('hide');
+      set_progress_bar_queued();
+      goto_progress();
     });
   }
 
