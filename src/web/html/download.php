@@ -15,15 +15,15 @@ if (isset($_GET['type'])) {
 $path = "/alaska/root/projects/" . $id;
 switch ($type) {
   case 'qc':
-    $file = "1_qc.tar.gz"
+    $file = "1_qc.tar.gz";
     $path = $path . "/" . $file;
     break;
   case 'quant':
-    $file = "2_alignment.tar.gz"
+    $file = "2_alignment.tar.gz";
     $path = $path . "/" . $file;
     break;
   case 'diff':
-    $file = "3_diff_exp.tar.gz"
+    $file = "3_diff_exp.tar.gz";
     $path = $path . "/" . $file;
     break;
   case 'all':
