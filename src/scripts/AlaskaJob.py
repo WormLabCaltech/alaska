@@ -118,7 +118,7 @@ class AlaskaJob(Alaska):
         for key, item in loaded.items():
             if key == 'docker':
                 self.docker = AlaskaDocker(item['img_tag'])
-            elif key.startswith('datetime'):
+            elif key.startswith('datetime') and item is not None:
                 setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
             else:
                 setattr(self, key, item)

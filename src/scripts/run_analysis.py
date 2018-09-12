@@ -169,7 +169,7 @@ def run_qc(proj, nthreads):
             args += ['-2', ','.join(pair2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
-        # args += ['-u', str(2 * (10 ** 5))]
+        args += ['-u', str(5 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
         args += ['--verbose']
         run_sys(args, prefix=_id)
