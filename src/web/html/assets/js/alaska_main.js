@@ -2715,8 +2715,6 @@ function fetch_sample_names() {
         names[val].addClass('is-invalid');
         valid = false;
       }
-
-      proj.samples[id].name = val;
     }
   }
 
