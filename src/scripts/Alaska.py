@@ -89,7 +89,9 @@ class Alaska():
                             'test_samples/raw/minimum/wt2']
 
     TEST_RAW_READS_FULL = ['test_samples/raw/full/mt1',
-                            'test_samples/raw/full/wt1'
+                            'test_samples/raw/full/mt2',
+                            'test_samples/raw/full/wt1',
+                            'test_samples/raw/full/wt2'
                             ]
 
 
