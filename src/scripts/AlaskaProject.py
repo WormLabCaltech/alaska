@@ -187,8 +187,7 @@ class AlaskaProject(Alaska):
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
-
-         temp = {**temp, **samples}
+        temp = {**temp, **samples}
 
     def analyze_reads(self):
         """
