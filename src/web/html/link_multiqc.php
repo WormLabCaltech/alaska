@@ -8,22 +8,11 @@ if (isset($_POST['id'])) {
 
 # construct path to file
 $path = "/alaska/root/projects/" . $id . "/1_qc/multiqc_report.html";
-$target = "/var/www/html/multiqc_reports/" . $id . "/multiqc_report.html";
-echo posix_getpwuid(posix_geteuid())['name'];
-echo is_writeable("/var/www/html/") ? "true" : "false";
-
-if (!is_dir($target)) {
-  echo (mkdir($target, 0777, true)) ? "true" : "false";
-}
 
 # Sanity check, and then read.
-if (!file_exists($target)) {
-  if (is_readable($path)) {
-    echo (symlink($path, $target)) ? "true" : "false";
-  } else {
-    throw new Exception("file is not readable");
-  }
+if (is_readable($path)) {
+  echo file_get_contents($path);
 } else {
-  echo "true";
+  throw new Exception("file is not readable");
 }
 ?>

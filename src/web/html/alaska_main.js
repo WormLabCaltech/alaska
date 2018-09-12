@@ -124,9 +124,8 @@ function goto_progress(status) {
       data: {'id': proj_id},
       success:function(out) {
         console.log(out);
-        if (out.includes('true')) {
-          window.open('/multiqc_reports/' + proj_id + '/multiqc_report.html', '_blank');
-        }
+        var win = window.open('?id=' + proj_id + '/multiqc_report', '_blank');
+        win.html(out);
       }
     });
   });
