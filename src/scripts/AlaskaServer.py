@@ -343,7 +343,7 @@ class AlaskaServer(Alaska):
                             job.docker.output.append(out) # append output
                             with open(out_path, 'a') as f:
                                 f.write('{}\n'.format(out))
-                            self.out('{}: {}: {}'.format(proj_id, job_name, out))
+                            # self.out('{}: {}: {}'.format(proj_id, job_name, out))
                 except Exception as e:
                     self.out('ERROR: error occured while starting container {}'.format(job.docker.id))
                 finally:
