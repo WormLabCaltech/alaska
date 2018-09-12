@@ -118,15 +118,7 @@ function goto_progress(status) {
 
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
-    $.ajax({
-      type: 'POST',
-      url: 'multiqc_report.php',
-      data: {'id': proj_id},
-      success:function() {
-        var win = window.open('_blank');
-        win.window.location = 'multiqc_report.php';
-      }
-    });
+      window.open('multiqc_report.php?id=APws1v5m', '_blank');
   });
 
   // Set the progress page to the given progress.

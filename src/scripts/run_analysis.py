@@ -18,6 +18,7 @@ import sys
 import time
 import json
 import queue
+import tarfile
 from threading import Thread
 import multiprocessing as mp
 from multiprocessing import Process
@@ -79,6 +80,13 @@ def run_sys(cmd, prefix=''):
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
 
     return output
+
+def archive(out, source_dir):
+    """
+    Archive given source directory into output file.
+    """
+    with tarfile.open(out, 'w:gz') as tar:
+        tar.add(source_dir, arcname=os.path.sep)
 
 ######### These functions must be here to allow multiprocessing.
 def read_distribution(_id, bed_path):
@@ -295,11 +303,15 @@ def run_qc(proj, nthreads):
         os.chdir(wdir)
         print_with_flush('# returned to {}'.format(wdir))
 
-    print('# running multiqc for all samples')
+    print_with_flush('# running multiqc for all samples')
     path = '1_qc'
     os.chdir(path)
     multiqc()
     os.chdir(wdir)
+
+    print_with_flush('# qc finished, archiving')
+    archive(path + '.tar.gz', path)
+    print_with_flush('# done')
 
 
 
