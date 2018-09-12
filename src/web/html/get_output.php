@@ -2,7 +2,6 @@
 # if there is an id
 if (isset($_POST['id'])) {
   $id = $_POST['id'];
-  echo "received id $id\n";
 } else {
   throw new Exception("id not given");
 }
@@ -10,7 +9,6 @@ if (isset($_POST['id'])) {
 # make sure there is an action
 if (isset($_POST['type'])) {
   $type = $_POST['type'];
-  echo "received type $action\n";
 } else {
   # if there is no action, this script was called incorrectly
   throw new Exception("action not given");
