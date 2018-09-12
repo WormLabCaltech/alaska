@@ -2720,6 +2720,19 @@ function fetch_sample_names() {
     }
   }
 
+  // Only set the names if everything is valid.
+  if (valid) {
+    for (var id in proj.samples) {
+      var input = $('#' + input_id.replace('SAMPLEID', id));
+      var val = input.val();
+
+      // If the input is empty, just use default (i.e. do nothing).
+      if (val != '') {
+        proj.samples[id].name = val;
+      }
+    }
+  }
+
   return valid;
 }
 
