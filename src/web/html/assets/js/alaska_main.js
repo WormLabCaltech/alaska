@@ -248,7 +248,7 @@ function update_proj_status(out) {
 
   set_progress(status);
 
-  if (status > progress.diff_finished) {
+  if (status >= progress.diff_finished) {
     clearInterval(project_progress_interval);
   }
 }
@@ -337,7 +337,6 @@ function set_progress(status) {
       elements.diff_output_btn.prop('disabled', true);
     case progress.diff_started:
       elements.diff_download_btn.prop('disabled', true);
-    case progress.diff_finished:
       elements.diff_server_btn.prop('disabled', true);
   }
 
