@@ -9,6 +9,9 @@ if (isset($_POST['id'])) {
 # construct path to file
 $path = "/alaska/root/projects/" . $id . "/1_qc/multiqc_report.html";
 $target = "/var/www/html/multiqc_reports/" . $id . "/multiqc_report.html";
+
+echo (is_writeable("/var/www/html/") ? "true" : "false";
+
 if (!is_dir($target)) {
   echo (mkdir($target, 0777, true)) ? "true" : "false";
 }
