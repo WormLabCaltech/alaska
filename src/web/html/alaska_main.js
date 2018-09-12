@@ -132,6 +132,27 @@ function goto_progress(status) {
       window.open('download.php?id=' + proj_id + '&type=diff', '_blank');
   });
 
+  // Set sleuth server open button listener.
+  $('#diff_server_btn').click(function () {
+    $.ajax({
+      type: 'POST',
+      url: 'cgi_request.php',
+      data: {
+        id: proj_id,
+        action: 'open_sleuth_server'
+      },
+      success:function(out) {
+        console.log(out);
+        var split = out.split('\n');
+        var line = split[split.length - 3];
+        var split2 = line.split(' ');
+        var port = parseInt(split2[split2.line - 1]);
+
+        console.log(port);
+      }
+    });
+  });
+
   // Set the progress page to the given progress.
   set_progress(status);
 
@@ -226,6 +247,10 @@ function update_proj_status(out) {
   var status = parseInt(split[split.length - 3]);
 
   set_progress(status);
+
+  if (status > progress.diff_finished) {
+    clearInterval(project_progress_interval);
+  }
 }
 
 /**
@@ -254,13 +279,16 @@ function set_progress(status) {
     'qc_output_btn',
     'qc_report_btn',
     'qc_download_btn',
+    'qc_output_collapse',
     'quant_status_badge',
     'quant_output_btn',
     'quant_download_btn',
+    'quant_output_collapse',
     'diff_status_badge',
     'diff_output_btn',
     'diff_server_btn',
-    'diff_download_btn'
+    'diff_download_btn',
+    'diff_output_collapse'
   ];
 
   // Construct elements dictionary
@@ -273,8 +301,8 @@ function set_progress(status) {
   // Deal with enabling buttons first.
   switch (status) {
     case progress.server_open:
-      elements.diff_server_btn.prop('disabled', false);
     case progress.diff_finished:
+      elements.diff_server_btn.prop('disabled', false);
       elements.diff_download_btn.prop('disabled', false);
     case progress.diff_started:
       elements.diff_output_btn.prop('disabled', false);
@@ -330,11 +358,29 @@ function set_progress(status) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
     set_progress_badge(elements.diff_status_badge, 'finished');
+
+    // Stop live output refreshing.
+    elements.qc_output_collapse.off('show.bs.collapse');
+    elements.qc_output_collapse.off('hide.bs.collapse');
+    elements.quant_output_collapse.off('show.bs.collapse');
+    elements.quant_output_collapse.off('hide.bs.collapse');
+    elements.diff_output_collapse.off('show.bs.collapse');
+    elements.diff_output_collapse.off('hide.bs.collapse');
   } else if (status >= progress.quant_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
+
+    // Stop live output refreshing.
+    elements.qc_output_collapse.off('show.bs.collapse');
+    elements.qc_output_collapse.off('hide.bs.collapse');
+    elements.quant_output_collapse.off('show.bs.collapse');
+    elements.quant_output_collapse.off('hide.bs.collapse');
   } else if (status >= progress.qc_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
+
+    // Stop live output refreshing.
+    elements.qc_output_collapse.off('show.bs.collapse');
+    elements.qc_output_collapse.off('hide.bs.collapse');
   }
   switch (status) {
     case progress.qc_started:
@@ -376,48 +422,6 @@ function set_progress_badge(badge, state) {
       badge.addClass('badge-danger');
       badge.text('Error');
   }
-}
-
-/**
- * Set qc started.
- */
-function set_qc_started(container) {
-
-}
-
-/**
- * Set qc_finished.
- */
-function set_qc_finished(container) {
-
-}
-
-/**
- * Set quant started.
- */
-function set_quant_started(container) {
-
-}
-
-/**
- * Set quant finished.
- */
-function set_quant_finished(container) {
-
-}
-
-/**
- * Set diff started.
- */
-function set_diff_started(container) {
-
-}
-
-/**
- * Set diff finished.
- */
-function set_diff_finished(container) {
-
 }
 
 /**

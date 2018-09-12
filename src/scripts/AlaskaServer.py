@@ -1479,7 +1479,7 @@ class AlaskaServer(Alaska):
                           ports=ports)
         cont_id = cont.id
         self.out('INFO: shiny app container started with id {}'.format(cont_id))
-        self.sleuth_servers[port] = (_id, cont_id, dt.datetime.now())
+        self.sleuth_servers[port] = [_id, cont_id, dt.datetime.now()]
 
         self.broadcast(_id, '{}: server opened on port {}'.format(_id, port))
 
