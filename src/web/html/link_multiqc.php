@@ -10,7 +10,7 @@ if (isset($_POST['id'])) {
 $path = "/alaska/root/projects/" . $id . "/1_qc/multiqc_report.html";
 $target = "/var/www/html/multiqc_reports/" . $id . "/multiqc_report.html";
 if (!is_dir($target)) {
-  mkdir($target, 0777, true);
+  echo (mkdir($target, 0777, true)) ? "true" : "false";
 }
 
 # Sanity check, and then read.
