@@ -8,13 +8,13 @@ if (isset($_POST['id'])) {
 
 # construct path to file
 $path = "/alaska/root/projects/" . $id . "/1_qc/multiqc_report.html";
-$target = "/var/www/html/multiqc_reports/" . $id;
+$target = "/var/www/html/multiqc_reports/" . $id . "/multiqc_report.html";
 if (!is_dir($target)) {
   mkdir($target, 0777, true);
 }
 
 # Sanity check, and then read.
-if (!file_exists($target . "/multiqc_report.html")) {
+if (!file_exists($target)) {
   if (is_readable($path)) {
     echo (symlink($path, $target)) ? "true" : "false";
   } else {
