@@ -118,7 +118,18 @@ function goto_progress(status) {
 
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
-      window.open('multiqc_report.php?id=APws1v5m', '_blank');
+      window.open('multiqc_report.php?id=' + proj_id, '_blank');
+  });
+
+  // Set download button listeners.
+  $('#qc_download_btn').click(function () {
+      window.open('download.php?id=' + proj_id + '&type=qc', '_blank');
+  });
+  $('#quant_download_btn').click(function () {
+      window.open('download.php?id=' + proj_id + '&type=quant', '_blank');
+  });
+  $('#diff_download_btn').click(function () {
+      window.open('download.php?id=' + proj_id + '&type=diff', '_blank');
   });
 
   // Set the progress page to the given progress.
