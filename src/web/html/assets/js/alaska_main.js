@@ -931,6 +931,9 @@ function set_fetch_succeeded() {
   failed.hide();
   succeeded.show();
 
+  // Disable fetch reads button.
+  $('#fetch_reads_btn').prop('disabled', true);
+
   scroll_to_ele(succeeded);
 }
 
@@ -1048,11 +1051,13 @@ function show_sample_name_input() {
   // First, add event listener for modal hide.
   first.on('hidden.bs.modal', function (e) {
     second.modal('show');
+    $(this).off('hidden.bs.modal');
   });
 
   // Then, hide infer samples modal,
   // which will also show the second modal.
   first.modal('hide');
+
 }
 
 /**

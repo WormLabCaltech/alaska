@@ -931,6 +931,9 @@ function set_fetch_succeeded() {
   failed.hide();
   succeeded.show();
 
+  // Disable fetch reads button.
+  $('#fetch_reads_btn').prop('disabled', true);
+
   scroll_to_ele(succeeded);
 }
 
