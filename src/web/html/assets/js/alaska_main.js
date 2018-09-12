@@ -120,12 +120,11 @@ function goto_progress(status) {
   $('#qc_report_btn').click(function () {
     $.ajax({
       type: 'POST',
-      url: 'link_multiqc.php',
+      url: 'multiqc_report.php',
       data: {'id': proj_id},
-      success:function(out) {
-        console.log(out);
-        var win = window.open('?id=' + proj_id + '/multiqc_report', '_blank');
-        win.html(out);
+      success:function() {
+        var win = window.open('_blank');
+        win.window.location = 'multiqc_report.php';
       }
     });
   });

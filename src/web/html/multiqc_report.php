@@ -11,7 +11,7 @@ $path = "/alaska/root/projects/" . $id . "/1_qc/multiqc_report.html";
 
 # Sanity check, and then read.
 if (is_readable($path)) {
-  echo file_get_contents($path);
+  readfile($path);
 } else {
   throw new Exception("file is not readable");
 }
