@@ -7,11 +7,12 @@
     <title>Alaska</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/css/check.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
     <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
     <link rel="stylesheet" href="assets/css/loading.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
@@ -563,7 +564,7 @@
             </span>
         </div>
     </div>
-    <div id="ftp_info_div" style="margin-bottom:18rem;display:none">
+    <div id="ftp_info_div" style="margin-bottom:18rem">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -572,30 +573,115 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center" style="color:rgb(255,255,255);font-weight:100;font-size:2em;">Here's what you need to do.</h2>
+                    <h2 class="text-center" style="color:rgb(255,255,255);font-weight:100;font-size:2em;">Please follow the instructions below.</h2>
                 </div>
             </div>
             <div class="row mt-5">
                 <div class="col mx-4"><div class="card-deck">
     <div class="card text-white border-success" style="background-color:transparent;">
-        <div class="card-header">1. Your project</div>
+        <h5 class="card-header">1. Your project ID</h5>
         <div class="card-body">
-            <h4 id="proj_id" class="card-title">Project ID</h4>
-            <p class="card-text">Here is your new project ID. This is how Alaska identifies and keeps track of everything related to your project.</p>
-            <p class="card-text">You may return to this page at any time with the following url:<br><mark><code id="proj_url">http://alaska.caltech.edu:81/</code></mark></p>
+            <p class="card-text mb-0">Your project ID is:</p>
+            <h5 id="proj_id" class="card-title">Project ID</h5>
+            <p class="card-text">This will be used to identify and keep track of everything related to your project. If you need to contact the WormBase team regarding your project, you will need to include your ID.</p>
+            <p class="card-text">Here is the unique URL for your project:<br><mark><code id="proj_url">http://alaska.caltech.edu:81/</code></mark></p>
         </div>
     </div>
     <div class="card text-white border-warning" style="background-color:transparent;">
-        <div class="card-header">2. Important notes</div>
+        <h5 class="card-header">2. Preparing your reads for upload</h5>
         <div class="card-body">
-            <h4 class="card-title">Preparing your reads</h4>
-            <p class="card-text">Alaska accepts compressed files, as well as plain folders/files. If you decide to compress your reads, please make sure it is in one of the supported formats. <mark><code>.tar.gz</code></mark> is recommended. <u>Just make sure each sample is compressed into separate files (i.e. one file per sample) or in separate folders (i.e. one folder per sample).</u></p></div>
+            <p class="card-text">Alaska accepts <mark><code>.fastq</code></mark> or <mark><code>.fastq.gz</code></mark> files in both compressed or non-compressed folders. The recommended compression format for folders is <mark><code>.tar.gz</code></mark>.</p>
+            <p class="card-text text-center">
+                <!--See example button trigger for modal-->
+                <button id="read_example_btn" class="btn btn-warning mt-2" type="button" data-toggle="modal" data-target="#read_example_modal">See examples</button>
+            </p>
+            <!--Read example modal-->
+            <div class="modal fade" id="read_example_modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header alert-warning">
+                            <h5 class="modal-title"><i class="fa fa-file mr-2"></i>Valid submission examples</h5>
+                        </div>
+                        <div class="modal-body text-dark">
+                            <p>For all the examples, we are working with a project with 2 samples, with 4 read files each (for a total of 8 read files).</p>
+                            <h5>Without folders</h5>
+                            <p>You will prepare 2 archives, one for each sample, containing all the reads for their corresponding sample. Here is what it would look like.</p>
+                            <div class="d-flex justify-content-center">
+                                <ul class="fa-ul text-monospace" style="list-style:none;font-size:0.8em">
+                                    <li><i class="fa fa-li fa-file-archive"></i>sample_1_archive.tar.gz</li>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_1.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_2.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_3.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_4.fastq.gz</li>
+                                    </ul>
+                                    <li><i class="fa fa-li fa-file-archive"></i>sample_2_archive.tar.gz</li>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_1.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_2.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_3.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_4.fastq.gz</li>
+                                    </ul>
+                                </ul>
+                            </div>
+                            <hr>
+                            <h5>With non-compressed folders</h5>
+                            <p>You will prepare 2 folders, one for each sample, containing all the reads for their corresponding sample. Here is what it would look like.</p>
+                            <div class="d-flex justify-content-center">
+                                <ul class="fa-ul text-monospace" style="list-style:none;font-size:0.8em">
+                                    <li><i class="fa fa-li fa-folder-open"></i>sample_1_folder</li>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_1.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_2.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_3.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_1_read_4.fastq.gz</li>
+                                    </ul>
+                                    <li><i class="fa fa-li fa-folder-open"></i>sample_2_folder</li>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_1.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_2.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_3.fastq.gz</li>
+                                        <li><i class="fa fa-li fa-file"></i>sample_2_read_4.fastq.gz</li>
+                                    </ul>
+                                </ul>
+                            </div>
+                            <hr>
+                            <h5>With compressed folders</h5>
+                            <p>You will prepare 1 archive, containing 2 folders, one for each sample, containing all the reads for their corresponding sample. Here is what it would look like.</p>
+                            <div class="d-flex justify-content-center">
+                                <ul class="fa-ul text-monospace" style="list-style:none;font-size:0.8em">
+                                    <li><i class="fa fa-li fa-file-archive"></i>all_samples_archive.tar.gz</li>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa fa-li fa-folder-open"></i>sample_1_folder</li>
+                                        <ul class="fa-ul">
+                                            <li><i class="fa fa-li fa-file"></i>sample_1_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_1_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_1_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_1_read_1.tar.gz</li>
+                                        </ul>
+                                        <li><i class="fa fa-li fa-folder-open"></i>sample_2_folder</li>
+                                        <ul class="fa-ul">
+                                            <li><i class="fa fa-li fa-file"></i>sample_2_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_2_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_2_read_1.tar.gz</li>
+                                            <li><i class="fa fa-li fa-file"></i>sample_2_read_1.tar.gz</li>
+                                        </ul>
+                                    </ul>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="card text-white border-danger" style="background-color:transparent;">
-        <div class="card-header">3. Raw reads submission</div>
+        <h5 class="card-header">3. Uploading your reads</h5>
         <div class="card-body">
-            <h4 class="card-title">Uploading your reads</h4>
-            <p class="card-text">You will be uploading your reads via FTP. For large files, you may wish to use a server.</p>
+            <p class="card-text">Reads can only be uploaded using an FTP service. Large files may be transferred through a server. If you are not familiar with FTP transfers, we recommend that you use an FTP client, such as Cyberduck.</p>
             <!--
             <dl class="row" style="font-size:0.8em">
                 <dt class="col-sm-4">Server</dt>
@@ -607,7 +693,7 @@
                 <dt class="col-sm-4">Password</dt>
                 <dd id="ftp_pw" class="col-sm-6">password</dd>
             </dl>-->
-            <p class="card-text">If you aren't familiar with transferring files via FTP, an FTP client, like Cyberduck, may be helpful.</p>
+            <p class="card-text">When you reach this step, click the button below for details on how to upload.</p>
             <p class="card-text text-center">
                 <!--FTP button trigger for modal-->
                 <button id="ftp_info_btn" class="btn btn-danger mt-2" type="button" data-toggle="modal" data-target="#ftp_info_modal">View FTP details</button>
@@ -617,9 +703,11 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header alert-danger">
-                            <h5 class="modal-title">FTP Info</h5>
+                            <h5 class="modal-title"><i class="fa fa-upload mr-2"></i>FTP Info</h5>
                         </div>
                         <div class="modal-body text-dark">
+                            <p>This is the information you need to provide to your FTP service or client in order to transfer the files from your computer to WormBase.</p>
+                            <hr>
                             <!--Description list for FTP info-->
                             <dl class="row">
                                 <dt class="col-md-3">Server</dt>
@@ -641,10 +729,9 @@
         </div>
     </div>
     <div class="card text-white border-primary" style="background-color:transparent;">
-        <div class="card-header">4. Fetch your reads</div>
+        <h5 class="card-header">4. Run Alaska</h5>
         <div class="card-body">
-            <h4 class="card-title">Begin pipeline</h4>
-            <p class="card-text">Once all your reads are uploaded, Alaska can start its data analysis pipeline. Please click the button below <strong>ONLY</strong> once all your reads are uploaded.</p>
+            <p class="card-text">Once we receive your reads, we can start the data analysis. Please click the button below <strong>ONLY</strong> once all your reads are uploaded.</p>
             <!--Copy test reads button for testing purposes-->
             <p class="card-text text-center"><button id="copy_test_reads_btn" class="btn btn-secondary d-flex align-items-center mt-2" type="button">
                 Copy test reads
@@ -663,16 +750,17 @@
             </div>
         </div>
     </div>
-    <div id="raw_reads_div" style="margin-bottom:18rem;display:none">
+    <div id="raw_reads_div" style="margin-bottom:18rem;">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center text-white" id="fetch_reads_results_header_1" style="font-size:3em;margin-bottom:0px;">Here's what we found.</h1>
+                    <h1 class="text-center text-white" id="fetch_reads_results_header_1" style="font-size:3em;margin-bottom:0px;">We have received your reads!</h1>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center text-white" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.8em;">Any files not listed here will be ignored.</h2>
+                    <h2 class="text-center text-white" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.5em;">This is the directory structure that we received. Please check it to make sure that the directory structure is correct and that all the files are listed within the folders you intended. Any files that are missing from this list will
+                        not be used in downstream analyses.</h2>
                 </div>
             </div>
             <div class="row">
@@ -712,14 +800,14 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header alert-primary">
-                <h5 class="modal-title">Alaska will infer your samples.</h5>
+                <h5 class="modal-title">Begin sample metadata annotation</h5>
             </div>
             <div class="modal-body text-dark">
-                <p>Alaska will begin to infer your samples when you press the button below. Depending on the number, size, and format of your reads, this may take a few minutes. The page will automatcially refresh when this is finished.
+                <p>Alaska will infer some initial metadata from your samples once you press the button. This may take a few minutes.</p>
             </div>
             <div class="modal-footer">
                 <button id="infer_samples_btn" type="button" class="btn btn-primary d-flex align-items-center">
-                    Infer samples
+                    Start
                     <!--Div for the loading spinner.-->
                     <div id="infer_samples_loading_spinner" class="spinner-light ml-2" style="width:20px;height:20px;display:none"></div>
                 </button>
@@ -734,11 +822,12 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header alert-warning d-block">
-                <h5 class="modal-title">Let's name your samples.</h5>
+                <h5 class="modal-title">Let's name your samples</h5>
                 <p class="modal-title" id="sample_names_header">Alaska found num samples.</p>
             </div>
             <div class="modal-body text-dark">
-                <p>These names will be used in many places to label your samples. If you leave any blank, we'll just use the default values.
+                <p>We extracted the sample names from the folders/files you provided. If you wish to name the samples differently, please rename them now. Sample names can be anything, but the following special characters should not be used: &#92; &#47; &#36; &#37; &#96; &#126;</p>
+                <p>Sample names must be unique.</p>
                 <form id="sample_names_form">
                     <div class="d-flex">
                         <label class="col-sm-3 pl-0">Folder</label>
@@ -748,6 +837,9 @@
                     <div id="name_input_row_SAMPLEID" style="display:none">
                         <label class="col-sm-3 pl-0 text-monospace" id="name_input_folder_SAMPLEID"></label>
                         <input type="text" class="form-control form-control-sm col-sm-5" id="name_input_SAMPLEID">
+                        <div class="invalid-feedback">
+                            Sample names must be unique.
+                        </div>
                     </div>
                 </form>
             </div>

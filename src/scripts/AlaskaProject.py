@@ -117,6 +117,7 @@ class AlaskaProject(Alaska):
             self.out('{}: unpacking finished'.format(self.id))
 
         # walk through raw reads directory
+        self.raw_reads = {}
         for root, dirs, files in os.walk(self.raw_dir):
             # go straight to deepest directory
             if not len(dirs) == 0:
@@ -172,11 +173,12 @@ class AlaskaProject(Alaska):
         #     raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
 
         # loop through each folder with sample
+        self.samples = {}
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id, folder)
-            if temp is not None: # if temporary variable is given
-                temp[_id] = sample
+            # if temp is not None: # if temporary variable is given
+            #     temp[_id] = sample
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
@@ -185,6 +187,8 @@ class AlaskaProject(Alaska):
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
+
+         temp = {**temp, **samples}
 
     def analyze_reads(self):
         """
