@@ -16,11 +16,11 @@ if (!is_dir($target)) {
 # Sanity check, and then read.
 if (!file_exists($target . "/multiqc_report.html")) {
   if (is_readable($path)) {
-    echo symlink($path, $target);
+    echo (symlink($path, $target)) ? "true" : "false";
   } else {
     throw new Exception("file is not readable");
   }
 } else {
-  echo false;
+  echo "false";
 }
 ?>
