@@ -184,7 +184,7 @@ def run_qc(proj, nthreads):
         sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-@', str(nthreads-1)]
-        args += ['-m', '4G']
+        args += ['-m', '2G']
         run_sys(args, prefix=_id)
 
     def samtools_index(_id):
@@ -204,7 +204,7 @@ def run_qc(proj, nthreads):
         sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-t', str(nthreads-1)]
-        args += ['-m', '4G']
+        args += ['-m', '2G']
         run_sys(args, prefix=_id)
 
     def sambamba_index(_id):
