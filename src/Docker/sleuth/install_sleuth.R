@@ -4,9 +4,9 @@
 args = commandArgs(trailingOnly=TRUE)
 
 if (length(args) != 1) {
-    stop("Exactly one argument required.n", call.=FALSE)
+    stop("Exactly one argument required.", call.=FALSE)
 } else {
-    repo <- paste("pachterlab/sleuth", args[1], sep="@")
+    repo <- paste("pachterlab/sleuth@v", args[1], sep="")
 }
 
 # install dependencies
