@@ -146,9 +146,12 @@ function goto_progress(status) {
         var split = out.split('\n');
         var line = split[split.length - 3];
         var split2 = line.split(' ');
-        var port = parseInt(split2[split2.line - 1]);
+        var port = parseInt(split2[split2.length - 1]);
 
         console.log(port);
+
+        var url = 'http://' + window.location.hostname + ':' + port + '/';
+        window.open(url, '_blank');
       }
     });
   });
