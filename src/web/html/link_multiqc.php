@@ -21,6 +21,6 @@ if (!file_exists($target . "/multiqc_report.html")) {
     throw new Exception("file is not readable");
   }
 } else {
-  echo "false";
+  echo "true";
 }
 ?>
