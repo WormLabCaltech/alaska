@@ -400,7 +400,7 @@ class AlaskaServer(Alaska):
         """
         Method to decode messages received from AlaskaRequest.
         """
-        self.out('{}: received {}'.format(request[0], request[1]))
+        # self.out('{}: received {}'.format(request[0], request[1]))
         try:
             if request[1] not in self.CODES:
                 raise Exception('ERROR: code {} was not recognized'.format(request[1]))

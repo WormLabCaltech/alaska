@@ -169,7 +169,7 @@ def run_qc(proj, nthreads):
             args += ['-2', ','.join(pair2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
-        args += ['-u', str(5 * (10 ** 5))]
+        args += ['-u', str(1 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
         args += ['--verbose']
         run_sys(args, prefix=_id)
@@ -369,6 +369,11 @@ def run_kallisto(proj, nthreads):
 
         run_sys(args, prefix=_id)
 
+    path = '2_alignment'
+    print_with_flush('# kallisto finished, archiving')
+    archive(path + '.tar.gz', path)
+    print_with_flush('# done')
+
 
 def run_sleuth(proj):
     """
@@ -383,6 +388,11 @@ def run_sleuth(proj):
     # args += ['--shiny']
 
     run_sys(args)
+
+    path = '3_diff_exp'
+    print_with_flush('# sleuth finished, archiving')
+    archive(path + '.tar.gz', path)
+    print_with_flush('# done')
 
 if __name__ == '__main__':
     import argparse
