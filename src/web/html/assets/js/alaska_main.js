@@ -3234,8 +3234,8 @@ function get_proj_input_fields() {
   proj_input_fields.meta['title'] = proj_form.find('#proj_title');
   proj_input_fields.meta['abstract'] = proj_form.find('#proj_abstract');
   proj_input_fields.meta['corresponding'] = {
-    'email': proj.form.find('#proj_corresponding_email'),
-    'name': proj.form.find('#proj_corresponding_name')
+    'email': proj_form.find('#proj_corresponding_email'),
+    'name': proj_form.find('#proj_corresponding_name')
   };
   proj_input_fields.meta['contributors'] = proj_contributor_fields;
   proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
