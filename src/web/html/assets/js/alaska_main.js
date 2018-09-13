@@ -1924,7 +1924,7 @@ function add_factor() {
 
   // Extract factor number.
   var split = more_div_id.split('_');
-  var num = parseInt(split[split.length - 3]);
+  var num = parseInt(split[split.length - 4]);
 
   var fields;
   if (num == 0) {
@@ -2166,7 +2166,7 @@ function set_factor_listener() {
   var factor_2_radio_id = 'proj_design_2_radio';
 
   // ID of the second factor.
-  var factor_1_id = 'proj_factor_1_collapse';
+  var factor_1_id = 'proj_factor_1_card';
 
   var factor_1_radio = proj_form.find('#' + factor_1_radio_id);
   var factor_2_radio = proj_form.find('#' + factor_2_radio_id);
@@ -2198,11 +2198,11 @@ function set_proj_meta_input() {
   proj_form.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
-  var proj_factor_0_0 = proj_form.find('#proj_factor_0_0_div');
-  var proj_factor_0_1 = proj_form.find('#proj_factor_0_1_div');
+  var proj_factor_0_0 = proj_form.find('#proj_factor_0_value_0_div');
+  var proj_factor_0_1 = proj_form.find('#proj_factor_0_value_1_div');
   var proj_factor_0_btn = proj_form.find('#proj_factor_0_add_btn');
-  var proj_factor_1_0 = proj_form.find('#proj_factor_1_0_div');
-  var proj_factor_1_1 = proj_form.find('#proj_factor_1_1_div');
+  var proj_factor_1_0 = proj_form.find('#proj_factor_1_value_0_div');
+  var proj_factor_1_1 = proj_form.find('#proj_factor_1_value_1_div');
   var proj_factor_1_btn = proj_form.find('#proj_factor_1_add_btn');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
   var save_changes_btn = proj_form.find('#proj_save_btn');
@@ -3233,8 +3233,11 @@ function get_proj_input_fields() {
   proj_input_fields['meta'] = {};
   proj_input_fields.meta['title'] = proj_form.find('#proj_title');
   proj_input_fields.meta['abstract'] = proj_form.find('#proj_abstract');
+  proj_input_fields.meta['corresponding'] = {
+    'email': proj.form.find('#proj_corresponding_email'),
+    'name': proj.form.find('#proj_corresponding_name')
+  };
   proj_input_fields.meta['contributors'] = proj_contributor_fields;
-  proj_input_fields.meta['email'] = proj_form.find('#proj_email');
   proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
   proj_input_fields['design'] = proj_form.find('#proj_design');
 

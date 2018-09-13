@@ -331,6 +331,7 @@
                     <input type="email" class="form-control" id="proj_sra_center_code">
                 </div>
             </div>
+            <hr>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <legend class="col-form-label pt-0">Experimental design</legend>
@@ -345,8 +346,88 @@
                         <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2">
                         <label class="custom-control-label" for="proj_design_2_radio">2-factor</label>
                     </div>
+                    <div class="card mt-3" id="proj_factor_0_card">
+                        <h6 class="card-header">Factor 1</h6>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-sm-4">
+                                    <legend class="col-form-label">Name</legend>
+                                    <small id="proj_factor_0_name_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="custom-select" id="proj_factor_0_name_select">
+                                        <option selected hidden disabled>Please select.</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 pl-0">
+                                    <input type="text" class="form-control" id="proj_factor_0_name_custom" disabled>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-4">
+                                    <legend class="col-form-label">All possible values</legend>
+                                    <small id="proj_factor_0_values_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                </div>
+                                <div id="proj_factor_0_values" class="col">
+                                    <div class="d-flex" id="proj_factor_0_value_0_div">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_0" required>
+                                        <button id="proj_factor_0_add_btn" class="btn btn-primary" type="button">Add value</button>
+                                    </div>
+                                    <div class="d-flex mt-1" id="proj_factor_0_value_1_div">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_1" required>
+                                    </div>
+                                    <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
+                                    <div class="mt-1 collapse" id="proj_factor_0_value_num_div" style="display:none">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_num">
+                                        <button id="proj_factor_0_remove_num" class="btn btn-danger" type="button">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3 collapse" id="proj_factor_1_card">
+                        <h6 class="card-header">Factor 2</h6>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-sm-4">
+                                    <legend class="col-form-label">Name</legend>
+                                    <small id="proj_factor_1_name_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="custom-select" id="proj_factor_1_name_select">
+                                        <option selected hidden disabled>Please select.</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 pl-0">
+                                    <input type="text" class="form-control" id="proj_factor_1_name_custom" disabled>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-4">
+                                    <legend class="col-form-label">All possible values</legend>
+                                    <small id="proj_factor_1_values_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                </div>
+                                <div id="proj_factor_1_values" class="col">
+                                    <div class="d-flex" id="proj_factor_1_value_0_div">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_0" required>
+                                        <button id="proj_factor_1_add_btn" class="btn btn-primary" type="button">Add value</button>
+                                    </div>
+                                    <div class="d-flex mt-1" id="proj_factor_1_value_1_div">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_1" required>
+                                    </div>
+                                    <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
+                                    <div class="mt-1 collapse" id="proj_factor_1_value_num_div" style="display:none">
+                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_num">
+                                        <button id="proj_factor_1_remove_num" class="btn btn-danger" type="button">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!--
+            <hr>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <legend class="col-form-label">Factor 1</legend>
@@ -399,6 +480,7 @@
                     </div>
                 </div>
             </div>
+            -->
             <div class="text-right">
                 <button class="btn btn-primary" id="proj_save_btn" type="button">Save changes</button>
             </div>
