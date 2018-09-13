@@ -260,7 +260,7 @@
         </div>
     </div>
 </div></div>
-        <div id="meta_proj" class="mt-5"><div class="card mx-2">
+        <div id="meta_proj" class="my-5"><div class="card mx-2">
     <div class="card-header alert-primary h2">
         <i class="fas fa-cube"></i>
         Project Metadata Form
@@ -289,20 +289,20 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
-                    <label for="corresponding_name" class="col-form-label">Corresponding contributor</label>
-                    <small id="corresponding_name_help" class="form-text text-muted">The full name of an individual who should be contacted regarding the project files.</small>
+                    <label for="proj_corresponding_name" class="col-form-label">Corresponding contributor</label>
+                    <small id="proj_corresponding_name_help" class="form-text text-muted">The full name of an individual who should be contacted regarding the project files.</small>
                 </div>
                 <div class="col-sm-3">
-                    <input type="email" class="form-control" id="corresponding_name" required>
+                    <input type="text" class="form-control" id="proj_corresponding_name" required>
                 </div>
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
-                    <label for="proj_email" class="col-form-label">Email</label>
-                    <small id="proj_email_help" class="form-text text-muted">Please input the email of the corresponding contributor. This email will also be used to contact you when the analysis is finished.</small>
+                    <label for="proj_corresponding_email" class="col-form-label">Email</label>
+                    <small id="proj_corresponding_email_help" class="form-text text-muted">Please input the email of the corresponding contributor. This email will also be used to contact you when the analysis is finished.</small>
                 </div>
                 <div class="col-sm-3">
-                    <input type="email" class="form-control" id="proj_email" required>
+                    <input type="email" class="form-control" id="proj_corresponding_email" required>
                 </div>
             </div>
             <div class="form-group row">
@@ -401,12 +401,23 @@
             </div>
             <div class="text-right">
                 <button class="btn btn-primary" id="proj_save_btn" type="button">Save changes</button>
-                <button class="btn btn-secondary" id="proj_save_btn" type="button">Next</button>
             </div>
         </form>
     </div>
 </div></div>
-        <div id="meta_sample" class="mt-5"><div style="height:70em">
+        <div id="meta_header">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="col">
+                    <h1 class="text-center text-white" style="font-size:2.2em;">Great! Now we just have a few questions about your samples.</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 class="text-center text-white" style="font-weight:100;font-size:1.5em;">You may edit your project metadata inputs at any time by simply scrolling up.</h2>
+                </div>
+            </div>
+        </div>
+        <div id="meta_sample" class="mt-3"><div style="height:70em">
     <div class="card mx-2" id="sample_card">
         <div class="card-header alert-warning h2">
             <i class="fas fa-cubes"></i>
@@ -444,19 +455,25 @@
                 </div>
             </div>
         </div>
-        <div class="collapse" id="sample_SAMPLEID">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Common metadata for all samples</h4>
+            <form novalidate>
+                <div class="form-group row">
+                    <div class="col-sm-3">
+                        <label for="sample_name_SAMPLEID" class="col-form-label">Name</label>
+                        <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" id="sample_name_SAMPLEID" required disabled>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="" id="sample_SAMPLEID">
             <div class="card-body">
                 <h4 class="card-title" id="sample_id_SAMPLEID">Sample ID</h4>
                 <form novalidate>
-                    <div class="form-group row">
-                        <div class="col-sm-3">
-                            <label for="sample_name_SAMPLEID" class="col-form-label">Name</label>
-                            <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
-                        </div>
-                        <div class="col-sm-3">
-                            <input type="text" class="form-control" id="sample_name_SAMPLEID" required disabled>
-                        </div>
-                    </div>
+                    
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <label for="sample_description_SAMPLEID" class="col-form-label">Description</label>
