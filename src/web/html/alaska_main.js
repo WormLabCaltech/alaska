@@ -1910,6 +1910,21 @@ function set_remove_factor_btn(button, fields) {
 }
 
 /**
+ * Set factor name dropdown options.
+ */
+function set_factor_name_options(dropdown) {
+  // Dictionary of choice: div pairs.
+  var choices = {
+    'genotype': null,
+    'growth conditions': null,
+    'organism strain': null,
+    'life-stage': null,
+    'tissue': null,
+    'other': null,
+  };
+}
+
+/**
  * Add factor detail.
  */
 function add_factor() {
