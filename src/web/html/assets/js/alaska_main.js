@@ -2197,12 +2197,18 @@ function set_proj_meta_input() {
   proj_form.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
+  var proj_factor_0_0 = proj_form.find('#proj_factor_0_0_div');
+  var proj_factor_0_1 = proj_form.find('#proj_factor_0_1_div');
   var proj_factor_0_btn = proj_form.find('#proj_factor_0_add_btn');
+  var proj_factor_1_0 = proj_form.find('#proj_factor_1_0_div');
+  var proj_factor_1_1 = proj_form.find('#proj_factor_1_1_div');
   var proj_factor_1_btn = proj_form.find('#proj_factor_1_add_btn');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
   var save_changes_btn = proj_form.find('#proj_save_btn');
 
-  proj_contributor_fields.push(proj_contributor_0);
+  proj_contributor_fields = [proj_contributor_0];
+  proj_factor_0_fields = [proj_factor_0_0, proj_factor_0_1];
+  proj_factor_1_fields = [proj_factor_1_0, proj_factor_1_1];
 
   // Button handlers.
   add_contributor_btn.click(add_contributor);
