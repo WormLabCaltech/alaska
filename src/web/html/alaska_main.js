@@ -1950,6 +1950,17 @@ function add_factor() {
 
   // Set the remove button handler.
   set_remove_factor_btn(new_more_btn, fields, n_values);
+
+  // Append the new field to DOM.
+  factor_div.append(new_div);
+  new_div.show();
+  new_div.addClass('d-flex');
+
+  // Show the collapse.
+  new_div.collapse('show');
+
+  // Add the div to the global list of factor values.
+  fields.push(new_div);
 }
 
 /**
