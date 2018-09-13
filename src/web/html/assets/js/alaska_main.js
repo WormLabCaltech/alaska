@@ -1897,13 +1897,14 @@ function remove_value(fields, n) {
 /**
  * Set up the remove value button.
  */
-function set_remove_factor_btn(button, fields, n) {
+function set_remove_factor_btn(button, fields) {
   button.click({
     'fields': fields,
-    'n': n
   }, function (e) {
+    var id = $(this).attr('id');
+    var split = id.split('_');
+    var n = split[split.length - 1];
     var fields = e.data.fields;
-    var n = e.data.n;
     remove_value(fields, n);
   });
 }
@@ -1949,7 +1950,7 @@ function add_factor() {
   new_more_btn.attr('id', new_more_btn_id);
 
   // Set the remove button handler.
-  set_remove_factor_btn(new_more_btn, fields, n_values);
+  set_remove_factor_btn(new_more_btn, fields);
 
   // Append the new field to DOM.
   factor_div.append(new_div);
