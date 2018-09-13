@@ -54,10 +54,13 @@ class AlaskaProject(Alaska):
         self.meta = {} # variable for all metadata
         # from GEO submission template
         self.meta['title'] = ''
-        self.meta['summary'] = ''
+        self.meta['abstract'] = ''
+        self.meta['corresponding'] = {
+            'email': '',
+            'name': ''
+        }
         self.meta['contributors'] = []
         self.meta['SRA_center_code'] = ''
-        self.meta['email'] = ''
         # end from GEO submission template
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 

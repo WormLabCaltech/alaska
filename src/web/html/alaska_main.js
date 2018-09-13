@@ -97,6 +97,17 @@ function goto_ftp_info() {
 }
 
 /**
+ * Goto raw reads.
+ */
+function goto_raw_reads() {
+  // Disable fetch reads button.
+  $('#fetch_reads_btn').prop('disabled', true);
+
+  goto_ftp_info();
+  refetch_reads();
+}
+
+/**
  * Go to meta input page.
  */
 function goto_meta_input() {
@@ -611,10 +622,11 @@ function parse_proj_status(out) {
     // Samples inferred
     case progress.inferred:
       console.log('status: samples inferred');
-      goto_meta_input()
+      goto_ftp_info();
       break;
     case progress.set:
       console.log('status: set');
+      goto_meta_input()
       break;
 
     // For all of these cases, we go to the progress page.
@@ -1443,13 +1455,13 @@ function set_paired_end_listener(id, form) {
 
   // Set listener for click.
   single_radio.click({'paired': paired}, function (e) {
-    paired = e.data.paired;
+    var paired = e.data.paired;
     if (this.checked) {
       paired.collapse('hide');
     }
   });
   paired_radio.click({'paired': paired}, function (e) {
-    paired = e.data.paired;
+    var paired = e.data.paired;
     if (this.checked) {
       paired.collapse('show');
     }
@@ -1766,7 +1778,7 @@ function set_remove_characteristic_button(button) {
 }
 
 /**
- * Add contributors.
+ * Add characteristic.
  */
 function add_characteristic() {
   var btn = $(this);
@@ -1839,6 +1851,108 @@ function add_characteristic() {
 }
 
 /**
+ * Remove value.
+ */
+function remove_value(fields, n) {
+  // Get div of value.
+  var div = fields[n];
+
+  // Set on-hide listener to destroy this div.
+  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+  function (e) {
+    var div = e.data.div;
+    var fields = e.data.fields;
+    var n = e.data.n;
+
+    var factor_div = div.parent();
+    var more_div = factor_div.children('div[style*="display:none"]');
+    var more_value = more_div.children('input');
+    var more_btn = more_div.children('button');
+    var more_div_id = more_div.attr('id');
+    var more_value_id = more_value.attr('id');
+    var more_btn_id = more_btn.attr('id');
+
+    // Remove item from the array. Then, delete it from DOM.
+    fields.splice(n, 1);
+    div.remove();
+
+    // Then, update the ids of all the following elements.
+    var n_values = fields.length;
+    for (var i = n; i < n_values; i++) {
+      var new_more_div_id = more_div_id.replace('num', i);
+      var new_more_value_id = more_value_id.replace('num', i);
+      var new_more_btn_id = more_btn_id.replace('num', i);
+
+      var div = fields[i];
+      div.attr('id', new_more_div_id);
+      div.children('input').attr('id', new_more_value_id);
+      div.children('button').attr('id', new_more_btn_id);
+    }
+  });
+
+  // Hide collapse.
+  div.collapse('hide');
+}
+
+/**
+ * Set up the remove value button.
+ */
+function set_remove_factor_btn(button, fields, n) {
+  button.click({
+    'fields': fields,
+    'n': n
+  }, function (e) {
+    var fields = e.data.fields;
+    var n = e.data.n;
+    remove_value(fields, n);
+  });
+}
+
+/**
+ * Add factor detail.
+ */
+function add_factor() {
+  var btn = $(this);
+  var factor_div = btn.parent().parent();
+  var more_div = factor_div.children('div[style*="display:none"]');
+  var more_value = more_div.children('input');
+  var more_btn = more_div.children('button');
+  var more_div_id = more_div.attr('id');
+  var more_value_id = more_value.attr('id');
+  var more_btn_id = more_btn.attr('id');
+
+  // Extract factor number.
+  var split = more_div_id.split('_');
+  var num = parseInt(split[split.length - 3]);
+
+  var fields;
+  if (num == 0) {
+    fields = proj_factor_0_fields;
+  } else {
+    fields = proj_factor_1_fields;
+  }
+
+  // Get how many values there are already.
+  var n_values = fields.length;
+
+  // Make new div by cloning.
+  var new_div = more_div.clone();
+
+  // Then, change the ids.
+  var new_more_div_id = more_div_id.replace('num', n_values);
+  var new_more_value_id = more_value_id.replace('num', n_values);
+  var new_more_btn_id = more_btn_id.replace('num', n_values);
+  var new_more_value = new_div.children('input');
+  var new_more_btn = new_div.children('button');
+  new_div.attr('id', new_more_div_id);
+  new_more_value.attr('id', new_more_value_id);
+  new_more_btn.attr('id', new_more_btn_id);
+
+  // Set the remove button handler.
+  set_remove_factor_btn(new_more_btn, fields, n_values);
+}
+
+/**
  * Sets project meta fields with the values from the global proj object.
  */
 function set_proj_meta_fields() {
@@ -1889,7 +2003,7 @@ function set_proj_meta_fields() {
         break;
 
       case 'title':
-      case 'summary':
+      case 'abstract':
       case 'SRA_center_code':
       case 'email':
       default:
@@ -2033,15 +2147,47 @@ function save_proj(callback) {
 }
 
 /**
+ * Set 1-, 2-factor listener.
+ */
+function set_factor_listener() {
+  var factor_1_radio_id = 'proj_design_1_radio';
+  var factor_2_radio_id = 'proj_design_2_radio';
+
+  // ID of the second factor.
+  var factor_1_id = 'proj_factor_1_collapse';
+
+  var factor_1_radio = proj_form.find('#' + factor_1_radio_id);
+  var factor_2_radio = proj_form.find('#' + factor_2_radio_id);
+  var factor_1 = proj_form.find('#' + factor_1_id);
+
+  // Set listener for click.
+  factor_1_radio.click({'factor_1': factor_1}, function (e) {
+    var factor_1 = e.data.factor_1;
+    if (this.checked) {
+      factor_1.collapse('hide');
+    }
+  });
+  factor_2_radio.click({'factor_1': factor_1}, function (e) {
+    var factor_1 = e.data.factor_1;
+    if (this.checked) {
+      factor_1.collapse('show');
+    }
+  });
+}
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
   proj_form = $('#proj');
 
   // Set the project id header
-  proj_form.children('h4').text(proj_id);
+  var html = proj_form.html();
+  proj_form.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
 
   var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
+  var proj_factor_0_btn = proj_form.find('#proj_factor_0_add_btn');
+  var proj_factor_1_btn = proj_form.find('#proj_factor_1_add_btn');
   var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
   var save_changes_btn = proj_form.find('#proj_save_btn');
 
@@ -2050,6 +2196,16 @@ function set_proj_meta_input() {
   // Button handlers.
   add_contributor_btn.click(add_contributor);
   save_changes_btn.click(save_proj);
+
+  // Factor handlers.
+  proj_factor_0_btn.click(add_factor);
+  proj_factor_1_btn.click(add_factor);
+  set_factor_listener();
+
+  // Disable 2-factor design if there are less than 8 samples.
+  if (Object.keys(proj.samples).length < 8) {
+    proj_form.find('#proj_design_2_radio').prop('disabled', true);
+  }
 }
 
 /**
@@ -2756,6 +2912,21 @@ function meta_input() {
   var valid = fetch_sample_names();
 
   if (valid) {
+    // First, save and set the project.
+    write_proj(function () {
+      $.ajax({
+        type: 'POST',
+        url: 'cgi_request.php',
+        data: {
+          id: proj_id,
+          action: 'set_proj'
+        },
+        success:function(out) {
+          console.log(out);
+        }
+      });
+    });
+
     $('#sample_names_modal').modal('hide');
 
     set_meta_input();
@@ -2853,7 +3024,7 @@ function validate_proj_meta() {
         field = field[0].children('input');
         val = field.val();
       case 'title':
-      case 'summary':
+      case 'abstract':
         // These just have to be filled out.
         if (val != '' && val != null) {
           field.removeClass('is-invalid');
@@ -3043,7 +3214,7 @@ function get_proj_input_fields() {
   var proj_input_fields = {}
   proj_input_fields['meta'] = {};
   proj_input_fields.meta['title'] = proj_form.find('#proj_title');
-  proj_input_fields.meta['summary'] = proj_form.find('#proj_summary');
+  proj_input_fields.meta['abstract'] = proj_form.find('#proj_abstract');
   proj_input_fields.meta['contributors'] = proj_contributor_fields;
   proj_input_fields.meta['email'] = proj_form.find('#proj_email');
   proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
@@ -3107,7 +3278,7 @@ function set_proj_meta(meta) {
 
     switch (cat) {
       case 'title':
-      case 'summary':
+      case 'abstract':
       case 'contributors':
       case 'SRA_center_code':
       case 'email':
@@ -3176,7 +3347,7 @@ function get_proj_meta() {
   var proj_meta = {};
   proj_meta['meta'] = {};
   proj_meta.meta['title'] = meta_input_fields.meta['title'].val();
-  proj_meta.meta['summary'] = meta_input_fields.meta['summary'].val();
+  proj_meta.meta['abstract'] = meta_input_fields.meta['abstract'].val();
 
   // Get contributors.
   proj_meta.meta['contributors'] = [];
@@ -3320,6 +3491,8 @@ var sorted_names;
 var organisms;
 var import_export_dropdown;
 var proj_contributor_fields = [];
+var proj_factor_0_fields = [];
+var proj_factor_1_fields = [];
 var sample_contributor_fields = {};
 var sample_characteristic_fields = {};
 var sample_pair_fields = {};

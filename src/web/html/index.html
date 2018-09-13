@@ -146,7 +146,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center text-white" style="font-weight:100;font-size:2em;">Please fill out the form below.</h2>
+                    <h2 class="text-center text-white" style="font-weight:100;font-size:1.8em;">Part of the Alaska services are meant to help you fill out the metadata fields required for submission at the Gene Expression Omnibus.</h2>
                 </div>
             </div>
             <div class="row">
@@ -266,12 +266,13 @@
         Project Metadata Form
     </div>
     <div class="card-body" id="proj">
-        <h4 class="card-title">Project ID</h4>
+        <h4 class="card-title">Project ID: PROJECT_ID</h4>
+        <small id="proj_id_help" class="form-text text-muted mb-4">The automatically generated ID associated with this project.</small>
         <form novalidate>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <label for="proj_title" class="col-form-label">Title</label>
-                    <small id="proj_title_help" class="form-text text-muted">Some description.</small>
+                    <small id="proj_title_help" class="form-text text-muted">Title of your project or paper.</small>
                 </div>
                 <div class="col-sm-3">
                     <input type="text" class="form-control" id="proj_title" required>
@@ -279,17 +280,35 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
-                    <label for="proj_summary" class="col-form-label">Summary</label>
-                    <small id="proj_summary_help" class="form-text text-muted">Some description.</small>
+                    <label for="proj_abstract" class="col-form-label">Abstract</label>
+                    <small id="proj_abstract_help" class="form-text text-muted">A brief description of the project, its intended findings, genotypes used, etc.</small>
                 </div>
                 <div class="col-sm-9">
-                    <textarea class="form-control" id="proj_summary" rows="3" required></textarea>
+                    <textarea class="form-control" id="proj_abstract" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3">
+                    <label for="corresponding_name" class="col-form-label">Corresponding contributor</label>
+                    <small id="corresponding_name_help" class="form-text text-muted">The full name of an individual who should be contacted regarding the project files.</small>
+                </div>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="corresponding_name" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3">
+                    <label for="proj_email" class="col-form-label">Email</label>
+                    <small id="proj_email_help" class="form-text text-muted">Please input the email of the corresponding contributor. This email will also be used to contact you when the analysis is finished.</small>
+                </div>
+                <div class="col-sm-3">
+                    <input type="email" class="form-control" id="proj_email" required>
                 </div>
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <legend class="col-form-label">Contributors</legend>
-                    <small id="proj_contributors_help" class="form-text text-muted">Some description.</small>
+                    <small id="proj_contributors_help" class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project.</small>
                 </div>
                 <div id="proj_contributors" class="col">
                     <div class="d-flex" id="proj_contributor_0_div">
@@ -305,17 +324,8 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
-                    <label for="proj_email" class="col-form-label">Email</label>
-                    <small id="proj_email_help" class="form-text text-muted">Some description.</small>
-                </div>
-                <div class="col-sm-3">
-                    <input type="email" class="form-control" id="proj_email" required>
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-3">
                     <label for="proj_sra_center_code" class="col-form-label">SRA Center Code</label>
-                    <small id="proj_sra_center_code_help" class="form-text text-muted">Some description.</small>
+                    <small id="proj_sra_center_code_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
                 </div>
                 <div class="col-sm-3">
                     <input type="email" class="form-control" id="proj_sra_center_code">
@@ -323,22 +333,75 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-3">
-                    <legend class="col-form-label pt-0">Design</legend>
-                    <small id="proj_design_help" class="form-text text-muted">Click here for more information.</small>
+                    <legend class="col-form-label pt-0">Experimental design</legend>
+                    <small id="proj_design_help" class="form-text text-muted">Hover your mouse on each choice to learn more. A minimum of 8 samples are required for 2-factor design.</small>
                 </div>
                 <div class="col-sm-9" id="proj_design">
-                    <div class="custom-control custom-radio custom-control-inline">
+                    <div class="custom-control custom-radio custom-control-inline" tabindex="0" data-toggle="popover" data-trigger="hover focus" data-content="A 1-factor design contrasts a control sample with a single experimental sample." data-placement="bottom">
                         <input type="radio" id="proj_design_1_radio" name="proj_design" class="custom-control-input" checked="" value="1">
                         <label class="custom-control-label active" for="proj_design_1_radio">1-factor</label>
                     </div>
-                    <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2" disabled>
+                    <div class="custom-control custom-radio custom-control-inline" tabindex="0" data-toggle="popover" data-trigger="hover focus" data-content="A 2-factor design is used to contrast two different perturbations (i.e., wild-type or mutants of gene A treated with or without a toxin) and identify their individual, log-additive, effects on gene expression. This 2-factor design can also be used to identify transcripts that deviate from a log-additive model; in other words, the 2-factor design can be used to identify transcripts where applying both perturbations simultaneously does not lead to the effect that would be predicted by adding the individual effects associated with each factor." data-placement="bottom">
+                        <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2">
                         <label class="custom-control-label" for="proj_design_2_radio">2-factor</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3">
+                    <legend class="col-form-label">Factor 1</legend>
+                    <small id="proj_factor_0_help" class="form-text text-muted">Some description.</small>
+                </div>
+                <div id="proj_factor_0" class="col">
+                    <div class="d-flex">
+                        <label class="col-sm-3 pl-0 mr-2">Name</label>
+                        <label class="col-sm-5 pl-0">All possible values</label>
+                    </div>
+                    <div class="d-flex" id="proj_factor_0_0_div">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="proj_factor_0_name_0" required>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_0_value_0" required>
+                        <button id="proj_factor_0_add_btn" class="btn btn-primary" type="button">Add value</button>
+                    </div>
+                    <div class="d-flex mt-1" id="proj_factor_0_1_div" style="">
+                        <span class="col-sm-3 mr-2"></span>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_0_value_1" required>
+                    </div>
+                    <div class="mt-1" id="proj_factor_0_num_div" style="display:none">
+                        <span class="col-sm-3 mr-2"></span>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_0_value_num" required>
+                        <button id="proj_factor_0_remove_btn_num" class="btn btn-danger" type="button">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row collapse" id="proj_factor_1_collapse">
+                <div class="col-sm-3">
+                    <legend class="col-form-label">Factor 2</legend>
+                    <small id="proj_factor_1_help" class="form-text text-muted">Some description.</small>
+                </div>
+                <div id="proj_factor_1" class="col">
+                    <div class="d-flex">
+                        <label class="col-sm-3 pl-0 mr-2">Name</label>
+                        <label class="col-sm-5 pl-0">All possible values</label>
+                    </div>
+                    <div class="d-flex" id="proj_factor_1_0_div">
+                        <input type="text" class="form-control col-sm-3 mr-2" id="proj_factor_1_name_0" required>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_1_value_0" required>
+                        <button id="proj_factor_1_add_btn" class="btn btn-primary" type="button">Add value</button>
+                    </div>
+                    <div class="d-flex mt-1" id="proj_factor_1_1_div" style="">
+                        <span class="col-sm-3 mr-2"></span>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_1_value_1" required>
+                    </div>
+                    <div class="mt-1" id="proj_factor_1_num_div" style="display:none">
+                        <span class="col-sm-3 mr-2"></span>
+                        <input type="text" class="form-control col-sm-5 mr-2" id="proj_factor_1_value_num" required>
+                        <button id="proj_factor_1_remove_btn_num" class="btn btn-danger" type="button">Remove</button>
                     </div>
                 </div>
             </div>
             <div class="text-right">
                 <button class="btn btn-primary" id="proj_save_btn" type="button">Save changes</button>
+                <button class="btn btn-secondary" id="proj_save_btn" type="button">Next</button>
             </div>
         </form>
     </div>
