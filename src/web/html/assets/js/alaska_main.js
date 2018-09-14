@@ -2444,7 +2444,7 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
   // If name changes, the factor name also changes for each sample.
   name_inputs.change({
     'name_div': name_div,
-    'class_name' = sample_factor_group_class_name
+    'class_name': sample_factor_group_class_name
   }, function (e) {
     var name_div = e.data.name_div;
     var class_name = e.data.class_name;
