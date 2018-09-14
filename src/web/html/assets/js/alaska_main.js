@@ -2518,7 +2518,7 @@ function copy_to_common(form_group) {
         if (index < temp_index) {
           common_form.find('.' + class_order[temp_index]).before(copy);
           break;
-        } else if (i == indices.length) {
+        } else if (i == (indices.length - 1)) {
           common_form.find('.' + class_order[temp_index]).after(copy);
         }
       }
