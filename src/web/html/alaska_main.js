@@ -2607,7 +2607,7 @@ function set_common_checkboxes(form) {
   });
 
   // Also, whenever an input or select is changed, fire the checkbox.
-  var inputs = form.find('input:not(:checkbox),select,button').change(
+  var inputs = form.find('input:not(:checkbox),select,button').change(function () {
     var input = $(this);
     var custom_parent = get_closest_custom_parent(input);
     var checkbox = custom_parent.find('input:checkbox');
@@ -2618,7 +2618,7 @@ function set_common_checkboxes(form) {
     }
 
     checkbox.change();
-  );
+  });
 }
 
 /**
