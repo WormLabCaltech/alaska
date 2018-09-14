@@ -2423,7 +2423,7 @@ function set_proj_meta_input() {
 
   // Disable 2-factor design if there are less than 8 samples.
   if (Object.keys(proj.samples).length < 8) {
-    paired_show_radio.prop('disabled', true);
+    factor_show_radio.prop('disabled', true);
   }
 }
 
@@ -3180,7 +3180,7 @@ function set_meta_input() {
   // is populated.
   set_common_meta_input();
 
-  set_meta_input_fields();
+  // set_meta_input_fields();
 
   // Then, add listener to verify metadata button.
   $('#verify_meta_btn').click(show_verify_meta_modal);
