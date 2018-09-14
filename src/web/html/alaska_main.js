@@ -1118,64 +1118,80 @@ function set_sample_name_input(proj) {
   }
 }
 
+// /**
+//  * Sets the dropdown of available organisms.
+//  */
+// function set_organisms_dropdown() {
+//   var dropdown_id = 'sample_organism_SAMPLEID';
+//   var option_id = 'sample_organism_SAMPLEID_option';
+//
+//   for (var id in sample_forms) {
+//     var new_dropdown_id = dropdown_id.replace('SAMPLEID', id);
+//     var new_option_id = option_id.replace('SAMPLEID', id);
+//     var dropdown = sample_forms[id].find('#' + new_dropdown_id);
+//
+//     // Loop through each organism.
+//     for (var i = 0; i < organisms.length; i++) {
+//       var org = organisms[i];
+//
+//       // Get clone of placeholder option.
+//       var option = dropdown.children('#' + new_option_id).clone();
+//
+//       // Set the value and remove id (because we don't need the id).
+//       option.attr('value', org);
+//       option.attr('id', '');
+//       option.text(org);
+//
+//       // Add it to the dropdown.
+//       dropdown.append(option);
+//
+//       // Then, show it.
+//       option.show();
+//     }
+//   }
+// }
+
 /**
- * Sets the dropdown of available organisms.
+ * Populates the given select with the global organisms variable.
  */
-function set_organisms_dropdown() {
-  var dropdown_id = 'sample_organism_SAMPLEID';
-  var option_id = 'sample_organism_SAMPLEID_option';
-
-  for (var id in sample_forms) {
-    var new_dropdown_id = dropdown_id.replace('SAMPLEID', id);
-    var new_option_id = option_id.replace('SAMPLEID', id);
-    var dropdown = sample_forms[id].find('#' + new_dropdown_id);
-
-    // Loop through each organism.
-    for (var i = 0; i < organisms.length; i++) {
-      var org = organisms[i];
-
-      // Get clone of placeholder option.
-      var option = dropdown.children('#' + new_option_id).clone();
-
-      // Set the value and remove id (because we don't need the id).
-      option.attr('value', org);
-      option.attr('id', '');
-      option.text(org);
-
-      // Add it to the dropdown.
-      dropdown.append(option);
-
-      // Then, show it.
-      option.show();
-    }
+function populate_organisms_select(select) {
+  for (var i = 0; i < organisms.length; i++) {
+    var option = $('<option>', {text: organisms[i]});
+    select.append(option);
   }
 }
-
 
 /**
  * Sets the internal list of available organisms.
  */
-function set_organisms() {
-  // Send get_organisms request.
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'get_organisms'
-    },
-    success:function(out) {
-      console.log(out);
+function set_organisms_select(select) {
+  // Send request only if we haven't received the list of organisms yet.
+  if (organisms == null) {
+    // Send get_organisms request.
+    $.ajax({
+      type: 'POST',
+      url: 'cgi_request.php',
+      data: {
+        action: 'get_organisms'
+      },
+      success:function(out) {
+        console.log(out);
 
-      var split = out.split('[');
-      var split2 = split[1].split(']');
-      var dump = '[' + split2[0] + ']';
+        var split = out.split('[');
+        var split2 = split[1].split(']');
+        var dump = '[' + split2[0] + ']';
 
-      organisms = JSON.parse(dump);
+        organisms = JSON.parse(dump);
 
-      // Set the dropdowns.
-      set_organisms_dropdown();
-    }
-  });
+        // Set the dropdowns.
+        populate_organisms_select(select);
+      }
+    });
+  } else {
+    // Otherwise, we can just set the dropdown right away.
+    populate_organisms_select(select);
+  }
+
 }
 
 /**
@@ -1270,31 +1286,30 @@ function show_sample_form(id, form) {
  * Set choose sample button.
  */
 function set_choose_sample_button(dropdown, forms) {
-  var dropdown_item_id = 'show_sample_SAMPLEID';
-
+  var dropdown_item = $('.show_sample_dropdown_item');
 
   for (var id in forms) {
-    var new_dropdown_item_id = dropdown_item_id.replace('SAMPLEID', id);
-
-    var dropdown_item = $('#' + dropdown_item_id).clone();
+    var new_item = dropdown_item.clone();
 
     // Change id, text.
-    dropdown_item.attr('id', new_dropdown_item_id);
-    dropdown_item.text(proj.samples[id].name);
+    new_item.text(proj.samples[id].name);
 
     // Append to global variable.
-    dropdown_items[id] = dropdown_item;
+    dropdown_items[id] = new_item;
 
     // Set on click handler.
-    dropdown_item.click({'id': id}, function (e) {
+    new_item.click({'id': id}, function (e) {
       console.log('clicked ' + e.data.id);
+      var item = $(this);
+      var grandparent = item.parent().parent();
+      grandparent.children('button').text(proj.samples[id].name);
       show_sample_form(e.data.id, sample_forms[e.data.id]);
     });
 
     // Append to html and show.
-    dropdown.append(dropdown_item);
+    dropdown.append(new_item);
 
-    dropdown_item.show();
+    new_item.show();
   }
 }
 
@@ -1468,516 +1483,501 @@ function set_paired_end_listener(id, form) {
   });
 }
 
-/**
- * Import data from sample.
- */
-function import_sample() {
-
-}
-
-/**
- * Refreshes the names in the import/export dropdown.
- */
-function refresh_import_export_samples() {
-  var import_dropdown = $('#import_popover_dropdown');
-  var export_dropdown = $('#export_popover_dropdown');
-
-  for (var name in names_to_ids) {
-    var id = names_to_ids[name];
-
-    // These are samples that we will refresh in this iteration.
-    var import_sample = import_dropdown.children('option[value="' + id + '"]');
-    var export_sample = export_dropdown.children('option[value="' + id + '"]');
-
-    // Refresh the text.
-    import_sample.text(name);
-    export_sample.text(name);
-  }
-}
-
-/**
- * Set import/export samples list.
- */
-function add_import_export_sample(name, id) {
-  var import_dropdown = $('#import_popover_dropdown');
-  var export_dropdown = $('#export_popover_dropdown');
-
-  var option = $('<option>', {
-    text: name,
-    value: id,
-  });
-
-  import_dropdown.append(option.clone());
-  export_dropdown.append(option.clone());
-
-  set_import_export_popover_btn();
-}
-
-/**
- * Returns content for import/export popover title.
- */
-function get_import_export_popover_title() {
-  if (current_sample_form != null) {
-    var id = current_sample_form.attr('id').replace('sample_', '');
-    return proj.samples[id].name;
-  }
-  return '';
-}
-
-/**
- * Returns content for import/export popover body.
- */
-function get_import_export_popover_body(popover) {
-  if (current_sample_form != null) {
-    var new_popover = popover.clone(true);
-    var id = current_sample_form.attr('id').replace('sample_', '');
-
-    var to_hide = new_popover.children('select').children('option[value="' + id + '"]');
-    to_hide.prop('hidden', true);
-
-    return new_popover.html();
-  }
-
-  return 'Please choose a sample first.';
-}
-
-/**
- * Set import/export button.
- */
-function set_import_export_popover_btn() {
-  // Set data input/export button.
-  var import_btn = $('#sample_import_outer_btn');
-  var export_btn = $('#sample_export_outer_btn');
-  var import_popover = $('#import_popover');
-  var export_popover = $('#export_popover');
-
-  import_btn.popover({
-    html: true,
-    placement: "bottom",
-    content: function() {
-      return get_import_export_popover_body(import_popover);
-    },
-    title: function() {
-      return get_import_export_popover_title();
-    }
-  });
-  export_btn.popover({
-    html: true,
-    placement: "bottom",
-    content: function() {
-      return get_import_export_popover_body(export_popover);
-    },
-    title: function() {
-      return get_import_export_popover_title();
-    }
-  });
-  import_btn.on('show.bs.popover', function() {
-    export_btn.popover('hide');
-  });
-  export_btn.on('show.bs.popover', function() {
-    import_btn.popover('hide');
-  });
-}
-
-/**
- * Remove contributor with index n.
- */
-function remove_contributor(fields, n) {
-  // Get the div of the contributor.
-  var div = fields[n];
-
-  // Set on-hide listener to destroy this div.
-  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
-  function (e) {
-    var div = e.data.div;
-    var fields = e.data.fields;
-    var n = e.data.n;
-
-    var contributors_div = div.parent();
-    var more_div = contributors_div.children('div[style*="display:none"]');
-    var more_input = more_div.children('input');
-    var more_btn = more_div.children('button');
-
-    var more_div_id = more_div.attr('id');
-    var more_input_id = more_input.attr('id');
-    var more_btn_id = more_btn.attr('id');
-
-    // Remove item from the array. Then, delete it from DOM.
-    fields.splice(n, 1);
-    div.remove();
-
-    // Then, update the ids of all the following elements.
-    var n_contributors = fields.length;
-    for (var i = n; i < n_contributors; i++) {
-      var new_more_div_id = more_div_id.replace('num', i);
-      var new_more_input_id = more_input_id.replace('num', i);
-      var new_more_btn_id = more_btn_id.replace('num', i);
-
-      var div = fields[i];
-      div.attr('id', new_more_div_id);
-      div.children('input').attr('id', new_more_input_id);
-      div.children('button').attr('id', new_more_btn_id);
-    }
-  });
-
-  // Hide collapse.
-  div.collapse('hide');
-}
-
-/**
- * Set up the remove contributor button.
- */
-function set_remove_contributor_button(button) {
-  button.click(function () {
-    var id = $(this).attr('id');
-    var split = id.split('_');
-    var n = split[split.length - 1];
-
-    console.log(id);
-
-    if (id.startsWith('proj')) {
-      remove_contributor(proj_contributor_fields, n);
-    } else if (id.startsWith('sample')) {
-      var sample_id = split[split.length - 3];
-      remove_contributor(sample_contributor_fields[sample_id], n);
-    }
-  });
-
-}
-
-/**
- * Add contributors.
- */
-function add_contributor() {
-  var btn = $(this);
-  var contributors_div = btn.parent().parent();
-  var more_div = contributors_div.children('div[style*="display:none"]');
-  var more_input = more_div.children('input');
-  var more_btn = more_div.children('button');
-
-  var more_div_id = more_div.attr('id');
-  var more_input_id = more_input.attr('id');
-  var more_btn_id = more_btn.attr('id');
-
-  var fields;
-  if (more_div_id.startsWith('proj')) {
-    fields = proj_contributor_fields;
-  } else if (more_div_id.startsWith('sample')) {
-    var split = more_div_id.split('_');
-    var sample_id = split[split.length - 3];
-    fields = sample_contributor_fields[sample_id];
-  }
-
-  // Current number of project contributor fields.
-  var n_contributors = fields.length;
-
-  // Make new div by cloning.
-  var new_div = more_div.clone();
-
-  // Then, change the ids.
-  var new_more_div_id = more_div_id.replace('num', n_contributors);
-  var new_more_input_id = more_input_id.replace('num', n_contributors);
-  var new_more_btn_id = more_btn_id.replace('num', n_contributors);
-  var new_more_input = new_div.children('input');
-  var new_more_btn = new_div.children('button');
-  new_div.attr('id', new_more_div_id);
-  new_more_input.attr('id', new_more_input_id);
-  new_more_btn.attr('id', new_more_btn_id);
-
-  // Set up suggestions (if this is for a sample)
-  if (more_div_id.startsWith('sample')) {
-    new_more_input.focusin(function() {
-      var split = $(this).attr('id').split('_');
-      var id = split[split.length - 2];
-
-      set_suggestions($(this), get_all_contributors_except(id));
-    });
-  }
-
-  // Then, set the remove button handler.
-  set_remove_contributor_button(new_more_btn);
-
-  // Append the new field to DOM.
-  contributors_div.append(new_div);
-  new_div.show();
-  new_div.addClass('d-flex');
-
-  // Show the collapse.
-  new_div.collapse('show');
-
-  // Add the div to the global list of contributor fields.
-  fields.push(new_div);
-}
-
-/**
- * Remove contributor with index n.
- */
-function remove_characteristic(fields, n) {
-  // Get the div of the contributor.
-  var div = fields[n];
-
-  // Set on-hide listener to destroy this div.
-  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
-  function (e) {
-    var div = e.data.div;
-    var fields = e.data.fields;
-    var n = e.data.n;
-
-    var characteristics_div = div.parent();
-    var more_div = characteristics_div.children('div[style*="display:none"]');
-    var more_div_id = more_div.attr('id');
-
-    // Extract sample id.
-    var split = more_div_id.split('_');
-    var id = split[split.length - 3];
-
-    var more_char_id = 'sample_characteristic_' + id + '_num';
-    var more_detail_id = 'sample_detail_' + id + '_num';
-
-    var more_btn = more_div.children('button');
-    var more_btn_id = more_btn.attr('id');
-
-    // Remove item from the array. Then, delete it from DOM.
-    fields.splice(n, 1);
-    div.remove();
-
-    // Then, update the ids of all the following elements.
-    var n_characteristics = fields.length;
-    for (var i = n; i < n_characteristics; i++) {
-      var new_more_div_id = more_div_id.replace('num', i);
-      var new_more_char_id = more_char_id.replace('num', i);
-      var new_more_detail_id = more_detail_id.replace('num', i);
-      var new_more_btn_id = more_btn_id.replace('num', i);
-
-      var div = fields[i];
-      div.attr('id', new_more_div_id);
-      div.children('#' + more_char_id).attr('id', new_more_char_id);
-      div.children('#' + more_detail_id).attr('id', new_more_detail_id);
-      div.children('button').attr('id', new_more_btn_id);
-    }
-  });
-
-  // Hide collapse.
-  div.collapse('hide');
-}
-
-/**
- * Set up the remove contributor button.
- */
-function set_remove_characteristic_button(button) {
-  button.click(function () {
-    var id = $(this).attr('id');
-    var split = id.split('_');
-    var n = split[split.length - 1];
-
-    console.log(id);
-
-    var sample_id = split[split.length - 3];
-    remove_characteristic(sample_characteristic_fields[sample_id], n);
-  });
-}
-
-/**
- * Add characteristic.
- */
-function add_characteristic() {
-  var btn = $(this);
-  var characteristics_div = btn.parent().parent();
-  var more_div = characteristics_div.children('div[style*="display:none"]');
-  var more_div_id = more_div.attr('id');
-
-  // Extract sample id.
-  var split = more_div_id.split('_');
-  var id = split[split.length - 3];
-
-  var more_char_id = 'sample_characteristic_' + id + '_num';
-  var more_detail_id = 'sample_detail_' + id + '_num';
-
-  var more_btn = more_div.children('button');
-  var more_btn_id = more_btn.attr('id');
-
-  var fields = sample_characteristic_fields[id];
-
-  // Current number of project contributor fields.
-  var n_characteristics = fields.length;
-
-  // Make new div by cloning.
-  var new_div = more_div.clone();
-
-  // Then, change the ids.
-  var new_more_div_id = more_div_id.replace('num', n_characteristics);
-  var new_more_char_id = more_char_id.replace('num', n_characteristics);
-  var new_more_detail_id = more_detail_id.replace('num', n_characteristics);
-  var new_more_btn_id = more_btn_id.replace('num', n_characteristics);
-  var new_more_char = new_div.children('#' + more_char_id);
-  var new_more_detail = new_div.children('#' + more_detail_id);
-  var new_more_btn = new_div.children('button');
-  new_div.attr('id', new_more_div_id);
-  new_more_char.attr('id', new_more_char_id);
-  new_more_detail.attr('id', new_more_detail_id);
-  new_more_btn.attr('id', new_more_btn_id);
-
-  // Set up suggestions
-  new_more_char.focusin(function() {
-    var split = $(this).attr('id').split('_');
-    var id = split[split.length - 2];
-    var characteristics = get_all_characteristics_except(id);
-
-    set_suggestions($(this), Object.keys(characteristics));
-  });
-  new_more_detail.focusin({char: new_more_char}, function(e) {
-    var char = e.data.char.val();
-    var characteristics = get_all_characteristics();
-
-    if (char != '' && char != null && characteristics[char] != null) {
-      set_suggestions($(this), characteristics[char]);
-    }
-  });
-
-
-  // Then, set the remove button handler.
-  set_remove_characteristic_button(new_more_btn);
-
-  // Append the new field to DOM.
-  characteristics_div.append(new_div);
-  new_div.show();
-  new_div.addClass('d-flex');
-
-  // Show the collapse.
-  new_div.collapse('show');
-
-  // Add the div to the global list of contributor fields.
-  fields.push(new_div);
-}
-
-/**
- * Remove value.
- */
-function remove_value(fields, n) {
-  // Get div of value.
-  var div = fields[n];
-
-  // Set on-hide listener to destroy this div.
-  div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
-  function (e) {
-    var div = e.data.div;
-    var fields = e.data.fields;
-    var n = e.data.n;
-
-    var factor_div = div.parent();
-    var more_div = factor_div.children('div[style*="display:none"]');
-    var more_value = more_div.children('input');
-    var more_btn = more_div.children('button');
-    var more_div_id = more_div.attr('id');
-    var more_value_id = more_value.attr('id');
-    var more_btn_id = more_btn.attr('id');
-
-    // Remove item from the array. Then, delete it from DOM.
-    fields.splice(n, 1);
-    div.remove();
-
-    // Then, update the ids of all the following elements.
-    var n_values = fields.length;
-    for (var i = n; i < n_values; i++) {
-      var new_more_div_id = more_div_id.replace('num', i);
-      var new_more_value_id = more_value_id.replace('num', i);
-      var new_more_btn_id = more_btn_id.replace('num', i);
-
-      var div = fields[i];
-      div.attr('id', new_more_div_id);
-      div.children('input').attr('id', new_more_value_id);
-      div.children('button').attr('id', new_more_btn_id);
-    }
-  });
-
-  // Hide collapse.
-  div.collapse('hide');
-}
-
-/**
- * Set up the remove value button.
- */
-function set_remove_factor_btn(button, fields) {
-  button.click({
-    'fields': fields,
-  }, function (e) {
-    var id = $(this).attr('id');
-    var split = id.split('_');
-    var n = split[split.length - 1];
-    var fields = e.data.fields;
-    remove_value(fields, n);
-  });
-}
-
-/**
- * Set factor name dropdown options.
- */
-function set_factor_name_options(dropdown) {
-  // Dictionary of choice: div pairs.
-  var choices = {
-    'genotype': null,
-    'growth conditions': null,
-    'organism strain': null,
-    'life-stage': null,
-    'tissue': null,
-    'other': null,
-  };
-}
-
-/**
- * Add factor detail.
- */
-function add_factor() {
-  var btn = $(this);
-  var factor_div = btn.parent().parent();
-  var more_div = factor_div.children('div[style*="display:none"]');
-  var more_value = more_div.children('input');
-  var more_btn = more_div.children('button');
-  var more_div_id = more_div.attr('id');
-  var more_value_id = more_value.attr('id');
-  var more_btn_id = more_btn.attr('id');
-
-  // Extract factor number.
-  var split = more_div_id.split('_');
-  var num = parseInt(split[split.length - 4]);
-
-  var fields;
-  if (num == 0) {
-    fields = proj_factor_0_fields;
-  } else {
-    fields = proj_factor_1_fields;
-  }
-
-  // Get how many values there are already.
-  var n_values = fields.length;
-
-  // Make new div by cloning.
-  var new_div = more_div.clone();
-
-  // Then, change the ids.
-  var new_more_div_id = more_div_id.replace('num', n_values);
-  var new_more_value_id = more_value_id.replace('num', n_values);
-  var new_more_btn_id = more_btn_id.replace('num', n_values);
-  var new_more_value = new_div.children('input');
-  var new_more_btn = new_div.children('button');
-  new_div.attr('id', new_more_div_id);
-  new_more_value.attr('id', new_more_value_id);
-  new_more_btn.attr('id', new_more_btn_id);
-
-  // Set the remove button handler.
-  set_remove_factor_btn(new_more_btn, fields);
-
-  // Append the new field to DOM.
-  factor_div.append(new_div);
-  new_div.show();
-  new_div.addClass('d-flex');
-
-  // Show the collapse.
-  new_div.collapse('show');
-
-  // Add the div to the global list of factor values.
-  fields.push(new_div);
-}
+// /**
+//  * Import data from sample.
+//  */
+// function import_sample() {
+//
+// }
+//
+// /**
+//  * Refreshes the names in the import/export dropdown.
+//  */
+// function refresh_import_export_samples() {
+//   var import_dropdown = $('#import_popover_dropdown');
+//   var export_dropdown = $('#export_popover_dropdown');
+//
+//   for (var name in names_to_ids) {
+//     var id = names_to_ids[name];
+//
+//     // These are samples that we will refresh in this iteration.
+//     var import_sample = import_dropdown.children('option[value="' + id + '"]');
+//     var export_sample = export_dropdown.children('option[value="' + id + '"]');
+//
+//     // Refresh the text.
+//     import_sample.text(name);
+//     export_sample.text(name);
+//   }
+// }
+//
+// /**
+//  * Set import/export samples list.
+//  */
+// function add_import_export_sample(name, id) {
+//   var import_dropdown = $('#import_popover_dropdown');
+//   var export_dropdown = $('#export_popover_dropdown');
+//
+//   var option = $('<option>', {
+//     text: name,
+//     value: id,
+//   });
+//
+//   import_dropdown.append(option.clone());
+//   export_dropdown.append(option.clone());
+//
+//   set_import_export_popover_btn();
+// }
+//
+// /**
+//  * Returns content for import/export popover title.
+//  */
+// function get_import_export_popover_title() {
+//   if (current_sample_form != null) {
+//     var id = current_sample_form.attr('id').replace('sample_', '');
+//     return proj.samples[id].name;
+//   }
+//   return '';
+// }
+//
+// /**
+//  * Returns content for import/export popover body.
+//  */
+// function get_import_export_popover_body(popover) {
+//   if (current_sample_form != null) {
+//     var new_popover = popover.clone(true);
+//     var id = current_sample_form.attr('id').replace('sample_', '');
+//
+//     var to_hide = new_popover.children('select').children('option[value="' + id + '"]');
+//     to_hide.prop('hidden', true);
+//
+//     return new_popover.html();
+//   }
+//
+//   return 'Please choose a sample first.';
+// }
+//
+// /**
+//  * Set import/export button.
+//  */
+// function set_import_export_popover_btn() {
+//   // Set data input/export button.
+//   var import_btn = $('#sample_import_outer_btn');
+//   var export_btn = $('#sample_export_outer_btn');
+//   var import_popover = $('#import_popover');
+//   var export_popover = $('#export_popover');
+//
+//   import_btn.popover({
+//     html: true,
+//     placement: "bottom",
+//     content: function() {
+//       return get_import_export_popover_body(import_popover);
+//     },
+//     title: function() {
+//       return get_import_export_popover_title();
+//     }
+//   });
+//   export_btn.popover({
+//     html: true,
+//     placement: "bottom",
+//     content: function() {
+//       return get_import_export_popover_body(export_popover);
+//     },
+//     title: function() {
+//       return get_import_export_popover_title();
+//     }
+//   });
+//   import_btn.on('show.bs.popover', function() {
+//     export_btn.popover('hide');
+//   });
+//   export_btn.on('show.bs.popover', function() {
+//     import_btn.popover('hide');
+//   });
+// }
+
+// /**
+//  * Remove contributor with index n.
+//  */
+// function remove_contributor(fields, n) {
+//   // Get the div of the contributor.
+//   var div = fields[n];
+//
+//   // Set on-hide listener to destroy this div.
+//   div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+//   function (e) {
+//     var div = e.data.div;
+//     var fields = e.data.fields;
+//     var n = e.data.n;
+//
+//     var contributors_div = div.parent();
+//     var more_div = contributors_div.children('div[style*="display:none"]');
+//     var more_input = more_div.children('input');
+//     var more_btn = more_div.children('button');
+//
+//     var more_div_id = more_div.attr('id');
+//     var more_input_id = more_input.attr('id');
+//     var more_btn_id = more_btn.attr('id');
+//
+//     // Remove item from the array. Then, delete it from DOM.
+//     fields.splice(n, 1);
+//     div.remove();
+//
+//     // Then, update the ids of all the following elements.
+//     var n_contributors = fields.length;
+//     for (var i = n; i < n_contributors; i++) {
+//       var new_more_div_id = more_div_id.replace('num', i);
+//       var new_more_input_id = more_input_id.replace('num', i);
+//       var new_more_btn_id = more_btn_id.replace('num', i);
+//
+//       var div = fields[i];
+//       div.attr('id', new_more_div_id);
+//       div.children('input').attr('id', new_more_input_id);
+//       div.children('button').attr('id', new_more_btn_id);
+//     }
+//   });
+//
+//   // Hide collapse.
+//   div.collapse('hide');
+// }
+
+// /**
+//  * Set up the remove contributor button.
+//  */
+// function set_remove_contributor_button(button) {
+//   button.click(function () {
+//     var id = $(this).attr('id');
+//     var split = id.split('_');
+//     var n = split[split.length - 1];
+//
+//     console.log(id);
+//
+//     if (id.startsWith('proj')) {
+//       remove_contributor(proj_contributor_fields, n);
+//     } else if (id.startsWith('sample')) {
+//       var sample_id = split[split.length - 3];
+//       remove_contributor(sample_contributor_fields[sample_id], n);
+//     }
+//   });
+//
+// }
+
+// /**
+//  * Add contributors.
+//  */
+// function add_contributor() {
+//   var btn = $(this);
+//   var contributors_div = btn.parent().parent();
+//   var more_div = contributors_div.children('div[style*="display:none"]');
+//   var more_input = more_div.children('input');
+//   var more_btn = more_div.children('button');
+//
+//   var more_div_id = more_div.attr('id');
+//   var more_input_id = more_input.attr('id');
+//   var more_btn_id = more_btn.attr('id');
+//
+//   var fields;
+//   if (more_div_id.startsWith('proj')) {
+//     fields = proj_contributor_fields;
+//   } else if (more_div_id.startsWith('sample')) {
+//     var split = more_div_id.split('_');
+//     var sample_id = split[split.length - 3];
+//     fields = sample_contributor_fields[sample_id];
+//   }
+//
+//   // Current number of project contributor fields.
+//   var n_contributors = fields.length;
+//
+//   // Make new div by cloning.
+//   var new_div = more_div.clone();
+//
+//   // Then, change the ids.
+//   var new_more_div_id = more_div_id.replace('num', n_contributors);
+//   var new_more_input_id = more_input_id.replace('num', n_contributors);
+//   var new_more_btn_id = more_btn_id.replace('num', n_contributors);
+//   var new_more_input = new_div.children('input');
+//   var new_more_btn = new_div.children('button');
+//   new_div.attr('id', new_more_div_id);
+//   new_more_input.attr('id', new_more_input_id);
+//   new_more_btn.attr('id', new_more_btn_id);
+//
+//   // Set up suggestions (if this is for a sample)
+//   if (more_div_id.startsWith('sample')) {
+//     new_more_input.focusin(function() {
+//       var split = $(this).attr('id').split('_');
+//       var id = split[split.length - 2];
+//
+//       set_suggestions($(this), get_all_contributors_except(id));
+//     });
+//   }
+//
+//   // Then, set the remove button handler.
+//   set_remove_contributor_button(new_more_btn);
+//
+//   // Append the new field to DOM.
+//   contributors_div.append(new_div);
+//   new_div.show();
+//   new_div.addClass('d-flex');
+//
+//   // Show the collapse.
+//   new_div.collapse('show');
+//
+//   // Add the div to the global list of contributor fields.
+//   fields.push(new_div);
+// }
+
+// /**
+//  * Remove contributor with index n.
+//  */
+// function remove_characteristic(fields, n) {
+//   // Get the div of the contributor.
+//   var div = fields[n];
+//
+//   // Set on-hide listener to destroy this div.
+//   div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+//   function (e) {
+//     var div = e.data.div;
+//     var fields = e.data.fields;
+//     var n = e.data.n;
+//
+//     var characteristics_div = div.parent();
+//     var more_div = characteristics_div.children('div[style*="display:none"]');
+//     var more_div_id = more_div.attr('id');
+//
+//     // Extract sample id.
+//     var split = more_div_id.split('_');
+//     var id = split[split.length - 3];
+//
+//     var more_char_id = 'sample_characteristic_' + id + '_num';
+//     var more_detail_id = 'sample_detail_' + id + '_num';
+//
+//     var more_btn = more_div.children('button');
+//     var more_btn_id = more_btn.attr('id');
+//
+//     // Remove item from the array. Then, delete it from DOM.
+//     fields.splice(n, 1);
+//     div.remove();
+//
+//     // Then, update the ids of all the following elements.
+//     var n_characteristics = fields.length;
+//     for (var i = n; i < n_characteristics; i++) {
+//       var new_more_div_id = more_div_id.replace('num', i);
+//       var new_more_char_id = more_char_id.replace('num', i);
+//       var new_more_detail_id = more_detail_id.replace('num', i);
+//       var new_more_btn_id = more_btn_id.replace('num', i);
+//
+//       var div = fields[i];
+//       div.attr('id', new_more_div_id);
+//       div.children('#' + more_char_id).attr('id', new_more_char_id);
+//       div.children('#' + more_detail_id).attr('id', new_more_detail_id);
+//       div.children('button').attr('id', new_more_btn_id);
+//     }
+//   });
+//
+//   // Hide collapse.
+//   div.collapse('hide');
+// }
+//
+// /**
+//  * Set up the remove contributor button.
+//  */
+// function set_remove_characteristic_button(button) {
+//   button.click(function () {
+//     var id = $(this).attr('id');
+//     var split = id.split('_');
+//     var n = split[split.length - 1];
+//
+//     console.log(id);
+//
+//     var sample_id = split[split.length - 3];
+//     remove_characteristic(sample_characteristic_fields[sample_id], n);
+//   });
+// }
+//
+// /**
+//  * Add characteristic.
+//  */
+// function add_characteristic() {
+//   var btn = $(this);
+//   var characteristics_div = btn.parent().parent();
+//   var more_div = characteristics_div.children('div[style*="display:none"]');
+//   var more_div_id = more_div.attr('id');
+//
+//   // Extract sample id.
+//   var split = more_div_id.split('_');
+//   var id = split[split.length - 3];
+//
+//   var more_char_id = 'sample_characteristic_' + id + '_num';
+//   var more_detail_id = 'sample_detail_' + id + '_num';
+//
+//   var more_btn = more_div.children('button');
+//   var more_btn_id = more_btn.attr('id');
+//
+//   var fields = sample_characteristic_fields[id];
+//
+//   // Current number of project contributor fields.
+//   var n_characteristics = fields.length;
+//
+//   // Make new div by cloning.
+//   var new_div = more_div.clone();
+//
+//   // Then, change the ids.
+//   var new_more_div_id = more_div_id.replace('num', n_characteristics);
+//   var new_more_char_id = more_char_id.replace('num', n_characteristics);
+//   var new_more_detail_id = more_detail_id.replace('num', n_characteristics);
+//   var new_more_btn_id = more_btn_id.replace('num', n_characteristics);
+//   var new_more_char = new_div.children('#' + more_char_id);
+//   var new_more_detail = new_div.children('#' + more_detail_id);
+//   var new_more_btn = new_div.children('button');
+//   new_div.attr('id', new_more_div_id);
+//   new_more_char.attr('id', new_more_char_id);
+//   new_more_detail.attr('id', new_more_detail_id);
+//   new_more_btn.attr('id', new_more_btn_id);
+//
+//   // Set up suggestions
+//   new_more_char.focusin(function() {
+//     var split = $(this).attr('id').split('_');
+//     var id = split[split.length - 2];
+//     var characteristics = get_all_characteristics_except(id);
+//
+//     set_suggestions($(this), Object.keys(characteristics));
+//   });
+//   new_more_detail.focusin({char: new_more_char}, function(e) {
+//     var char = e.data.char.val();
+//     var characteristics = get_all_characteristics();
+//
+//     if (char != '' && char != null && characteristics[char] != null) {
+//       set_suggestions($(this), characteristics[char]);
+//     }
+//   });
+//
+//
+//   // Then, set the remove button handler.
+//   set_remove_characteristic_button(new_more_btn);
+//
+//   // Append the new field to DOM.
+//   characteristics_div.append(new_div);
+//   new_div.show();
+//   new_div.addClass('d-flex');
+//
+//   // Show the collapse.
+//   new_div.collapse('show');
+//
+//   // Add the div to the global list of contributor fields.
+//   fields.push(new_div);
+// }
+//
+// /**
+//  * Remove value.
+//  */
+// function remove_value(fields, n) {
+//   // Get div of value.
+//   var div = fields[n];
+//
+//   // Set on-hide listener to destroy this div.
+//   div.on('hidden.bs.collapse', {'div': div, 'fields': fields, 'n': n},
+//   function (e) {
+//     var div = e.data.div;
+//     var fields = e.data.fields;
+//     var n = e.data.n;
+//
+//     var factor_div = div.parent();
+//     var more_div = factor_div.children('div[style*="display:none"]');
+//     var more_value = more_div.children('input');
+//     var more_btn = more_div.children('button');
+//     var more_div_id = more_div.attr('id');
+//     var more_value_id = more_value.attr('id');
+//     var more_btn_id = more_btn.attr('id');
+//
+//     // Remove item from the array. Then, delete it from DOM.
+//     fields.splice(n, 1);
+//     div.remove();
+//
+//     // Then, update the ids of all the following elements.
+//     var n_values = fields.length;
+//     for (var i = n; i < n_values; i++) {
+//       var new_more_div_id = more_div_id.replace('num', i);
+//       var new_more_value_id = more_value_id.replace('num', i);
+//       var new_more_btn_id = more_btn_id.replace('num', i);
+//
+//       var div = fields[i];
+//       div.attr('id', new_more_div_id);
+//       div.children('input').attr('id', new_more_value_id);
+//       div.children('button').attr('id', new_more_btn_id);
+//     }
+//   });
+//
+//   // Hide collapse.
+//   div.collapse('hide');
+// }
+//
+// /**
+//  * Set up the remove value button.
+//  */
+// function set_remove_factor_btn(button, fields) {
+//   button.click({
+//     'fields': fields,
+//   }, function (e) {
+//     var id = $(this).attr('id');
+//     var split = id.split('_');
+//     var n = split[split.length - 1];
+//     var fields = e.data.fields;
+//     remove_value(fields, n);
+//   });
+// }
+//
+// /**
+//  * Add factor detail.
+//  */
+// function add_factor() {
+//   var btn = $(this);
+//   var factor_div = btn.parent().parent();
+//   var more_div = factor_div.children('div[style*="display:none"]');
+//   var more_value = more_div.children('input');
+//   var more_btn = more_div.children('button');
+//   var more_div_id = more_div.attr('id');
+//   var more_value_id = more_value.attr('id');
+//   var more_btn_id = more_btn.attr('id');
+//
+//   // Extract factor number.
+//   var split = more_div_id.split('_');
+//   var num = parseInt(split[split.length - 4]);
+//
+//   var fields;
+//   if (num == 0) {
+//     fields = proj_factor_0_fields;
+//   } else {
+//     fields = proj_factor_1_fields;
+//   }
+//
+//   // Get how many values there are already.
+//   var n_values = fields.length;
+//
+//   // Make new div by cloning.
+//   var new_div = more_div.clone();
+//
+//   // Then, change the ids.
+//   var new_more_div_id = more_div_id.replace('num', n_values);
+//   var new_more_value_id = more_value_id.replace('num', n_values);
+//   var new_more_btn_id = more_btn_id.replace('num', n_values);
+//   var new_more_value = new_div.children('input');
+//   var new_more_btn = new_div.children('button');
+//   new_div.attr('id', new_more_div_id);
+//   new_more_value.attr('id', new_more_value_id);
+//   new_more_btn.attr('id', new_more_btn_id);
+//
+//   // Set the remove button handler.
+//   set_remove_factor_btn(new_more_btn, fields);
+//
+//   // Append the new field to DOM.
+//   factor_div.append(new_div);
+//   new_div.show();
+//   new_div.addClass('d-flex');
+//
+//   // Show the collapse.
+//   new_div.collapse('show');
+//
+//   // Add the div to the global list of factor values.
+//   fields.push(new_div);
+// }
 
 /**
  * Sets project meta fields with the values from the global proj object.
@@ -2169,37 +2169,216 @@ function read_proj() {
  * Save project to temporary json.
  */
 function save_proj(callback) {
-  set_all_meta();
-  write_proj(callback);
+  // set_all_meta();
+  // write_proj(callback);
+}
+
+// /**
+//  * Set 1-, 2-factor listener.
+//  */
+// function set_factor_listener() {
+//   var factor_1_radio_id = 'proj_design_1_radio';
+//   var factor_2_radio_id = 'proj_design_2_radio';
+//
+//   // ID of the second factor.
+//   var factor_1_id = 'proj_factor_1_card';
+//
+//   var factor_1_radio = proj_form.find('#' + factor_1_radio_id);
+//   var factor_2_radio = proj_form.find('#' + factor_2_radio_id);
+//   var factor_1 = proj_form.find('#' + factor_1_id);
+//
+//   // Set listener for click.
+//   factor_1_radio.click({'factor_1': factor_1}, function (e) {
+//     var factor_1 = e.data.factor_1;
+//     if (this.checked) {
+//       factor_1.collapse('hide');
+//     }
+//   });
+//   factor_2_radio.click({'factor_1': factor_1}, function (e) {
+//     var factor_1 = e.data.factor_1;
+//     if (this.checked) {
+//       factor_1.collapse('show');
+//     }
+//   });
+// }
+
+/**
+ * Sets a 2-radio toggle to show/hide a collapse.
+ */
+function set_radio_collapse_toggle(radio_hide, radio_show, div_to_toggle) {
+  radio_hide.click({'div': div_to_toggle}, function (e) {
+    var div = e.data.div;
+    if (this.checked) {
+      div.collapse('hide');
+    }
+  });
+  radio_show.click({'div': div_to_toggle}, function (e) {
+    var div = e.data.div;
+    if (this.checked) {
+      div.collapse('show');
+    }
+  });
 }
 
 /**
- * Set 1-, 2-factor listener.
+ * Add a contributor.
  */
-function set_factor_listener() {
-  var factor_1_radio_id = 'proj_design_1_radio';
-  var factor_2_radio_id = 'proj_design_2_radio';
+function add_contributor() {
+  var btn = $(this);
+  var grandparent = btn.parent().parent();
+  var div = grandparent.children('div[style*="display:none"]');
 
-  // ID of the second factor.
-  var factor_1_id = 'proj_factor_1_card';
+  // Make a copy of this new div.
+  var new_div = div.clone();
 
-  var factor_1_radio = proj_form.find('#' + factor_1_radio_id);
-  var factor_2_radio = proj_form.find('#' + factor_2_radio_id);
-  var factor_1 = proj_form.find('#' + factor_1_id);
+  // Set up remove button.
+  new_div.children('button').click(remove_contributor);
 
-  // Set listener for click.
-  factor_1_radio.click({'factor_1': factor_1}, function (e) {
-    var factor_1 = e.data.factor_1;
-    if (this.checked) {
-      factor_1.collapse('hide');
-    }
+  // Then, add it to the DOM and show it.
+  grandparent.append(new_div);
+  new_div.show();
+  new_div.addClass('d-flex');
+
+  // Show the new contributor row.
+  new_div.collapse('show');
+}
+
+/**
+ * Removes given contributor.
+ */
+function remove_contributor() {
+  var btn = $(this);
+  var div = btn.parent();
+
+  // Set it up so that this div is destroyed when it is hidden.
+  div.on('hidden.bs.collapse', function () {
+    $(this).remove();
   });
-  factor_2_radio.click({'factor_1': factor_1}, function (e) {
-    var factor_1 = e.data.factor_1;
-    if (this.checked) {
-      factor_1.collapse('show');
-    }
+
+  // Then, hide the div so that it is destroyed.
+  div.collapse('hide');
+}
+
+/**
+ * Sets add/remove functionality for contributors input.
+ */
+function set_contributors(div) {
+  // The first child div is the first contributor row.
+  var first = div.children('div:nth-of-type(1)');
+
+  // Set up the add button.
+  first.children('button').click(add_contributor);
+}
+
+/**
+ * Remove a input row.
+ */
+function remove_input_row() {
+  var btn = $(this);
+
+  var div = btn.parent();
+
+  // Set it up so that this div is destroyed when it is hidden.
+  div.on('hidden.bs.collapse', function () {
+    $(this).remove();
   });
+
+  // Then, hide the div so that it is destroyed.
+  div.collapse('hide');
+}
+
+/**
+ * Adds an input row.
+ */
+function add_input_row() {
+  var btn = $(this);
+  var grandparent = btn.parent().parent();
+  var div = grandparent.children('div[style*="display:none"]');
+
+  // Clone a new row.
+  var new_div = div.clone();
+
+  // Set up remove button.
+  new_div.children('button').click(remove_input_row);
+
+  // Then, add it to the DOM and show it.
+  grandparent.append(new_div);
+  new_div.show();
+  new_div.addClass('d-flex');
+
+  // Show the new contributor row.
+  new_div.collapse('show');
+}
+
+/**
+ * Sets functionality for adding/removing input rows.
+ */
+function set_fluid_input_rows(div) {
+  var button = div.find('button:first');
+
+  // Set up the add button.
+  button.click(add_input_row);
+}
+
+/**
+ * Enables custom input.
+ */
+function enable_custom_input() {
+  var select = $(this);
+  var parent = select.parent();
+  var input = parent.find('input');
+  var value = select.children('option:selected').val();
+
+  if (value.toLowerCase() == 'other') {
+    input.prop('disabled', false);
+  } else {
+    input.prop('disabled', true);
+  }
+}
+
+/**
+ * Sets custom listener, which automatically enables an adjacent textbox
+ * when the 'other' option is selected and disables it otherwise.
+ */
+function set_custom_listener(select) {
+  select.change(enable_custom_input);
+}
+
+/**
+ * Sets dropdown and text area wehre if the user selects 'other', the text
+ * area is enabled..
+ */
+function set_custom_dropdown(div, choices) {
+  var select = div.find('select');
+  var custom_input = div.find('input');
+
+  // Add possible names.
+  for (var i = 0; i < choices.length; i++) {
+    var choice = choices[i];
+    var option = $('<option>', {text: choice});
+    select.append(option);
+  }
+
+  // Then, add custom.
+  var custom = $('<option>', {text: 'other'});
+  select.append(custom);
+
+  // Finally, set listener for when user selects the 'other' option.
+  set_custom_listener(select);
+}
+
+/**
+ * Sets everything that needs to be set for a factor selection card.
+ */
+function set_factor(div) {
+  var name_group = div.find('.factor_name_group');
+  var values_group = div.find('.factor_values_group');
+
+  var name_div = name_group.children('.factor_name_inputs');
+  var values_div = values_group.children('.factor_values_inputs');
+
+  set_custom_dropdown(name_div, Object.keys(factor_names_to_class_ids));
+  set_fluid_input_rows(values_div);
 }
 
 /**
@@ -2212,33 +2391,211 @@ function set_proj_meta_input() {
   var html = proj_form.html();
   proj_form.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
 
-  var proj_contributor_0 = proj_form.find('#proj_contributor_0_div');
-  var proj_factor_0_0 = proj_form.find('#proj_factor_0_value_0_div');
-  var proj_factor_0_1 = proj_form.find('#proj_factor_0_value_1_div');
-  var proj_factor_0_btn = proj_form.find('#proj_factor_0_add_btn');
-  var proj_factor_1_0 = proj_form.find('#proj_factor_1_value_0_div');
-  var proj_factor_1_1 = proj_form.find('#proj_factor_1_value_1_div');
-  var proj_factor_1_btn = proj_form.find('#proj_factor_1_add_btn');
-  var add_contributor_btn = proj_form.find('#proj_add_contributor_btn');
-  var save_changes_btn = proj_form.find('#proj_save_btn');
+  // Set up contributors.
+  var contributors_group = proj_form.find('.contributors_group');
+  var contributors_div = contributors_group.children('.contributors_inputs');
+  set_contributors(contributors_div);
 
-  proj_contributor_fields = [proj_contributor_0];
-  proj_factor_0_fields = [proj_factor_0_0, proj_factor_0_1];
-  proj_factor_1_fields = [proj_factor_1_0, proj_factor_1_1];
+  // Set up Factor 1 name and values.
+  var factor_card = proj_form.find('.factor_card');
+  set_factor(factor_card);
 
-  // Button handlers.
-  add_contributor_btn.click(add_contributor);
-  save_changes_btn.click(save_proj);
+  // Enable experimental design.
+  var design_group = proj_form.find('.experimental_design_group');
+  var design_inputs = design_group.children('.experimental_design_inputs');
+  var factor_hide_radio = design_group.find('#proj_design_1_radio');
+  var factor_show_radio = design_group.find('#proj_design_2_radio');
+  var div_to_toggle = factor_card.clone(true);
+  div_to_toggle.children('h6').text('Factor 2');
+  div_to_toggle.addClass('collapse');
+  design_inputs.append(div_to_toggle);
+  set_radio_collapse_toggle(factor_hide_radio, factor_show_radio, div_to_toggle);
 
-  // Factor handlers.
-  proj_factor_0_btn.click(add_factor);
-  proj_factor_1_btn.click(add_factor);
-  set_factor_listener();
+  proj_form.find('.save_btn').click(function () {
+    save_proj();
+
+    var header = $('#sample_meta_header');
+    header.show();
+    $('#sample_meta_common').show();
+    scroll_to_ele(header);
+
+  });
 
   // Disable 2-factor design if there are less than 8 samples.
   if (Object.keys(proj.samples).length < 8) {
-    proj_form.find('#proj_design_2_radio').prop('disabled', true);
+    paired_show_radio.prop('disabled', true);
   }
+}
+
+/**
+ * Enables/disables row depending on whether the checkbox is checked.
+ */
+function enable_disable_row() {
+    var checkbox = $(this);
+    var form_group = checkbox.parent().parent().parent();
+
+    var inputs = form_group.find('input:not(:checkbox)');
+    var textareas = form_group.find('textarea');
+    var selects = form_group.find('select');
+    var buttons = form_group.find('button');
+
+    if (this.checked) {
+      // Enable everything.
+      form_group.removeClass('text-muted');
+
+      inputs.prop('disabled', false);
+      textareas.prop('disabled', false);
+      selects.prop('disabled', false);
+      // Then, fire change event for selects.
+      selects.change();
+      buttons.prop('disabled', false);
+    } else {
+      // Disable everything.
+      form_group.addClass('text-muted');
+      inputs.prop('disabled', true);
+      textareas.prop('disabled', true);
+      selects.prop('disabled', true);
+      buttons.prop('disabled', true);
+    }
+}
+
+/**
+ * Extracts the custom class from the element.
+ */
+function get_custom_class(ele) {
+  var class_list = ele.attr('class').split(/\s+/);
+  $.each(class_list, function (index, item) {
+    if (item.includes('_')) {
+      return item;
+    }
+  });
+
+  return null;
+}
+
+/**
+ * Copies the given input group to the sample-specific card of all samples.
+ */
+function copy_to_specific(form_group) {
+
+}
+
+/**
+ * Copies the given input group to the common card of all samples.
+ */
+function copy_to_common(form_group) {
+  var copy = form_group.clone(true);
+  var class_name = get_custom_class(form_group);
+  var index = class_order.indexOf(class_name);
+
+  for (var id in sample_forms) {
+    var form = sample_forms[id];
+    var common_form = form.find('.sample_common_form');
+
+    // First, construct an array of classes present in the form.
+    var indices = [];
+    for (var i = 0; i < class_order.length; i++) {
+      var temp_class = class_order[i];
+      if (common_form.find('.' + temp_class).length > 0) {
+        indices.push(i);
+      }
+    }
+
+    // If the form is empty, just append the element into the form.
+    if (indices.length == 0) {
+      common_form.append(copy);
+      return;
+    } else if (indices.includes(index)) {
+      // We have to replace the form group already in the form.
+      var to_replace = common_form.find('.' + class_order[index]);
+      to_replace.after(copy);
+      to_replace.remove();
+    } else {
+      // Otherwise, let's calculate where it should be added.
+      for (var i = 0; i < indices.length; i++) {
+        var temp_index = indices[i];
+
+        // As soon as index < temp_index, we have to add it before.
+        if (index < temp_index) {
+          common_form.find('.' + class_order[temp_index]).before(copy);
+          break;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Refresh which inputs are common and which are sample-specific.
+ */
+function refresh_checkbox() {
+  var checkbox = $(this);
+  // The value is how we order the rows.
+  var val = checkbox.val();
+
+  var form_group = checkbox.parent().parent().parent();
+  var class_name = get_custom_class(form_group);
+
+  // Copy to different places depending on whether the checkbox is checked
+  // or unchecked.
+  if (checkbox.checked) {
+    copy_to_common(form_group);
+  } else {
+
+  }
+}
+
+/**
+ * Sets enabling/disabling of rows in the common metadata form.
+ */
+function set_common_checkboxes(form) {
+  // First, find all the checkboxes.
+  var checkboxes = form.find('input:checkbox');
+  checkboxes.click(function () {
+    enable_disable_row();
+    refresh_checkbox();
+  });
+}
+
+/**
+ * Sets few of the shared inputs for the common input form and
+ * individual input forms.
+ */
+function set_shared_inputs(form) {
+  var organism_select = form.find('.sample_organism_select');
+  var lifestage_dropdown = form.find('.sample_life-stage_inputs');
+  var tissue_dropdown = form.find('.sample_tissue_inputs');
+  var chars_inputs = form.find('.sample_characteristics_inputs');
+  var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_inputs');
+
+  set_organisms_select(organism_select);
+  set_custom_dropdown(lifestage_dropdown, life_stages);
+  set_custom_dropdown(tissue_dropdown, tissues);
+  set_fluid_input_rows(chars_inputs);
+  set_custom_dropdown(sequenced_molecules_dropdown, sequenced_molecules);
+}
+
+/**
+ * Set the common metadata form.
+ */
+function set_common_meta_input() {
+  common_form = $('#sample_common_form');
+  var form = common_form.children('form');
+
+  // Set checkboxes.
+  set_common_checkboxes(form);
+
+  // Set shared inputs.
+  set_shared_inputs(form);
+
+  // Set save & apply button.
+  common_form.find('.save_btn').click(function () {
+    save_proj();
+
+    var meta = $('#sample_meta')
+    $('#sample_meta').show();
+    scroll_to_ele(meta);
+  });
 }
 
 /**
@@ -2365,7 +2722,7 @@ function get_all_contributors() {
  * Set samples meta input.
  */
 function set_samples_meta_input() {
-  var sample_form_id = 'sample_SAMPLEID'
+  var sample_form = $('.sample_collapse');
 
   // Set sorted names.
   set_sorted_names();
@@ -2374,79 +2731,49 @@ function set_samples_meta_input() {
   for (var i = 0; i < sorted_names.length; i++) {
     var name = sorted_names[i];
     var id = names_to_ids[name];
-    var new_sample_form_id = sample_form_id.replace('SAMPLEID', id);
-
-    var sample_form = $('#' + sample_form_id).clone(true);
-
-    // Change sample form id.
-    sample_form.attr('id', new_sample_form_id);
+    var new_sample_form = sample_form.clone(true);
 
     // Replace all instances of SAMPLEID to the id.
-    var html = sample_form.html();
-    sample_form.html(html.replace(new RegExp('SAMPLEID', 'g'), id));
+    var html = new_sample_form.html();
+    new_sample_form.html(html.replace(new RegExp('SAMPLEID', 'g'), id));
 
-    // Change the header to be the id.
-    sample_form.find('#sample_id_' + id).text(id);
-    sample_form.find('#sample_name_' + id).val(proj.samples[id].name);
+    sample_forms[id] = new_sample_form;
 
-    // Add first contributor field to the list of fields.
-    var sample_contributor_0 = sample_form.find('#sample_contributor_' + id + '_0_div');
-    var add_contributor_btn = sample_form.find('#sample_add_contributor_' + id + '_btn');
-    sample_contributor_fields[id] = [sample_contributor_0];
-    add_contributor_btn.click(add_contributor);
 
-    var sample_contributor_0_input = sample_contributor_0.children('input');
-    sample_contributor_0_input.focusin({'id':id}, function(e) {
-      var id = e.data.id;
-      set_suggestions($(this), get_all_contributors_except(id));
-    });
-
-    // Add the first characteristic field to the list of fields.
-    var sample_characteristic_0 = sample_form.find('#sample_characteristic_' + id + '_0_div');
-    var add_characteristic_btn = sample_form.find('#sample_add_characteristic_' + id + '_btn');
-    sample_characteristic_fields[id] = [sample_characteristic_0];
-    add_characteristic_btn.click(add_characteristic);
-
-    var char_id = 'sample_characteristic_' + id + '_0';
-    var detail_id = 'sample_detail_' + id + '_0';
-    var sample_characteristic_0_char = sample_characteristic_0.children('#' + char_id);
-    var sample_characteristic_0_detail = sample_characteristic_0.children('#' + detail_id);
-    sample_characteristic_0_char.focusin({'id':id}, function(e) {
-      var id = e.data.id;
-      var characteristics = get_all_characteristics_except(id);
-
-      set_suggestions($(this), Object.keys(characteristics));
-    });
-    sample_characteristic_0_detail.focusin({char: sample_characteristic_0_char}, function(e) {
-      var char = e.data.char.val();
-      var characteristics = get_all_characteristics();
-
-      if (char != '' && char != null && characteristics[char] != null) {
-        set_suggestions($(this), characteristics[char]);
-      }
-    });
+    // var char_id = 'sample_characteristic_' + id + '_0';
+    // var detail_id = 'sample_detail_' + id + '_0';
+    // var sample_characteristic_0_char = sample_characteristic_0.children('#' + char_id);
+    // var sample_characteristic_0_detail = sample_characteristic_0.children('#' + detail_id);
+    // sample_characteristic_0_char.focusin({'id':id}, function(e) {
+    //   var id = e.data.id;
+    //   var characteristics = get_all_characteristics_except(id);
+    //
+    //   set_suggestions($(this), Object.keys(characteristics));
+    // });
+    // sample_characteristic_0_detail.focusin({char: sample_characteristic_0_char}, function(e) {
+    //   var char = e.data.char.val();
+    //   var characteristics = get_all_characteristics();
+    //
+    //   if (char != '' && char != null && characteristics[char] != null) {
+    //     set_suggestions($(this), characteristics[char]);
+    //   }
+    // });
 
     // Set paired end listener.
-    set_paired_end(id, sample_form);
+    set_paired_end(id, new_sample_form);
 
     // Set the reads table for this sample.
-    set_reads_table(id, sample_form);
+    set_reads_table(id, new_sample_form);
 
     // Save changes button.
-    var save_changes_btn = sample_form.find('#sample_' + id + '_save_btn');
+    var save_changes_btn = new_sample_form.find('.save_btn');
     save_changes_btn.click(save_proj);
-
-    // Add this project to the import/export samples list.
-    add_import_export_sample(name, id);
 
     sample_forms[id] = sample_form;
 
     // Append new form.
     $('#sample_card').append(sample_form);
   }
-
-  // Set organisms dropdown.
-  set_organisms();
 
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
@@ -2848,6 +3175,11 @@ function set_meta_input() {
   // Then, set the samples metadata.
   set_samples_meta_input();
 
+  // We have to set the common meta input form after setting up the samples
+  // because this function assumes that the global sample_forms variable
+  // is populated.
+  set_common_meta_input();
+
   set_meta_input_fields();
 
   // Then, add listener to verify metadata button.
@@ -2879,7 +3211,8 @@ function show_meta_input() {
 
   // Show meta input.
   $('#progress_bar_container').show();
-  $('#meta_container').show();
+  $('#proj_meta_header').show();
+  $('#proj_meta').show();
 }
 
 /**
@@ -3514,12 +3847,14 @@ function write_proj(callback) {
 // Global variables.
 var proj_id;
 var proj;
+var organisms;
 var meta_input_fields;
 var ftp_pw;
 var raw_reads_div;
 var controls_modal;
 var dropdown_items = {};
 var proj_form;
+var common_form;
 var current_sample_form;
 var sample_forms = {};
 var names_to_ids;
@@ -3529,7 +3864,6 @@ var import_export_dropdown;
 var proj_contributor_fields = [];
 var proj_factor_0_fields = [];
 var proj_factor_1_fields = [];
-var sample_contributor_fields = {};
 var sample_characteristic_fields = {};
 var sample_pair_fields = {};
 var chars_to_samples = {};
@@ -3551,6 +3885,41 @@ var progress = {
   'diff_finished':    13,
   'server_open':      14
   }
+var factor_names_to_class_ids = {
+  'genotype':           'sample_genotype_group',
+  'growth conditions':  'sample_growth_conditions_group',
+  'organism strain':    'sample_organism_strain_group',
+  'life-stage':         'sample_life-stage_group',
+  'tissue':             'sample_tissue_group'
+};
+var life_stages = [
+  'L1', 'L2', 'L3', 'L4', 'Young Adult', 'Adult', 'Embryo', 'Mixed'
+];
+var tissues = [
+  'Whole Organism (Multi-worm)',
+  'Whole Organism (Single worm)',
+  'Dissected Tissue'
+];
+var sequenced_molecules = [
+  'Poly-A Purified',
+  'Total RNA',
+  'Tissue-specific tagged poly-A RNA',
+  'Tissue-specific tagged total RNA'
+];
+var class_order = [
+  'sample_genotype_group',
+  'sample_growth_conditions_group',
+  'sample_rna_extraction_group',
+  'sample_library_preparation_group',
+  'sample_miscellaneous_group',
+  'sample_organism_group',
+  'sample_organism_strain_group',
+  'sample_life-stage_group',
+  'sample_tissue_group',
+  'sample_characteristics_group',
+  'sample_sequenced_molecules_group',
+  'sample_read_type_group'
+];
 
 // Global variables for holding interval ids.
 var project_progress_interval;

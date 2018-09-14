@@ -138,7 +138,7 @@
         </div>
     </div>
     <div class="container" id="meta_container">
-        <div id="meta_header">
+        <div id="proj_meta_header">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
                     <h1 class="text-center text-white" style="font-size:3em;">We just need some more information!</h1>
@@ -260,7 +260,7 @@
         </div>
     </div>
 </div></div>
-        <div id="meta_proj" class="my-5"><div class="card mx-2">
+        <div id="proj_meta" class="my-5"><div class="card mx-2">
     <div class="card-header alert-primary h2">
         <i class="fas fa-cube"></i>
         Project Metadata Form
@@ -305,20 +305,20 @@
                     <input type="email" class="form-control" id="proj_corresponding_email" required>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row contributors_group">
                 <div class="col-sm-3">
                     <legend class="col-form-label">Contributors</legend>
-                    <small id="proj_contributors_help" class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project.</small>
+                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project.</small>
                 </div>
-                <div id="proj_contributors" class="col">
-                    <div class="d-flex" id="proj_contributor_0_div">
-                        <input type="text" class="form-control col-sm-3 mr-2" id="proj_contributor_0" required>
-                        <button id="proj_add_contributor_btn" class="btn btn-primary" type="button">Add</button>
+                <div class="col contributors_inputs">
+                    <div class="d-flex contributor">
+                        <input type="text" class="form-control col-sm-3 mr-2" required>
+                        <button class="btn btn-primary" type="button">Add</button>
                     </div>
                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                    <div class="collapse mt-1" id="proj_contributor_num_div" style="display:none">
-                        <input type="text" class="form-control col-sm-3 mr-2" id="proj_contributor_num">
-                        <button id="proj_remove_contributor_btn_num" class="btn btn-danger" type="button">Remove</button>
+                    <div class="collapse mt-1 contributor" style="display:none">
+                        <input type="text" class="form-control col-sm-3 mr-2">
+                        <button class="btn btn-danger" type="button">Remove</button>
                     </div>
                 </div>
             </div>
@@ -332,12 +332,12 @@
                 </div>
             </div>
             <hr>
-            <div class="form-group row">
+            <div class="form-group row experimental_design_group">
                 <div class="col-sm-3">
                     <legend class="col-form-label pt-0">Experimental design</legend>
                     <small id="proj_design_help" class="form-text text-muted">Hover your mouse on each choice to learn more. A minimum of 8 samples are required for 2-factor design.</small>
                 </div>
-                <div class="col-sm-9" id="proj_design">
+                <div class="col-sm-9 experimental_design_inputs">
                     <div class="custom-control custom-radio custom-control-inline" tabindex="0" data-toggle="popover" data-trigger="hover focus" data-content="A 1-factor design contrasts a control sample with a single experimental sample." data-placement="bottom">
                         <input type="radio" id="proj_design_1_radio" name="proj_design" class="custom-control-input" checked="" value="1">
                         <label class="custom-control-label active" for="proj_design_1_radio">1-factor</label>
@@ -346,40 +346,41 @@
                         <input type="radio" id="proj_design_2_radio" name="proj_design" class="custom-control-input" value="2">
                         <label class="custom-control-label" for="proj_design_2_radio">2-factor</label>
                     </div>
-                    <div class="card mt-3" id="proj_factor_0_card">
+                    <div class="card mt-3 factor_card">
                         <h6 class="card-header">Factor 1</h6>
                         <div class="card-body">
-                            <div class="form-group row">
+                            <div class="form-group row factor_name_group">
                                 <div class="col-sm-4">
                                     <legend class="col-form-label">Name</legend>
-                                    <small id="proj_factor_0_name_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                    <small class="form-text text-muted">Leave blank if you don’t have one.</small>
                                 </div>
-                                <div class="col-sm-4">
-                                    <select class="custom-select" id="proj_factor_0_name_select">
+                                <div class="col d-flex factor_name_inputs">
+                                    <select class="custom-select mr-2">
                                         <option selected hidden disabled>Please select.</option>
                                     </select>
+                                    <div class="pl-0 col-sm-6">
+                                        <input type="text" class="form-control" disabled>
+                                    </div>
                                 </div>
-                                <div class="col-sm-4 pl-0">
-                                    <input type="text" class="form-control" id="proj_factor_0_name_custom" disabled>
-                                </div>
+                                
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row factor_values_group">
                                 <div class="col-sm-4">
                                     <legend class="col-form-label">All possible values</legend>
-                                    <small id="proj_factor_0_values_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                    <small class="form-text text-muted">Leave blank if you don’t have one.</small>
                                 </div>
-                                <div id="proj_factor_0_values" class="col">
-                                    <div class="d-flex" id="proj_factor_0_value_0_div">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_0" required>
-                                        <button id="proj_factor_0_add_btn" class="btn btn-primary" type="button">Add value</button>
+                                <div class="col factor_values_inputs">
+                                    <div class="d-flex">
+                                        <input type="text" class="form-control col-sm-6 mr-2" required>
+                                        <button class="btn btn-primary" type="button">Add value</button>
                                     </div>
-                                    <div class="d-flex mt-1" id="proj_factor_0_value_1_div">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_1" required>
+                                    <div class="d-flex mt-1">
+                                        <input type="text" class="form-control col-sm-6 mr-2" required>
                                     </div>
                                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                                    <div class="mt-1 collapse" id="proj_factor_0_value_num_div" style="display:none">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_0_value_num">
-                                        <button id="proj_factor_0_remove_num" class="btn btn-danger" type="button">Remove</button>
+                                    <div class="mt-1 collapse" style="display:none">
+                                        <input type="text" class="form-control col-sm-6 mr-2">
+                                        <button class="btn btn-danger" type="button">Remove</button>
                                     </div>
                                 </div>
                             </div>
@@ -487,7 +488,7 @@
         </form>
     </div>
 </div></div>
-        <div id="meta_header">
+        <div id="sample_meta_header">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
                     <h1 class="text-center text-white" style="font-size:2.2em;">Great! Now we just have a few questions about your samples.</h1>
@@ -499,21 +500,21 @@
                 </div>
             </div>
         </div>
-        <div id="meta_sample" class="mt-3"><div class="mb-5">
+        <div id="sample_meta_common" class="mt-3"><div class="mb-5">
     <div class="card mx-2" id="common_sample_meta_card">
         <div class="card-header alert-info h2">
             <i class="fas fa-share-alt"></i>
             Common Metadata Form
         </div>
-        <div class="card-body">
+        <div class="card-body" id="sample_common_form">
             <h4 class="card-title">Please select and fill out the metadata that are shared by all of your samples.</h4>
             <p class="card-text mb-5">Checked inputs will be automatically applied to all samples.</p>
-            <form novalidate>
-                <div class="form-group row">
+            <form novalidate class="common_sample_meta_form">
+                <div class="form-group row sample_genotype_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_genotype_checkbox" class="custom-control-input" checked>
+                            <label for="sample_genotype_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -524,11 +525,11 @@
                         <input type="text" class="form-control sample_genotype" id="sample_share_genotype_input" placeholder="Ex: dpy-22 [EX P_myo-2::GFP]">
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_growth_conditions_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_growth_conditions_checkbox" class="custom-control-input" checked>
+                            <label for="sample_growth_conditions_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -539,11 +540,11 @@
                         <textarea class="form-control sample_growth_conditions" id="sample_share_growth_conditions_input" rows="2" placeholder="Ex: 20C on OP50"></textarea>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_rna_extraction_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_rna_extraction_checkbox" class="custom-control-input" checked>
+                            <label for="sample_rna_extraction_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -554,11 +555,11 @@
                         <textarea class="form-control sample_rna_extraction" id="sample_share_rna_extraction_input" rows="2" placeholder=""></textarea>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_library_preparation_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_library_preparation_checkbox" class="custom-control-input" checked>
+                            <label for="sample_library_preparation_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -569,11 +570,11 @@
                         <textarea class="form-control sample_library_preparation" id="sample_share_library_preparation" rows="2" placeholder=""></textarea>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_miscellaneous_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_miscellaneous_checkbox" class="custom-control-input" checked>
+                            <label for="sample_miscellaneous_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -585,11 +586,11 @@
                     </div>
                 </div>
                 <hr>
-                <div class="form-group row">
+                <div class="form-group row sample_organism_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_organism_checkbox" class="custom-control-input" checked>
+                            <label for="sample_organism_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -602,11 +603,11 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_organism_strain_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_organism_strain_checkbox" class="custom-control-input" checked>
+                            <label for="sample_organism_strain_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -617,65 +618,65 @@
                         <input type="text" class="form-control sample_organism_strain" id="sample_share_organism_strain" placeholder="Ex: N2, Hawaiian, etc.">
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_life-stage_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_life-stage_checkbox" class="custom-control-input" checked>
+                            <label for="sample_life-stage_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Life-stage</legend>
                         <small id="sample_share_life-stage_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
                     </div>
-                    <div class="col-sm-3">
-                        <select class="custom-select sample_life-stage_select" id="sample_share_life-stage_select">
+                    <div class="col d-flex sample_life-stage_inputs">
+                        <select class="custom-select mr-2 col-sm-4">
                             <option selected hidden disabled>Please select.</option>
                         </select>
-                    </div>
-                    <div class="col-sm-4 pl-0">
-                        <input type="text" class="form-control sample_life-stage_custom" id="sample_share_life-stage_custom" disabled>
+                        <div class="pl-0 col-sm-5">
+                            <input type="text" class="form-control" disabled>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_tissue_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" id="customControlInline" checked>
-                            <label class="custom-control-label" for="customControlInline"></label>
+                            <input type="checkbox" id="sample_tissue_checkbox" class="custom-control-input" id="customControlInline" checked>
+                            <label class="custom-control-label" for="sample_tissue_checkbox"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Tissue</legend>
                         <small id="sample_share_tissue_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
                     </div>
-                    <div class="col-sm-4">
-                        <select class="custom-select sample_tissue_select" id="sample_share_tissue_select">
+                    <div class="col d-flex sample_tissue_inputs">
+                        <select class="custom-select mr-2 col-sm-6">
                             <option selected hidden disabled>Please select.</option>
                         </select>
-                    </div>
-                    <div class="col-sm-3 pl-0">
-                        <input type="text" class="form-control sample_tissue_custom" id="sample_share_tissue_custom" disabled>
+                        <div class="pl-0 col-sm-5">
+                            <input type="text" class="form-control" disabled>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_characteristics_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_characteristics_checkbox" class="custom-control-input" checked>
+                            <label for="sample_characteristics_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Misc. characteristics</legend>
                         <small id="sample_share_characteristics_help" class="form-text text-muted">Additional shared characteristics.</small>
                     </div>
-                    <div id="sample_share_characteristics" class="col sample_characteristics">
+                    <div id="sample_share_characteristics" class="col sample_characteristics_inputs">
                         <div class="d-flex">
                             <label class="col-sm-4 pl-0 mr-2">Characteristic name</label>
                             <label class="col-sm-6 pl-0">Characteristic value</label>
                         </div>
                         <div class="d-flex sample_characteristic_0">
-                            <input type="text" class="form-control col-sm-4 mr-2" required>
-                            <input type="text" class="form-control col-sm-6 mr-2" required>
+                            <input type="text" class="form-control col-sm-4 mr-2">
+                            <input type="text" class="form-control col-sm-6 mr-2">
                             <button class="btn btn-primary" type="button">Add</button>
                         </div>
                         <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
@@ -687,31 +688,31 @@
                     </div>
                 </div>
                 <hr>
-                <div class="form-group row">
+                <div class="form-group row sample_sequenced_molecules_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_sequenced_molecules_checkbox" class="custom-control-input" checked>
+                            <label for="sample_sequenced_molecules_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Sequenced molecules</legend>
                         <small id="sample_share_sequenced_molecules_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
                     </div>
-                    <div class="col-sm-3">
-                        <select class="custom-select sample_sequenced_molecules_select" id="sample_share_sequenced_molecules_select">
+                    <div class="col d-flex sample_sequenced_molecules_inputs">
+                        <select class="custom-select mr-2 col-sm-6">
                             <option selected hidden disabled>Please select.</option>
                         </select>
-                    </div>
-                    <div class="col-sm-4 pl-0">
-                        <input type="text" class="form-control sample_sequenced_molecules_custom" id="sample_share_sequenced_molecules_custom" disabled>
+                        <div class="pl-0 col-sm-5">
+                            <input type="text" class="form-control" disabled>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row sample_read_type_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                            <input type="checkbox" class="custom-control-input" checked>
-                            <label class="custom-control-label"></label>
+                            <input type="checkbox" id="sample_read_type_checkbox" class="custom-control-input" checked>
+                            <label for="sample_read_type_checkbox" class="custom-control-label"></label>
                         </div>
                     </div>
                     <div class="col-sm-3 pl-0">
@@ -729,7 +730,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="collapse show">
+                <div class="collapse show sample_read_type_single_group">
                     <div class="form-group row">
                         <span class="col-sm-1"></span>
                         <div class="col-sm-3 pl-0">
@@ -757,7 +758,8 @@
             </form>
         </div>
     </div>
-</div><div style="">
+</div></div>
+        <div id="sample_meta" class="mt-3"><div style="">
     <div class="card mx-2" id="sample_card">
         <div class="card-header alert-warning h2">
             <i class="fas fa-cubes"></i>
@@ -765,15 +767,14 @@
             <div class="dropdown d-inline">
                 <button class="btn btn-warning dropdown-toggle ml-3" type="button" id="choose_sample_btn" data-toggle="dropdown">Choose a sample</button>
                 <div class="dropdown-menu" id="sample_choices">
-                    <a class="dropdown-item" id="show_sample_SAMPLEID" style="display:none">Test</a>
-                 </div>
+                    <a class="dropdown-item show_sample_dropdown_item" style="display:none">Test</a>
+                </div>
             </div>
         </div>
-        <div class="sample" id="sample_SAMPLEID">
+        <div class="sample_collapse">
             <div class="card-body">
-                <h4 class="card-title sample_id">Sample ID</h4>
                 <form novalidate>
-                    <div class="form-group row">
+                    <div class="form-group row sample_name_group">
                         <div class="col-sm-3">
                             <label for="sample_name_SAMPLEID" class="col-form-label">Name</label>
                             <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
@@ -782,7 +783,7 @@
                             <input type="text" class="form-control sample_name_input" id="sample_name_SAMPLEID" required disabled>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row sample_description_group">
                         <div class="col-sm-3">
                             <label for="sample_description_SAMPLEID" class="col-form-label">Description</label>
                             <small id="sample_description_SAMPLEID_help" class="form-text text-muted">Some description.</small>
@@ -791,11 +792,11 @@
                             <textarea class="form-control sample_description_input" id="sample_description_SAMPLEID" rows="3" required></textarea>
                         </div>
                     </div>
-                    <div class="card mb-4">
+                    <div class="card mb-4 sample_factors_card">
                         <h5 class="card-header alert-dark">Factors</h5>
                         <div class="card-body">
                             <form novalidate>
-                                <div class="form-group row">
+                                <div class="form-group row sample_factors_1_group">
                                     <div class="col-sm-3">
                                         <label for="sample_factor_1_SAMPLEID" class="col-form-label">Factor 1: FACTOR_1</label>
                                         <small id="sample_factor_1_SAMPLEID_help" class="form-text text-muted">Some description.</small>
@@ -806,7 +807,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="form-group row sample_factors_2_group">
                                     <div class="col-sm-3">
                                         <label for="sample_factor_2_SAMPLEID" class="col-form-label">Factor 2: FACTOR_2</label>
                                         <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Some description.</small>
@@ -820,66 +821,22 @@
                             </form>
                         </div>
                     </div>
-                    <div class="card mb-4">
+                    <div class="card mb-4 sample_specific_card">
                         <h5 class="card-header alert-dark">Sample-specific Metadata</h5>
                         <div class="card-body">
-                            <form novalidate>
-                                <div class="form-group row">
-                                    <div class="col-sm-3">
-                                        <label for="sample_factor_1_SAMPLEID" class="col-form-label">Factor 1: FACTOR_1</label>
-                                        <small id="sample_factor_1_SAMPLEID_help" class="form-text text-muted">Some description.</small>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <select class="custom-select sample_factor_1_select" required>
-                                            <option selected disabled hidden>Please select a value.</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-3">
-                                        <label for="sample_factor_2_SAMPLEID" class="col-form-label">Factor 2: FACTOR_2</label>
-                                        <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Some description.</small>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <select class="custom-select sample_factor_2_select" required>
-                                            <option selected disabled hidden>Please select a value.</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            <form novalidate class="sample_specific_form">
                             </form>
                         </div>
                     </div>
-                    <div class="card mb-4">
+                    <div class="card mb-4 sample_common_card">
                         <div class="card-header alert-dark">
                             <h5 class="d-inline">Common Metadata</h5>
                             <button class="btn btn-secondary btn-sm save_btn sample_save_btn ml-2" type="button" data-toggle="collapse" data-target="#sample_share_collapse_SAMPLEID">Show / Hide</button>
                         </div>
                         <div class="collapse" id="sample_share_collapse_SAMPLEID">
-                        <div class="card-body">
-                            <form novalidate>
-                                <div class="form-group row">
-                                    <div class="col-sm-3">
-                                        <label for="sample_factor_1_SAMPLEID" class="col-form-label">Factor 1: FACTOR_1</label>
-                                        <small id="sample_factor_1_SAMPLEID_help" class="form-text text-muted">Some description.</small>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <select class="custom-select sample_factor_1_select" required>
-                                            <option selected disabled hidden>Please select a value.</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-3">
-                                        <label for="sample_factor_2_SAMPLEID" class="col-form-label">Factor 2: FACTOR_2</label>
-                                        <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Some description.</small>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <select class="custom-select sample_factor_2_select" required>
-                                            <option selected disabled hidden>Please select a value.</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
+                            <div class="card-body">
+                                <form novalidate class="sample_common_form">
+                                </form>
                             </div>
                         </div>
                     </div>
