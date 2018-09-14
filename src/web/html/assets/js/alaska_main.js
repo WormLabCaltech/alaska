@@ -1252,12 +1252,6 @@ function set_sample_reads(table, reads) {
  * Show sample form.
  */
 function show_sample_form(id, form) {
-  // First, hide the import/export popover.
-  var import_btn = $('#sample_import_outer_btn');
-  var export_btn = $('#sample_export_outer_btn');
-  import_btn.popover('hide');
-  export_btn.popover('hide');
-
   // If the form is already being shown, just return.
   if (current_sample_form == form) {
     return;
@@ -1286,7 +1280,7 @@ function show_sample_form(id, form) {
  * Set choose sample button.
  */
 function set_choose_sample_button(dropdown, forms) {
-  var dropdown_item = $('.show_sample_dropdown_item');
+  var dropdown_item = dropdown.children('.show_sample_dropdown_item');
 
   for (var id in forms) {
     var new_item = dropdown_item.clone();
