@@ -2432,7 +2432,7 @@ function enable_disable_row(checkbox) {
     var selects = form_group.find('select');
     var buttons = form_group.find('button');
 
-    if (this.checked) {
+    if (checkbox.prop('checked')) {
       // Enable everything.
       form_group.removeClass('text-muted');
 
@@ -2527,7 +2527,7 @@ function refresh_checkbox(checkbox) {
 
   // Copy to different places depending on whether the checkbox is checked
   // or unchecked.
-  if (checkbox.checked) {
+  if (checkbox.prop('checked')) {
     copy_to_common(form_group);
   } else {
 
