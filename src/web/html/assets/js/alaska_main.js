@@ -2377,6 +2377,154 @@ function set_factor(div) {
 }
 
 /**
+ * Gets value from custom dropdown.
+ */
+function get_value_from_custom_dropdown(div) {
+  var select = div.find('select');
+  var custom_input = div.find('input');
+
+  var selected = select.find('option:selected');
+  var val;
+
+  if (selected.length > 0) {
+    val = selected.val();
+
+    if (val.toLowerCase() == 'other') {
+      val = custom_input.val();
+    }
+  }
+
+  return val;
+}
+
+/**
+ * Get list of values inputed to fluid input rows.
+ */
+function get_values_from_fluid_rows(div) {
+  var values = [];
+
+  var rows = div.children('div:visible');
+
+  var custom_rows = [];
+  rows.each(function () {
+    var row = $(this);
+    var col_values = [];
+    if (get_custom_class(row).includes('_')) {
+      var columns = row.children('input');
+
+      columns.each(function () {
+        var input = $(this);
+        var val = input.val();
+
+        if (val != null && val != '') {
+          col_values.push(val);
+        }
+      });
+
+      values.push(col_values);
+    }
+  });
+
+  return values;
+}
+
+
+
+/**
+ * Sets listener to change content of the given sample factor group depending on
+ * the values of the factor card.
+ */
+function set_factor_card_to_sample_listener(factor_card, sample_factor_group_class_name) {
+  var name_div = factor_card.find('.factor_name_inputs');
+  var values_div = factor_card.find('.factor_values_inputs');
+
+  var name_inputs = name_div.find('select,input');
+  var values_inputs = values_div.find('select,input');
+
+  // If name changes, the factor name also changes for each sample.
+  name_inputs.change({
+    'name_div': name_div,
+    'class_name' = sample_factor_group_class_name
+  }, function (e) {
+    var name_div = e.data.name_div;
+    var class_name = e.data.class_name;
+
+    for (var id in sample_forms) {
+      var sample_form = sample_forms[id];
+
+      var factor_group = sample_form.find('.' + class_name);
+      var label = factor_group.find('label');
+      var name = get_value_from_custom_dropdown(name_div);
+      label.text('Factor 1: ' + name);
+    }
+  });
+
+  // If values change, the values dropdown must also change.
+  values_inputs.change({
+    'values_div': values_div,
+    'class_name': sample_factor_group_class_name
+  }, function (e) {
+    var values_div = e.data.values_div;
+    var class_name = e.data.class_name;
+
+    for (var id in sample_forms) {
+      var sample_form = sample_forms[id];
+
+      var factor_group = sample_form.find('.' + class_name);
+      var select = factor_group.find('select');
+
+      // First, remove all visible options.
+      select.children('option:visible').remove();
+
+      // Then, retrieve list of values.
+      var values = get_values_from_fluid_rows(values_div);
+
+      for (var i = 0; i < values.length; i++) {
+        var value = values[0][0];
+        var option = $('<option>', {
+          text: value
+        });
+
+        select.append(option);
+      }
+    }
+  });
+}
+
+/**
+ * Sets up factor 1 and factor 2 listeners so that appropriate information
+ * is displayed in the factor card of each sample.
+ */
+function set_factor_to_sample_listeners(design_1_radio, design_2_radio, design_inputs) {
+  var factor_1_card = design_inputs.children('.factor_card:first');
+  var factor_2_card = design_inputs.children('.factor_card:last');
+
+  set_factor_card_to_sample_listener(factor_1_card, 'sample_factors_1_group');
+  set_factor_card_to_sample_listener(factor_2_card, 'sample_factors_2_group');
+
+  // Also, depending on which radio is selected (i.e. what design the
+  // experiment is), we need to show or hide the second factor.
+  design_1_radio.click(function () {
+    if (this.checked) {
+      for (var id in sample_forms) {
+        var sample_form = sample_forms[id];
+
+        sample_form.find('.sample_factors_2_group').hide();
+      }
+    }
+  });
+  design_2_radio.click(function () {
+    if (this.checked) {
+      for (var id in sample_forms) {
+        var sample_form = sample_forms[id];
+
+        sample_form.find('.sample_factors_2_group').show();
+      }
+    }
+  });
+}
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
@@ -2405,6 +2553,10 @@ function set_proj_meta_input() {
   div_to_toggle.addClass('collapse');
   design_inputs.append(div_to_toggle);
   set_radio_collapse_toggle(factor_hide_radio, factor_show_radio, div_to_toggle);
+
+  // Then, we must also set up listeners to show/hide appropriate factor 1
+  // and factor 2 information for each sample.
+  set_factor_to_sample_listeners(factor_hide_radio, factor_show_radio, design_inputs);
 
   proj_form.find('.save_btn').click(function () {
     save_proj();
@@ -2521,7 +2673,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 
     copy.children('div:first').remove();
     copy.children('div:first').removeClass('pl-0');
-    copy.find('input,select,textarea').prop('disabled', disable);
+    copy.find('input,select,button,textarea').prop('disabled', disable);
 
     // First, construct an array of classes present in the form.
     var indices = [];
@@ -2610,9 +2762,10 @@ function set_common_checkboxes(form) {
     refresh_checkbox(checkbox);
     enable_disable_row(checkbox);
   });
+  checkboxes.click();
 
   // Also, whenever an input or select is changed, fire the checkbox.
-  var inputs = form.find('input:not(:checkbox),select,button');
+  var inputs = form.find('input:not(:checkbox),select,button,textarea');
   inputs.change(function () {
     var input = $(this);
     var custom_parent = get_closest_custom_parent(input);
@@ -2623,7 +2776,7 @@ function set_common_checkboxes(form) {
       checkbox = custom_parent.find('input:checkbox');
     }
 
-    checkbox.change();
+    checkbox.click();
   });
 }
 
@@ -3244,9 +3397,6 @@ function show_verify_meta_modal() {
  * Set meta input form.
  */
 function set_meta_input() {
-  // Deal with project meta input form first.
-  set_proj_meta_input();
-
   // Then, set the samples metadata.
   set_samples_meta_input();
 
@@ -3254,6 +3404,9 @@ function set_meta_input() {
   // because this function assumes that the global sample_forms variable
   // is populated.
   set_common_meta_input();
+
+  // Deal with project meta input form last.
+  set_proj_meta_input();
 
   // set_meta_input_fields();
 

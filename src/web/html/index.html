@@ -311,12 +311,12 @@
                     <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project.</small>
                 </div>
                 <div class="col contributors_inputs">
-                    <div class="d-flex contributor">
+                    <div class="d-flex contributor_row">
                         <input type="text" class="form-control col-sm-3 mr-2" required>
                         <button class="btn btn-primary" type="button">Add</button>
                     </div>
                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                    <div class="collapse mt-1 contributor" style="display:none">
+                    <div class="collapse mt-1 contributor_row" style="display:none">
                         <input type="text" class="form-control col-sm-3 mr-2">
                         <button class="btn btn-danger" type="button">Remove</button>
                     </div>
@@ -370,56 +370,17 @@
                                     <small class="form-text text-muted">Leave blank if you don’t have one.</small>
                                 </div>
                                 <div class="col factor_values_inputs">
-                                    <div class="d-flex">
+                                    <div class="d-flex factor_values_row">
                                         <input type="text" class="form-control col-sm-6 mr-2" required>
                                         <button class="btn btn-primary" type="button">Add value</button>
                                     </div>
-                                    <div class="d-flex mt-1">
+                                    <div class="d-flex mt-1 factor_values_row">
                                         <input type="text" class="form-control col-sm-6 mr-2" required>
                                     </div>
                                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                                    <div class="mt-1 collapse" style="display:none">
+                                    <div class="mt-1 collapse factor_values_row" style="display:none">
                                         <input type="text" class="form-control col-sm-6 mr-2">
                                         <button class="btn btn-danger" type="button">Remove</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card mt-3 collapse" id="proj_factor_1_card">
-                        <h6 class="card-header">Factor 2</h6>
-                        <div class="card-body">
-                            <div class="form-group row">
-                                <div class="col-sm-4">
-                                    <legend class="col-form-label">Name</legend>
-                                    <small id="proj_factor_1_name_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
-                                </div>
-                                <div class="col-sm-4">
-                                    <select class="custom-select" id="proj_factor_1_name_select">
-                                        <option selected hidden disabled>Please select.</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-4 pl-0">
-                                    <input type="text" class="form-control" id="proj_factor_1_name_custom" disabled>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-sm-4">
-                                    <legend class="col-form-label">All possible values</legend>
-                                    <small id="proj_factor_1_values_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
-                                </div>
-                                <div id="proj_factor_1_values" class="col">
-                                    <div class="d-flex" id="proj_factor_1_value_0_div">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_0" required>
-                                        <button id="proj_factor_1_add_btn" class="btn btn-primary" type="button">Add value</button>
-                                    </div>
-                                    <div class="d-flex mt-1" id="proj_factor_1_value_1_div">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_1" required>
-                                    </div>
-                                    <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                                    <div class="mt-1 collapse" id="proj_factor_1_value_num_div" style="display:none">
-                                        <input type="text" class="form-control col-sm-6 mr-2" id="proj_factor_1_value_num">
-                                        <button id="proj_factor_1_remove_num" class="btn btn-danger" type="button">Remove</button>
                                     </div>
                                 </div>
                             </div>
@@ -674,13 +635,13 @@
                             <label class="col-sm-4 pl-0 mr-2">Characteristic name</label>
                             <label class="col-sm-6 pl-0">Characteristic value</label>
                         </div>
-                        <div class="d-flex sample_characteristic_0">
+                        <div class="d-flex sample_characteristics_row">
                             <input type="text" class="form-control col-sm-4 mr-2">
                             <input type="text" class="form-control col-sm-6 mr-2">
                             <button class="btn btn-primary" type="button">Add</button>
                         </div>
                         <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
-                        <div class="mt-1 sample_characteristic_num" style="display:none">
+                        <div class="mt-1 sample_characteristics_row" style="display:none">
                             <input type="text" class="form-control col-sm-4 mr-2" required>
                             <input type="text" class="form-control col-sm-6 mr-2" required>
                             <button class="btn btn-danger" type="button">Remove</button>
@@ -822,7 +783,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group row sample_factors_2_group">
+                                <div class="form-group row sample_factors_2_group" style="display:none">
                                     <div class="col-sm-3">
                                         <label for="sample_factor_2_SAMPLEID" class="col-form-label">Factor 2: FACTOR_2</label>
                                         <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Some description.</small>
