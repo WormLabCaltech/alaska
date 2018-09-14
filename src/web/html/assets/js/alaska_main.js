@@ -2457,12 +2457,17 @@ function enable_disable_row(checkbox) {
  * Extracts the custom class from the element.
  */
 function get_custom_class(ele) {
-  var class_list = ele.attr('class').split(' ');
+  var classes = ele.attr('class');
+  var class_list;
 
-  for (var i = 0; i < class_list.length; i++) {
-    var item = class_list[i];
-    if (item.includes('_')) {
-      return item;
+  if (classes != null) {
+    class_list = classes.split(' ');
+
+    for (var i = 0; i < class_list.length; i++) {
+      var item = class_list[i];
+      if (item.includes('_')) {
+        return item;
+      }
     }
   }
 
@@ -2607,7 +2612,8 @@ function set_common_checkboxes(form) {
   });
 
   // Also, whenever an input or select is changed, fire the checkbox.
-  var inputs = form.find('input:not(:checkbox),select,button').change(function () {
+  var inputs = form.find('input:not(:checkbox),select,button');
+  inputs.change(function () {
     var input = $(this);
     var custom_parent = get_closest_custom_parent(input);
     var checkbox = custom_parent.find('input:checkbox');
