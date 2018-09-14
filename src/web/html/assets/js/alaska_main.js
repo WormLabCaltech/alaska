@@ -2470,16 +2470,25 @@ function get_custom_class(ele) {
 }
 
 /**
- * Copies the given input group to the sample-specific card of all samples.
+ * Removes the given form_group from the specified card of all samples.
  */
-function copy_to_specific(form_group) {
+function remove_from_form(form_group, from_form_class_name) {
+  var class_name = get_custom_class(form_group);
 
+  for (var id in sample_forms) {
+    var form = sample_forms[id];
+    var from_form = form.find('.' + from_form_class_name);
+    var find = from_form.find('.' + class_name);
+
+    if (find.length > 0) {
+      find.remove();
+    }
+  }
 }
-
 /**
- * Copies the given input group to the common card of all samples.
+ * Copies the given input group to the specified card of all samples.
  */
-function copy_to_common(form_group) {
+function copy_to_form(form_group, to_form_class_name) {
   var class_name = get_custom_class(form_group);
   var index = class_order.indexOf(class_name);
   console.log(class_name);
@@ -2487,7 +2496,7 @@ function copy_to_common(form_group) {
 
   for (var id in sample_forms) {
     var form = sample_forms[id];
-    var common_form = form.find('.sample_common_form');
+    var to_form = form.find('.' + to_form_class_name);
 
     // Make a copy and switch it up.
     var copy = form_group.clone(true);
@@ -2514,7 +2523,7 @@ function copy_to_common(form_group) {
     var indices = [];
     for (var i = 0; i < class_order.length; i++) {
       var temp_class = class_order[i];
-      if (common_form.find('.' + temp_class).length > 0) {
+      if (to_form.find('.' + temp_class).length > 0) {
         indices.push(i);
       }
     }
@@ -2523,10 +2532,10 @@ function copy_to_common(form_group) {
 
     // If the form is empty, just append the element into the form.
     if (indices.length == 0) {
-      common_form.append(copy);
+      to_form.append(copy);
     } else if (indices.includes(index)) {
       // We have to replace the form group already in the form.
-      var to_replace = common_form.find('.' + class_order[index]);
+      var to_replace = to_form.find('.' + class_order[index]);
       to_replace.after(copy);
       to_replace.remove();
     } else {
@@ -2536,10 +2545,10 @@ function copy_to_common(form_group) {
 
         // As soon as index < temp_index, we have to add it before.
         if (index < temp_index) {
-          common_form.find('.' + class_order[temp_index]).before(copy);
+          to_form.find('.' + class_order[temp_index]).before(copy);
           break;
         } else if (i == (indices.length - 1)) {
-          common_form.find('.' + class_order[temp_index]).after(copy);
+          to_form.find('.' + class_order[temp_index]).after(copy);
         }
       }
     }
@@ -2560,10 +2569,14 @@ function refresh_checkbox(checkbox) {
 
   // Copy to different places depending on whether the checkbox is checked
   // or unchecked.
+  var common_form_class_name = 'sample_common_form';
+  var specific_form_class_name = 'sample_specific_form';
   if (checkbox.prop('checked')) {
-    copy_to_common(form_group);
+    copy_to_form(form_group, common_form_class_name);
+    remove_from_form(form_group, specific_form_class_name);
   } else {
-
+    copy_to_form(form_group, specific_form_class_name);
+    remove_from_form(form_group, common_form_class_name);
   }
 }
 
