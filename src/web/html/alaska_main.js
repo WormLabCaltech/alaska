@@ -2473,8 +2473,8 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var factor_group = sample_form.find('.' + class_name);
       var select = factor_group.find('select');
 
-      // First, remove all visible options.
-      select.children('option:visible').remove();
+      // First, remove all options.
+      select.children('option:not(:disabled)').remove();
 
       // Then, retrieve list of values.
       var values = get_values_from_fluid_rows(values_div);
