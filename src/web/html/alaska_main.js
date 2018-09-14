@@ -2516,9 +2516,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 
     copy.children('div:first').remove();
     copy.children('div:first').removeClass('pl-0');
-    copy.find('input').prop('disabled', disable);
-    copy.find('select').prop('disabled', disable);
-    copy.find('textarea').prop('disabled', disable);
+    copy.find('input,select,textarea').prop('disabled', disable);
 
     // First, construct an array of classes present in the form.
     var indices = [];
@@ -2557,6 +2555,21 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 }
 
 /**
+ * Get closest custom parent.
+ */
+function get_closest_custom_parent(start) {
+  var class_name = "";
+  var custom_parent = start;
+
+  while (!class_name.includes('_')) {
+    custom_parent = custom_parent.parent();
+    class_name = get_custom_class(custom_parent);
+  }
+
+  return custom_parent;
+}
+
+/**
  * Refresh which inputs are common and which are sample-specific.
  */
 function refresh_checkbox(checkbox) {
@@ -2592,6 +2605,20 @@ function set_common_checkboxes(form) {
     refresh_checkbox(checkbox);
     enable_disable_row(checkbox);
   });
+
+  // Also, whenever an input or select is changed, fire the checkbox.
+  var inputs = form.find('input:not(:checkbox),select,button').change(
+    var input = $(this);
+    var custom_parent = get_closest_custom_parent(input);
+    var checkbox = custom_parent.find('input:checkbox');
+
+    while (custom_parent.length < 1) {
+      custom_parent = get_closest_custom_parent(custom_parent);
+      checkbox = custom_parent.find('input:checkbox');
+    }
+
+    checkbox.change();
+  );
 }
 
 /**
