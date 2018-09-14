@@ -2430,8 +2430,7 @@ function set_proj_meta_input() {
 /**
  * Enables/disables row depending on whether the checkbox is checked.
  */
-function enable_disable_row() {
-    var checkbox = $(this);
+function enable_disable_row(checkbox) {
     var form_group = checkbox.parent().parent().parent();
 
     var inputs = form_group.find('input:not(:checkbox)');
@@ -2463,7 +2462,7 @@ function enable_disable_row() {
  * Extracts the custom class from the element.
  */
 function get_custom_class(ele) {
-  var class_list = ele.attr('class').split(/\s+/);
+  var class_list = ele.attr('class').split(' ');
   $.each(class_list, function (index, item) {
     if (item.includes('_')) {
       return item;
@@ -2528,11 +2527,7 @@ function copy_to_common(form_group) {
 /**
  * Refresh which inputs are common and which are sample-specific.
  */
-function refresh_checkbox() {
-  var checkbox = $(this);
-  // The value is how we order the rows.
-  var val = checkbox.val();
-
+function refresh_checkbox(checkbox) {
   var form_group = checkbox.parent().parent().parent();
   var class_name = get_custom_class(form_group);
 
@@ -2552,8 +2547,9 @@ function set_common_checkboxes(form) {
   // First, find all the checkboxes.
   var checkboxes = form.find('input:checkbox');
   checkboxes.click(function () {
-    enable_disable_row();
-    refresh_checkbox();
+    var checkbox = $(this);
+    enable_disable_row(checkbox);
+    refresh_checkbox(checkbox);
   });
 }
 
