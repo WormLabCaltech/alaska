@@ -1295,9 +1295,10 @@ function set_choose_sample_button(dropdown, forms) {
     new_item.click({'id': id}, function (e) {
       console.log('clicked ' + e.data.id);
       var item = $(this);
+      var id = e.data.id;
       var grandparent = item.parent().parent();
       grandparent.children('button').text(proj.samples[id].name);
-      show_sample_form(e.data.id, sample_forms[e.data.id]);
+      show_sample_form(id, sample_forms[id]);
     });
 
     // Append to html and show.
@@ -2479,13 +2480,13 @@ function copy_to_specific(form_group) {
  * Copies the given input group to the common card of all samples.
  */
 function copy_to_common(form_group) {
-  var copy = form_group.clone(true);
   var class_name = get_custom_class(form_group);
   var index = class_order.indexOf(class_name);
   console.log(class_name);
   console.log(index);
 
   for (var id in sample_forms) {
+    var copy = form_group.clone(true);
     var form = sample_forms[id];
     var common_form = form.find('.sample_common_form');
 
