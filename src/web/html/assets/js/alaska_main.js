@@ -2466,7 +2466,7 @@ function get_custom_class(ele) {
     }
   }
 
-  return null;
+  return '';
 }
 
 /**
@@ -2486,9 +2486,29 @@ function copy_to_common(form_group) {
   console.log(index);
 
   for (var id in sample_forms) {
-    var copy = form_group.clone(true);
     var form = sample_forms[id];
     var common_form = form.find('.sample_common_form');
+
+    // Make a copy and switch it up.
+    var copy = form_group.clone(true);
+    copy.find('*').each(function () {
+      var ele = $(this);
+      var ele_name = ele.attr('name');
+      var ele_id = ele.attr('id');
+
+      if (ele_name != null && ele_name != '' && ele_name.includes('_share_')) {
+        ele.attr('name', ele_name.replace('_share_', '_' + id + '_'));
+      }
+
+      if (ele_id != null && ele_id != '' && ele_id.includes('_share_')) {
+        ele.attr('id', ele_id.replace('_share_', '_' + id + '_'));
+      }
+    });
+
+    copy.children('div:first').remove();
+    copy.find('input').prop('disabled', true);
+    copy.find('select').prop('disabled', true);
+    copy.find('textarea').prop('disabled', true);
 
     // First, construct an array of classes present in the form.
     var indices = [];
@@ -2530,8 +2550,13 @@ function copy_to_common(form_group) {
  * Refresh which inputs are common and which are sample-specific.
  */
 function refresh_checkbox(checkbox) {
-  var form_group = checkbox.parent().parent().parent();
-  var class_name = get_custom_class(form_group);
+  var form_group = checkbox;
+  var class_name = "";
+
+  while (!(class_name.includes('_') && class_name.includes('group'))) {
+    form_group = form_group.parent();
+    class_name = get_custom_class(form_group);
+  }
 
   // Copy to different places depending on whether the checkbox is checked
   // or unchecked.
@@ -2571,6 +2596,13 @@ function set_shared_inputs(form) {
   set_custom_dropdown(tissue_dropdown, tissues);
   set_fluid_input_rows(chars_inputs);
   set_custom_dropdown(sequenced_molecules_dropdown, sequenced_molecules);
+
+  // Then, set up div toggle for single-end reads, which need read lenght and
+  // standard deviation.
+  var single_show_radio = form.find('.sample_read_type_single');
+  var single_hide_radio = form.find('.sample_read_type_paired');
+  var div_to_toggle = form.find('.sample_read_type_collapse');
+  set_radio_collapse_toggle(single_hide_radio, single_show_radio, div_to_toggle);
 }
 
 /**
@@ -2758,10 +2790,10 @@ function set_samples_meta_input() {
     // });
 
     // Set paired end listener.
-    set_paired_end(id, new_sample_form);
+    // set_paired_end(id, new_sample_form);
 
     // Set the reads table for this sample.
-    set_reads_table(id, new_sample_form);
+    // set_reads_table(id, new_sample_form);
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
