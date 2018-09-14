@@ -2503,7 +2503,6 @@ function copy_to_common(form_group) {
     // If the form is empty, just append the element into the form.
     if (indices.length == 0) {
       common_form.append(copy);
-      return;
     } else if (indices.includes(index)) {
       // We have to replace the form group already in the form.
       var to_replace = common_form.find('.' + class_order[index]);
