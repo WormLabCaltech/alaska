@@ -2457,11 +2457,13 @@ function enable_disable_row(checkbox) {
  */
 function get_custom_class(ele) {
   var class_list = ele.attr('class').split(' ');
-  $.each(class_list, function (index, item) {
+
+  for (var i = 0; i < class_list.length; i++) {
+    var item = class_list[i];
     if (item.includes('_')) {
       return item;
     }
-  });
+  }
 
   return null;
 }
@@ -2480,6 +2482,8 @@ function copy_to_common(form_group) {
   var copy = form_group.clone(true);
   var class_name = get_custom_class(form_group);
   var index = class_order.indexOf(class_name);
+  console.log(class_name);
+  console.log(index);
 
   for (var id in sample_forms) {
     var form = sample_forms[id];
@@ -2493,6 +2497,8 @@ function copy_to_common(form_group) {
         indices.push(i);
       }
     }
+
+    console.log(indices);
 
     // If the form is empty, just append the element into the form.
     if (indices.length == 0) {
