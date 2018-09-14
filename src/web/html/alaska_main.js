@@ -2759,10 +2759,8 @@ function set_samples_meta_input() {
     var save_changes_btn = new_sample_form.find('.save_btn');
     save_changes_btn.click(save_proj);
 
-    sample_forms[id] = sample_form;
-
     // Append new form.
-    $('#sample_card').append(sample_form);
+    $('#sample_card').append(new_sample_form);
   }
 
   // Then, set the button handler.
