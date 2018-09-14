@@ -2488,7 +2488,7 @@ function remove_from_form(form_group, from_form_class_name) {
 /**
  * Copies the given input group to the specified card of all samples.
  */
-function copy_to_form(form_group, to_form_class_name) {
+function copy_to_form(form_group, to_form_class_name, disable) {
   var class_name = get_custom_class(form_group);
   var index = class_order.indexOf(class_name);
   console.log(class_name);
@@ -2515,9 +2515,10 @@ function copy_to_form(form_group, to_form_class_name) {
     });
 
     copy.children('div:first').remove();
-    copy.find('input').prop('disabled', true);
-    copy.find('select').prop('disabled', true);
-    copy.find('textarea').prop('disabled', true);
+    copy.children('div:first').removeClass('pl-0');
+    copy.find('input').prop('disabled', disable);
+    copy.find('select').prop('disabled', disable);
+    copy.find('textarea').prop('disabled', disable);
 
     // First, construct an array of classes present in the form.
     var indices = [];
@@ -2572,10 +2573,10 @@ function refresh_checkbox(checkbox) {
   var common_form_class_name = 'sample_common_form';
   var specific_form_class_name = 'sample_specific_form';
   if (checkbox.prop('checked')) {
-    copy_to_form(form_group, common_form_class_name);
+    copy_to_form(form_group, common_form_class_name, true);
     remove_from_form(form_group, specific_form_class_name);
   } else {
-    copy_to_form(form_group, specific_form_class_name);
+    copy_to_form(form_group, specific_form_class_name, false);
     remove_from_form(form_group, common_form_class_name);
   }
 }
@@ -2588,8 +2589,8 @@ function set_common_checkboxes(form) {
   var checkboxes = form.find('input:checkbox');
   checkboxes.click(function () {
     var checkbox = $(this);
-    enable_disable_row(checkbox);
     refresh_checkbox(checkbox);
+    enable_disable_row(checkbox);
   });
 }
 
