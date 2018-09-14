@@ -2480,7 +2480,7 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var values = get_values_from_fluid_rows(values_div);
 
       for (var i = 0; i < values.length; i++) {
-        var value = values[0][0];
+        var value = values[i][0];
         var option = $('<option>', {
           text: value
         });
@@ -2539,9 +2539,7 @@ function set_proj_meta_input() {
   var contributors_div = contributors_group.children('.contributors_inputs');
   set_contributors(contributors_div);
 
-  // Set up Factor 1 name and values.
   var factor_card = proj_form.find('.factor_card');
-  set_factor(factor_card);
 
   // Enable experimental design.
   var design_group = proj_form.find('.experimental_design_group');
@@ -2557,6 +2555,8 @@ function set_proj_meta_input() {
   // Then, we must also set up listeners to show/hide appropriate factor 1
   // and factor 2 information for each sample.
   set_factor_to_sample_listeners(factor_hide_radio, factor_show_radio, design_inputs);
+
+  set_factor(factor_card);
 
   proj_form.find('.save_btn').click(function () {
     save_proj();
