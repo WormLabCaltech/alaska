@@ -2759,12 +2759,12 @@ function copy_to_form(form_group, to_form_class_name, disable) {
         }
 
         // Finally, add list of options for each select.
-        paired_collapse.find('select').each(function () {
-          for (var i = 0; i < options.length; i++) {
-            var option = options[i];
-            $(this).append(option);
-          }
-        });
+        // paired_collapse.find('select').each(function () {
+        //   for (var i = 0; i < options.length; i++) {
+        //     var option = options[i];
+        //     $(this).append(option);
+        //   }
+        // });
 
         // Set up paired-end listener.
         radio_2.click({
