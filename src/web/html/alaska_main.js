@@ -2944,7 +2944,7 @@ function set_common_meta_input() {
   var even = true;
   for (var id in proj.samples) {
     var sample = proj.samples[id];
-    var n_reads = Object.keys(proj.samples[id].reads).length.
+    var n_reads = Object.keys(proj.samples[id].reads).length;
     if (n_reads % 2 != 0) {
       even = false;
     }
