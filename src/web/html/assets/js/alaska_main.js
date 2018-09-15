@@ -2384,9 +2384,9 @@ function get_value_from_custom_dropdown(div) {
   var custom_input = div.find('input');
 
   var selected = select.find('option:selected');
-  var val;
+  var val = '';
 
-  if (selected.length > 0) {
+  if (selected.length > 0 && !selected.prop('disabled')) {
     val = selected.val();
 
     if (val.toLowerCase() == 'other') {
@@ -2395,6 +2395,37 @@ function get_value_from_custom_dropdown(div) {
   }
 
   return val;
+}
+
+/**
+ * Sets value to custom dropdown.
+ */
+function set_value_of_custom_dropdown(div, val) {
+  // Don't do anything if the value is empty.
+  if (val == null || val == '') {
+    return;
+  }
+
+  var select = div.find('select');
+  var custom_input = div.find('input');
+  var in_dropdown = false;
+
+  var options = select.children('option:not(:disabled)');
+  options.each(function () {
+    var option = $(this);
+    var this_val = option.val();
+
+    if (val == this_val) {
+      option.prop('selected', true);
+      in_dropdown = true;
+      return false;
+    }
+  });
+
+  if (!in_dropdown) {
+    options.eq(-1).prop('selected', true);
+    custom_input.val(val);
+  }
 }
 
 /**
@@ -2426,6 +2457,58 @@ function get_values_from_fluid_rows(div) {
   });
 
   return values;
+}
+
+/**
+ * Sets the values inputed to fluid input rows.
+ */
+function set_values_of_fluid_rows(div, vals) {
+  var rows = div.children('div:visible');
+  var first_row = null;
+  var default_rows = [];
+
+  // Find first custom row and remove all additional rows if they have
+  // a remove button. Otherwise, leave the row be.
+  rows.each(function () {
+    var row = $(this);
+    if (get_custom_class(row).includes('_')) {
+      if (first_row == null) {
+        first_row = row;
+        default_rows.push(row);
+      } else {
+        if (row.children('button').length > 0) {
+          row.remove();
+        } else {
+          default_rows.push(row);
+        }
+      }
+    }
+  });
+
+  var add_btn = first_row.children('button');
+
+  // Then, add the number of rows we need.
+  while (default_rows.length < vals.length) {
+    add_btn.click();
+    var new_div = div.children('div:visible:last');
+    default_rows.push(new_div);
+  }
+
+  // Finally, populate the text inputs.
+  for (var i = 0; i < vals.length; i++) {
+    var row = default_rows[i];
+    var row_vals = vals[i];
+    var row_inputs = row.children('input');
+
+    for (var j = 0; j < row_vals.length; j++) {
+      var input = row_inputs.eq(j);
+      var val = row_vals[j];
+
+      if (val != null && val != '') {
+        input.val(val);
+      }
+    }
+  }
 }
 
 
@@ -2539,7 +2622,7 @@ function set_proj_meta_input() {
   proj_form.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
 
   // Set up contributors.
-  var contributors_group = proj_form.find('.contributors_group');
+  var contributors_group = proj_form.find('.proj_contributors_group');
   var contributors_div = contributors_group.children('.contributors_inputs');
   set_contributors(contributors_div);
 
@@ -2651,7 +2734,7 @@ function remove_from_form(form_group, from_form_class_name) {
  */
 function copy_to_form(form_group, to_form_class_name, disable) {
   var class_name = get_custom_class(form_group);
-  var index = class_order.indexOf(class_name);
+  var index = common_meta_order.indexOf(class_name);
   console.log(form_group);
   console.log(class_name);
   console.log(index);
@@ -2811,8 +2894,8 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 
     // First, construct an array of classes present in the form.
     var indices = [];
-    for (var i = 0; i < class_order.length; i++) {
-      var temp_class = class_order[i];
+    for (var i = 0; i < common_meta_order.length; i++) {
+      var temp_class = common_meta_order[i];
       if (to_form.find('.' + temp_class).length > 0) {
         indices.push(i);
       }
@@ -2825,7 +2908,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       to_form.append(copy);
     } else if (indices.includes(index)) {
       // We have to replace the form group already in the form.
-      var to_replace = to_form.find('.' + class_order[index]);
+      var to_replace = to_form.find('.' + common_meta_order[index]);
       to_replace.after(copy);
       to_replace.remove();
     } else {
@@ -2835,10 +2918,10 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 
         // As soon as index < temp_index, we have to add it before.
         if (index < temp_index) {
-          to_form.find('.' + class_order[temp_index]).before(copy);
+          to_form.find('.' + common_meta_order[temp_index]).before(copy);
           break;
         } else if (i == (indices.length - 1)) {
-          to_form.find('.' + class_order[temp_index]).after(copy);
+          to_form.find('.' + common_meta_order[temp_index]).after(copy);
         }
       }
     }
@@ -2994,20 +3077,21 @@ function set_common_meta_input() {
     scroll_to_ele(meta);
   });
 }
-
+/*******************************************************************/
 /* These are functions used to easily fetch data from form groups. */
+/*******************************************************************/
 /**
  * Gets value from input textbox.
  */
 function get_value_from_group_textbox(form_group) {
   var inputs = form_group.children('div:last');
-  var value = inputs.find('input:text').val();
+  var value = inputs.find('input:text,input[type=email]').val();
 
   return value;
 }
 
 /**
- * Gets value from input textbox.
+ * Gets value from input numberbox.
  */
 function get_value_from_group_numberbox(form_group) {
   var inputs = form_group.children('div:last');
@@ -3037,6 +3121,16 @@ function get_values_from_group_fluid_rows(form_group) {
 }
 
 /**
+ * Gets value from custom dropdown.
+ */
+function get_value_from_group_custom_dropdown(form_group) {
+  var inputs = form_group.children('div:last');
+  var value = get_value_from_custom_dropdown(inputs);
+
+  return value;
+}
+
+/**
  * Gets value from dropdown.
  */
 function get_value_from_group_dropdown(form_group) {
@@ -3059,15 +3153,9 @@ function get_values_from_factor_card(factor_card) {
   var name = get_value_from_custom_dropdown(name_div);
   var values = get_values_from_fluid_rows(values_div);
 
-  var sanitized = [];
-  // Sanitize values.
-  for (var i = 0; i < values.length; i++) {
-    sanitized.push(values[i][0]);
-  }
-
   var result = {
     'name': name,
-    'values': sanitized
+    'values': values
   };
 
   return result;
@@ -3157,8 +3245,304 @@ function get_values_from_read_type(form_group) {
 
   return result;
 }
+/*******************************************************************/
 
 /*******************************************************************/
+/*     These are functions used to set data to form groups.        */
+/*******************************************************************/
+/**
+ * Sets value to input textbox.
+ */
+function set_value_of_group_textbox(form_group, val) {
+  var inputs = form_group.children('div:last');
+  var input = inputs.find('input:text,input[type=email]');
+  input.val(val);
+}
+
+/**
+ * Sets the value to input numberbox.
+ */
+function set_value_of_group_numberbox(form_group, val) {
+  var inputs = form_group.children('div:last');
+  var input = inputs.find('input[type="number"]');
+  input.val(val);
+}
+
+/**
+ * Sets the value to input textarea.
+ */
+function set_value_of_group_textarea(form_group, val) {
+  var inputs = form_group.children('div:last');
+  var input = inputs.find('textarea');
+  input.val(val);
+}
+
+/**
+ * Sets values to fluid rows.
+ */
+function set_values_of_group_fluid_rows(form_group, vals) {
+  var div = form_group.children('div:last');
+  set_values_of_fluid_rows(div, vals);
+}
+
+/**
+ * Sets value of custom dropdown.
+ */
+function set_value_of_group_custom_dropdown(form_group, val) {
+  var inputs = form_group.chidren('div:last');
+  set_value_of_custom_dropdown(inputs, val);
+}
+
+/**
+ * Sets value to dropdown.
+ */
+function set_value_of_group_dropdown(form_group, val) {
+  var inputs = form_group.children('div:last');
+  var options = inputs.find('option:not(:disabled)');
+
+  options.each(function () {
+    var option = $(this);
+    var this_val = option.val();
+
+    if (val == this_val) {
+      option.prop('selected', true);
+      return false;
+    }
+  });
+}
+
+/**
+ * Set values to factor card.
+ */
+function set_values_of_factor_card(factor_card, vals) {
+  var name_class = 'factor_name_inputs';
+  var values_class = 'factor_values_inputs';
+
+  var name_div = factor_card.find('.' + name_class);
+  var values_div = factor_card.find('.' + values_class);
+
+  set_value_of_custom_dropdown(name_div, vals.name);
+  set_values_of_fluid_rows(values_div, vals.values);
+}
+
+/**
+ * Sets values to experimental design.
+ */
+function set_values_of_experimental_design(form_group, vals) {
+  var inputs_div = form_group.children('div:last');
+  var radios = inputs_div.find('input:radio');
+  var radio_1 = radios.eq(0);
+  var radio_2 = radios.eq(1);
+  var factor_cards = inputs_div.find('.factor_card');
+  var factor = vals.length;
+
+  // First factor is always populated.
+  set_values_of_factor_card(factor_cards.eq(0), vals[0]);
+
+  if (factor == 1) {
+    radio_1.click();
+  } else {
+    set_values_of_factor_card(factor_cards.eq(1), vals[1]);
+    radio_2.click();
+  }
+}
+
+/**
+ * Sets read length and standard deviation.
+ */
+function set_values_of_single_collapse(collapse, vals) {
+  var length_div = collapse.children('div:nth-of-type(1)');
+  var stdev_div = collapse.children('div:nth-of-type(2)');
+
+  var length = vals.length;
+  var stdev = vals.stdev;
+
+  set_value_of_group_numberbox(length_div, length);
+  set_value_of_group_numberbox(stdev_div, stdev);
+}
+
+/**
+ * Sets read pairs.
+ */
+function set_values_of_paired_collapse(collapse, vals) {
+  var pair_divs = collapse.children('div:visible');
+
+  for (var i = 0; i < vals.length; i++) {
+    var pair = vals[i];
+    var pair_1 = pair[0];
+    var pair_2 = pair[1];
+    var pair_div = pair_divs.eq(i);
+    var inputs = pair_div.children('div:last');
+    var pair_1_select = inputs.children('select:first');
+    var pair_2_select = inputs.children('select:last');
+
+    if (pair_1 != null && pair_1 != '') {
+      pair_1_select.children('option[value="' + pair_1 + '"]').prop('selected', true);
+    }
+    if (pair_2 != null && pair_2 != '') {
+      pair_2_select.children('option[value="' + pair_2 + '"]').prop('selected', true);
+    }
+  }
+
+}
+
+/**
+ * Sets values to read_type.
+ */
+function set_values_of_read_type(form_group, vals) {
+  var inputs_div = form_group.children('div:last');
+  var read_type = vals.type;
+
+  if (read_type == 1) {
+    var single_collapse = form_group.find('.sample_read_type_single_collapse');
+    set_values_of_single_collapse(single_collapse, vals);
+  } else {
+    var paired_collapse = form_group.find('.sample_read_type_paired_collapse');
+    set_values_of_paired_collapse(paired_collapse, vals.pairs);
+  }
+}
+/*******************************************************************/
+
+
+/*******************************************************************/
+/*     These are functions used to save metadata form inputs.      */
+/*******************************************************************/
+var getters_and_setters = {
+  group_textbox: {
+    get: get_value_from_group_textbox,
+    set: set_value_of_group_textbox
+  },
+  group_numberbox: {
+    get: get_value_from_group_numberbox,
+    set: set_value_of_group_numberbox
+  },
+  group_textarea: {
+    get: get_value_from_group_textarea,
+    set: set_value_of_group_textarea
+  },
+  group_fluid_rows: {
+    get: get_values_from_group_fluid_rows,
+    set: set_values_of_group_fluid_rows
+  },
+  group_dropdown: {
+    get: get_value_from_group_dropdown,
+    set: set_value_of_group_dropdown
+  },
+  group_custom_dropdown: {
+    get: get_value_from_group_custom_dropdown,
+    set: set_value_of_group_custom_dropdown
+  },
+  factor_card: {
+    get: get_values_from_factor_card,
+    set: set_values_of_factor_card
+  },
+  experimental_design: {
+    get: get_values_from_experimental_design,
+    set: set_values_of_experimental_design
+  },
+  read_type: {
+    get: get_values_from_read_type,
+    set: set_values_of_read_type
+  }
+};
+var proj_meta_classes_to_functions = {
+  proj_title_group: 'group_textbox',
+  proj_abstract_group: 'group_textarea',
+  proj_corresponding_group: 'group_textbox',
+  proj_corresponding_email_group: 'group_textbox',
+  proj_contributors_group: 'group_fluid_rows',
+  proj_sra_center_code_group: 'group_textbox',
+  proj_experimental_design_group: 'experimental_design'
+};
+var common_meta_classes_to_functions = {
+  sample_genotype_group: 'group_textbox',
+  sample_growth_conditions_group: 'group_textarea',
+  sample_rna_extraction_group: 'group_textarea',
+  sample_library_preparation_group: 'group_textarea',
+  sample_miscellaneous_group: 'group_textarea',
+  sample_organism_group: 'group_dropdown',
+  sample_organism_strain_group: 'group_textbox',
+  'sample_life-stage_group': 'group_custom_dropdown',
+  sample_tissue_group: 'group_custom_dropdown',
+  sample_characteristics_group: 'group_fluid_rows',
+  sample_read_type_group: 'read_type'
+};
+var sample_meta_classes_to_functions = {
+  sample_name_group: 'group_textbox',
+  sample_description_group: 'group_textarea',
+  sample_factors_1_group: 'group_dropdown',
+  sample_factors_2_group: 'group_dropdown',
+};
+
+
+function get_proj_meta_inputs(card) {
+  var inputs = {};
+
+  for (var class_name in proj_meta_classes_to_functions) {
+    var type = proj_meta_classes_to_functions[class_name];
+    var form_group = card.find('.' + class_name);
+
+    inputs[class_name] = getters_and_setters[type].get(form_group);
+  }
+
+  return inputs;
+}
+
+function get_common_meta_inputs(card) {
+  var inputs = {};
+
+  for (var class_name in common_meta_classes_to_functions) {
+    var type = common_meta_classes_to_functions[class_name];
+    var form_group = card.find('.' + class_name);
+
+    // Get the input only if the checkbox is checked!
+    var checkbox_div = form_group.children('div:first');
+    var checkbox = checkbox_div.find('input:checkbox');
+
+    if (checkbox.prop('checked')) {
+      inputs[class_name] = getters_and_setters[type].get(form_group);
+    }
+  }
+
+  return inputs;
+}
+
+function get_sample_meta_inputs(card) {
+  var inputs = {};
+
+  for (var class_name in sample_meta_classes_to_functions) {
+    var type = sample_meta_classes_to_functions[class_name];
+    var form_group = card.find('.' + class_name);
+
+    inputs[class_name] = getters_and_setters[type].get(form_group);
+  }
+
+  for (var class_name in common_meta_classes_to_functions) {
+    var type = common_meta_classes_to_functions[class_name];
+    var form_group = card.find('.' + class_name);
+
+    inputs[class_name] = getters_and_setters[type].get(form_group);
+  }
+}
+
+/**
+ * Save all inputs.
+ */
+function save_all_meta_inputs() {
+  var proj_inputs = get_proj_meta_inputs($('#proj'));
+  write_object_to_temp(proj_inputs, 'proj_inputs');
+
+  var common_inputs = get_common_meta_inputs($('#sample_common_form'));
+  write_object_to_temp(common_inputs, 'common_inputs');
+
+  for (var id in sample_forms) {
+    var form = sample_forms[id];
+    var sample_inputs = get_sample_meta_inputs(form);
+    write_object_to_temp(sample_inputs, 'sample_' + id + '_inputs');
+  }
+}
+/*******************************************************************/
+
 
 /**
  * Set autocomplete suggestions for the given button.
@@ -4379,6 +4763,29 @@ function get_sample_meta(id) {
 }
 
 /**
+ * Write specified object to temporary directory.
+ */
+function write_object_to_temp(obj, fname, callback) {
+  // Send ajax request.
+  $.ajax({
+    type: 'POST',
+    url: 'jsonify.php',
+    data: {
+      'id': proj_id,
+      'fname': fname,
+      'json': JSON.stringify(obj, null, 4)
+    },
+    success:function(out) {
+      console.log(out);
+
+      if (typeof callback === 'function') {
+        callback();
+      }
+    }
+  });
+}
+
+/**
  * Writes the global proj variable as json to the project temp
  * directory.
  */
@@ -4468,7 +4875,22 @@ var sequenced_molecules = [
   'Tissue-specific tagged poly-A RNA',
   'Tissue-specific tagged total RNA'
 ];
-var class_order = [
+var proj_meta_inputs = {
+  'proj_title_group': get_value_from_group_textbox,
+  'proj_abstract_group': get_value_from_group_textarea,
+  'proj_corresponding_group': get_value_from_group_textbox,
+  'proj_corresponding_email_group': get_value_from_group_textbox,
+  'proj_contributors_group': get_values_from_fluid_rows,
+  'proj_sra_center_code_group': get_value_from_group_textbox,
+  'proj_experimental_design_group': ''
+};
+var sample_common_meta_inputs = {
+
+};
+var sample_meta_inputs = {
+
+};
+var common_meta_order = [
   'sample_genotype_group',
   'sample_growth_conditions_group',
   'sample_rna_extraction_group',

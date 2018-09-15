@@ -6,6 +6,12 @@ if (isset($_POST['id'])) {
   throw new Exception("no id given");
 }
 
+if (isset($_POST['fname'])) {
+  $fname = $_POST['fname'];
+} else {
+  $fname = $id;
+}
+
 # Then, check if we were given a stringified json.
 if (isset($_POST['json'])) {
   $json = $_POST['json'];
@@ -18,7 +24,7 @@ $path = "/alaska/root/projects/";
 $temp = "_temp";
 
 # full path to output json
-$path = $path . $id . "/" . $temp . "/" . $id . ".json";
+$path = $path . $id . "/" . $temp . "/" . $fname . ".json";
 echo $path . "\n";
 
 # Sanity check, and then write the json.
