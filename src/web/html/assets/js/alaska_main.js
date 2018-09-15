@@ -2473,19 +2473,23 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var factor_group = sample_form.find('.' + class_name);
       var select = factor_group.find('select');
 
-      // First, remove all options.
+      // First, remove all options and reset dropdown.
       select.children('option:not(:disabled)').remove();
+      select.children('option:disabled').prop('selected', true);
 
       // Then, retrieve list of values.
       var values = get_values_from_fluid_rows(values_div);
 
       for (var i = 0; i < values.length; i++) {
         var value = values[i][0];
-        var option = $('<option>', {
-          text: value
-        });
 
-        select.append(option);
+        if (value != null && value != '') {
+          var option = $('<option>', {
+            text: value
+          });
+
+          select.append(option);
+        }
       }
     }
   });
@@ -2661,6 +2665,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var ele = $(this);
       var ele_name = ele.attr('name');
       var ele_id = ele.attr('id');
+      var ele_for = ele.attr('for');
 
       if (ele_name != null && ele_name != '' && ele_name.includes('_share_')) {
         ele.attr('name', ele_name.replace('_share_', '_' + id + '_'));
@@ -2669,11 +2674,126 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       if (ele_id != null && ele_id != '' && ele_id.includes('_share_')) {
         ele.attr('id', ele_id.replace('_share_', '_' + id + '_'));
       }
+
+      if (ele_for != null && ele_for != '' && ele_for.includes('_share_')) {
+        ele.attr('for', ele_for.replace('_share_', '_' + id + '_'));
+      }
     });
 
+    // Deal with the copy that will be added to the sample.
     copy.children('div:first').remove();
     copy.children('div:first').removeClass('pl-0');
     copy.find('input,select,button,textarea').prop('disabled', disable);
+    if (!disable) {
+      copy.find('select').change();
+    }
+
+    // If this is a read type class, we have to do some additional work.
+    if (class_name == 'sample_read_type_group') {
+      // First, remove all event handlers from the copy.
+      copy.off();
+
+      var inputs = copy.children('div:last');
+      var radios = inputs.find('input:radio');
+      var radio_1 = radios.eq(0);
+      var radio_2 = radios.eq(1);
+      var collapses = inputs.children('.collapse');
+      var single_collapse = collapses.eq(0);
+      var paired_collapse = collapses.eq(1);
+      var paired_row = paired_collapse.find('div:hidden');
+
+      // Set up the single-end read listener.
+      radio_1.click({
+        'single_collapse': single_collapse,
+        'paired_collapse': paired_collapse
+      }, function (e) {
+        var single_collapse = e.data.single_collapse;
+        var paired_collapse = e.data.paired_collapse;
+
+        if (this.checked) {
+          if (paired_collapse.hasClass('show')) {
+            paired_collapse.on('hidden.bs.collapse', {
+              'single_collapse': single_collapse
+            }, function (e) {
+              var single_collapse = e.data.single_collapse;
+              single_collapse.collapse('show');
+              $(this).off('hidden.bs.collapse');
+            });
+
+            paired_collapse.collapse('hide');
+          } else {
+            single_collapse.collapse('show');
+          }
+        }
+      });
+
+      // Deal with paired end only if the sample has an even number
+      // of reads.
+      var reads = Object.keys(proj.samples[id].reads);
+      var n_reads = reads.length;
+      if (n_reads % 2 == 0) {
+        var n_pairs = n_reads / 2;
+        reads = reads.sort();
+
+        // Compute options.
+        var options = [];
+        for (var i = 0; i < n_reads; i++) {
+          var read = reads[i];
+          var short = read.replace('0_raw_reads/', '');
+          var option = $('<option>', {
+            text: short,
+            value: read
+          });
+
+          options.push(option);
+        }
+
+        // Then, add necessary rows.
+        for (var i = 0; i < n_pairs; i++) {
+          var new_row = paired_row.clone();
+          new_row.removeClass('mt-3');
+          new_row.find('legend').text('Pair ' + (i+1));
+
+          paired_collapse.append(new_row);
+          new_row.show();
+        }
+
+        // Finally, add list of options for each select.
+        paired_collapse.find('select').each(function () {
+          for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+            $(this).append(option);
+          }
+        });
+
+        // Set up paired-end listener.
+        radio_2.click({
+          'single_collapse': single_collapse,
+          'paired_collapse': paired_collapse
+        }, function (e) {
+          var single_collapse = e.data.single_collapse;
+          var paired_collapse = e.data.paired_collapse;
+
+          if (this.checked) {
+            if (single_collapse.hasClass('show')) {
+              single_collapse.on('hidden.bs.collapse', {
+                'paired_collapse': paired_collapse
+              }, function (e) {
+                var paired_collapse = e.data.paired_collapse;
+                paired_collapse.collapse('show');
+                $(this).off('hidden.bs.collapse');
+              });
+
+              single_collapse.collapse('hide');
+            } else {
+              paired_collapse.collapse('show');
+            }
+          }
+        });
+      } else {
+        radio_2.prop('disabled', true);
+      }
+    }
 
     // First, construct an array of classes present in the form.
     var indices = [];
@@ -2762,7 +2882,11 @@ function set_common_checkboxes(form) {
     refresh_checkbox(checkbox);
     enable_disable_row(checkbox);
   });
-  checkboxes.click();
+
+  checkboxes.each(function () {
+    var checkbox = $(this);
+    refresh_checkbox(checkbox);
+  });
 
   // Also, whenever an input or select is changed, fire the checkbox.
   var inputs = form.find('input:not(:checkbox),select,button,textarea');
@@ -2776,7 +2900,7 @@ function set_common_checkboxes(form) {
       checkbox = custom_parent.find('input:checkbox');
     }
 
-    checkbox.click();
+    refresh_checkbox(checkbox);
   });
 }
 
@@ -2812,11 +2936,25 @@ function set_common_meta_input() {
   common_form = $('#sample_common_form');
   var form = common_form.children('form');
 
-  // Set checkboxes.
-  set_common_checkboxes(form);
-
   // Set shared inputs.
   set_shared_inputs(form);
+
+  // All samples must have even number of reads for the paired-end radio
+  // to be active.
+  var even = true;
+  for (var id in proj.samples) {
+    var sample = proj.samples[id];
+    var n_reads = Object.keys(proj.samples[id].reads).length.
+    if (n_reads % 2 != 0) {
+      even = false;
+    }
+  }
+  if (!even) {
+    form.find('input:radio[value=2]').prop('disabled', true);
+  }
+
+  // Set checkboxes.
+  set_common_checkboxes(form);
 
   // Set save & apply button.
   common_form.find('.save_btn').click(function () {
@@ -2827,6 +2965,154 @@ function set_common_meta_input() {
     scroll_to_ele(meta);
   });
 }
+
+/* These are functions used to easily fetch data from form groups. */
+/**
+ * Gets value from input textbox.
+ */
+function get_value_from_group_textbox(form_group) {
+  var inputs = form_group.children('div:last');
+  var value = inputs.find('input:text').val();
+
+  return value;
+}
+
+/**
+ * Gets value from input textbox.
+ */
+function get_value_from_group_numberbox(form_group) {
+  var inputs = form_group.children('div:last');
+  var value = parseInt(inputs.find('input:number').val());
+
+  return value;
+}
+
+/**
+ * Gets value from input textarea.
+ */
+function get_value_from_group_textarea(form_group) {
+  var inputs = form_group.children('div:last');
+  var value = inputs.find('textarea').val();
+
+  return value;
+}
+
+/**
+ * Gets values from fluid rows.
+ */
+function get_values_from_group_fluid_rows(form_group) {
+  var div = form_group.children('div:last');
+  var values = get_values_from_fluid_rows(div);
+
+  return values;
+}
+
+/**
+ * Gets value from dropdown.
+ */
+function get_value_from_group_dropdown(form_group) {
+  var inputs = form_group.children('div:last');
+  var value = inputs.find('option:selected').val();
+
+  return value;
+}
+
+/**
+ * Get values from factor card.
+ */
+function get_values_from_factor_card(factor_card) {
+  var name_class = 'factor_name_inputs';
+  var values_class = 'factor_values_inputs';
+
+  var name_div = factor_card.find('.' + name_class);
+  var values_div = factor_card.find('.' + values_class);
+
+  var name = get_value_from_custom_dropdown(name_div);
+  var values = get_values_from_fluid_rows(values_div);
+
+  var sanitized = [];
+  // Sanitize values.
+  for (var i = 0; i < values.length; i++) {
+    sanitized.push(values[i][0]);
+  }
+
+  var result = {
+    'name': name,
+    'values': sanitized
+  };
+
+  return result;
+}
+
+/**
+ * Gets values from experimental design.
+ */
+function get_values_from_experimental_design(form_group) {
+  var inputs_div = form_group.children('div:last');
+  var factor = parseInt(inputs_div.find('input:radio:checked').val());
+  var factor_cards = inputs_div.find('.factor_card');
+
+  var factors = [];
+
+  // There is always the first factor.
+  var factor_1 = get_values_from_factor_card(factor_cards.eq(0));
+  factors.push(factor_1);
+
+  if (factor == 2) {
+    var factor_2 = get_values_from_factor_card(factor_cards.eq(1));
+    factors.append(factor_2);
+  }
+
+  return factors;
+}
+
+/**
+ * Gets read length and standard deviation.
+ */
+function get_values_from_read_type(collapse) {
+  var length_div = collapse.children('div:nth-of-type(1)');
+  var stdev_div = collapse.children('div:nth-of-type(2)');
+
+  var length = get_value_from_group_numberbox(length_div);
+  var stdev = get_value_from_group_numberbox(stdev_div);
+
+  var result = {
+    'length': length,
+    'stdev': stdev
+  };
+
+  return result;
+}
+
+/**
+ * Gets read pairs.
+ */
+function get_pairs_from_read_type(collapse) {
+  var pair_divs = collapse.children('div');
+
+  var pairs = [];
+
+  pair_divs.each(function () {
+    var pair_div = $(this);
+    var inputs = pair_div.children('div:last');
+    var pair_1 = inputs.children('select:first').val();
+    var pair_2 = inputs.children('select:last').val();
+
+    var pair = [pair_1, pair_2];
+
+    pairs.push(pair);
+  });
+}
+
+/**
+ * Gets values from read type.
+ */
+function get_values_from_read_type(form_group) {
+  var inputs_div = form_group.children('div:last');
+  var read_type = parseInt(inputs_div.find('input:radio:checked').val());
+}
+
+/*******************************************************************/
 
 /**
  * Set autocomplete suggestions for the given button.
@@ -2969,6 +3255,8 @@ function set_samples_meta_input() {
 
     sample_forms[id] = new_sample_form;
 
+    // Set the sample name.
+    new_sample_form.find('.sample_name_group').find('input').val(name);
 
     // var char_id = 'sample_characteristic_' + id + '_0';
     // var detail_id = 'sample_detail_' + id + '_0';

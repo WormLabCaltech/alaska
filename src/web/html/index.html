@@ -269,7 +269,7 @@
         <h4 class="card-title">Project ID: PROJECT_ID</h4>
         <small id="proj_id_help" class="form-text text-muted mb-4">The automatically generated ID associated with this project.</small>
         <form novalidate>
-            <div class="form-group row">
+            <div class="form-group row proj_title_group">
                 <div class="col-sm-3">
                     <label for="proj_title" class="col-form-label">Title</label>
                     <small id="proj_title_help" class="form-text text-muted">Title of your project or paper.</small>
@@ -560,7 +560,7 @@
                     </div>
                     <div class="col-sm-5">
                         <select class="custom-select sample_organism_select" id="sample_share_organism" required>
-                            <option selected disabled hidden>Please select an organism.</option>
+                            <option selected disabled hidden value="">Please select an organism.</option>
                         </select>
                     </div>
                 </div>
@@ -680,7 +680,7 @@
                         <legend class="col-form-label pt-0">Read type</legend>
                         <small id="sample_share_type_help" class="form-text text-muted">Click here for more information.</small>
                     </div>
-                    <div class="col-sm-8 sample_type" id="sample_share_read_type">
+                    <div class="col-sm-8 sample_read_type_inputs" id="sample_share_read_type">
                         <div class="row pl-3">
                             <div class="custom-control custom-radio custom-control-inline">
                                 <input type="radio" name="sample_share_read_type" id="sample_share_read_type_single" class="custom-control-input sample_read_type_single" checked="" value="1">
@@ -691,7 +691,7 @@
                                 <label class="custom-control-label" for="sample_share_read_type_paired">Paired-end</label>
                             </div>
                         </div>
-                        <div class="collapse show sample_read_type_collapse">
+                        <div class="collapse show sample_read_type_single_collapse">
                             <div class="row mt-3 sample_read_length_group">
                                 <div class="col-sm-3">
                                     <label for="sample_share_read_length" class="col-form-label">Read length</label>
@@ -711,17 +711,17 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="collapse">
-                            <div class="row mt-3 sample_read_pair_group">
+                        <div class="collapse sample_read_type_paired_collapse">
+                            <div class="row mt-3 sample_read_paired_group" style="display:none">
                                 <div class="col-sm-3">
-                                    <legend class="col-form-label">Pair 1</legend>
+                                    <legend class="col-form-label">Pair</legend>
                                 </div>
                                 <div class="col-sm-9 d-flex">
-                                    <select type="number" class="form-control sample_read_pair_1">
-                                        <option selected hidden disabled>Please select a read.</option>
+                                    <select class="form-control sample_read_pair_1">
+                                        <option selected hidden disabled value="">Please select a read.</option>
                                     </select>
-                                    <select type="number" class="form-control sample_read_pair_2">
-                                        <option selected hidden disabled>Please select its pair.</option>
+                                    <select class="form-control sample_read_pair_2">
+                                        <option selected hidden disabled value="">Please select its pair.</option>
                                     </select>
                                 </div>
                             </div>
