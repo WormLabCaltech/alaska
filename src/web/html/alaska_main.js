@@ -3098,7 +3098,7 @@ function get_values_from_experimental_design(form_group) {
 /**
  * Gets read length and standard deviation.
  */
-function get_values_from_read_type(collapse) {
+function get_values_from_single_collapse(collapse) {
   var length_div = collapse.children('div:nth-of-type(1)');
   var stdev_div = collapse.children('div:nth-of-type(2)');
 
@@ -3116,7 +3116,7 @@ function get_values_from_read_type(collapse) {
 /**
  * Gets read pairs.
  */
-function get_pairs_from_read_type(collapse) {
+function get_values_from_paired_collapse(collapse) {
   var pair_divs = collapse.children('div');
 
   var pairs = [];
@@ -3131,6 +3131,8 @@ function get_pairs_from_read_type(collapse) {
 
     pairs.push(pair);
   });
+
+  return pairs;
 }
 
 /**
@@ -3139,6 +3141,21 @@ function get_pairs_from_read_type(collapse) {
 function get_values_from_read_type(form_group) {
   var inputs_div = form_group.children('div:last');
   var read_type = parseInt(inputs_div.find('input:radio:checked').val());
+
+  var result = {};
+  result['type'] = read_type;
+  if (read_type == 1) {
+    var single_collapse = form_group.find('.sample_read_type_single_collapse');
+    var values = get_values_from_single_collapse(single_collapse);
+    result['length'] = values.length;
+    result['stdev'] = values.stdev;
+  } else {
+    var paired_collapse = form_group.find('.sample_read_type_paired_collapse');
+    var values = get_values_from_paired_collapse(paired_collapse);
+    result['pairs'] = values;
+  }
+
+  return result;
 }
 
 /*******************************************************************/
