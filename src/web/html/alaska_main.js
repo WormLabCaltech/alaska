@@ -2666,6 +2666,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var ele_name = ele.attr('name');
       var ele_id = ele.attr('id');
       var ele_for = ele.attr('for');
+      console.log(ele);
 
       if (ele_name != null && ele_name != '' && ele_name.includes('_share_')) {
         ele.attr('name', ele_name.replace('_share_', '_' + id + '_'));
