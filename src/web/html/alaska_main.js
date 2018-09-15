@@ -3590,11 +3590,20 @@ function set_sample_meta_inputs(card, inputs) {
     var form_group = card.find('.' + class_name);
     var type = sample_meta_classes_to_functions[class_name];
 
-    // Only set the value if it is n the sample-specific metadata card or
-    // the sample factors card..
     if (class_name in inputs) {
-      var factor = form_group.parents('.sample_factors_card');
-      var specific = form_group.parents('.sample_specific_card');
+      getters_and_setters[type].set(form_group, inputs[class_name]);
+    }
+  }
+
+  // Deal with common inputs.
+  for (var class_name in common_meta_classes_to_functions) {
+    var form_group = card.find('.' + class_name);
+    var type = common_meta_classes_to_functions[class_name];
+
+    var factor = form_group.parents('.sample_factors_card');
+    var specific = form_group.parents('.sample_specific_card');
+
+    if (class_name in inputs) {
       if (factor.length > 0 || specific.length > 0) {
         getters_and_setters[type].set(form_group, inputs[class_name]);
       }
@@ -3662,17 +3671,17 @@ function save_all_meta_inputs() {
  * Read all meta inputs.
  */
 function set_all_meta_inputs() {
-  var proj_inputs = get_proj_meta_inputs($('#proj'));
+  var proj_inputs = $('#proj');
   read_object_from_temp('proj_inputs', function (obj) {
     set_proj_meta_inputs(proj_inputs, obj);
   });
 
-  var common_inputs = get_common_meta_inputs($('#sample_common_form'));
+  var common_inputs = $('#sample_common_form');
   read_object_from_temp('common_inputs', function (obj) {
     set_common_meta_inputs(common_inputs, obj);
   });
 
-  for (var id in proj_forms) {
+  for (var id in sample_forms) {
     var form = sample_forms[id];
     read_object_from_temp('sample_' + id + '_inputs', function (obj) {
       set_sample_meta_inputs(form, obj);
