@@ -3154,11 +3154,38 @@ function get_value_from_group_custom_dropdown(form_group) {
 }
 
 /**
+ * Gets value from factor group.
+ */
+function get_values_from_group_factor(form_group) {
+  var value = get_value_from_group_dropdown(form_group);
+  var factor_div = form_group.children('div:first');
+  var factor = factor_div.children('label').text().split(': ')[1];
+
+  if (factor == 'FACTOR_1') {
+    factor = '';
+  }
+
+  var values = {
+    'name': factor,
+    'value': value
+  };
+
+  return values;
+}
+
+/**
  * Gets value from dropdown.
  */
 function get_value_from_group_dropdown(form_group) {
   var inputs = form_group.children('div:last');
-  var value = inputs.find('option:selected').val();
+  var selected = inputs.find('option:selected');
+  var value;
+
+  if (selected.prop('disabled')) {
+    value = '';
+  } else {
+    value = selected.val();
+  }
 
   return value;
 }
@@ -3466,6 +3493,10 @@ var getters_and_setters = {
     get: get_value_from_group_custom_dropdown,
     set: set_value_of_group_custom_dropdown
   },
+  group_factor: {
+    get: get_values_from_group_factor,
+    set: set_value_of_group_dropdown
+  },
   factor_card: {
     get: get_values_from_factor_card,
     set: set_values_of_factor_card
@@ -3505,8 +3536,8 @@ var common_meta_classes_to_functions = {
 var sample_meta_classes_to_functions = {
   sample_name_group: 'group_textbox',
   sample_description_group: 'group_textarea',
-  sample_factors_1_group: 'group_dropdown',
-  sample_factors_2_group: 'group_dropdown',
+  sample_factors_1_group: 'group_factor',
+  sample_factors_2_group: 'group_factor',
 };
 
 
@@ -3521,6 +3552,54 @@ function get_proj_meta_inputs(card) {
   }
 
   return inputs;
+}
+
+function set_proj_meta_inputs(card, inputs) {
+  for (var class_name in proj_meta_classes_to_functions) {
+    if (class_name in inputs) {
+      var type = proj_meta_classes_to_functions[class_name];
+      var form_group = card.find('.' + class_name);
+
+      getters_and_setters[type].set(form_group, inputs[class_name]);
+    }
+  }
+}
+
+function set_common_meta_inputs(card, inputs) {
+  for (var class_name in common_meta_classes_to_functions) {
+    var form_group = card.find('.' + class_name);
+    var checkbox = form_group.find('input:checkbox');
+    var type = common_meta_classes_to_functions[class_name];
+
+    if (class_name in inputs) {
+      getters_and_setters[type].set(form_group, inputs[class_name]);
+
+      // Check the checkbox.
+      checkbox.prop('checked', false);
+      checkbox.click();
+    } else {
+      // Unselect the checkbox.
+      checkbox.prop('checked', true);
+      checkbox.click();
+    }
+  }
+}
+
+function set_sample_meta_inputs(card, inputs) {
+  for (var class_name in sample_meta_classes_to_functions) {
+    var form_group = card.find('.' + class_name);
+    var type = sample_meta_classes_to_functions[class_name];
+
+    // Only set the value if it is n the sample-specific metadata card or
+    // the sample factors card..
+    if (class_name in inputs) {
+      var factor = form_group.parents('.sample_factors_card');
+      var specific = form_group.parents('.sample_specific_card');
+      if (factor.length > 0 || specific.length > 0) {
+        getters_and_setters[type].set(form_group, inputs[class_name]);
+      }
+    }
+  }
 }
 
 function get_common_meta_inputs(card) {
@@ -3578,6 +3657,29 @@ function save_all_meta_inputs() {
     write_object_to_temp(sample_inputs, 'sample_' + id + '_inputs');
   }
 }
+
+/**
+ * Read all meta inputs.
+ */
+function set_all_meta_inputs() {
+  var proj_inputs = get_proj_meta_inputs($('#proj'));
+  read_object_from_temp('proj_inputs', function (obj) {
+    set_proj_meta_inputs(proj_inputs, obj);
+  });
+
+  var common_inputs = get_common_meta_inputs($('#sample_common_form'));
+  read_object_from_temp('common_inputs', function (obj) {
+    set_common_meta_inputs(common_inputs, obj);
+  });
+
+  for (var id in proj_forms) {
+    var form = sample_forms[id];
+    read_object_from_temp('sample_' + id + '_inputs', function (obj) {
+      set_sample_meta_inputs(form, obj);
+    });
+  }
+}
+
 /*******************************************************************/
 
 
@@ -4797,6 +4899,29 @@ function get_sample_meta(id) {
   }
 
   return sample_meta;
+}
+
+/**
+ * Read and return object.
+ */
+function read_object_from_temp(fname, callback) {
+  // Send ajax request.
+  $.ajax({
+    type: 'POST',
+    url: 'read_proj.php',
+    data: {
+      'id': proj_id,
+      'fname': fname,
+    },
+    success:function(out) {
+      console.log(out);
+      var obj = JSON.parse(out);
+
+      if (typeof callback === 'function') {
+        callback(obj);
+      }
+    }
+  });
 }
 
 /**
