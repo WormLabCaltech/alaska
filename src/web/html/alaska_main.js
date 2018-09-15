@@ -2730,6 +2730,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       // Deal with paired end only if the sample has an even number
       // of reads.
       var reads = Object.keys(proj.samples[id].reads);
+      console.log(reads);
       var n_reads = reads.length;
       if (n_reads % 2 == 0) {
         var n_pairs = n_reads / 2;
@@ -2747,6 +2748,8 @@ function copy_to_form(form_group, to_form_class_name, disable) {
 
           options.push(option);
         }
+
+        console.log(options);
 
         // Then, add necessary rows.
         for (var i = 0; i < n_pairs; i++) {
