@@ -2699,7 +2699,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var collapses = inputs.children('.collapse');
       var single_collapse = collapses.eq(0);
       var paired_collapse = collapses.eq(1);
-      var paired_row = paired_collapse.find('div:hidden');
+      var paired_row = paired_collapse.find('div:[style*="display:none"]');
 
       // Set up the single-end read listener.
       radio_1.click({
@@ -2764,7 +2764,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
         paired_collapse.find('select').each(function () {
           for (var i = 0; i < options.length; i++) {
             var option = options[i];
-            $(this).append(option);
+            $(this).append(option.clone());
           }
         });
 
@@ -2935,7 +2935,7 @@ function set_shared_inputs(form) {
   // standard deviation.
   var single_show_radio = form.find('.sample_read_type_single');
   var single_hide_radio = form.find('.sample_read_type_paired');
-  var div_to_toggle = form.find('.sample_read_type_collapse');
+  var div_to_toggle = form.find('.sample_read_type_single_collapse');
   set_radio_collapse_toggle(single_hide_radio, single_show_radio, div_to_toggle);
 }
 
