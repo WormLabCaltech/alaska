@@ -3011,7 +3011,7 @@ function get_value_from_group_textbox(form_group) {
  */
 function get_value_from_group_numberbox(form_group) {
   var inputs = form_group.children('div:last');
-  var value = parseInt(inputs.find('input:number').val());
+  var value = parseInt(inputs.find('input[type="number"]').val());
 
   return value;
 }
@@ -3117,7 +3117,7 @@ function get_values_from_single_collapse(collapse) {
  * Gets read pairs.
  */
 function get_values_from_paired_collapse(collapse) {
-  var pair_divs = collapse.children('div');
+  var pair_divs = collapse.children('div:visible');
 
   var pairs = [];
 
