@@ -2696,13 +2696,9 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var radios = inputs.find('input:radio');
       var radio_1 = radios.eq(0);
       var radio_2 = radios.eq(1);
-      var collapses = inputs.children('.collapse');
-      var single_collapse = collapses.eq(0);
-      var paired_collapse = collapses.eq(1);
+      var single_collapse = inputs.children('.sample_read_type_single_collapse');
+      var paired_collapse = inputs.children('.sample_read_type_paired_collapse');
       var paired_row = paired_collapse.find('div[style*="display:none"]');
-
-      console.log(single_collapse);
-      console.log(paired_collapse);
 
       // Set up the single-end read listener.
       radio_1.click({
@@ -2728,6 +2724,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
             paired_collapse.collapse('hide');
           }
         }
+        paired_collapse.collapse('hide');
       });
 
       // Deal with paired end only if the sample has an even number
@@ -2796,11 +2793,19 @@ function copy_to_form(form_group, to_form_class_name, disable) {
               single_collapse.collapse('hide');
             }
           }
+          single_collapse.collapse('hide');
         });
-
-
       } else {
         radio_2.prop('disabled', true);
+      }
+
+      var type = parseInt(inputs.find('input:radio:checked').val());
+      if (type == 1) {
+        single_collapse.collapse('show');
+        paired_collapse.collappse('hide');
+      } else {
+        paired_collapse.collapse('show');
+        single_collapse.collapse('hide');
       }
     }
 
