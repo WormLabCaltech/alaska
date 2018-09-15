@@ -2690,7 +2690,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
       // First, remove all event handlers from the copy.
-      copy.find('*').off();
+      copy = copy.clone();
 
       var inputs = copy.children('div:last');
       var radios = inputs.find('input:radio');
@@ -2700,6 +2700,9 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var single_collapse = collapses.eq(0);
       var paired_collapse = collapses.eq(1);
       var paired_row = paired_collapse.find('div[style*="display:none"]');
+
+      console.log(single_collapse);
+      console.log(paired_collapse);
 
       // Set up the single-end read listener.
       radio_1.click({
@@ -2722,6 +2725,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
             paired_collapse.collapse('hide');
           } else {
             single_collapse.collapse('show');
+            paired_collapse.collapse('hide');
           }
         }
       });
@@ -2789,9 +2793,12 @@ function copy_to_form(form_group, to_form_class_name, disable) {
               single_collapse.collapse('hide');
             } else {
               paired_collapse.collapse('show');
+              single_collapse.collapse('hide');
             }
           }
         });
+
+
       } else {
         radio_2.prop('disabled', true);
       }
@@ -2868,9 +2875,16 @@ function refresh_checkbox(checkbox) {
   // or unchecked.
   var common_form_class_name = 'sample_common_form';
   var specific_form_class_name = 'sample_specific_form';
+
+  // Deal with read type specially.
   if (checkbox.prop('checked')) {
-    copy_to_form(form_group, common_form_class_name, true);
-    remove_from_form(form_group, specific_form_class_name);
+    if (class_name == 'sample_read_type_group' && parseInt(form_group.find('input:radio:checked').val()) == 2) {
+      copy_to_form(form_group, specific_form_class_name, false);
+      remove_from_form(form_group, common_form_class_name);
+    } else {
+      copy_to_form(form_group, common_form_class_name, true);
+      remove_from_form(form_group, specific_form_class_name);
+    }
   } else {
     copy_to_form(form_group, specific_form_class_name, false);
     remove_from_form(form_group, common_form_class_name);
