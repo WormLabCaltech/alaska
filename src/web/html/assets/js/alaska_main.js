@@ -2802,7 +2802,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var type = parseInt(inputs.find('input:radio:checked').val());
       if (type == 1) {
         single_collapse.collapse('show');
-        paired_collapse.collappse('hide');
+        paired_collapse.collapse('hide');
       } else {
         paired_collapse.collapse('show');
         single_collapse.collapse('hide');
