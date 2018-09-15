@@ -2688,115 +2688,115 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       copy.find('select').change();
     }
 
-    // If this is a read type class, we have to do some additional work.
-    if (false) {
-      // First, remove all event handlers from the copy.
-      copy.off();
-
-      var inputs = copy.children('div:last');
-      var radios = inputs.find('input:radio');
-      var radio_1 = radios.eq(0);
-      var radio_2 = radios.eq(1);
-      var collapses = inputs.children('.collapse');
-      var single_collapse = collapses.eq(0);
-      var paired_collapse = collapses.eq(1);
-      var paired_row = paired_collapse.find('div:hidden');
-
-      // Set up the single-end read listener.
-      radio_1.click({
-        'single_collapse': single_collapse,
-        'paired_collapse': paired_collapse
-      }, function (e) {
-        var single_collapse = e.data.single_collapse;
-        var paired_collapse = e.data.paired_collapse;
-
-        if (this.checked) {
-          if (paired_collapse.hasClass('show')) {
-            paired_collapse.on('hidden.bs.collapse', {
-              'single_collapse': single_collapse
-            }, function (e) {
-              var single_collapse = e.data.single_collapse;
-              single_collapse.collapse('show');
-              $(this).off('hidden.bs.collapse');
-            });
-
-            paired_collapse.collapse('hide');
-          } else {
-            single_collapse.collapse('show');
-          }
-        }
-      });
-
-      // Deal with paired end only if the sample has an even number
-      // of reads.
-      var reads = Object.keys(proj.samples[id].reads);
-      console.log(reads);
-      var n_reads = reads.length;
-      if (n_reads % 2 == 0) {
-        var n_pairs = n_reads / 2;
-        reads = reads.sort();
-
-        // Compute options.
-        var options = [];
-        for (var i = 0; i < n_reads; i++) {
-          var read = reads[i];
-          var short = read.replace('0_raw_reads/', '');
-          var option = $('<option>', {
-            text: short,
-            value: read
-          });
-
-          options.push(option);
-        }
-
-        console.log(options);
-
-        // Then, add necessary rows.
-        for (var i = 0; i < n_pairs; i++) {
-          var new_row = paired_row.clone();
-          new_row.removeClass('mt-3');
-          new_row.find('legend').text('Pair ' + (i+1));
-
-          paired_collapse.append(new_row);
-          new_row.show();
-        }
-
-        // Finally, add list of options for each select.
-        // paired_collapse.find('select').each(function () {
-        //   for (var i = 0; i < options.length; i++) {
-        //     var option = options[i];
-        //     $(this).append(option);
-        //   }
-        // });
-
-        // Set up paired-end listener.
-        radio_2.click({
-          'single_collapse': single_collapse,
-          'paired_collapse': paired_collapse
-        }, function (e) {
-          var single_collapse = e.data.single_collapse;
-          var paired_collapse = e.data.paired_collapse;
-
-          if (this.checked) {
-            if (single_collapse.hasClass('show')) {
-              single_collapse.on('hidden.bs.collapse', {
-                'paired_collapse': paired_collapse
-              }, function (e) {
-                var paired_collapse = e.data.paired_collapse;
-                paired_collapse.collapse('show');
-                $(this).off('hidden.bs.collapse');
-              });
-
-              single_collapse.collapse('hide');
-            } else {
-              paired_collapse.collapse('show');
-            }
-          }
-        });
-      } else {
-        radio_2.prop('disabled', true);
-      }
-    }
+    // // If this is a read type class, we have to do some additional work.
+    // if (class_name == 'sample_read_type_group') {
+    //   // First, remove all event handlers from the copy.
+    //   copy.off();
+    //
+    //   var inputs = copy.children('div:last');
+    //   var radios = inputs.find('input:radio');
+    //   var radio_1 = radios.eq(0);
+    //   var radio_2 = radios.eq(1);
+    //   var collapses = inputs.children('.collapse');
+    //   var single_collapse = collapses.eq(0);
+    //   var paired_collapse = collapses.eq(1);
+    //   var paired_row = paired_collapse.find('div:hidden');
+    //
+    //   // Set up the single-end read listener.
+    //   radio_1.click({
+    //     'single_collapse': single_collapse,
+    //     'paired_collapse': paired_collapse
+    //   }, function (e) {
+    //     var single_collapse = e.data.single_collapse;
+    //     var paired_collapse = e.data.paired_collapse;
+    //
+    //     if (this.checked) {
+    //       if (paired_collapse.hasClass('show')) {
+    //         paired_collapse.on('hidden.bs.collapse', {
+    //           'single_collapse': single_collapse
+    //         }, function (e) {
+    //           var single_collapse = e.data.single_collapse;
+    //           single_collapse.collapse('show');
+    //           $(this).off('hidden.bs.collapse');
+    //         });
+    //
+    //         paired_collapse.collapse('hide');
+    //       } else {
+    //         single_collapse.collapse('show');
+    //       }
+    //     }
+    //   });
+    //
+    //   // Deal with paired end only if the sample has an even number
+    //   // of reads.
+    //   var reads = Object.keys(proj.samples[id].reads);
+    //   console.log(reads);
+    //   var n_reads = reads.length;
+    //   if (n_reads % 2 == 0) {
+    //     var n_pairs = n_reads / 2;
+    //     reads = reads.sort();
+    //
+    //     // Compute options.
+    //     var options = [];
+    //     for (var i = 0; i < n_reads; i++) {
+    //       var read = reads[i];
+    //       var short = read.replace('0_raw_reads/', '');
+    //       var option = $('<option>', {
+    //         text: short,
+    //         value: read
+    //       });
+    //
+    //       options.push(option);
+    //     }
+    //
+    //     console.log(options);
+    //
+    //     // Then, add necessary rows.
+    //     for (var i = 0; i < n_pairs; i++) {
+    //       var new_row = paired_row.clone();
+    //       new_row.removeClass('mt-3');
+    //       new_row.find('legend').text('Pair ' + (i+1));
+    //
+    //       paired_collapse.append(new_row);
+    //       new_row.show();
+    //     }
+    //
+    //     // Finally, add list of options for each select.
+    //     // paired_collapse.find('select').each(function () {
+    //     //   for (var i = 0; i < options.length; i++) {
+    //     //     var option = options[i];
+    //     //     $(this).append(option);
+    //     //   }
+    //     // });
+    //
+    //     // Set up paired-end listener.
+    //     radio_2.click({
+    //       'single_collapse': single_collapse,
+    //       'paired_collapse': paired_collapse
+    //     }, function (e) {
+    //       var single_collapse = e.data.single_collapse;
+    //       var paired_collapse = e.data.paired_collapse;
+    //
+    //       if (this.checked) {
+    //         if (single_collapse.hasClass('show')) {
+    //           single_collapse.on('hidden.bs.collapse', {
+    //             'paired_collapse': paired_collapse
+    //           }, function (e) {
+    //             var paired_collapse = e.data.paired_collapse;
+    //             paired_collapse.collapse('show');
+    //             $(this).off('hidden.bs.collapse');
+    //           });
+    //
+    //           single_collapse.collapse('hide');
+    //         } else {
+    //           paired_collapse.collapse('show');
+    //         }
+    //       }
+    //     });
+    //   } else {
+    //     radio_2.prop('disabled', true);
+    //   }
+    // }
 
     // First, construct an array of classes present in the form.
     var indices = [];
