@@ -2699,7 +2699,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var collapses = inputs.children('.collapse');
       var single_collapse = collapses.eq(0);
       var paired_collapse = collapses.eq(1);
-      var paired_row = paired_collapse.find('div:[style*="display:none"]');
+      var paired_row = paired_collapse.find('div[style*="display:none"]');
 
       // Set up the single-end read listener.
       radio_1.click({
