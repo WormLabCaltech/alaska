@@ -2690,7 +2690,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
       // First, remove all event handlers from the copy.
-      copy.off();
+      copy.find('*').off();
 
       var inputs = copy.children('div:last');
       var radios = inputs.find('input:radio');
@@ -2699,7 +2699,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var collapses = inputs.children('.collapse');
       var single_collapse = collapses.eq(0);
       var paired_collapse = collapses.eq(1);
-      var paired_row = paired_collapse.find('div:[style*="display:none"]');
+      var paired_row = paired_collapse.find('div[style*="display:none"]');
 
       // Set up the single-end read listener.
       radio_1.click({

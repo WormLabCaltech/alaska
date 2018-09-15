@@ -2690,7 +2690,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
       // First, remove all event handlers from the copy.
-      copy.off();
+      copy.find('*').off();
 
       var inputs = copy.children('div:last');
       var radios = inputs.find('input:radio');
