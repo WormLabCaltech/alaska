@@ -2631,7 +2631,7 @@ function set_proj_meta_input() {
   set_factor(factor_card);
 
   // Enable experimental design.
-  var design_group = proj_form.find('.experimental_design_group');
+  var design_group = proj_form.find('.proj_experimental_design_group');
   var design_inputs = design_group.children('.experimental_design_inputs');
   var factor_hide_radio = design_group.find('#proj_design_1_radio');
   var factor_show_radio = design_group.find('#proj_design_2_radio');
