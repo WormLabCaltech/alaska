@@ -2686,9 +2686,6 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     copy.children('div:first').remove();
     copy.children('div:first').removeClass('pl-0');
     copy.find('input,select,button,textarea').prop('disabled', disable);
-    if (!disable) {
-      copy.find('select').change();
-    }
 
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
@@ -2832,6 +2829,10 @@ function copy_to_form(form_group, to_form_class_name, disable) {
           to_form.find('.' + class_order[temp_index]).after(copy);
         }
       }
+    }
+
+    if (!disable) {
+      copy.find('select').change();
     }
   }
 }
