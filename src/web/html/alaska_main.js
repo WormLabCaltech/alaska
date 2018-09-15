@@ -2904,7 +2904,7 @@ function set_common_checkboxes(form) {
       var custom_parent = get_closest_custom_parent(input);
       var checkbox = custom_parent.find('input:checkbox');
 
-      while (custom_parent.length < 1) {
+      while (custom_parent.length < 1 || !get_custom_class(custom_parent).includes('group')) {
         custom_parent = get_closest_custom_parent(custom_parent);
         checkbox = custom_parent.find('input:checkbox');
       }
