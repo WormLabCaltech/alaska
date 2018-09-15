@@ -1052,9 +1052,14 @@ class AlaskaServer(Alaska):
 
         # output project JSON to temp folder
         proj.save(Alaska.TEMP_DIR)
-        # Set read & write permissions for everyone for this file.
+        # Set read & write permissions for everyone for this directory.
         permission = 0o777
-        os.chmod('{}/{}.json'.format(proj.temp_dir, _id), permission)
+        os.chmod(proj.temp_dir, permission)
+        for root, dirs, files in os.walk(proj.temp_dir):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), permission)
+            for f in files:
+                os.chmod(os.path.join(root, f), permission)
         self.broadcast(_id, '{}: saved to temp folder'.format(_id))
 
         # Then, output the JSON.

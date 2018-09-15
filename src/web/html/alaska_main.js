@@ -2417,6 +2417,7 @@ function set_value_of_custom_dropdown(div, val) {
 
     if (val == this_val) {
       option.prop('selected', true);
+      custom_input.val('');
       in_dropdown = true;
       return false;
     }
@@ -2426,6 +2427,9 @@ function set_value_of_custom_dropdown(div, val) {
     options.eq(-1).prop('selected', true);
     custom_input.val(val);
   }
+
+  // Then, fire change.
+  select.change();
 }
 
 /**
@@ -2739,6 +2743,12 @@ function copy_to_form(form_group, to_form_class_name, disable) {
   console.log(class_name);
   console.log(index);
 
+  // If there is a select, we must save the select values.
+  var select = form_group.find('select').eq(0);
+  if (select.length > 0) {
+    var selected = select.children('option:selected').val();
+  }
+
   for (var id in sample_forms) {
     var form = sample_forms[id];
     var to_form = form.find('.' + to_form_class_name);
@@ -2769,6 +2779,19 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     copy.children('div:first').remove();
     copy.children('div:first').removeClass('pl-0');
     copy.find('input,select,button,textarea').prop('disabled', disable);
+
+    // Deal with select.
+    var copy_select = copy.find('select').eq(0);
+    if (copy_select.length > 0) {
+      var options = copy_select.children('option:not(:disabled)');
+      options.each(function () {
+        var option = $(this);
+        if (option.val() == selected) {
+          option.prop('selected', true);
+          return false;
+        }
+      });
+    }
 
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
@@ -3177,7 +3200,7 @@ function get_values_from_experimental_design(form_group) {
 
   if (factor == 2) {
     var factor_2 = get_values_from_factor_card(factor_cards.eq(1));
-    factors.append(factor_2);
+    factors.push(factor_2);
   }
 
   return factors;
@@ -3289,7 +3312,7 @@ function set_values_of_group_fluid_rows(form_group, vals) {
  * Sets value of custom dropdown.
  */
 function set_value_of_group_custom_dropdown(form_group, val) {
-  var inputs = form_group.chidren('div:last');
+  var inputs = form_group.children('div:last');
   set_value_of_custom_dropdown(inputs, val);
 }
 
@@ -3341,9 +3364,9 @@ function set_values_of_experimental_design(form_group, vals) {
 
   if (factor == 1) {
     radio_1.click();
-  } else {
-    set_values_of_factor_card(factor_cards.eq(1), vals[1]);
+  } else if (!radio_2.prop('disabled')) {
     radio_2.click();
+    set_values_of_factor_card(factor_cards.eq(1), vals[1]);
   }
 }
 
@@ -3378,9 +3401,13 @@ function set_values_of_paired_collapse(collapse, vals) {
 
     if (pair_1 != null && pair_1 != '') {
       pair_1_select.children('option[value="' + pair_1 + '"]').prop('selected', true);
+    } else {
+      pair_1_select.children('option:disabled').prop('selected', true);
     }
     if (pair_2 != null && pair_2 != '') {
       pair_2_select.children('option[value="' + pair_2 + '"]').prop('selected', true);
+    } else {
+      pair_2_select.children('option:disabled').prop('selected', true);
     }
   }
 
@@ -3391,13 +3418,20 @@ function set_values_of_paired_collapse(collapse, vals) {
  */
 function set_values_of_read_type(form_group, vals) {
   var inputs_div = form_group.children('div:last');
+  var radios = inputs_div.find('input:radio');
+  var radio_1 = radios.eq(0);
+  var radio_2 = radios.eq(1);
   var read_type = vals.type;
 
   if (read_type == 1) {
+    radio_1.click();
     var single_collapse = form_group.find('.sample_read_type_single_collapse');
+    single_collapse.collapse('show');
     set_values_of_single_collapse(single_collapse, vals);
   } else {
+    radio_2.click();
     var paired_collapse = form_group.find('.sample_read_type_paired_collapse');
+    paired_collapse.collapse('show');
     set_values_of_paired_collapse(paired_collapse, vals.pairs);
   }
 }
@@ -3465,6 +3499,7 @@ var common_meta_classes_to_functions = {
   'sample_life-stage_group': 'group_custom_dropdown',
   sample_tissue_group: 'group_custom_dropdown',
   sample_characteristics_group: 'group_fluid_rows',
+  sample_sequenced_molecules_group: 'group_custom_dropdown',
   sample_read_type_group: 'read_type'
 };
 var sample_meta_classes_to_functions = {
@@ -3523,6 +3558,8 @@ function get_sample_meta_inputs(card) {
 
     inputs[class_name] = getters_and_setters[type].get(form_group);
   }
+
+  return inputs;
 }
 
 /**
