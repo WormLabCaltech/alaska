@@ -2439,7 +2439,7 @@ function set_value_of_custom_dropdown(div, val) {
 function get_values_from_fluid_rows(div) {
   var values = [];
 
-  var rows = div.children('div:visible');
+  var rows = div.children('div:not([style*="display:none"])');
 
   var custom_rows = [];
   rows.each(function () {
@@ -2468,7 +2468,7 @@ function get_values_from_fluid_rows(div) {
  * Sets the values inputed to fluid input rows.
  */
 function set_values_of_fluid_rows(div, vals) {
-  var rows = div.children('div:visible');
+  var rows = div.children('div:not([style*="display:none"])');
   var first_row = null;
   var default_rows = [];
 
@@ -2495,7 +2495,7 @@ function set_values_of_fluid_rows(div, vals) {
   // Then, add the number of rows we need.
   while (default_rows.length < vals.length) {
     add_btn.click();
-    var new_div = div.children('div:visible:last');
+    var new_div = div.children('div:not([style*="display:none"]):last');
     default_rows.push(new_div);
   }
 
@@ -3295,7 +3295,7 @@ function get_values_from_single_collapse(collapse) {
  * Gets read pairs.
  */
 function get_values_from_paired_collapse(collapse) {
-  var pair_divs = collapse.children('div:visible');
+  var pair_divs = collapse.children('div:not(style*="display:none")');
 
   var pairs = [];
 
@@ -3459,7 +3459,7 @@ function set_values_of_single_collapse(collapse, vals) {
  * Sets read pairs.
  */
 function set_values_of_paired_collapse(collapse, vals) {
-  var pair_divs = collapse.children('div:visible');
+  var pair_divs = collapse.children('div:not([style*="display:none"])');
 
   for (var i = 0; i < vals.length; i++) {
     var pair = vals[i];
@@ -3794,7 +3794,7 @@ function convert_proj_meta_inputs(card) {
         obj.meta['title'] = input;
         break;
 
-      case 'proj_abstract':
+      case 'proj_abstract_group':
         obj.meta['abstract'] = input;
         break;
 
@@ -3904,10 +3904,27 @@ function convert_sample_meta_inputs(card) {
         break;
     }
   }
-
+  return obj;
 }
-function convert_all_meta_inputs() {
 
+/**
+ * Directly modifies the global proj object.
+ */
+function convert_all_meta_inputs() {
+  var proj_inputs = convert_proj_meta_inputs(proj_form);
+
+  for (var cat in proj_inputs) {
+    proj[cat] = proj_inputs[cat];
+  }
+
+  for (var id in sample_forms) {
+    var sample_form = sample_forms[id];
+    var sample_inputs = convert_sample_meta_inputs(sample_form);
+
+    for (var cat in sample_inputs) {
+      proj.samples[id][cat] = sample_inputs[cat];
+    }
+  }
 }
 
 /*******************************************************************/
