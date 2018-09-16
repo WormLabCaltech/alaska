@@ -2366,14 +2366,6 @@ function set_custom_dropdown(div, choices) {
  * Sets everything that needs to be set for a factor selection card.
  */
 function set_factor(div) {
-  var factor_names_to_class_names = {
-    'genotype':           'sample_genotype_group',
-    'growth conditions':  'sample_growth_conditions_group',
-    'organism strain':    'sample_organism_strain_group',
-    'life-stage':         'sample_life-stage_group',
-    'tissue':             'sample_tissue_group'
-  };
-
   var name_group = div.find('.factor_name_group');
   var values_group = div.find('.factor_values_group');
 
@@ -5096,6 +5088,13 @@ var progress = {
   'diff_finished':    13,
   'server_open':      14
   }
+var factor_names_to_class_names = {
+  'genotype':           'sample_genotype_group',
+  'growth conditions':  'sample_growth_conditions_group',
+  'organism strain':    'sample_organism_strain_group',
+  'life-stage':         'sample_life-stage_group',
+  'tissue':             'sample_tissue_group'
+};
 var life_stages = [
   'L1', 'L2', 'L3', 'L4', 'Young Adult', 'Adult', 'Embryo', 'Mixed'
 ];
