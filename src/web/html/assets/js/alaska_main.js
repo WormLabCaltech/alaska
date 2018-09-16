@@ -3747,7 +3747,7 @@ function set_all_meta_inputs() {
  */
 function convert_proj_meta_inputs(card) {
   var obj = {};
-  var obj['meta'] = {};
+  obj['meta'] = {};
   obj.meta['corresponding'] = {};
   obj.meta['contributors'] = [];
   var inputs = get_proj_meta_inputs(card);
