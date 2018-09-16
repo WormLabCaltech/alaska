@@ -2567,7 +2567,7 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
           remove_from_form(form_group, specific_form_class_name);
         } else {
           checkbox.prop('disabled', false);
-          refresh_checkbox(checkbox, type);
+          refresh_checkbox(checkbox);
         }
         enable_disable_row(checkbox);
       }
@@ -3685,14 +3685,18 @@ function get_sample_meta_inputs(card) {
     var type = sample_meta_classes_to_functions[class_name];
     var form_group = card.find('.' + class_name);
 
-    inputs[class_name] = getters_and_setters[type].get(form_group);
+    if (form_group.length > 0) {
+      inputs[class_name] = getters_and_setters[type].get(form_group);
+    }
   }
 
   for (var class_name in common_meta_classes_to_functions) {
     var type = common_meta_classes_to_functions[class_name];
     var form_group = card.find('.' + class_name);
 
-    inputs[class_name] = getters_and_setters[type].get(form_group);
+    if (form_group.length > 0) {
+      inputs[class_name] = getters_and_setters[type].get(form_group);
+    }
   }
 
   return inputs;
@@ -3741,11 +3745,108 @@ function set_all_meta_inputs() {
 /**
  * Convert all inputs into the proj object (i.e. the format Alaska can use).
  */
-function convert_proj_meta_inputs() {
+function convert_proj_meta_inputs(card) {
+  var obj = {};
+  var obj['meta'] = {};
+  obj.meta['corresponding'] = {};
+  obj.meta['contributors'] = [];
+  var inputs = get_proj_meta_inputs(card);
 
+  for (var class_name in inputs) {
+    var input = inputs[class_name];
+
+    switch (class_name) {
+      case 'proj_corresponding_group':
+        obj.meta.corresponding['name'] = input;
+        obj.meta.contributors.push(input);
+        break;
+      case 'proj_corresponding_email_group':
+        obj.meta.corresponding['email'] = input;
+        break;
+
+      case 'proj_contributors_group':
+        for (var i = 0; i < input.length; i++) {
+          var contributor = input[i][0];
+          obj.meta.contributors.push(contributor);
+        }
+        break;
+
+      case 'proj_experimental_design_group':
+        obj['design'] = input.length;
+
+        var factors = [];
+        for (var i = 0; i < input.length; i++) {
+          var factor = {};
+          factor['name'] = input[i].name;
+
+          var values = [];
+          for (var j = 0; j < input[i].values, j++) {
+            var value = input[i].values[j][0];
+            values.push(value);
+          }
+          factor['values'] = values;
+          factors.push(factor);
+        }
+
+      case 'proj_title_group':
+        obj.meta['title'] = input;
+        break;
+
+      case 'proj_abstract':
+        obj.meta['abstract'] = input;
+        break;
+
+      case 'proj_sra_center_code_group':
+        obj.meta['SRA_center_code'] = input;
+    }
+  }
+
+  return obj;
 }
 
-function convert_common_meta_inputs() {
+function convert_common_meta_inputs(card) {
+}
+
+function convert_sample_meta_inputs(card) {
+  var obj = {};
+  obj['meta'] = {};
+  obj.meta['chars'] = {};
+  var inputs = get_sample_meta_inputs(card);
+
+  for (var class_name in inputs) {
+    var input = inputs[class_name];
+
+    switch (class_name) {
+      case 'sample_characteristics_group':
+        for (var i = 0; i < input.length; i++) {
+          obj.meta.chars[input[i][0]] = input[i][1];
+        }
+        break;
+
+      case 'sample_description_group':
+        obj.meta['description'] = input;
+        break;
+
+      case 'sample_factors_1_group':
+      case 'sample_factors_2_group':
+      case 'sample_genotype_group':
+      case 'sample_growth_conditions_group':
+      case 'sample_library_preparation_group':
+      case 'sample_life-stage_group':
+      case 'sample_miscellaneous_group':
+      case 'sample_name_group':
+      case 'sample_organism_group':
+      case 'sample_organism_strain_group':
+      case 'sample_read_type_group':
+      case 'sample_rna_extraction_group':
+      case 'sample_sequenced_molecules_group':
+      case 'sample_specific_characteristics_group':
+      case 'sample_tissue_group':
+    }
+  }
+
+}
+function convert_all_meta_inputs() {
 
 }
 
