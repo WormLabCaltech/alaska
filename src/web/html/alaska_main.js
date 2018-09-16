@@ -4244,7 +4244,7 @@ function set_choose_controls_modal(modal) {
   // Set verify button.
   validate_btn.click({
     'btn': start_btn,
-    'tooltip': tooltip
+    'tooltip': tooltip,
     'control_groups': control_groups
   }, function (e) {
     var control_groups = e.data.control_groups;
