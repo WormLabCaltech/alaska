@@ -5097,7 +5097,7 @@ var common_meta_order = [
   'sample_tissue_group',
   'sample_characteristics_group',
   'sample_sequenced_molecules_group',
-  'sample_read_type_group'
+  'sample_read_type_group',
   'sample_specific_characteristics_group'
 ];
 
