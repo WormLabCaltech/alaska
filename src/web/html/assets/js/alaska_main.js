@@ -3728,7 +3728,7 @@ function set_all_meta_inputs() {
 
     var common_inputs = $('#sample_common_form');
     read_object_from_temp('common_inputs', function (obj) {
-      set_common_meta_inputs(common_inputs, obj);
+      setTimeout(set_common_meta_inputs, 1000, common_inputs, obj);
 
       for (var id in sample_forms) {
         var form = sample_forms[id];
