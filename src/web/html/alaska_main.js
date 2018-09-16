@@ -3704,24 +3704,22 @@ function save_all_meta_inputs() {
  */
 function set_all_meta_inputs() {
   var proj_inputs = $('#proj');
-  read_object_from_temp('proj_inputs', function (obj) {
-    set_proj_meta_inputs(proj_inputs, obj);
+  read_object_from_temp('proj_inputs', function (obj, form) {
+    set_proj_meta_inputs(form, obj);
 
     var common_inputs = $('#sample_common_form');
-    read_object_from_temp('common_inputs', function (obj) {
-      set_common_meta_inputs(common_inputs, obj);
+    read_object_from_temp('common_inputs', function (obj, form) {
+      set_common_meta_inputs(form, obj);
 
       for (var id in sample_forms) {
-        var form = sample_forms[id];
-        read_object_from_temp('sample_' + id + '_inputs', function (obj) {
+        var sample_form = sample_forms[id];
+        read_object_from_temp('sample_' + id + '_inputs', function (obj, form) {
           // Give it a timeout so that everything else has been set up.
-          setTimeout(function () {
-            set_sample_meta_inputs(form, obj);
-          }, 2000);
-        });
+          setTimeout(set_sample_meta_inputs, 2000, form, obj);
+        }, sample_form);
       }
-    });
-  });
+    }, common_inputs);
+  }, proj_inputs);
 }
 
 /**
@@ -4967,7 +4965,7 @@ function get_sample_meta(id) {
 /**
  * Read and return object.
  */
-function read_object_from_temp(fname, callback) {
+function read_object_from_temp(fname, callback, form) {
   // Send ajax request.
   $.ajax({
     type: 'POST',
@@ -4981,7 +4979,11 @@ function read_object_from_temp(fname, callback) {
       var obj = JSON.parse(out);
 
       if (typeof callback === 'function') {
-        callback(obj);
+        if (form != null) {
+          callback(obj, form);
+        } else {
+          callback(obj);
+        }
       }
     }
   });
