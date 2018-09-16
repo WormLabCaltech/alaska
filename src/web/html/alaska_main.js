@@ -3780,7 +3780,7 @@ function convert_proj_meta_inputs(card) {
           factor['name'] = input[i].name;
 
           var values = [];
-          for (var j = 0; j < input[i].values, j++) {
+          for (var j = 0; j < input[i].values; j++) {
             var value = input[i].values[j][0];
             values.push(value);
           }
