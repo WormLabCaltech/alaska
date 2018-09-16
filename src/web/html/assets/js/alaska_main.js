@@ -4139,100 +4139,138 @@ function set_detail_options(dropdown, characteristic) {
 }
 
 /**
+ * Gets control.
+ */
+function get_control(form_group) {
+  var name = form_group.find('input').text();
+  var value = form_group.find('select').children('option:selected').val();
+
+  var result = {
+    'name': name,
+    'value': value
+  };
+
+  return result;
+}
+
+/**
+ * Shows matching samples for given factor.
+ */
+function show_matching_controls(form_group) {
+  var valid = false;
+  var name = form_group.find('input').text();
+  var value = form_group.find('select').children('option:selected').val();
+  var sample_list = form_group.find('ul');
+
+  var samples = chars_details_to_samples[name][value];
+  for (var i = 0; i < samples.length; i++) {
+    var sample = samples[i];
+    var list_item = $('<li>', {
+      text: proj.sample[id].name;
+    });
+    sample_list.append(list_item);
+    valid = true;
+  }
+
+  return valid;
+}
+
+/**
  * Sets the choose controls modal with the appropriate information.
  */
 function set_choose_controls_modal(modal) {
   var design = proj.design;
-  var description = modal.find('#design_description');
-  var header = description.children('#design_header');
-  var tooltip = modal.find('#start_analysis_tooltip');
+  var factors = proj.factors;
+  var validate_btn = modal.find('#validate_controls_btn');
   var start_btn = modal.find('#start_analysis_btn');
-  var control_0 = modal.find('#proj_control_0');
-  var control_1 = modal.find('#proj_control_1');
-
-  var controls;
-  if (proj.design == 1) {
-    controls = [control_0];
-  } else {
-    controls = [control_0, control_1];
-  }
-
+  var control_groups = modal.find('.proj_control_group');
+  var control_group_1 = control_groups.eq(0);
+  var control_group_2 = control_groups.eq(1);
+  var tooltip = modal.find('#start_analysis_tooltip');
   tooltip.tooltip();
 
-  // Set characteristic and detail dropdowns.
-  for (var i = 0; i < controls.length; i++) {
-    var ctrl = controls[i];
+  // Deal with first factor.
+  var control_group_1_divs = control_group_1.children('div');
+  var control_1_name = control_group_divs.eq(0);
+  var control_1_value = control_group_divs.eq(1);
+  var control_1_value_select = control_1_value.find('select');
+  var control_1_samples = control_group_divs.filter('[style*="display:none"]');
+  control_1_name.find('input').val(factors[0].name);
+  for (var i = 0; i < factors[0].values.length; i++) {
+    var value = factors[0].values[i];
+    var option = $('<option>', {
+      text: value
+    });
+    control_1_value_select.append(option);
+  }
 
-    var char_id = 'proj_control_char_' + i;
-    var detail_id = 'proj_control_detail_' + i;
-    var list_id = 'control_samples_' + i;
-    var char = ctrl.find('#' + char_id);
-    var detail = ctrl.find('#' + detail_id);
-    var list = ctrl.find('#' + list_id);
+  // Deal with second factor if design = 2.
+  if (design == 2) {
+    control_group_2.show();
+    var control_group_2_divs = control_group_2.children('div');
+    var control_2_name = control_group_divs.eq(0);
+    var control_2_value = control_group_divs.eq(1);
+    var control_2_samples = control_group_divs.filter('[style*="display:none"]');
+    control_2_name.find('input').val(factors[1].name);
+    for (var i = 0; i < factors[1].values.length; i++) {
+      var value = factors[1].values[i];
+      var option = $('<option>', {
+        text: value
+      });
+      control_2_value.find('select').append(option);
+    }
+  }
 
-    set_characteristic_options(char);
+  modal.find('select').change({
+    'btn': start_btn,
+    'tooltip': tooltip
+  }, function (e) {
+    var select = $(this);
+    var control_group = select.parent().parent().parent();
+    var controls_list = control_group.children('div:last');
+    controls_list.hide();
 
-    // Then, bind to change.
-    char.change({
-      'tooltip': tooltip,
-      'btn': start_btn,
-      'detail': detail,
-      'list': list
-    }, function (e) {
-      // First, disable start analysis button,
-      var tooltip = e.data.tooltip;
-      var btn = e.data.btn;
+    // Destroy all list items.
+    controls_list.find('li').remove();
+
+    // Disable start analysis button.
+    var tooltip = e.data.tooltip;
+    var btn = e.data.btn;
+    tooltip.tooltip('enable');
+    btn.css('pointer-events', 'none');
+    btn.prop('disabled', true);
+  });
+
+  // Set verify button.
+  validate_btn.click({
+    'btn': start_btn,
+    'tooltip': tooltip
+    'control_groups': control_groups
+  }, function (e) {
+    var control_groups = e.data.control_groups;
+    var factor = proj.design;
+    var btn = e.data.btn;
+    var tooltip = e.data.tooltip;
+
+    var valid = show_matching_controls(control_groups.eq(0));
+    var controls = [get_control(control_groups.eq(0))];
+
+    if (factor == 2) {
+      valid = valid && show_matching_controls(control_groups.eq(1));
+      controls.push(get_control(control_groups.eq(1)));
+    }
+
+    // If everything's good, enable start analysis button.
+    if (valid) {
+      tooltip.tooltip('disable');
+      btn.css('pointer-events', 'auto');
+      btn.prop('disabled', false);
+    } else {
       tooltip.tooltip('enable');
       btn.css('pointer-events', 'none');
       btn.prop('disabled', true);
-
-      // Hide list of samples.
-      e.data.list.hide();
-
-      var val = $(this).children('option:selected').val();
-      set_detail_options(e.data.detail, val);
-    });
-
-    detail.change({
-      'list': list,
-      'tooltip': tooltip,
-      'btn': start_btn
-    }, function (e) {
-      // First, disable start analysis button,
-      var tooltip = e.data.tooltip;
-      var btn = e.data.btn;
-      tooltip.tooltip('enable');
-      btn.css('pointer-events', 'none');
-      btn.prop('disabled', true);
-
-
-      // Hide list of samples.
-      e.data.list.hide();
-    });
-
-
-    // Bind validate button.
-    var validate_btn = modal.find('#validate_controls_btn');
-    validate_btn.click({
-      'tooltip': tooltip,
-      'btn': start_btn,
-      'controls': controls
-    }, function (e) {
-      var tooltip = e.data.tooltip;
-      var btn = e.data.btn;
-      var valid = verify_controls(e.data.controls);
-
-      // If the controls are valid, enable the start analysis button.
-      if (valid) {
-        tooltip.tooltip('disable');
-        btn.css('pointer-events', 'auto');
-        btn.prop('disabled', false);
-      } else {
-        tooltip.tooltip('enable');
-        btn.css('pointer-events', 'none');
-        btn.prop('disabled', true);
-      }
-    });
+    }
+  });
 
     // Finally, bind start analysis button.
     start_btn.click({'controls': controls}, function (e) {
@@ -4312,30 +4350,15 @@ function start_analysis() {
  * Sets controls to the global proj object.
  */
 function set_controls(controls) {
-  ctrls = {};
+  var ctrls = {};
   for (var i = 0; i < controls.length; i++) {
-    var ctrl = controls[i];
-    var char = ctrl.children('div:nth-of-type(1)').find('option:selected').val();
+    var name = controls[i].name;
+    var value = controls[i].value;
 
-    var items = ctrl.find('li');
-    if (items == null) {
-      ctrl.find('select').addClass('is-invalid');
-    } else {
-      var names = [];
-      items.each(function() {
-        names.push($(this).text());
-      });
-
-      // Add these to the dictionary.
-      for (var j = 0; j < names.length; j++) {
-        var name = names[j];
-        var id = names_to_ids[name];
-
-        ctrls[id] = char;
-      }
-
-      // Once this is done, set the project chars dictionary.
-      proj.ctrls = ctrls;
+    var samples = chars_details_to_samples[name][value];
+    for (var j = 0; j < samples.length; j++) {
+      var sample = samples[j];
+      ctrls[]
     }
   }
 }
