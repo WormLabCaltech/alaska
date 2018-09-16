@@ -3787,6 +3787,8 @@ function convert_proj_meta_inputs(card) {
           factor['values'] = values;
           factors.push(factor);
         }
+        obj['factors'] = factors;
+        break;
 
       case 'proj_title_group':
         obj.meta['title'] = input;
@@ -3817,6 +3819,7 @@ function convert_sample_meta_inputs(card) {
     var input = inputs[class_name];
 
     switch (class_name) {
+      case 'sample_specific_characteristics_group':
       case 'sample_characteristics_group':
         for (var i = 0; i < input.length; i++) {
           obj.meta.chars[input[i][0]] = input[i][1];
@@ -3829,19 +3832,76 @@ function convert_sample_meta_inputs(card) {
 
       case 'sample_factors_1_group':
       case 'sample_factors_2_group':
+        var name = input.name;
+        var value = input.value;
+
+        if (name != 'FACTOR_1' && name != 'FACTOR_2') {
+          obj.meta.chars[name] = value;
+        }
+        break;
+
       case 'sample_genotype_group':
+        obj.meta.chars['genotype'] = input;
+        break;
+
       case 'sample_growth_conditions_group':
+        obj.meta.chars['growth conditions'] = input;
+        break;
+
       case 'sample_library_preparation_group':
+        obj.meta.chars['library preparation'] = input;
+        break;
+
       case 'sample_life-stage_group':
+        obj.meta.chars['life-stage'] = input;
+        break;
+
       case 'sample_miscellaneous_group':
+        obj.meta.chars['miscellaneous'] = input;
+        break;
+
       case 'sample_name_group':
+        obj['name'] = input;
+        break;
+
       case 'sample_organism_group':
+        var split = input.split('_');
+
+        if (split.length >= 3) {
+          var organism = split[0] + '_' + split[1];
+          var ref_ver = split.slice(2).join('_');
+          obj['organism'] = organism;
+          obj['ref_ver'] = ref_ver;
+        }
+        break;
+
       case 'sample_organism_strain_group':
+        obj.meta.chars['organism strain'] = input;
+        break;
+
       case 'sample_read_type_group':
+        var type = input.type;
+        obj['type'] = type;
+
+        if (type == 1) {
+          obj['length'] = input.length;
+          obj['stdev'] = input.stdev;
+        } else if (type == 2) {
+          obj['pairs'] = input.pairs;
+        }
+        break;
+
       case 'sample_rna_extraction_group':
+        obj.meta.chars['rna extraction'] = input;
+        break;
+
       case 'sample_sequenced_molecules_group':
-      case 'sample_specific_characteristics_group':
+        obj.meta.chars['sequenced molecules'] = input;
+        break;
+
       case 'sample_tissue_group':
+        obj.meta.chars['tissue'] = input;
+        break;
     }
   }
 
