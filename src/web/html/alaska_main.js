@@ -4274,7 +4274,6 @@ function set_choose_controls_modal(modal) {
 
     // Finally, bind start analysis button.
     start_btn.click({'controls': controls}, function (e) {
-      set_controls(e.data.controls);
       write_proj(start_analysis);
 
       // Then, dismiss the project controls form and show progress screen.
@@ -4344,23 +4343,23 @@ function start_analysis() {
   });
 }
 
-
-/**
- * Sets controls to the global proj object.
- */
-function set_controls(controls) {
-  var ctrls = {};
-  for (var i = 0; i < controls.length; i++) {
-    var name = controls[i].name;
-    var value = controls[i].value;
-
-    var samples = chars_details_to_samples[name][value];
-    for (var j = 0; j < samples.length; j++) {
-      var sample = samples[j];
-      ctrls[]
-    }
-  }
-}
+//
+// /**
+//  * Sets controls to the global proj object.
+//  */
+// function set_controls(controls) {
+//   var ctrls = {};
+//   for (var i = 0; i < controls.length; i++) {
+//     var name = controls[i].name;
+//     var value = controls[i].value;
+//
+//     var samples = chars_details_to_samples[name][value];
+//     for (var j = 0; j < samples.length; j++) {
+//       var sample = samples[j];
+//       ctrls[]
+//     }
+//   }
+// }
 
 /**
  * Verifies the controls.
