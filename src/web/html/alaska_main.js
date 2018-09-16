@@ -2792,14 +2792,6 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       });
     }
 
-    // If this is the sample characteristics class, we need to do additional
-    if (class_name == 'sample_characteristics_group') {
-      // Disable all rows except the add button.
-      copy.find('input,select,button,textarea').prop('disabled', true);
-      copy.find('button').eq(0).prop('disabled', false);
-      copy.find('div[style*="display:none"]').find('input,select,button,textarea').prop('disabled', false);
-    }
-
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
       // First, remove all event handlers from the copy.
@@ -2999,16 +2991,14 @@ function refresh_checkbox(checkbox) {
     if (class_name == 'sample_read_type_group' && parseInt(form_group.find('input:radio:checked').val()) == 2) {
       copy_to_form(form_group, specific_form_class_name, false);
       remove_from_form(form_group, common_form_class_name);
-    } else if (class_name == 'sample_characteristics_group'){
-      // This group must always be placed in the sample-specific metadata.
-      copy_to_form(form_group, specific_form_class_name, false);
-      remove_from_form(form_group, common_form_class_name);
     } else {
       copy_to_form(form_group, common_form_class_name, true);
       remove_from_form(form_group, specific_form_class_name);
     }
   } else {
-    copy_to_form(form_group, specific_form_class_name, false);
+    if (class_name != 'sample_characteristics_group') {
+      copy_to_form(form_group, specific_form_class_name, false);
+    }
     remove_from_form(form_group, common_form_class_name);
   }
 }
@@ -3553,6 +3543,7 @@ var sample_meta_classes_to_functions = {
   sample_description_group: 'group_textarea',
   sample_factors_1_group: 'group_factor',
   sample_factors_2_group: 'group_factor',
+  sample_specific_characteristics_group: 'group_fluid_rows'
 };
 
 
@@ -3890,6 +3881,9 @@ function set_samples_meta_input() {
 
     // Set the reads table for this sample.
     // set_reads_table(id, new_sample_form);
+
+    // Characteristics.
+    set_fluid_input_rows(new_sample_form.find('.sample_specific_characteristics_group'));
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
@@ -5104,6 +5098,7 @@ var common_meta_order = [
   'sample_characteristics_group',
   'sample_sequenced_molecules_group',
   'sample_read_type_group'
+  'sample_specific_characteristics_group'
 ];
 
 // Global variables for holding interval ids.
