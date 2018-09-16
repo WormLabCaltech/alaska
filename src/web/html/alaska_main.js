@@ -1311,7 +1311,7 @@ function set_choose_sample_button(dropdown, forms) {
 /**
  * Set reads table for the specified sample.
  */
-function set_reads_table(form) {
+function set_reads_table(id, form) {
   // Set the reads table.
   var table = form.find('.sample_reads_table');
 
@@ -4078,7 +4078,7 @@ function set_samples_meta_input() {
     // set_paired_end(id, new_sample_form);
 
     // Set the reads table for this sample.
-    set_reads_table(new_sample_form);
+    set_reads_table(id, new_sample_form);
 
     // Characteristics.
     set_fluid_input_rows(new_sample_form.find('.sample_specific_characteristics_group'));
