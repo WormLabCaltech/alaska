@@ -3761,7 +3761,7 @@ function convert_proj_meta_inputs(card) {
           factor['name'] = input[i].name;
 
           var values = [];
-          for (var j = 0; j < input[i].values; j++) {
+          for (var j = 0; j < input[i].values.length; j++) {
             var value = input[i].values[j][0];
             values.push(value);
           }
@@ -4674,28 +4674,7 @@ function substring_matcher(strs) {
  * whether everything is valid as a boolean.
  */
 function validate_all_meta() {
-  // First, validate individual forms.
-  proj_valid = validate_proj_meta();
-  console.log('proj: ' + proj_valid);
 
-  for (var id in proj.samples) {
-    var sample_valid = validate_sample_meta(id);
-    console.log(id + ': ' + sample_valid);
-    proj_valid = proj_valid && sample_valid;
-  }
-
-  // Then, we must check whether all samples share either 1 (for
-  // 1-factor design) or 2 (for 2-factor design) characteristics.
-  var design = proj.design;
-  // Loop through each sample and check characteristic.
-  if (design == 1) {
-
-  } else if (design == 2) {
-
-  }
-
-  console.log('entire proj: ' + proj_valid);
-  return proj_valid;
 }
 
 /**
@@ -4711,45 +4690,7 @@ function isEmail(email) {
  * whether the project is valid.
  */
 function validate_proj_meta() {
-  var proj_meta = get_proj_meta();
-  var meta = proj_meta.meta;
-  var valid = true;
 
-  // We don't have to check design because it is a radio button.
-  for (var cat in meta) {
-    var field = meta_input_fields.meta[cat];
-    var val = proj_meta.meta[cat];
-
-    switch (cat) {
-      // Contributors must be dealt slightly differently.
-      // We just need to make sure the FIRST field is populated.
-      case 'contributors':
-        field = field[0].children('input');
-        val = field.val();
-      case 'title':
-      case 'abstract':
-        // These just have to be filled out.
-        if (val != '' && val != null) {
-          field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-          valid = false;
-        }
-        break;
-      case 'email':
-        if (isEmail(val)) {
-          field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-          valid = false;
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  return valid;
 }
 
 /**
@@ -4764,313 +4705,182 @@ function validate_read_pairs() {
  * whether the sample is valid.
  */
 function validate_sample_meta(id) {
-  var sample_meta = get_sample_meta(id);
-  var meta = sample_meta.meta;
-  var valid = true;
 
-  // Loop through each field.
-  for (var cat in sample_meta) {
-    // Skip meta.
-    if (cat == 'meta') {
-      continue;
-    }
-
-    var field = meta_input_fields.samples[id][cat];
-    var val = sample_meta[cat];
-
-    switch (cat) {
-      case 'name':
-      case 'organism':
-      case 'length':
-      case 'stdev':
-        // These just have to be filled out.
-        if (val != '' && val != null && val != 0) {
-          field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-          valid = false;
-        }
-        break;
-
-      case 'type':
-        // If the reads are paired-end, we need to make sure
-        // correct pairs were selected.
-        if (val == 2) {
-          // Each selection must be unique.
-          var reads = [];
-          var pairs = sample_meta.reads;
-          for (var i = 0; i < pairs.length; i++) {
-            for (var j = 0; j < pairs[i].length; j++) {
-              var read = pairs[i][j];
-
-              // If the read is null or empty, we need to prompt the user
-              // to make a selection.
-              if (read != '' && read != null) {
-                var dropdown = meta_input_fields.samples[id][cat]
-                  .find('select option[value="' + read + '"]:selected').parent();
-                if (!reads.includes(read)) {
-                  dropdown.removeClass('is-invalid');
-                } else {
-                  dropdown.addClass('is-invalid');
-                  valid = false;
-                  reads.push(read);
-                }
-              } else {
-                var dropdowns = meta_input_fields.samples[id][cat].find('select option:selected');
-                dropdowns.filter(':disabled');
-                dropdowns.filter(':hidden');
-                dropdowns.parent().addClass('is-invalid');
-                valid = false;
-              }
-            }
-          }
-        }
-
-      default:
-        break;
-    }
-  }
-
-  // Loop through fields in meta.
-  for (var cat in meta) {
-    var field = meta_input_fields.samples[id].meta[cat];
-    var val = sample_meta.meta[cat];
-
-    switch (cat) {
-      // Characteristics must be dealt slightly different.
-      case 'chars':
-        var chars = Object.keys(val);
-        var n_chars = chars.length;
-        var field = field[0].children('input');
-        if (n_chars > 0) {
-          // Then, make sure each characteristic is unique.
-          for (var i = 0; i < n_chars; i++) {
-            var char = chars[i];
-            var fields = meta_input_fields.samples[id].meta[cat];
-            var duplicates = [];
-            for (var j = 0; j < fields.length; j++) {
-              var char_field = fields[j].find('input:nth-of-type(1)');
-              var detail_field = fields[j].find('input:nth-of-type(2)');
-              if (char_field.val() == char) {
-                duplicates.push([char_field, detail_field]);
-              } else {
-                char_field.removeClass('is-invalid');
-                detail_field.removeClass('is-invalid');
-              }
-            }
-          }
-          if (duplicates.length > 1) {
-            for (var j = 0; j < duplicates.length; j++) {
-              duplicates[j][0].addClass('is-invalid');
-              duplicates[j][1].addClass('is-invalid');
-              valid = false;
-            }
-          } else if (duplicates.length == 1) {
-            duplicates[0][0].removeClass('is-invalid');
-            duplicates[0][1].removeClass('is-invalid');
-          }
-          // field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-          valid = false;
-        }
-        break;
-
-      // Contributors must be dealt slightly differently.
-      // We just need to make sure the FIRST field is populated.
-      case 'contributors':
-        field = field[0].children('input');
-        val = field.val();
-      case 'title':
-      case 'description':
-      case 'source':
-        // These just have to be filled out.
-        if (val != '' && val != null) {
-          field.removeClass('is-invalid');
-        } else {
-          field.addClass('is-invalid');
-          valid = false;
-        }
-        break;
-    }
-  }
-
-  return valid;
 }
 
-/**
- * Sets global dictionary for meta input fields (proj + sample).
- */
-function set_meta_input_fields() {
-  meta_input_fields = get_proj_input_fields();
-  meta_input_fields['samples'] = {};
+// /**
+//  * Sets global dictionary for meta input fields (proj + sample).
+//  */
+// function set_meta_input_fields() {
+//   meta_input_fields = get_proj_input_fields();
+//   meta_input_fields['samples'] = {};
+//
+//   for (var id in proj.samples) {
+//     meta_input_fields.samples[id] = get_sample_input_fields(id);
+//   }
+// }
+//
+// /**
+//  * Returns a dictionary for project input fields.
+//  */
+// function get_proj_input_fields() {
+//   var proj_input_fields = {}
+//   proj_input_fields['meta'] = {};
+//   proj_input_fields.meta['title'] = proj_form.find('#proj_title');
+//   proj_input_fields.meta['abstract'] = proj_form.find('#proj_abstract');
+//   proj_input_fields.meta['corresponding'] = {
+//     'email': proj_form.find('#proj_corresponding_email'),
+//     'name': proj_form.find('#proj_corresponding_name')
+//   };
+//   proj_input_fields.meta['contributors'] = proj_contributor_fields;
+//   proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
+//   proj_input_fields['design'] = proj_form.find('#proj_design');
+//
+//   return proj_input_fields;
+// }
+//
+// /**
+//  * Returns a dictionary for sample input fields.
+//  */
+// function get_sample_input_fields(id) {
+//   var form = sample_forms[id];
+//   var sample_input_fields = {};
+//   sample_input_fields['meta'] = {};
+//   sample_input_fields['name'] = form.find('#sample_name_' + id);
+//   sample_input_fields.meta['description'] = form.find('#sample_description_' + id);
+//   sample_input_fields.meta['contributors'] = sample_contributor_fields[id];
+//   sample_input_fields.meta['source'] = form.find('#sample_source_' + id);
+//   sample_input_fields.meta['chars'] = sample_characteristic_fields[id];
+//   sample_input_fields['type'] = form.find('#read_type_' + id);
+//   sample_input_fields['organism'] = form.find('#sample_organism_' + id);
+//   sample_input_fields['length'] = form.find('#sample_length_' + id);
+//   sample_input_fields['stdev'] = form.find('#sample_stdev_' + id);
+//
+//   return sample_input_fields;
+// }
 
-  for (var id in proj.samples) {
-    meta_input_fields.samples[id] = get_sample_input_fields(id);
-  }
-}
+// /**
+//  * Sets all the metadata with values from the form.
+//  */
+// function set_all_meta() {
+//   // Set project meta.
+//   set_proj_meta(get_proj_meta());
+//
+//   for (var id in sample_forms) {
+//     set_sample_meta(id, get_sample_meta(id));
+//   }
+// }
 
-/**
- * Returns a dictionary for project input fields.
- */
-function get_proj_input_fields() {
-  var proj_input_fields = {}
-  proj_input_fields['meta'] = {};
-  proj_input_fields.meta['title'] = proj_form.find('#proj_title');
-  proj_input_fields.meta['abstract'] = proj_form.find('#proj_abstract');
-  proj_input_fields.meta['corresponding'] = {
-    'email': proj_form.find('#proj_corresponding_email'),
-    'name': proj_form.find('#proj_corresponding_name')
-  };
-  proj_input_fields.meta['contributors'] = proj_contributor_fields;
-  proj_input_fields.meta['SRA_center_code'] = proj_form.find('#proj_sra_center_code');
-  proj_input_fields['design'] = proj_form.find('#proj_design');
+// /**
+//  * Set global proj dictionary with the values given.
+//  */
+// function set_proj_meta(meta) {
+//   for (var cat in meta) {
+//     var val = meta[cat];
+//
+//     switch (cat) {
+//       case 'meta':
+//         break;
+//
+//       case 'design':
+//       default:
+//         proj[cat] = val;
+//     }
+//   }
+//
+//   // Deal with meta field separately.
+//   for (var cat in meta.meta) {
+//     var val = meta.meta[cat];
+//
+//     switch (cat) {
+//       case 'title':
+//       case 'abstract':
+//       case 'contributors':
+//       case 'SRA_center_code':
+//       case 'email':
+//       default:
+//         proj.meta[cat] = val;
+//     }
+//   }
+// }
 
-  return proj_input_fields;
-}
+// /**
+//  * Set the specified sample in the global proj dictionary with
+//  * the values given.
+//  */
+// function set_sample_meta(id, meta) {
+//   for (var cat in meta) {
+//     var val = meta[cat];
+//
+//     switch (cat) {
+//       case 'meta':
+//         break;
+//
+//       // If reads is present, that means it is paired.
+//       case 'reads':
+//         var new_reads = [];
+//         for (var i = 0; i < val.length; i++) {
+//           var pair = val[i];
+//           var read_1 = pair[0];
+//           var read_2 = pair[1];
+//           var new_pair = [proj.samples[id][cat][read_1],
+//                             proj.samples[id][cat][read_2]];
+//
+//           new_reads.push(new_pair);
+//         }
+//         proj.samples[id][cat] = new_reads;
+//         break;
+//
+//       case 'name':
+//       case 'type':
+//       case 'organism':
+//       case 'ref_ver':
+//       case 'length':
+//       case 'stdev':
+//       default:
+//         proj.samples[id][cat] = val;
+//     }
+//   }
+//
+//   for (var cat in meta.meta) {
+//     var val = meta.meta[cat];
+//
+//     switch (cat) {
+//       case 'title':
+//       case 'contributors':
+//       case 'source':
+//       case 'chars':
+//       case 'description':
+//         proj.samples[id].meta[cat] = val;
+//     }
+//   }
+// }
 
-/**
- * Returns a dictionary for sample input fields.
- */
-function get_sample_input_fields(id) {
-  var form = sample_forms[id];
-  var sample_input_fields = {};
-  sample_input_fields['meta'] = {};
-  sample_input_fields['name'] = form.find('#sample_name_' + id);
-  sample_input_fields.meta['description'] = form.find('#sample_description_' + id);
-  sample_input_fields.meta['contributors'] = sample_contributor_fields[id];
-  sample_input_fields.meta['source'] = form.find('#sample_source_' + id);
-  sample_input_fields.meta['chars'] = sample_characteristic_fields[id];
-  sample_input_fields['type'] = form.find('#read_type_' + id);
-  sample_input_fields['organism'] = form.find('#sample_organism_' + id);
-  sample_input_fields['length'] = form.find('#sample_length_' + id);
-  sample_input_fields['stdev'] = form.find('#sample_stdev_' + id);
-
-  return sample_input_fields;
-}
-
-/**
- * Sets all the metadata with values from the form.
- */
-function set_all_meta() {
-  // Set project meta.
-  set_proj_meta(get_proj_meta());
-
-  for (var id in sample_forms) {
-    set_sample_meta(id, get_sample_meta(id));
-  }
-}
-
-/**
- * Set global proj dictionary with the values given.
- */
-function set_proj_meta(meta) {
-  for (var cat in meta) {
-    var val = meta[cat];
-
-    switch (cat) {
-      case 'meta':
-        break;
-
-      case 'design':
-      default:
-        proj[cat] = val;
-    }
-  }
-
-  // Deal with meta field separately.
-  for (var cat in meta.meta) {
-    var val = meta.meta[cat];
-
-    switch (cat) {
-      case 'title':
-      case 'abstract':
-      case 'contributors':
-      case 'SRA_center_code':
-      case 'email':
-      default:
-        proj.meta[cat] = val;
-    }
-  }
-}
-
-/**
- * Set the specified sample in the global proj dictionary with
- * the values given.
- */
-function set_sample_meta(id, meta) {
-  for (var cat in meta) {
-    var val = meta[cat];
-
-    switch (cat) {
-      case 'meta':
-        break;
-
-      // If reads is present, that means it is paired.
-      case 'reads':
-        var new_reads = [];
-        for (var i = 0; i < val.length; i++) {
-          var pair = val[i];
-          var read_1 = pair[0];
-          var read_2 = pair[1];
-          var new_pair = [proj.samples[id][cat][read_1],
-                            proj.samples[id][cat][read_2]];
-
-          new_reads.push(new_pair);
-        }
-        proj.samples[id][cat] = new_reads;
-        break;
-
-      case 'name':
-      case 'type':
-      case 'organism':
-      case 'ref_ver':
-      case 'length':
-      case 'stdev':
-      default:
-        proj.samples[id][cat] = val;
-    }
-  }
-
-  for (var cat in meta.meta) {
-    var val = meta.meta[cat];
-
-    switch (cat) {
-      case 'title':
-      case 'contributors':
-      case 'source':
-      case 'chars':
-      case 'description':
-        proj.samples[id].meta[cat] = val;
-    }
-  }
-}
-
-/**
- * Get project metadata inputs.
- */
-function get_proj_meta() {
-  var proj_meta = {};
-  proj_meta['meta'] = {};
-  proj_meta.meta['title'] = meta_input_fields.meta['title'].val();
-  proj_meta.meta['abstract'] = meta_input_fields.meta['abstract'].val();
-
-  // Get contributors.
-  proj_meta.meta['contributors'] = [];
-  for (var i = 0; i < proj_contributor_fields.length; i++) {
-    var field = proj_contributor_fields[i];
-    var contributor = field.children('input').val();
-
-    if (contributor != '' && contributor != null) {
-      proj_meta.meta['contributors'].push(contributor);
-    }
-  }
-  proj_meta.meta['email'] = meta_input_fields.meta['email'].val();
-  proj_meta.meta['SRA_center_code'] = meta_input_fields.meta['SRA_center_code'].val();
-  proj_meta['design'] = parseInt(meta_input_fields['design'].find('input:checked').val());
-
-  return proj_meta;
-}
+// /**
+//  * Get project metadata inputs.
+//  */
+// function get_proj_meta() {
+//   var proj_meta = {};
+//   proj_meta['meta'] = {};
+//   proj_meta.meta['title'] = meta_input_fields.meta['title'].val();
+//   proj_meta.meta['abstract'] = meta_input_fields.meta['abstract'].val();
+//
+//   // Get contributors.
+//   proj_meta.meta['contributors'] = [];
+//   for (var i = 0; i < proj_contributor_fields.length; i++) {
+//     var field = proj_contributor_fields[i];
+//     var contributor = field.children('input').val();
+//
+//     if (contributor != '' && contributor != null) {
+//       proj_meta.meta['contributors'].push(contributor);
+//     }
+//   }
+//   proj_meta.meta['email'] = meta_input_fields.meta['email'].val();
+//   proj_meta.meta['SRA_center_code'] = meta_input_fields.meta['SRA_center_code'].val();
+//   proj_meta['design'] = parseInt(meta_input_fields['design'].find('input:checked').val());
+//
+//   return proj_meta;
+// }
 
 /**
  * Get sample metadata inputs.
