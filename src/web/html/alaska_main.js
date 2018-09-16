@@ -2392,14 +2392,23 @@ function set_factor(div) {
 
     for (var factor_name in factor_names_to_class_names) {
       var class_name = factor_names_to_class_names[factor_name];
-      var checkbox = common_form.find('.' + class_name).find('input:checkbox');
+      var form_group = common_form.find('.' + class_name);
+      var checkbox = form_group.find('input:checkbox');
 
-      if (val == class_name) {
+      var common_form_class_name = 'sample_common_form';
+      var specific_form_class_name = 'sample_specific_form';
+
+      if (val == factor_name) {
         checkbox.prop('checked', false);
         checkbox.prop('disabled', true);
+        remove_from_form(form_group, common_form_class_name);
+        remove_from_form(form_group, specific_form_class_name);
       } else {
         checkbox.prop('disabled', false);
+        refresh_checkbox(checkbox, type);
       }
+      enable_disable_row(checkbox);
+
     }
   });
 }
@@ -3052,22 +3061,6 @@ function set_common_checkboxes(form) {
     var checkbox = $(this);
     refresh_checkbox(checkbox, type);
     enable_disable_row(checkbox);
-  });
-  checkboxes.change(function () {
-    var checkbox = $(this);
-
-    if (checkbox.prop('disabled')) {
-      var form_group = get_custom_group_from_checkbox(checkbox);
-      var class_name = get_custom_class(form_group);
-      var common_form_class_name = 'sample_common_form';
-      var specific_form_class_name = 'sample_specific_form';
-      remove_from_form(form_group, common_form_class_name);
-      remove_from_form(form_group, specific_form_class_name);
-    } else {
-      refresh_checkbox(checkbox, type);
-    }
-    enable_disable_row(checkbox);
-
   });
 
   checkboxes.each(function () {
