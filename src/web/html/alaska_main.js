@@ -3716,7 +3716,7 @@ function set_all_meta_inputs() {
         var form = sample_forms[id];
         read_object_from_temp('sample_' + id + '_inputs', function (obj) {
           // Give it a timeout so that everything else has been set up.
-          setTimeout(set_sample_meta_inputs, 2000, form, obj);
+          setTimeout(set_sample_meta_inputs, 3000, form, obj);
         });
       }
     });
