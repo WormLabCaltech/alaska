@@ -4282,7 +4282,6 @@ function set_choose_controls_modal(modal) {
       set_progress_bar_queued();
       goto_progress();
     });
-  }
 
   // Depending on the project design, show a different description.
   var text;
