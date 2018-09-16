@@ -4166,7 +4166,7 @@ function show_matching_controls(form_group) {
   for (var i = 0; i < samples.length; i++) {
     var sample = samples[i];
     var list_item = $('<li>', {
-      text: proj.sample[id].name;
+      text: proj.sample[id].name
     });
     sample_list.append(list_item);
     valid = true;
