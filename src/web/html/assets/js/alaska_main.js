@@ -2760,7 +2760,6 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var ele_name = ele.attr('name');
       var ele_id = ele.attr('id');
       var ele_for = ele.attr('for');
-      console.log(ele);
 
       if (ele_name != null && ele_name != '' && ele_name.includes('_share_')) {
         ele.attr('name', ele_name.replace('_share_', '_' + id + '_'));
@@ -3563,6 +3562,9 @@ function set_proj_meta_inputs(card, inputs) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
     }
   }
+
+  // Then, fire some changes.
+  card.find('input:text,select').change();
 }
 
 function set_common_meta_inputs(card, inputs) {
