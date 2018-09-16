@@ -3377,7 +3377,6 @@ function set_value_of_group_dropdown(form_group, val) {
 
     if (val == this_val) {
       option.prop('selected', true);
-      return false;
     }
   });
 }
@@ -3716,7 +3715,9 @@ function set_all_meta_inputs() {
         var form = sample_forms[id];
         read_object_from_temp('sample_' + id + '_inputs', function (obj) {
           // Give it a timeout so that everything else has been set up.
-          setTimeout(set_sample_meta_inputs, 2000, form, obj);
+          setTimeout(function () {
+            set_sample_meta_inputs(form, obj);
+          }, 2000);
         });
       }
     });
