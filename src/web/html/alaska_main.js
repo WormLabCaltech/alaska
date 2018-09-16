@@ -2383,34 +2383,6 @@ function set_factor(div) {
   set_custom_dropdown(name_div, Object.keys(factor_names_to_class_names));
   set_fluid_input_rows(values_div);
 
-  // Set an additional on change listener for the select.
-  var select = name_group.find('select');
-  select.change(function () {
-    var select = $(this);
-    var selected = select.children('option:selected');
-    var val = selected.val();
-
-    for (var factor_name in factor_names_to_class_names) {
-      var class_name = factor_names_to_class_names[factor_name];
-      var form_group = common_form.find('.' + class_name);
-      var checkbox = form_group.find('input:checkbox');
-
-      var common_form_class_name = 'sample_common_form';
-      var specific_form_class_name = 'sample_specific_form';
-
-      if (val == factor_name) {
-        checkbox.prop('checked', false);
-        checkbox.prop('disabled', true);
-        remove_from_form(form_group, common_form_class_name);
-        remove_from_form(form_group, specific_form_class_name);
-      } else {
-        checkbox.prop('disabled', false);
-        refresh_checkbox(checkbox, type);
-      }
-      enable_disable_row(checkbox);
-
-    }
-  });
 }
 
 /**
@@ -2580,6 +2552,33 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var label = factor_group.find('label');
       var name = get_value_from_custom_dropdown(name_div);
       label.text('Factor 1: ' + name);
+    }
+
+    // To enable, disable preset factor names.
+    if ($(this).is('select')) {
+      var select = $(this);
+      var selected = select.children('option:selected');
+      var val = selected.val();
+
+      for (var factor_name in factor_names_to_class_names) {
+        var class_name = factor_names_to_class_names[factor_name];
+        var form_group = common_form.find('.' + class_name);
+        var checkbox = form_group.find('input:checkbox');
+
+        var common_form_class_name = 'sample_common_form';
+        var specific_form_class_name = 'sample_specific_form';
+
+        if (val == factor_name) {
+          checkbox.prop('checked', false);
+          checkbox.prop('disabled', true);
+          remove_from_form(form_group, common_form_class_name);
+          remove_from_form(form_group, specific_form_class_name);
+        } else {
+          checkbox.prop('disabled', false);
+          refresh_checkbox(checkbox, type);
+        }
+        enable_disable_row(checkbox);
+      }
     }
   });
 
@@ -3059,7 +3058,7 @@ function set_common_checkboxes(form) {
   var checkboxes = form.find('input:checkbox');
   checkboxes.click(function () {
     var checkbox = $(this);
-    refresh_checkbox(checkbox, type);
+    refresh_checkbox(checkbox);
     enable_disable_row(checkbox);
   });
 
