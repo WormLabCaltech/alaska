@@ -1311,13 +1311,10 @@ function set_choose_sample_button(dropdown, forms) {
 /**
  * Set reads table for the specified sample.
  */
-function set_reads_table(id, form) {
+function set_reads_table(form) {
   // Set the reads table.
-  var sample_reads_table_id = 'sample_reads_table_' + id + '_row_num';
-  var folder_id = 'folder_' + id + '_num';
-  var filename_id = 'filename_' + id + '_num';
-  var size_id = 'size_' + id + '_num';
-  var md5_id = 'md5_' + id + '_num';
+  var table = form.find('.sample_reads_table');
+
   for (var path in proj.samples[id].reads) {
     // Extract folder, filename, size and md5.
     split = path.split('/');
@@ -1329,26 +1326,11 @@ function set_reads_table(id, form) {
     var size = proj.samples[id].reads[path].size / Math.pow(1024, 2);
     var md5 = proj.samples[id].reads[path].md5;
 
-    // Construct row.
-    var new_sample_reads_table_id = sample_reads_table_id.replace('num', path);
-    var new_folder_id = folder_id.replace('num', path);
-    var new_filename_id = filename_id.replace('num', path);
-    var new_size_id = size_id.replace('num', path);
-    var new_md5_id = md5_id.replace('num', path);
-
-    // Change row id.
-    var row = form.find('#' + sample_reads_table_id).clone();
-    row.attr('id', new_sample_reads_table_id);
-
-    // Change cell ids.
-    var folder_cell = row.children('#' + folder_id);
-    var filename_cell = row.children('#' + filename_id);
-    var size_cell = row.children('#' + size_id);
-    var md5_cell = row.children('#' + md5_id);
-    folder_cell.attr('id', new_folder_id);
-    filename_cell.attr('id', new_filename_id);
-    size_cell.attr('id', new_size_id);
-    md5_cell.attr('id', new_md5_id);
+    var row = table.find('tr[style*="display:none"]').clone();
+    var folder_cell = row.children('.sample_read_folder');
+    var filename_cell = row.children('.sample_read_filename');
+    var size_cell = row.children('.sample_read_size');
+    var md5_cell = row.children('.sample_read_md5');
 
     // Then, set the values.
     folder_cell.text(folder);
@@ -1357,7 +1339,7 @@ function set_reads_table(id, form) {
     md5_cell.text(md5);
 
     // Append row.
-    form.find('#sample_reads_table_' + id).append(row);
+    table.find('tbody').append(row);
     row.show();
   }
 }
@@ -3728,7 +3710,7 @@ function set_all_meta_inputs() {
 
     var common_inputs = $('#sample_common_form');
     read_object_from_temp('common_inputs', function (obj) {
-      setTimeout(set_common_meta_inputs, 1000, common_inputs, obj);
+      setTimeout(set_common_meta_inputs, 1500, common_inputs, obj);
 
       for (var id in sample_forms) {
         var form = sample_forms[id];
@@ -4096,7 +4078,7 @@ function set_samples_meta_input() {
     // set_paired_end(id, new_sample_form);
 
     // Set the reads table for this sample.
-    // set_reads_table(id, new_sample_form);
+    set_reads_table(new_sample_form);
 
     // Characteristics.
     set_fluid_input_rows(new_sample_form.find('.sample_specific_characteristics_group'));

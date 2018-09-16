@@ -148,14 +148,6 @@
                 <div class="col">
                     <h2 class="text-center text-white" style="font-weight:100;font-size:1.8em;">Part of the Alaska services are meant to help you fill out the metadata fields required for submission at the Gene Expression Omnibus.</h2>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <h3 class="text-center text-white" style="font-weight:100;font-size:1.2em;">Once you're done, click this button.</h3>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal" data-target="#choose_controls_modal">Verify metadata</button></div>
             </div><!--Choose samples modal.-->
 <div class="modal fade" id="check_meta_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -830,7 +822,7 @@
                     <div class="card mb-4 sample_common_card">
                         <div class="card-header alert-dark">
                             <h5 class="d-inline">Common Metadata</h5>
-                            <button class="btn btn-secondary btn-sm save_btn sample_save_btn ml-2" type="button" data-toggle="collapse" data-target="#sample_share_collapse_SAMPLEID">Show / Hide</button>
+                            <button class="btn btn-secondary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#sample_share_collapse_SAMPLEID">Show / Hide</button>
                         </div>
                         <div class="collapse" id="sample_share_collapse_SAMPLEID">
                             <div class="card-body">
@@ -840,10 +832,10 @@
                         </div>
                     </div>
                     <hr>
-                    <div class="form-group row mt-4">
-                        <label for="sample_reads_table_SAMPLEID" class="col-form-label col-sm-3">Reads</label>
+                    <div class="form-group row mt-4 sample_reads_table_group">
+                        <legend class="col-form-label col-sm-3">Reads</legend>
                         <div class="table-responsive col-sm-9">
-                            <table class="table table-bordered table-light table-sm sample_reads_table" id="sample_reads_table_SAMPLEID">
+                            <table class="table table-bordered table-light table-sm sample_reads_table">
                                 <thead>
                                     <tr>
                                         <th>Folder</th>
@@ -1103,6 +1095,16 @@
         </div>
     </div>
 </div></div>
+        <div id="meta_footer">
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center text-white" style="font-weight:100;font-size:1.2em;">Once you're done, click this button.</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal" data-target="#choose_controls_modal">Verify metadata</button></div>
+            </div>
+        </div>
     </div>
     <div class="container-fluid" id="main_content_div" style="margin-top: 18em;margin-bottom: 18em">
         <div class="row d-flex justify-content-center align-items-center">
