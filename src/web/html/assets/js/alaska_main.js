@@ -2687,8 +2687,6 @@ function enable_disable_row(checkbox) {
 
     if (checkbox.prop('checked')) {
       // Enable everything.
-      form_group.removeClass('text-muted');
-
       inputs.prop('disabled', false);
       textareas.prop('disabled', false);
       selects.prop('disabled', false);
@@ -2697,7 +2695,6 @@ function enable_disable_row(checkbox) {
       buttons.prop('disabled', false);
     } else {
       // Disable everything.
-      form_group.addClass('text-muted');
       inputs.prop('disabled', true);
       textareas.prop('disabled', true);
       selects.prop('disabled', true);
@@ -3703,13 +3700,14 @@ function save_all_meta_inputs() {
  * Read all meta inputs.
  */
 function set_all_meta_inputs() {
-  var proj_inputs = $('#proj');
-  read_object_from_temp('proj_inputs', function (obj, form) {
-    set_proj_meta_inputs(form, obj);
 
-    var common_inputs = $('#sample_common_form');
+  var common_inputs = $('#sample_common_form');
+  read_object_from_temp('common_inputs', function (obj, form) {
+    set_common_meta_inputs(form, obj);
+
+    var proj_inputs = $('#proj');
     read_object_from_temp('common_inputs', function (obj, form) {
-      set_common_meta_inputs(form, obj);
+      set_proj_meta_inputs(form, obj);
 
       for (var id in sample_forms) {
         var sample_form = sample_forms[id];
@@ -3718,8 +3716,8 @@ function set_all_meta_inputs() {
           setTimeout(set_sample_meta_inputs, 2000, form, obj);
         }, sample_form);
       }
-    }, common_inputs);
-  }, proj_inputs);
+    }, proj_inputs);
+  }, common_inputs);
 }
 
 /**
