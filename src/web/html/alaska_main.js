@@ -3360,6 +3360,10 @@ function set_value_of_group_dropdown(form_group, val) {
   });
 }
 
+function set_values_of_group_factor(form_group, vals) {
+  set_value_of_group_dropdown(vals.value);
+}
+
 /**
  * Set values to factor card.
  */
@@ -3494,7 +3498,7 @@ var getters_and_setters = {
   },
   group_factor: {
     get: get_values_from_group_factor,
-    set: set_value_of_group_dropdown
+    set: set_values_of_group_factor
   },
   factor_card: {
     get: get_values_from_factor_card,
@@ -3676,19 +3680,23 @@ function set_all_meta_inputs() {
   var proj_inputs = $('#proj');
   read_object_from_temp('proj_inputs', function (obj) {
     set_proj_meta_inputs(proj_inputs, obj);
-  });
 
-  var common_inputs = $('#sample_common_form');
-  read_object_from_temp('common_inputs', function (obj) {
-    set_common_meta_inputs(common_inputs, obj);
-  });
+    var common_inputs = $('#sample_common_form');
+    read_object_from_temp('common_inputs', function (obj) {
+      set_common_meta_inputs(common_inputs, obj);
 
-  for (var id in sample_forms) {
-    var form = sample_forms[id];
-    read_object_from_temp('sample_' + id + '_inputs', function (obj) {
-      set_sample_meta_inputs(form, obj);
+      for (var id in sample_forms) {
+        var form = sample_forms[id];
+        read_object_from_temp('sample_' + id + '_inputs', function (obj) {
+          set_sample_meta_inputs(form, obj);
+        });
+      }
     });
-  }
+  });
+
+
+
+
 }
 
 /*******************************************************************/
