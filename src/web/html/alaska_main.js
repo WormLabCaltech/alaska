@@ -2526,32 +2526,32 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var name = get_value_from_custom_dropdown(name_div);
       label.text('Factor 1: ' + name);
     }
+  });
 
-    // To enable, disable preset factor names.
-    if ($(this).is('select')) {
-      var select = $(this);
-      var selected = select.children('option:selected');
-      var val = selected.val();
+  // To enable, disable preset factor names.
+  name_div.find('select').change(function () {
+    var select = $(this);
+    var selected = select.children('option:selected');
+    var val = selected.val();
 
-      for (var factor_name in factor_names_to_class_names) {
-        var class_name = factor_names_to_class_names[factor_name];
-        var form_group = common_form.find('.' + class_name);
-        var checkbox = form_group.find('input:checkbox');
+    for (var factor_name in factor_names_to_class_names) {
+      var class_name = factor_names_to_class_names[factor_name];
+      var form_group = common_form.find('.' + class_name);
+      var checkbox = form_group.find('input:checkbox');
 
-        var common_form_class_name = 'sample_common_form';
-        var specific_form_class_name = 'sample_specific_form';
+      var common_form_class_name = 'sample_common_form';
+      var specific_form_class_name = 'sample_specific_form';
 
-        if (val == factor_name) {
-          checkbox.prop('checked', false);
-          checkbox.prop('disabled', true);
-          remove_from_form(form_group, common_form_class_name);
-          remove_from_form(form_group, specific_form_class_name);
-        } else {
-          checkbox.prop('disabled', false);
-          refresh_checkbox(checkbox);
-        }
-        enable_disable_row(checkbox);
+      if (val == factor_name) {
+        checkbox.prop('checked', false);
+        checkbox.prop('disabled', true);
+        remove_from_form(form_group, common_form_class_name);
+        remove_from_form(form_group, specific_form_class_name);
+      } else {
+        checkbox.prop('disabled', false);
+        refresh_checkbox(checkbox);
       }
+      enable_disable_row(checkbox);
     }
   });
 
@@ -2745,9 +2745,6 @@ function remove_from_form(form_group, from_form_class_name) {
 function copy_to_form(form_group, to_form_class_name, disable) {
   var class_name = get_custom_class(form_group);
   var index = common_meta_order.indexOf(class_name);
-  console.log(form_group);
-  console.log(class_name);
-  console.log(index);
 
   // If there is a select, we must save the select values.
   var select = form_group.find('select').eq(0);
@@ -3700,14 +3697,13 @@ function save_all_meta_inputs() {
  * Read all meta inputs.
  */
 function set_all_meta_inputs() {
+  var proj_inputs = $('#proj');
+  read_object_from_temp('proj_inputs', function (obj, form) {
+    set_proj_meta_inputs(form, obj);
 
-  var common_inputs = $('#sample_common_form');
-  read_object_from_temp('common_inputs', function (obj, form) {
-    set_common_meta_inputs(form, obj);
-
-    var proj_inputs = $('#proj');
+    var common_inputs = $('#sample_common_form');
     read_object_from_temp('common_inputs', function (obj, form) {
-      set_proj_meta_inputs(form, obj);
+      set_common_meta_inputs(form, obj);
 
       for (var id in sample_forms) {
         var sample_form = sample_forms[id];
@@ -3716,8 +3712,11 @@ function set_all_meta_inputs() {
           setTimeout(set_sample_meta_inputs, 2000, form, obj);
         }, sample_form);
       }
-    }, proj_inputs);
-  }, common_inputs);
+    }, common_inputs);
+  }, proj_inputs);
+
+  // Re-fire factor change.
+  proj_inputs.find('.proj_experimental_design_group').find('select').change();
 }
 
 /**
