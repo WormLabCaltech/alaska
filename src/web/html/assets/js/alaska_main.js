@@ -2792,6 +2792,14 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       });
     }
 
+    // If this is the sample characteristics class, we need to do additional
+    if (class_name == 'sample_characteristics_group') {
+      // Disable all rows except the add button.
+      copy.find('input,select,button,textarea').prop('disabled', true);
+      copy.find('button').eq(0).prop('disabled', false);
+      copy.find('div[style*="display:none"]').find('input,select,button,textarea').prop('disabled', false);
+    }
+
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
       // First, remove all event handlers from the copy.
@@ -2989,6 +2997,10 @@ function refresh_checkbox(checkbox) {
   // Deal with read type specially.
   if (checkbox.prop('checked')) {
     if (class_name == 'sample_read_type_group' && parseInt(form_group.find('input:radio:checked').val()) == 2) {
+      copy_to_form(form_group, specific_form_class_name, false);
+      remove_from_form(form_group, common_form_class_name);
+    } else if (class_name == 'sample_characteristics_group'){
+      // This group must always be placed in the sample-specific metadata.
       copy_to_form(form_group, specific_form_class_name, false);
       remove_from_form(form_group, common_form_class_name);
     } else {
@@ -3361,7 +3373,7 @@ function set_value_of_group_dropdown(form_group, val) {
 }
 
 function set_values_of_group_factor(form_group, vals) {
-  set_value_of_group_dropdown(vals.value);
+  set_value_of_group_dropdown(form_group, vals.value);
 }
 
 /**
@@ -3688,14 +3700,22 @@ function set_all_meta_inputs() {
       for (var id in sample_forms) {
         var form = sample_forms[id];
         read_object_from_temp('sample_' + id + '_inputs', function (obj) {
-          set_sample_meta_inputs(form, obj);
+          // Give it a timeout so that everything else has been set up.
+          setTimeout(set_sample_meta_inputs, 2000, form, obj);
         });
       }
     });
   });
+}
 
+/**
+ * Convert all inputs into the proj object (i.e. the format Alaska can use).
+ */
+function convert_proj_meta_inputs() {
 
+}
 
+function convert_common_meta_inputs() {
 
 }
 
