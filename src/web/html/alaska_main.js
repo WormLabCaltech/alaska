@@ -2366,14 +2366,42 @@ function set_custom_dropdown(div, choices) {
  * Sets everything that needs to be set for a factor selection card.
  */
 function set_factor(div) {
+  var factor_names_to_class_names = {
+    'genotype':           'sample_genotype_group',
+    'growth conditions':  'sample_growth_conditions_group',
+    'organism strain':    'sample_organism_strain_group',
+    'life-stage':         'sample_life-stage_group',
+    'tissue':             'sample_tissue_group'
+  };
+
   var name_group = div.find('.factor_name_group');
   var values_group = div.find('.factor_values_group');
 
   var name_div = name_group.children('.factor_name_inputs');
   var values_div = values_group.children('.factor_values_inputs');
 
-  set_custom_dropdown(name_div, Object.keys(factor_names_to_class_ids));
+  set_custom_dropdown(name_div, Object.keys(factor_names_to_class_names));
   set_fluid_input_rows(values_div);
+
+  // Set an additional on change listener for the select.
+  var select = name_group.find('select');
+  select.change(function () {
+    var select = $(this);
+    var selected = select.children('option:selected');
+    var val = selected.val();
+
+    for (var factor_name in factor_names_to_class_names) {
+      var class_name = factor_names_to_class_names[factor_name];
+      var checkbox = common_form.find('.' + class_name).find('input:checkbox');
+
+      if (val == class_name) {
+        checkbox.prop('checked', false);
+        checkbox.prop('disabled', true);
+      } else {
+        checkbox.prop('disabled', false);
+      }
+    }
+  });
 }
 
 /**
@@ -2970,9 +2998,9 @@ function get_closest_custom_parent(start) {
 }
 
 /**
- * Refresh which inputs are common and which are sample-specific.
+ * Get custom form group from checkbox.
  */
-function refresh_checkbox(checkbox) {
+function get_custom_group_from_checkbox(checkbox) {
   var form_group = checkbox;
   var class_name = "";
 
@@ -2981,11 +3009,22 @@ function refresh_checkbox(checkbox) {
     class_name = get_custom_class(form_group);
   }
 
+  return form_group;
+}
+
+/**
+ * Refresh which inputs are common and which are sample-specific.
+ */
+function refresh_checkbox(checkbox) {
+  var form_group = get_custom_group_from_checkbox(checkbox);
+  var class_name = get_custom_class(form_group);
+
   // Copy to different places depending on whether the checkbox is checked
   // or unchecked.
   var common_form_class_name = 'sample_common_form';
   var specific_form_class_name = 'sample_specific_form';
 
+  // If this is a click event.
   // Deal with read type specially.
   if (checkbox.prop('checked')) {
     if (class_name == 'sample_read_type_group' && parseInt(form_group.find('input:radio:checked').val()) == 2) {
@@ -3011,8 +3050,24 @@ function set_common_checkboxes(form) {
   var checkboxes = form.find('input:checkbox');
   checkboxes.click(function () {
     var checkbox = $(this);
-    refresh_checkbox(checkbox);
+    refresh_checkbox(checkbox, type);
     enable_disable_row(checkbox);
+  });
+  checkboxes.change(function () {
+    var checkbox = $(this);
+
+    if (checkbox.prop('disabled')) {
+      var form_group = get_custom_group_from_checkbox(checkbox);
+      var class_name = get_custom_class(form_group);
+      var common_form_class_name = 'sample_common_form';
+      var specific_form_class_name = 'sample_specific_form';
+      remove_from_form(form_group, common_form_class_name);
+      remove_from_form(form_group, specific_form_class_name);
+    } else {
+      refresh_checkbox(checkbox, type);
+    }
+    enable_disable_row(checkbox);
+
   });
 
   checkboxes.each(function () {
@@ -5049,13 +5104,6 @@ var progress = {
   'diff_finished':    13,
   'server_open':      14
   }
-var factor_names_to_class_ids = {
-  'genotype':           'sample_genotype_group',
-  'growth conditions':  'sample_growth_conditions_group',
-  'organism strain':    'sample_organism_strain_group',
-  'life-stage':         'sample_life-stage_group',
-  'tissue':             'sample_tissue_group'
-};
 var life_stages = [
   'L1', 'L2', 'L3', 'L4', 'Young Adult', 'Adult', 'Embryo', 'Mixed'
 ];
