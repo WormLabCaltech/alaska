@@ -149,6 +149,7 @@ for (i in 1:length(conditions)) {
 }
 
 print('#Writing sleuth object.')
+so_file = paste(output_dir, 'so.rds', sep='/')
 saveRDS(so, file=so_file)
 
 
