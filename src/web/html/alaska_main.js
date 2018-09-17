@@ -2534,6 +2534,7 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
     var selected = select.children('option:not(:disabled):selected');
     var val = selected.val();
 
+    // Skip if null.
     if (val == null) {
       return;
     }
