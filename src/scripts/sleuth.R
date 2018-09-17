@@ -62,13 +62,47 @@ output_dir <- opt$o
 
 #get ids
 print('# Reading analysis matrix')
-sample_ids <- list.dirs(kallisto, recursive=FALSE, full.names=FALSE)
-kal_dirs <- sapply(sample_ids, function(id) file.path(kallisto, id))
-metadata <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
 
-print('# Appending path to kallisto abundance.h5 files.')
-metadata <- dplyr::mutate(s2c, path=file.path(kallisto, sample, 'abundance.h5'))
+# Determine the number of factors.
+conditions = vector()
+for (column_name in colnames(metadata)) {
+  if (strcmp(column_name, 'sample')) {
+    next
+  }
 
+  conditions <- c(conditions, column_name)
+}
+print(paste('# ', length(conditions), ' conditions detected'))
+if (length(conditions) > 2) {
+  stop('More than 2 conditions detected.')
+}
+
+print('# Appending path to kallisto result folders.')
+s2c <- dplyr::mutate(s2c, path=file.path(kallisto, sample))
+
+print('# Creating Sleuth object.')
+so <- sleuth_prep(metadata, target_mapping = t2g, extra_bootstrap_summary = TRUE)
+
+# Fit reduced model.
+print('# Fitting reduced model.')
+if (length(conditions) == 1) {
+  condition <- '~1'
+} else {
+  condition <- paste('~', conditions[1])
+}
+so <- sleuth_fit(so, eval(parse(text=condition)), 'reduced')
+
+# Fit full model.
+print('# Fitting full model.')
+if (length(conditions) == 1) {
+  condition <- paste('~', conditions[1])
+} else {
+  condition <- paste('~', conditions[1], '+', conditions[2])
+}
+so <- sleuth_fit(so, eval(parse(text=condition)), 'full')
+
+models(so)
 
 
 

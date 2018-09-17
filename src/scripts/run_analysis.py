@@ -382,7 +382,7 @@ def run_sleuth(proj):
     """
     args = ['Rscript']
     args += ['./sleuth.R']
-    args += ['-d', '.']
+    args += ['-d', './3_diff_exp']
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
     # args += ['--shiny']
