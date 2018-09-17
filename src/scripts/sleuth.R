@@ -124,12 +124,12 @@ for (i in 1:length(conditions)) {
     }
 
     print(paste('# Computing wald test on condition ', condition, ':', name, sep=''))
-    so <- sleuth_wt(so, which_beta = name, which_model = 'full')
+    so <- sleuth_wt(so, which_beta=paste(condition, name, sep=''), which_model='full')
   }
 }
 
 
-print('# Writing sleuth tables.')
+print('# Writing likelihood ratio test sleuth table.')
 sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
 write.csv(sleuth_table, paste(output_dir, 'sleuth_table_lrt.csv', sep='/'))
 for (i in 1:length(conditions)) {
@@ -141,9 +141,9 @@ for (i in 1:length(conditions)) {
       next
     }
 
-    print(paste('# Computing wald test on condition ', condition, ':', name, sep=''))
-    results_table <- sleuth_results(so, name, 'full', test_type = 'wt')
-    output_file = paste('sleuth_table_', condition, '_', condition_name, '.csv', sep='')
+    print(paste('# Writing Wald test sleuth table for ', condition, ':', name, sep=''))
+    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full', test_type='wt')
+    output_file = paste('sleuth_table_wt_', condition, '_', condition_name, '.csv', sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
