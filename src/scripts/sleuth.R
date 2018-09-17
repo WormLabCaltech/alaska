@@ -143,7 +143,7 @@ for (i in 1:length(conditions)) {
 
     print(paste('# Writing Wald test sleuth table for ', condition, ':', name, sep=''))
     results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full', test_type='wt')
-    output_file = paste('sleuth_table_wt_', condition, '_', condition_name, '.csv', sep='')
+    output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv', sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
