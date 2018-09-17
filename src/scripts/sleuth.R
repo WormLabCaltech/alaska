@@ -148,8 +148,7 @@ for (i in 1:length(conditions)) {
   }
 }
 
-print(paste('#Writing sleuth object to', so_file))
-so_file = paste(output_dir, 'so.rds', sep='/')
+print(paste('#Writing sleuth object.')
 saveRDS(so, file=so_file)
 
 
