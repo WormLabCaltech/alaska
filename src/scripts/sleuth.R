@@ -148,7 +148,7 @@ for (i in 1:length(conditions)) {
   }
 }
 
-print(paste('#Writing sleuth object.')
+print('#Writing sleuth object.')
 saveRDS(so, file=so_file)
 
 
