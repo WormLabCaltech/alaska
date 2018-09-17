@@ -2531,8 +2531,12 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
   // To enable, disable preset factor names.
   name_div.find('select').change(function () {
     var select = $(this);
-    var selected = select.children('option:selected');
+    var selected = select.children('option:not(:disabled):selected');
     var val = selected.val();
+
+    if (val == null) {
+      return;
+    }
 
     for (var factor_name in factor_names_to_class_names) {
       var class_name = factor_names_to_class_names[factor_name];
@@ -2543,8 +2547,8 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var specific_form_class_name = 'sample_specific_form';
 
       if (val == factor_name) {
-        checkbox.prop('checked', false);
         checkbox.prop('disabled', true);
+        checkbox.prop('checked', false);
         remove_from_form(form_group, common_form_class_name);
         remove_from_form(form_group, specific_form_class_name);
       } else {
