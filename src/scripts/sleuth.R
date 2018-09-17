@@ -47,7 +47,7 @@ t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id',
 print('#Renaming genes')
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
-ttg <- dplyr::select(ttg, c('target_id', 'ens_gene', 'ext_gene'))
+t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 
 #point to your directory
 base_dir <- opt$d
