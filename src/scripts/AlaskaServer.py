@@ -1573,9 +1573,14 @@ class AlaskaServer(Alaska):
 
             if all('wt' in read for read in sample.reads):
                 sample.meta['chars']['genotype'] = 'wt'
-                proj.ctrls[sid] = 'genotype'
             elif all('mt' in read for read in sample.reads):
                 sample.meta['chars']['genotype'] = 'mt'
+        proj.factors = [
+            {'name':'genotype', 'values':['wt', 'mt']}
+        ]
+        proj.controls = [
+            {'name': 'genotype', 'value': 'wt'}
+        ]
 
         # finalize project
         proj.save(Alaska.TEMP_DIR)

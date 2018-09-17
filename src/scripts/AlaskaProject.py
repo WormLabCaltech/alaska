@@ -259,8 +259,8 @@ class AlaskaProject(Alaska):
         sample_names = []
         for sample_id in self.samples:
             sample_names.append(self.samples[sample_id].name)
-        df = pd.DataFrame(sample_names, columns=['samples'])
-        df.set_index('samples', inplace=True)
+        df = pd.DataFrame(sample_names, columns=['sample'])
+        df.set_index('sample', inplace=True)
 
         # Add a column for each factor.
         for i in range(self.design):
@@ -281,8 +281,8 @@ class AlaskaProject(Alaska):
 
                 column.append([name, factor_value])
 
-            col = pd.DataFrame(column, columns=['samples', control_name])
-            col.set_index('samples', inplace=True)
+            col = pd.DataFrame(column, columns=['sample', control_name])
+            col.set_index('sample', inplace=True)
             df = pd.concat([df, col], axis=1, sort=True)
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)
