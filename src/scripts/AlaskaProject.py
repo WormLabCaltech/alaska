@@ -181,7 +181,7 @@ class AlaskaProject(Alaska):
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id, folder)
-            
+
             if temp is not None: # if temporary variable is given
                 temp[_id] = sample
 
@@ -270,8 +270,8 @@ class AlaskaProject(Alaska):
             control_value = control['value']
 
             for sample_id, sample in self.samples.items():
-                name = sample['name']
-                factor_value = sample['meta']['chars'][control_name]
+                name = sample.name
+                factor_value = sample.meta['chars'][control_name]
 
                 # append a_ if this is a control. otherwise append b_
                 if (factor_value == control_value):
