@@ -42,9 +42,8 @@ mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
                          biomart = 'metazoa_mart',
                          dataset = 'celegans_eg_gene')
 print('#Fetching bioMart info (2/2)')
-t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'transcript_version',
-                            'ensembl_gene_id', 'external_gene_name', 'description',
-                            'transcript_biotype'), mart = mart)
+t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id',
+                            'external_gene_name'), mart = mart)
 print('#Renaming genes')
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
