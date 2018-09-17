@@ -343,7 +343,7 @@ class AlaskaServer(Alaska):
                             job.docker.output.append(out) # append output
                             with open(out_path, 'a') as f:
                                 f.write('{}\n'.format(out))
-                            # self.out('{}: {}: {}'.format(proj_id, job_name, out))
+                            self.out('{}: {}: {}'.format(proj_id, job_name, out))
                 except Exception as e:
                     self.out('ERROR: error occured while starting container {}'.format(job.docker.id))
                 finally:
@@ -1180,12 +1180,6 @@ class AlaskaServer(Alaska):
         new_proj = AlaskaProject(_id)
         self.projects[_id] = new_proj
         new_proj.load(Alaska.TEMP_DIR)
-
-        # remove temporary files
-        f = '{}/{}.json'.format(proj.temp_dir, _id)
-        if os.path.isfile(f):
-            os.remove(f)
-            self.broadcast(_id, '{}: {} removed'.format(_id, f))
 
         # convert temporary samples to permanent samples
         self.samples = {**self.samples, **new_proj.samples}
