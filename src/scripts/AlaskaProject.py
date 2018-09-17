@@ -181,8 +181,9 @@ class AlaskaProject(Alaska):
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id, folder)
-            # if temp is not None: # if temporary variable is given
-            #     temp[_id] = sample
+            
+            if temp is not None: # if temporary variable is given
+                temp[_id] = sample
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
@@ -191,7 +192,6 @@ class AlaskaProject(Alaska):
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
-        temp = {**temp, **self.samples}
 
     def analyze_reads(self):
         """
