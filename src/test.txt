@@ -1,0 +1,4 @@
+samples condition_1 condition_2
+sample_1 a d
+sample_3 b e
+sample_2 c f
