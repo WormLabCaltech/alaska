@@ -28,6 +28,7 @@ class AlaskaSample(Alaska):
         self.id = _id
         self.name = name
         self.type = 1 # 1: single-end, 2: pair-end
+        self.pairs = []
         self.organism = ''
         self.ref_ver = '' # kallisto index for this sample
         self.length = 0 # used for single-end
@@ -45,4 +46,3 @@ class AlaskaSample(Alaska):
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-

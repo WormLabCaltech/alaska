@@ -4199,16 +4199,16 @@ function set_choose_controls_modal(modal, factors) {
   select.change({
     'btn': start_btn,
     'tooltip': start_tooltip,
-    'group': samples_group
   }, function (e) {
     var btn = e.data.btn;
     var tooltip = e.data.tooltip;
-    var group = e.data.group;
+    var select = $(this);
+    var samples_group = select.parent().parent().parent().children('.proj_control_samples_group');
 
     btn.prop('disabled', true);
     btn.css('pointer-events', 'none');
     tooltip.tooltip('enable');
-    group.collapse('hide');
+    samples_group.collapse('hide');
   });
 
   // Set up each factor.

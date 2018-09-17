@@ -3747,7 +3747,10 @@ function convert_proj_meta_inputs(card) {
       case 'proj_contributors_group':
         for (var i = 0; i < input.length; i++) {
           var contributor = input[i][0];
-          obj.meta.contributors.push(contributor);
+
+          if (contributor != null && contributor != '') {
+            obj.meta.contributors.push(contributor);
+          }
         }
         break;
 
@@ -4199,16 +4202,16 @@ function set_choose_controls_modal(modal, factors) {
   select.change({
     'btn': start_btn,
     'tooltip': start_tooltip,
-    'group': samples_group
   }, function (e) {
     var btn = e.data.btn;
     var tooltip = e.data.tooltip;
-    var group = e.data.group;
+    var select = $(this);
+    var samples_group = select.parent().parent().parent().children('.proj_control_samples_group');
 
     btn.prop('disabled', true);
     btn.css('pointer-events', 'none');
     tooltip.tooltip('enable');
-    group.collapse('hide');
+    samples_group.collapse('hide');
   });
 
   // Set up each factor.
@@ -4280,10 +4283,16 @@ function set_choose_controls_modal(modal, factors) {
         var samples_list = samples_group.children('ul');
         samples_list.children('li').remove();
         var samples = chars_details_to_samples[name][value];
+        var sample_names = [];
         for (var j = 0; j < samples.length; j++) {
           var id = samples[j];
+          sample_names.append(id);
+        }
+
+        sample_names.sort();
+        for (var j = 0; j < sample_names.length; j++) {
           var li = $('<li>', {
-            text: proj.samples[id].name
+            text: sample_names[j];
           });
           samples_list.append(li);
         }
@@ -4311,6 +4320,8 @@ function set_choose_controls_modal(modal, factors) {
   // Bind the start analysis button.
   start_btn.click(function () {
     console.log('start analysis');
+    write_proj();
+    start_analysis();
   });
 }
 
@@ -4377,48 +4388,48 @@ function start_analysis() {
 //   }
 // }
 
-/**
- * Verifies the controls.
- * We only need to verify whether the two controls are different.
- * (This only applies to 2-factor design.)
- */
-function verify_controls(controls) {
-  chars = {};
-  for (var i = 0; i < controls.length; i++) {
-    var ctrl = controls[i];
-
-    var char_id = 'proj_control_char_' + i;
-    var detail_id = 'proj_control_detail_' + i;
-    var list_id = 'control_samples_' + i;
-    var char_dropdown = ctrl.find('#' + char_id);
-    var detail_dropdown = ctrl.find('#' + detail_id);
-    var list = ctrl.find('#' + list_id);
-    var char = char_dropdown.children('option:selected').val();
-    var detail = detail_dropdown.children('option:selected').val();
-    char_dropdown.removeClass('is-invalid');
-    detail_dropdown.removeClass('is-invalid');
-    list.hide();
-    list.find('ul li').remove();
-
-    // First, make sure something is selected.
-    if (char == null || char == '') {
-      char_dropdown.addClass('is-invalid');
-    }
-    if (detail == null || detail == '') {
-      detail_dropdown.addClass('is-invalid');
-    }
-
-    // Then, check whether any has the same characteristic-detail pair.
-    if (!(char in chars)) {
-      chars[char] = {};
-    }
-    if (!(detail in chars[char])) {
-      chars[char][detail] = detail_dropdown;
-    } else {
-      detail_dropdown.addClass('is-invalid');
-      chars[char][detail].addClass('is-invalid');
-    }
-  }
+// /**
+//  * Verifies the controls.
+//  * We only need to verify whether the two controls are different.
+//  * (This only applies to 2-factor design.)
+//  */
+// function verify_controls(controls) {
+//   chars = {};
+//   for (var i = 0; i < controls.length; i++) {
+//     var ctrl = controls[i];
+//
+//     var char_id = 'proj_control_char_' + i;
+//     var detail_id = 'proj_control_detail_' + i;
+//     var list_id = 'control_samples_' + i;
+//     var char_dropdown = ctrl.find('#' + char_id);
+//     var detail_dropdown = ctrl.find('#' + detail_id);
+//     var list = ctrl.find('#' + list_id);
+//     var char = char_dropdown.children('option:selected').val();
+//     var detail = detail_dropdown.children('option:selected').val();
+//     char_dropdown.removeClass('is-invalid');
+//     detail_dropdown.removeClass('is-invalid');
+//     list.hide();
+//     list.find('ul li').remove();
+//
+//     // First, make sure something is selected.
+//     if (char == null || char == '') {
+//       char_dropdown.addClass('is-invalid');
+//     }
+//     if (detail == null || detail == '') {
+//       detail_dropdown.addClass('is-invalid');
+//     }
+//
+//     // Then, check whether any has the same characteristic-detail pair.
+//     if (!(char in chars)) {
+//       chars[char] = {};
+//     }
+//     if (!(detail in chars[char])) {
+//       chars[char][detail] = detail_dropdown;
+//     } else {
+//       detail_dropdown.addClass('is-invalid');
+//       chars[char][detail].addClass('is-invalid');
+//     }
+//   }
 
   // Then, show selected controls for ones that are not invalid.
   var valid = true;

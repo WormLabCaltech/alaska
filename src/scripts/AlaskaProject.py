@@ -47,7 +47,8 @@ class AlaskaProject(Alaska):
         self.raw_reads = {}
         self.samples = {}
         self.design = 1 # 1: single-factor, 2: two-factor
-        self.ctrls = {} # controls
+        self.controls = [] # controls
+        self.factors = []
 
         self.progress = 0 # int to denote current analysis progress
 
@@ -254,23 +255,37 @@ class AlaskaProject(Alaska):
         """
         Writes rna_seq_info.txt
         """
-        if self.design == 1: # single-factor
-            # write design matrix txt
-            ctrl_ftr = list(self.ctrls.values())[0]
-            head = ['sample', 'condition']
-            data = []
-            for _id, sample in self.samples.items():
-                if _id in self.ctrls:
-                    ftr = 'a_{}'.format(sample.meta['chars'][ctrl_ftr])
-                else:
-                    ftr = 'b_{}'.format(sample.meta['chars'][ctrl_ftr])
-                data.append([sample.name, ftr]) # TODO: batch??
-            # convert to dataframe and save with space as delimiter
-            df = pd.DataFrame(data, columns=head)
-        elif self.design == 2: # two-factor
-            pass # TODO: implement
+        # First, let's construct a DataFrame with just one column.
+        sample_names = []
+        for sample_id in self.samples:
+            sample_names.append(self.samples[sample_id].name)
+        df = pd.DataFrame(sample_names, columns=['samples'])
+        df.set_index('samples', inplace=True)
 
-        df.to_csv('{}/rna_seq_info.txt'.format(self.dir), sep=' ', index=False)
+        # Add a column for each factor.
+        for i in range(self.design):
+            column = []
+            control = self.controls[i]
+            control_name = control['name']
+            control_value = control['value']
+
+            for sample_id, sample in self.samples.items():
+                name = sample['name']
+                factor_value = sample['meta']['chars'][control_name]
+
+                # append a_ if this is a control. otherwise append b_
+                if (factor_value == control_value):
+                    factor_value = 'a_' + factor_value
+                else:
+                    factor_value = 'b_' + factor_value
+
+                column.append([name, factor_value])
+
+            col = pd.DataFrame(column, columns=['samples', control_name])
+            col.set_index('samples', inplace=True)
+            df = pd.concat([df, col], axis=1, sort=True)
+
+        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)
 
     def save(self, folder=None):
         """

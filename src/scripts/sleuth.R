@@ -42,12 +42,13 @@ mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
                          biomart = 'metazoa_mart',
                          dataset = 'celegans_eg_gene')
 print('#Fetching bioMart info (2/2)')
-t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id',
-                                     'external_gene_name'), mart = mart)
+t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'transcript_version',
+                            'ensembl_gene_id', 'external_gene_name', 'description',
+                            'transcript_biotype'), mart = mart)
 print('#Renaming genes')
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
-
+ttg <- dplyr::select(ttg, c('target_id', 'ens_gene', 'ext_gene'))
 
 #point to your directory
 base_dir <- opt$d
@@ -60,10 +61,17 @@ output_dir <- opt$o
 
 
 #get ids
-print('#Reading analysis matrix')
-sample_id <- list.dirs(kallisto, recursive=FALSE, full.names=FALSE)
-kal_dirs <- sapply(sample_id, function(id) file.path(kallisto, id))
-s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+print('# Reading analysis matrix')
+sample_ids <- list.dirs(kallisto, recursive=FALSE, full.names=FALSE)
+kal_dirs <- sapply(sample_ids, function(id) file.path(kallisto, id))
+metadata <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+
+print('# Appending path to kallisto abundance.h5 files.')
+metadata <- dplyr::mutate(s2c, path=file.path(kallisto, sample, 'abundance.h5'))
+
+
+
+
 # print(sample_id)
 # print(kal_dirs)
 # print(s2c)
