@@ -1038,49 +1038,27 @@
                 </div>
                 <hr />
                 <div class="modal-title" id="design_description">
-                    <h5 id="design_header">This project is a FACTOR design.</h5>
+                    <h5 id="choose_controls_header">This project is a FACTOR design.</h5>
                 </div>
-                <hr />
-                <form>
-                    <div class="form-group proj_control_group" id="proj_control_0">
-                        <div class="row">
-                            <label for="proj_control_name_0" class="col-form-label col-sm-4">Factor 1 name</label>
+                <form class="proj_control_form">
+                    <div class="form-group proj_control_group" style="display:none">
+                        <hr />
+                        <div class="row proj_control_name_group">
+                            <legend class="col-form-label col-sm-4">FACTOR_NUM name</legend>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" id="proj_control_name_0" disabled>
+                                <input type="text" class="form-control" disabled>
                             </div>
                         </div>
-                        <div class="row mt-2">
-                            <label for="proj_control_value_0" class="col-form-label col-sm-4">Factor 1 control value</label>
+                        <div class="row mt-2 proj_control_values_group">
+                            <legend class="col-form-label col-sm-4">FACTOR_NUM control value</legend>
                             <div class="col-sm-6">
-                                <select class="custom-select" id="proj_control_value_0" required>
-                                    <option selected disabled hidden value="">Please select a value.</option>
+                                <select class="custom-select" required>
+                                    <option selected disabled hidden>Please select a value.</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="mt-4" id="control_samples_0" style="display:none">
-                            The following samples will be selected as controls for this characteristic:
-                            <ul>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="form-group proj_control_group" id="proj_control_1" style="display:none">
-                    <hr />
-                        <div class="row">
-                            <label for="proj_control_name_1" class="col-form-label col-sm-4">Factor 2 name</label>
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control" id="proj_control_name_1" disabled>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <label for="proj_control_value_1" class="col-form-label col-sm-4">Factor 2 control value</label>
-                            <div class="col-sm-6">
-                                <select class="custom-select" id="proj_control_value_1" required>
-                                    <option selected disabled hidden value="">Please select a value.</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-4" id="control_samples_1" style="display:none">
-                            The following samples will be selected as controls for this characteristic:
+                        <div class="mt-4 collapse proj_control_samples_group">
+                            The following samples will be selected as controls for this factor:
                             <ul>
                             </ul>
                         </div>

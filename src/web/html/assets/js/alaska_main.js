@@ -2531,8 +2531,12 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
   // To enable, disable preset factor names.
   name_div.find('select').change(function () {
     var select = $(this);
-    var selected = select.children('option:selected');
+    var selected = select.children('option:not(:disabled):selected');
     var val = selected.val();
+
+    if (val == null) {
+      return;
+    }
 
     for (var factor_name in factor_names_to_class_names) {
       var class_name = factor_names_to_class_names[factor_name];
@@ -2543,8 +2547,8 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
       var specific_form_class_name = 'sample_specific_form';
 
       if (val == factor_name) {
-        checkbox.prop('checked', false);
         checkbox.prop('disabled', true);
+        checkbox.prop('checked', false);
         remove_from_form(form_group, common_form_class_name);
         remove_from_form(form_group, specific_form_class_name);
       } else {
@@ -4174,124 +4178,134 @@ function show_matching_controls(form_group) {
 /**
  * Sets the choose controls modal with the appropriate information.
  */
-function set_choose_controls_modal(modal) {
-  var design = proj.design;
-  var factors = proj.factors;
+function set_choose_controls_modal(modal, factors) {
+  // First, let's set the header.
+  var header = modal.find('.choose_controls_header');
+  var form = modal.find('.proj_control_form');
+  header.text(header.text().replace('FACTOR', factors.length + '-factor'));
+
+  // Set up common listener first.
   var validate_btn = modal.find('#validate_controls_btn');
   var start_btn = modal.find('#start_analysis_btn');
-  var control_groups = modal.find('.proj_control_group');
-  var control_group_1 = control_groups.eq(0);
-  var control_group_2 = control_groups.eq(1);
-  var tooltip = modal.find('#start_analysis_tooltip');
-  tooltip.tooltip();
+  var start_tooltip = modal.find('#start_analysis_tooltip');
+  var control_group = modal.find('.proj_control_group[style*="display:none"]').clone();
 
-  // Deal with first factor.
-  var control_group_1_divs = control_group_1.children('div');
-  var control_1_name = control_group_divs.eq(0);
-  var control_1_value = control_group_divs.eq(1);
-  var control_1_value_select = control_1_value.find('select');
-  var control_1_samples = control_group_divs.filter('[style*="display:none"]');
-  control_1_name.find('input').val(factors[0].name);
-  for (var i = 0; i < factors[0].values.length; i++) {
-    var value = factors[0].values[i];
-    var option = $('<option>', {
-      text: value
+  // Initialize tooltip.
+  start_tooltip.tooltip();
+
+  // If the select changes, we need to disable the start button and enable
+  // the tooltip.
+  var select = control_group.find('select');
+  select.change({
+    'btn': start_btn,
+    'tooltip': start_tooltip
+  }, function (e) {
+    var btn = e.data.btn;
+    var tooltip = e.data.tooltip;
+
+    btn.prop('disabled', true);
+    btn.css('pointer-events', 'none');
+    tooltip.tooltip('enable');
+  });
+
+  // Set up each factor.
+  var control_groups = [];
+  for (var i = 0; i < factors.length; i++) {
+    var factor_num = i + 1;
+    var factor = factors[i];
+    var factor_name = factor.name;
+    var factor_values = factor.values;
+    var new_control_group = control_group.clone(true);
+    control_groups.push(new_control_group);
+
+    // Then, change the text of each legend to match this factor.
+    var legends = new_control_group.find('legend');
+    legends.each(function () {
+      var legend = $(this);
+      legend.text(legend.text().replace('FACTOR_NUM', 'Factor ' + factor_num));
     });
-    control_1_value_select.append(option);
-  }
 
-  // Deal with second factor if design = 2.
-  if (design == 2) {
-    control_group_2.show();
-    var control_group_2_divs = control_group_2.children('div');
-    var control_2_name = control_group_divs.eq(0);
-    var control_2_value = control_group_divs.eq(1);
-    var control_2_samples = control_group_divs.filter('[style*="display:none"]');
-    control_2_name.find('input').val(factors[1].name);
-    for (var i = 0; i < factors[1].values.length; i++) {
-      var value = factors[1].values[i];
+    // Then, set the input and select.
+    var name_group = new_control_group.find('.proj_control_name_group');
+    name_group.find('input:text:disabled').val(factor_name);
+    var values_group = new_control_group.find('.proj_control_values_group');
+    for (var j = 0; j < factor_values.length; j++) {
+      var value = factor_values[j];
       var option = $('<option>', {
         text: value
       });
-      control_2_value.find('select').append(option);
+      values_group.find('select').append(option);
     }
+
+    // Append the new factor and show it.
+    form.append(new_control_group);
+    new_control_group.show();
   }
 
-  modal.find('select').change({
-    'btn': start_btn,
-    'tooltip': tooltip
-  }, function (e) {
-    var select = $(this);
-    var control_group = select.parent().parent().parent();
-    var controls_list = control_group.children('div:last');
-    controls_list.hide();
-
-    // Destroy all list items.
-    controls_list.find('li').remove();
-
-    // Disable start analysis button.
-    var tooltip = e.data.tooltip;
-    var btn = e.data.btn;
-    tooltip.tooltip('enable');
-    btn.css('pointer-events', 'none');
-    btn.prop('disabled', true);
-  });
-
-  // Set verify button.
+  // Bind the validate button.
   validate_btn.click({
+    'control_groups': control_groups,
     'btn': start_btn,
-    'tooltip': tooltip,
-    'control_groups': control_groups
+    'tooltip': start_tooltip
   }, function (e) {
+    var valid = true;
+    var controls = [];
     var control_groups = e.data.control_groups;
-    var factor = proj.design;
-    var btn = e.data.btn;
-    var tooltip = e.data.tooltip;
 
-    var valid = show_matching_controls(control_groups.eq(0));
-    var controls = [get_control(control_groups.eq(0))];
+    for (var i = 0; i < control_groups.length; i++) {
+      var control_group = control_groups[i];
+      var control = {};
 
-    if (factor == 2) {
-      valid = valid && show_matching_controls(control_groups.eq(1));
-      controls.push(get_control(control_groups.eq(1)));
+      // Get the name and selected value from the control group.
+      var name_input = control_group.find('input:text:disabled');
+      var name = name_input.val();
+      var value_select = control_group.find('select');
+      var value = value_select.children('option:selected:not(:disabled)').val();
+
+      // If the value is null or empty, the user did not make a selection.
+      if (value == null || value == '') {
+        value_select.addClass('is-invalid');
+        valid = false;
+      } else {
+        value_select.removeClass('is-invalid');
+        control['name'] = name;
+        control['value'] = value;
+        controls.push(control);
+
+        // Add the list of project that match this control.
+        var samples_list = control_group.find('ul');
+        samples_list.children('li').remove();
+        var samples = chars_details_to_samples[name][value];
+        for (var j = 0; j < samples.length; j++) {
+          var id = samples[j];
+          var li = $('<li>', {
+            text: proj.samples[id].name
+          });
+          samples_list.append(li);
+        }
+      }
     }
 
-    // If everything's good, enable start analysis button.
+    // Only if the form is valid, set the controls of the global proj object.
+    var btn = e.data.btn;
+    var tooltip = e.data.tooltip;
     if (valid) {
-      tooltip.tooltip('disable');
-      btn.css('pointer-events', 'auto');
+      proj['controls'] = controls;
+
       btn.prop('disabled', false);
+      btn.css('pointer-events', 'auto');
+      tooltip.tooltip('disable');
     } else {
-      tooltip.tooltip('enable');
-      btn.css('pointer-events', 'none');
       btn.prop('disabled', true);
+      btn.css('pointer-events', 'none');
+      tooltip.tooltip('enable');
     }
   });
 
-    // Finally, bind start analysis button.
-    start_btn.click({'controls': controls}, function (e) {
-      write_proj(start_analysis);
-
-      // Then, dismiss the project controls form and show progress screen.
-      $('#choose_controls_modal').modal('hide');
-      set_progress_bar_queued();
-      goto_progress();
-    });
-
-  // Depending on the project design, show a different description.
-  var text;
-  var to_hide;
-  if (design == 1) {
-    text = '1-factor';
-    to_hide = description.children('#design_2_description');
-  } else if (design == 2) {
-    text = '2-factor';
-    to_hide = description.children('#design_1_description');
-    modal.find('#proj_control_1').show();
-  }
-
-  header.text(header.text().replace('FACTOR', text));
-  to_hide.hide();
+  // Bind the start analysis button.
+  start_btn.click(function () {
+    console.log('start analysis');
+  });
 }
 
 /**
@@ -4476,6 +4490,9 @@ function show_verify_meta_modal() {
   // Save all inputs.
   save_proj();
 
+  // Then, convert to proj object.
+  convert_all_meta_inputs();
+
   // Verify.
   var valid = validate_all_meta();
 
@@ -4485,7 +4502,7 @@ function show_verify_meta_modal() {
   if (true) {
     modal = $('#choose_controls_modal');
 
-    var replacement = controls_modal.clone(true);
+    var replacement = controls_modal.clone();
     modal.replaceWith(replacement);
     modal = replacement;
 
