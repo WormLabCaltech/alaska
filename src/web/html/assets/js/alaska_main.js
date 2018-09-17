@@ -2549,11 +2549,9 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
 
       if (val == factor_name) {
         checkbox.prop('disabled', true);
-        checkbox.prop('checked', false);
         remove_from_form(form_group, common_form_class_name);
         remove_from_form(form_group, specific_form_class_name);
       } else {
-        checkbox.prop('disabled', false);
         refresh_checkbox(checkbox);
       }
       enable_disable_row(checkbox);
@@ -4190,6 +4188,7 @@ function set_choose_controls_modal(modal, factors) {
   var start_btn = modal.find('#start_analysis_btn');
   var start_tooltip = modal.find('#start_analysis_tooltip');
   var control_group = modal.find('.proj_control_group[style*="display:none"]').clone();
+  var samples_group = modal.find('.proj_control_samples_group');
 
   // Initialize tooltip.
   start_tooltip.tooltip();
@@ -4199,14 +4198,17 @@ function set_choose_controls_modal(modal, factors) {
   var select = control_group.find('select');
   select.change({
     'btn': start_btn,
-    'tooltip': start_tooltip
+    'tooltip': start_tooltip,
+    'group': samples_group
   }, function (e) {
     var btn = e.data.btn;
     var tooltip = e.data.tooltip;
+    var group = e.data.group;
 
     btn.prop('disabled', true);
     btn.css('pointer-events', 'none');
     tooltip.tooltip('enable');
+    group.collapse('hide');
   });
 
   // Set up each factor.
@@ -4274,7 +4276,8 @@ function set_choose_controls_modal(modal, factors) {
         controls.push(control);
 
         // Add the list of project that match this control.
-        var samples_list = control_group.find('ul');
+        var samples_group = control_group.find('.proj_control_samples_group');
+        var samples_list = samples_group.children('ul');
         samples_list.children('li').remove();
         var samples = chars_details_to_samples[name][value];
         for (var j = 0; j < samples.length; j++) {
@@ -4284,6 +4287,8 @@ function set_choose_controls_modal(modal, factors) {
           });
           samples_list.append(li);
         }
+
+        samples_group.collapse('show');
       }
     }
 
@@ -4508,7 +4513,7 @@ function show_verify_meta_modal() {
     modal = replacement;
 
     set_chars_details_to_samples();
-    set_choose_controls_modal(modal);
+    set_choose_controls_modal(modal, proj.factors);
   } else {
     modal = $('#check_meta_modal');
   }
