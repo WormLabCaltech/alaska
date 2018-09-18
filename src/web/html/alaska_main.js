@@ -3679,6 +3679,171 @@ function get_sample_meta_inputs(card) {
   return inputs;
 }
 
+function validate_proj_meta_inputs(inputs) {
+  var valid = true;
+
+  for (var class_name in proj_meta_classes_to_functions) {
+    var val = inputs[class_name];
+    var form_group = proj_form.find('.' + class_name);
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    form_inputs = form_inputs.filter(':not([style*="display:none"])');
+    form_inputs.removeClass('is-invalid');
+
+    switch (class_name) {
+      case 'proj_title_group':
+      case 'proj_abstract_group':
+      case 'proj_corresponding_group':
+        if (val == null || val == '') {
+          form_inputs.addClass('is-invalid');
+          valid = false;
+        }
+        break;
+
+      case 'proj_corresponding_email_group':
+        if (val == null || val == '' || !isEmail(val)) {
+          form_inputs.addClass('is-invalid');
+          valid = false;
+        }
+        break;
+
+      case 'proj_experimental_design_group':
+        var factor_cards = form_group.find('.factor_card');
+
+        var names = {};
+        for (var i = 0; i < val.length; i++) {
+          var factor = val[i];
+          var factor_card = factor_cards.eq(i);
+          var name_group = factor_card.find('.factor_name_group');
+          var values_group = factor_card.find('.factor_values_group');
+
+          var name_inputs = name_group.find('select,input:text');
+          var values_inputs = values_group.find('input:text:not([style*="display:none"])');
+
+
+          if (factor.name == null || factor.name == '') {
+            name_inputs.addClass('is-invalid');
+            valid = false;
+          } else {
+            // Check that no two factors are the same.
+            if (factor.name in names) {
+              names[factor.name].addClass('is-invalid');
+              name_inputs.addClass('is-invalid');
+              valid = false;
+            } else {
+              names[factor.name] = name_inputs;
+            }
+          }
+
+          if(factor.values == null || factor.values.length < 1) {
+            name_inputs.addClass('is-invalid');
+            valid = false;
+          }
+
+          // Check that no two values are the same.
+          var values = {};
+          for (var j = 0; j < factor.values.length; j++) {
+            var value_input = values_inputs.eq(j);
+            var value = factor.values[j][0];
+            if (value == null || value == '') {
+              value_input.addClass('is-invalid');
+              valid = false;
+            } else {
+              if (value in values) {
+                values[value].addClass('is-invalid');
+                value_input.addClass('is-invalid');
+                valid = false;
+              } else {
+                values[value] = value_input;
+              }
+            }
+          }
+        }
+        break;
+    }
+  }
+
+  return valid;
+}
+
+function validate_common_meta_inputs(inputs) {
+  var valid = true;
+
+  for (var class_name in common_meta_classes_to_functions) {
+    var form_group = common_form.find('.' + class_name);
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    form_inputs = form_inputs.filter(':not([style*="display:none"])');
+    form_inputs.removeClass('is-invalid');
+
+    // Only validate if the checkbox is checked and not disabled.
+    var checkbox = form_group.children('div:first').find('input:checkbox');
+    if (!checkbox.prop('disabled') && checkbox.prop('checked')) {
+      var val = inputs[class_name];
+
+      switch (class_name) {
+        case 'sample_genotype_group':
+        case 'sample_growth_conditions_group':
+        case 'sample_rna_extraction_group':
+        case 'sample_library_preparation_group':
+        case 'sample_organism_group':
+        case 'sample_life-stage_group':
+        case 'sample_tissue_group':
+        case 'sample_sequenced_molecules_group':
+          if (val == null || val == '') {
+            form_inputs.addClass('is-invalid');
+            valid = false;
+          }
+          break;
+
+        case 'sample_read_type_group':
+          var type = val.type;
+          if (type == 1) {
+            var single_group = form_group.find('.sample_read_type_single_collapse');
+            var single_inputs = single_group.find('input[type="number"]');
+            var length = val.length;
+            if (length == null || length == '' || length == 0) {
+              single_inputs.eq(0).addClass('is-invalid');
+              valid = false;
+            }
+
+            var stdev = val.stdev;
+            if (stdev == null || stdev == '' || stdev == 0) {
+              single_inputs.eq(1).addClass('is-invalid');
+              valid = false;
+            }
+          }
+          break;
+
+        case 'sample_characteristics_group':
+          var rows = form_group.find('.sample_characteristics_row');
+          for (var i = 0; i < val.length; i++) {
+            var row = rows.eq(i);
+
+            if (val[i].length == 1) {
+              row.find('input:text').addClass('is-invalid');
+              valid = false;
+            }
+          }
+          break;
+      }
+
+    }
+  }
+}
+
+function validate_sample_meta_inputs(inputs, id) {
+  var sample_form = sample_forms[id];
+  var valid = true;
+
+  for (var class_name in sample_meta_classes_to_functions) {
+
+    switch (class_name) {
+      class 'sample_description_group':
+      class 'sample_factors_1_group':
+      class 'sample_factors_2_group':
+    }
+  }
+}
+
 /**
  * Save all inputs.
  */
@@ -3749,7 +3914,9 @@ function convert_proj_meta_inputs(card) {
           var contributor = input[i][0];
 
           if (contributor != null && contributor != '') {
-            obj.meta.contributors.push(contributor);
+            if (!obj.meta.contributors.includes(contributor)) {
+              obj.meta.contributors.push(contributor);
+            }
           }
         }
         break;
@@ -4292,7 +4459,7 @@ function set_choose_controls_modal(modal, factors) {
         sample_names.sort();
         for (var j = 0; j < sample_names.length; j++) {
           var li = $('<li>', {
-            text: sample_names[j];
+            text: sample_names[j]
           });
           samples_list.append(li);
         }
@@ -4431,37 +4598,37 @@ function start_analysis() {
 //     }
 //   }
 
-  // Then, show selected controls for ones that are not invalid.
-  var valid = true;
-  for (var i = 0; i < controls.length; i++) {
-    var ctrl = controls[i];
-
-    var char_id = 'proj_control_char_' + i;
-    var detail_id = 'proj_control_detail_' + i;
-    var list_id = 'control_samples_' + i;
-    var char_dropdown = ctrl.find('#' + char_id);
-    var detail_dropdown = ctrl.find('#' + detail_id);
-    var list = ctrl.find('#' + list_id);
-    var char = char_dropdown.children('option:selected').val();
-    var detail = detail_dropdown.children('option:selected').val();
-
-    if (!char_dropdown.hasClass('is-invalid') && !detail_dropdown.hasClass('is-invalid')) {
-      var samples = chars_details_to_samples[char][detail];
-      for (var j = 0; j < samples.length; j++) {
-        var sample = samples[j];
-        var item = $('<li>', {
-          text: proj.samples[sample].name
-        });
-        list.children('ul').append(item);
-      }
-      list.show();
-    } else {
-      valid = false;
-    }
-  }
-
-  return valid;
-}
+//   // Then, show selected controls for ones that are not invalid.
+//   var valid = true;
+//   for (var i = 0; i < controls.length; i++) {
+//     var ctrl = controls[i];
+//
+//     var char_id = 'proj_control_char_' + i;
+//     var detail_id = 'proj_control_detail_' + i;
+//     var list_id = 'control_samples_' + i;
+//     var char_dropdown = ctrl.find('#' + char_id);
+//     var detail_dropdown = ctrl.find('#' + detail_id);
+//     var list = ctrl.find('#' + list_id);
+//     var char = char_dropdown.children('option:selected').val();
+//     var detail = detail_dropdown.children('option:selected').val();
+//
+//     if (!char_dropdown.hasClass('is-invalid') && !detail_dropdown.hasClass('is-invalid')) {
+//       var samples = chars_details_to_samples[char][detail];
+//       for (var j = 0; j < samples.length; j++) {
+//         var sample = samples[j];
+//         var item = $('<li>', {
+//           text: proj.samples[sample].name
+//         });
+//         list.children('ul').append(item);
+//       }
+//       list.show();
+//     } else {
+//       valid = false;
+//     }
+//   }
+//
+//   return valid;
+// }
 
 /**
  * Sets the global charicteristic-details-to-samples dictionary.
