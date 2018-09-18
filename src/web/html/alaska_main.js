@@ -3754,7 +3754,7 @@ function validate_proj_meta_inputs(inputs) {
             if (value == null || value == '') {
               value_input.addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Factor ' + (i+1) + ' has an empty or blank value'.);
+              failed_fields[class_name].push('Factor ' + (i+1) + ' has an empty or blank value.');
             } else {
               if (value in values) {
                 values[value].addClass('is-invalid');
