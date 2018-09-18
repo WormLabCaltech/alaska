@@ -88,6 +88,8 @@ if (length(conditions) > 2) {
 print('# Appending path to kallisto result folders.')
 s2c <- dplyr::mutate(s2c, path=file.path(kallisto, sample))
 
+print(s2c)
+
 print('# Creating Sleuth object.')
 so <- sleuth_prep(s2c, target_mapping = t2g, extra_bootstrap_summary = TRUE)
 
@@ -130,7 +132,7 @@ for (i in 1:length(conditions)) {
 
 
 print('# Writing likelihood ratio test sleuth table.')
-sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
+sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all=FALSE)
 write.csv(sleuth_table, paste(output_dir, 'sleuth_table_lrt.csv', sep='/'))
 for (i in 1:length(conditions)) {
   condition <- conditions[i]
@@ -142,7 +144,7 @@ for (i in 1:length(conditions)) {
     }
 
     print(paste('# Writing Wald test sleuth table for ', condition, ':', name, sep=''))
-    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full', test_type='wt')
+    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full', test_type='wt', show_all=FALSE)
     output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv', sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }

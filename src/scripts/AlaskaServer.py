@@ -1363,6 +1363,7 @@ class AlaskaServer(Alaska):
         # copy scripts
         self.copy_script(_id, Alaska.ANL_SCRIPT)
         self.copy_script(_id, Alaska.SLE_SCRIPT)
+        self.copy_script(_id, Alaska.SHI_SCRIPT, dst=proj.diff_dir)
 
         # check if diff. exp. is already queued
         qu = list(self.queue.queue)
@@ -1445,9 +1446,6 @@ class AlaskaServer(Alaska):
                 return
 
         self.broadcast(_id, '{}: starting Sleuth shiny app'.format(_id))
-
-        # First, copy the script that opens the server.
-        self.copy_script(_id, Alaska.SHI_SCRIPT, dst=proj.diff_dir)
 
         # source and target mouting points
         src = Alaska.DOCKER_DATA_VOLUME
