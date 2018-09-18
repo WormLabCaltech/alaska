@@ -3979,12 +3979,13 @@ function validate_sample_meta_inputs(inputs, sample_form) {
 /**
  *
  */
-function add_check_meta_details(modal_body, details_div, title_class, title_text, failed_inputs) {
+function add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs) {
   if (Object.keys(failed_inputs).length > 0) {
     var new_details_div = details_div.clone();
-    var title = new_details_div.children('h5');
+    var title = new_details_div.children('div:first');
     title.addClass(title_class);
-    title.text(title_text);
+    title.children('i').addClass(title_icon_class);
+    title.children('h5').text(title_text);
 
     var details_list = new_details_div.children('ul');
     for (var class_name in failed_inputs) {
@@ -4029,23 +4030,29 @@ function validate_all_meta_inputs(modal) {
 
   // Some inputs failed, so we need to add the failed descriptions to the
   // modal.
-  var title_text = '<i class="fas fa-cube"></i>Project Metadata Form';
-  add_check_meta_details(modal_body, details_div, 'alert-primary', title_text, failed_inputs);
+  var title_icon_class = 'fa-cube';
+  var title_text = 'Project Metadata Form';
+  var title_class = 'alert-primary';
+  add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
 
   // Common inputs.
   var common_inputs = get_common_meta_inputs(common_form);
   failed_inputs = validate_common_meta_inputs(common_inputs, common_form);
 
-  title_text = '<i class="fas fa-share-alt"></i>Common Metadata Form';
-  add_check_meta_details(modal_body, details_div, 'alert-info', title_text, failed_inputs);
+  title_icon_class = 'fa-share-alt';
+  title_text = 'Common Metadata Form';
+  title_class = 'alert-info';
+  add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
 
   for (var id in sample_forms) {
     var sample_form = sample_forms[id];
     var sample_inputs = get_sample_meta_inputs(sample_form);
     failed_inputs = validate_sample_meta_inputs(sample_inputs, sample_form);
 
-    title_text = '<i class="fas fa-cubes"></i>Sample Metadata Form: ' + proj.samples[id].name;
-    add_check_meta_details(modal_body, details_div, 'alert-warning', title_text, failed_inputs);
+    title_icon_class = 'fa-cubes';
+    title_text = 'Sample Metadata Form: ' + proj.samples[id].name;
+    title_class = 'alert-warning';
+    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
   }
 }
 
