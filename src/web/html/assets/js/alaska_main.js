@@ -118,6 +118,7 @@ function goto_meta_input() {
  * Go to analysis progress page.
  */
 function goto_progress(status) {
+  $('#progress_bar_container').show();
   var progress_container = $('#progress_container');
   progress_container.show();
 
