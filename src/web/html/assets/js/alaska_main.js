@@ -5876,6 +5876,7 @@ $(document).ready(function() {
 
   if (url_params.has('testing')) {
     if (url_params.get('testing') == 'true') {
+      console.log('testing: true');
       testing = true;
     }
     // Enable all testing elements.
