@@ -3136,7 +3136,8 @@ function set_common_meta_input() {
     save_proj();
 
     var meta = $('#sample_meta')
-    $('#sample_meta').show();
+    meta.show();
+    $('#meta_footer').show();
     scroll_to_ele(meta);
   });
 }
@@ -5020,6 +5021,7 @@ function show_meta_input() {
 
   // Show meta input.
   $('#progress_bar_container').show();
+  $('#meta_container').show();
   $('#proj_meta_header').show();
   $('#proj_meta').show();
 }
