@@ -3679,7 +3679,7 @@ function get_sample_meta_inputs(card) {
   return inputs;
 }
 
-function validate_proj_meta_inputs(inputs) {
+function validate_proj_meta_inputs(inputs, proj_form) {
   var valid = true;
   var failed_fields = {};
 
@@ -3778,7 +3778,7 @@ function validate_proj_meta_inputs(inputs) {
   }
 }
 
-function validate_common_meta_inputs(inputs) {
+function validate_common_meta_inputs(inputs, common_form) {
   var valid = true;
   var failed_fields = {};
 
@@ -3816,14 +3816,14 @@ function validate_common_meta_inputs(inputs) {
             var single_group = form_group.find('.sample_read_type_single_collapse');
             var single_inputs = single_group.find('input[type="number"]');
             var length = val.length;
-            if (length == null || length == '' || length == 0) {
+            if (length == null || length == '' || isNaN(length) || length == 0) {
               single_inputs.eq(0).addClass('is-invalid');
               valid = false;
               failed_fields[class_name].push('Read length can not be empty, blank, or zero.');
             }
 
             var stdev = val.stdev;
-            if (stdev == null || stdev == '' || stdev == 0) {
+            if (stdev == null || stdev == '' || isNaN(stdev) || stdev == 0) {
               single_inputs.eq(1).addClass('is-invalid');
               valid = false;
               failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
@@ -3855,12 +3855,12 @@ function validate_common_meta_inputs(inputs) {
   }
 }
 
-function validate_sample_meta_inputs(inputs, id) {
-  var sample_form = sample_forms[id];
+function validate_sample_meta_inputs(inputs, sample_form) {
   var valid = true;
   var failed_fields = {};
 
   for (var class_name in sample_meta_classes_to_functions) {
+    var val = inputs[class_name];
     var form_group = sample_form.find('.' + class_name);
     var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
@@ -3869,7 +3869,6 @@ function validate_sample_meta_inputs(inputs, id) {
     failed_fields[class_name] = [];
     switch (class_name) {
       case 'sample_description_group':
-      case 'sample_factors_1_group':
         if (val == null || val == '') {
           form_inputs.addClass('is-invalid');
           valid = false;
@@ -3877,12 +3876,16 @@ function validate_sample_meta_inputs(inputs, id) {
         }
         break;
 
+      case 'sample_factors_1_group':
       case 'sample_factors_2_group':
-        if (form_group.filter(':not(style*="display:none")').length > 0) {
-          if (val == null || val == '') {
+        var name = val.name;
+        var value = val.value;
+
+        if (name != 'FACTOR_1' && name != 'FACTOR_2' && name != null && name != '') {
+          if (value == null || value == '') {
             form_inputs.addClass('is-invalid');
             valid = false;
-            failed_fields[class_name].push('Can not be empty or blank.');
+            failed_fields[class_name].push('No value selected for factor ' + name + '.');
           }
         }
         break;
@@ -3970,6 +3973,64 @@ function validate_sample_meta_inputs(inputs, id) {
     return {};
   } else {
     return failed_fields;
+  }
+}
+
+function validate_all_meta_inputs(modal) {
+  var valid = true;
+  var modal_body = modal.find('.modal-body');
+  var details_divs = modal_body.children('.check_meta_details');
+
+  // Remove.
+  details_divs.filter(':not([style*="display:none"])').remove();
+
+  var details_div = details_divs.filter('[style*="display:none"]');
+
+  // First, validate project metadata.
+  var proj_inputs = get_proj_meta_inputs(proj_form);
+  var failed_inputs = validate_proj_meta_inputs(proj_inputs, proj_form);
+
+  // Some inputs failed, so we need to add the failed descriptions to the
+  // modal.
+  if (Object.keys(failed_inputs).length > 0) {
+    var new_details_div = details_div.clone();
+    var title = new_details_div.children('div:first');
+    title.addClass('alert-primary');
+    title.children('i').addClass('fa-cube');
+    title.text('Project Metadata Form');
+
+    var details_list = new_details_div.children('ul');
+    for (var class_name in failed_inputs) {
+      var descriptions = failed_inputs[class_name];
+
+      if (descriptions.length > 0) {
+        var list_item = $('<li>', {
+          text: class_name
+        });
+        var list = $('<ul>');
+
+        for (var i = 0; i < descriptions.length; i++) {
+          var description = descriptions[i];
+          var sub_item = $('<li>', {
+            text: description
+          });
+          list.append(sub_item);
+        }
+
+        details_list.append(list_item);
+        details_list.append(list);
+      }
+    }
+    modal_body.append(new_details_div);
+    new_details_div.show();
+  }
+
+
+  var common_inputs = get_common_meta_inputs(common_form);
+
+  for (var id in sample_forms) {
+    var sample_form = sample_forms[id];
+    var sample_inputs = get_sample_meta_inputs(sample_form);
   }
 }
 
@@ -4812,7 +4873,7 @@ function show_verify_meta_modal() {
   // Depending on whether or not all the input is valid,
   // show different modal.
   var modal;
-  if (true) {
+  if (false) {
     modal = $('#choose_controls_modal');
 
     var replacement = controls_modal.clone();
