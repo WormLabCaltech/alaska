@@ -4081,6 +4081,21 @@ function save_all_meta_inputs() {
 }
 
 /**
+ * Fill forms with test metadata.
+ */
+function fill_with_test_metadata() {
+  set_proj_meta_inputs(proj_form, test_proj_inputs);
+  set_common_meta_inputs(common_form, test_common_inputs);
+
+  for (var name in test_samples_inputs) {
+    var test_sample_inputs = test_samples_inputs[name];
+    var sample_form = sample_forms[names_to_ids[name]];
+
+    set_sample_meta_inputs(sample_form, test_sample_inputs);
+  }
+}
+
+/**
  * Read all meta inputs.
  */
 function set_all_meta_inputs() {
@@ -4104,6 +4119,9 @@ function set_all_meta_inputs() {
 
   // Re-fire factor change.
   proj_inputs.find('.proj_experimental_design_group').find('select').change();
+
+  // Set listener for fill with test metadata button.
+  $('#test_metadata_btn').click(fill_with_test_metadata);
 }
 
 /**
@@ -5549,6 +5567,252 @@ var common_meta_order = [
   'sample_read_type_group',
   'sample_specific_characteristics_group'
 ];
+
+var test_proj_inputs = {
+    "proj_title_group": "test title",
+    "proj_abstract_group": "test abstract",
+    "proj_corresponding_group": "test corresponding contributor",
+    "proj_corresponding_email_group": "testemail@email.com",
+    "proj_contributors_group": [
+        [
+            "test contributor 1"
+        ],
+        [
+            "test contributor 2"
+        ],
+        [
+            "test contributor 3"
+        ]
+    ],
+    "proj_sra_center_code_group": "test sra center code",
+    "proj_experimental_design_group": [
+        {
+            "name": "test factor 1",
+            "values": [
+                [
+                    "value1"
+                ],
+                [
+                    "value2"
+                ]
+            ]
+        }
+    ]
+};
+var test_common_inputs = {
+    "sample_genotype_group": "shared genotype",
+    "sample_growth_conditions_group": "shared growth conditions",
+    "sample_rna_extraction_group": "shared rna extraction",
+    "sample_library_preparation_group": "shared library prep",
+    "sample_miscellaneous_group": "shared misc",
+    "sample_organism_group": "caenorhabditis_elegans_235",
+    "sample_organism_strain_group": "shared strain",
+    "sample_life-stage_group": "Young Adult",
+    "sample_tissue_group": "Whole Organism (Multi-worm)",
+    "sample_characteristics_group": [
+        [
+            "shared characteristic 1 name",
+            "shared characteristic 1 value"
+        ],
+        [
+            "shared characteristic 2 name",
+            "shared characteristic 2 value"
+        ]
+    ],
+    "sample_sequenced_molecules_group": "Total RNA",
+    "sample_read_type_group": {
+        "type": 1,
+        "length": 200,
+        "stdev": 60
+    }
+};
+var test_samples_inputs = {
+  'wt1': {
+      "sample_name_group": "wt1",
+      "sample_description_group": "wt1 description",
+      "sample_factors_1_group": {
+          "name": "test factor 1",
+          "value": "value2"
+      },
+      "sample_factors_2_group": {
+          "name": "FACTOR_2",
+          "value": ""
+      },
+      "sample_specific_characteristics_group": [
+          [
+              "e",
+              "f"
+          ],
+          [
+              "g",
+              "h"
+          ]
+      ],
+      "sample_genotype_group": "shared genotype",
+      "sample_growth_conditions_group": "shared growth conditions",
+      "sample_rna_extraction_group": "shared rna extraction",
+      "sample_library_preparation_group": "shared library prep",
+      "sample_miscellaneous_group": "shared misc",
+      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_strain_group": "shared strain",
+      "sample_life-stage_group": "Young Adult",
+      "sample_tissue_group": "Whole Organism (Multi-worm)",
+      "sample_characteristics_group": [
+          [
+              "shared characteristic 1 name",
+              "shared characteristic 1 value"
+          ],
+          [
+              "shared characteristic 2 name",
+              "shared characteristic 2 value"
+          ]
+      ],
+      "sample_sequenced_molecules_group": "Total RNA",
+      "sample_read_type_group": {
+          "type": 1,
+          "length": 200,
+          "stdev": 60
+      }
+  },
+  'wt2': {
+      "sample_name_group": "wt2",
+      "sample_description_group": "wt2 description",
+      "sample_factors_1_group": {
+          "name": "test factor 1",
+          "value": "value2"
+      },
+      "sample_factors_2_group": {
+          "name": "FACTOR_2",
+          "value": ""
+      },
+      "sample_specific_characteristics_group": [
+          [
+              "i",
+              "j"
+          ]
+      ],
+      "sample_genotype_group": "shared genotype",
+      "sample_growth_conditions_group": "shared growth conditions",
+      "sample_rna_extraction_group": "shared rna extraction",
+      "sample_library_preparation_group": "shared library prep",
+      "sample_miscellaneous_group": "shared misc",
+      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_strain_group": "shared strain",
+      "sample_life-stage_group": "Young Adult",
+      "sample_tissue_group": "Whole Organism (Multi-worm)",
+      "sample_characteristics_group": [
+          [
+              "shared characteristic 1 name",
+              "shared characteristic 1 value"
+          ],
+          [
+              "shared characteristic 2 name",
+              "shared characteristic 2 value"
+          ]
+      ],
+      "sample_sequenced_molecules_group": "Total RNA",
+      "sample_read_type_group": {
+          "type": 1,
+          "length": 200,
+          "stdev": 60
+      }
+  },
+  'mt1': {
+      "sample_name_group": "mt1",
+      "sample_description_group": "mt1 description",
+      "sample_factors_1_group": {
+          "name": "test factor 1",
+          "value": "value1"
+      },
+      "sample_factors_2_group": {
+          "name": "FACTOR_2",
+          "value": ""
+      },
+      "sample_specific_characteristics_group": [
+          [
+              "additional char 1",
+              "additional char 1 value"
+          ],
+          [
+              "additional char 2",
+              "additional char 2 value"
+          ]
+      ],
+      "sample_genotype_group": "shared genotype",
+      "sample_growth_conditions_group": "shared growth conditions",
+      "sample_rna_extraction_group": "shared rna extraction",
+      "sample_library_preparation_group": "shared library prep",
+      "sample_miscellaneous_group": "shared misc",
+      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_strain_group": "shared strain",
+      "sample_life-stage_group": "Young Adult",
+      "sample_tissue_group": "Whole Organism (Multi-worm)",
+      "sample_characteristics_group": [
+          [
+              "shared characteristic 1 name",
+              "shared characteristic 1 value"
+          ],
+          [
+              "shared characteristic 2 name",
+              "shared characteristic 2 value"
+          ]
+      ],
+      "sample_sequenced_molecules_group": "Total RNA",
+      "sample_read_type_group": {
+          "type": 1,
+          "length": 200,
+          "stdev": 60
+      }
+  },
+  'mt2': {
+      "sample_name_group": "mt2",
+      "sample_description_group": "mt2 description",
+      "sample_factors_1_group": {
+          "name": "test factor 1",
+          "value": "value1"
+      },
+      "sample_factors_2_group": {
+          "name": "FACTOR_2",
+          "value": ""
+      },
+      "sample_specific_characteristics_group": [
+          [
+              "a",
+              "b"
+          ],
+          [
+              "c",
+              "d"
+          ]
+      ],
+      "sample_genotype_group": "shared genotype",
+      "sample_growth_conditions_group": "shared growth conditions",
+      "sample_rna_extraction_group": "shared rna extraction",
+      "sample_library_preparation_group": "shared library prep",
+      "sample_miscellaneous_group": "shared misc",
+      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_strain_group": "shared strain",
+      "sample_life-stage_group": "Young Adult",
+      "sample_tissue_group": "Whole Organism (Multi-worm)",
+      "sample_characteristics_group": [
+          [
+              "shared characteristic 1 name",
+              "shared characteristic 1 value"
+          ],
+          [
+              "shared characteristic 2 name",
+              "shared characteristic 2 value"
+          ]
+      ],
+      "sample_sequenced_molecules_group": "Total RNA",
+      "sample_read_type_group": {
+          "type": 1,
+          "length": 200,
+          "stdev": 60
+      }
+  }
+}
+
 
 // Global variables for holding interval ids.
 var project_progress_interval;
