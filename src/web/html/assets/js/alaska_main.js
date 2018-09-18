@@ -118,14 +118,30 @@ function goto_meta_input() {
  * Go to analysis progress page.
  */
 function goto_progress(status) {
-  $('#meta_container').hide();
-  $('#main_content_div').hide();
-  $('#ftp_info_div').hide();
-  $('#raw_reads_div').hide();
-  $('#fetch_failed_div').hide();
+  var progress_container = $('#progress_container');
+  progress_container.show();
+
+  var obj = {pos: $(window).scrollTop()};
+  var transform = anime({
+    targets: obj,
+    pos: 0,
+    round: 1,
+    easing: 'easeInOutQuart',
+    update: function() {
+      $(window).scrollTop(obj.pos);
+    },
+    complete: function(anim) {
+      // Hide all other elements.
+      $('#meta_container').hide();
+      $('#main_content_div').hide();
+      $('#ftp_info_div').hide();
+      $('#raw_reads_div').hide();
+      $('#fetch_failed_div').hide();
+    }
+  });
 
   // Set output listeners for live output.
-  set_output_listeners();
+  set_output_listeners(progress_container);
 
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
@@ -190,49 +206,55 @@ function get_output(type, textarea) {
 
 }
 
+function set_output_listener_for_collapse(collapse, type, textarea, badge, t=1000) {
+  collapse.on('show.bs.collapse', {
+    'type': type,
+    'badge': badge,
+    'textarea': textarea,
+    't': t
+  }, function (e) {
+    var type = e.data.type;
+    var badge = e.data.badge;
+    var textarea = e.data.textarea;
+    var t = e.data.t;
+
+    // Set up interval only when the process is running.
+    if (badge.hasClass('badge-info') && output_intervals[type] == null) {
+      output_intervals[type] = setInterval(get_output, t, type, textarea);
+    } else {
+      get_output(type, textarea);
+    }
+  });
+  collapse.on('hide.bs.collapse', {
+    'type': type
+  }, function (e) {
+    var type = e.data.type;
+    if (output_intervals[type] != null) {
+      clearInterval(output_intervals[type]);
+      output_intervals[type] = null;
+    }
+  });
+
+}
+
 /**
  * Sets listeners for each of the three live output views.
  */
-function set_output_listeners() {
-  var qc_output_collapse = $('#qc_output_collapse');
-  var quant_output_collapse = $('#quant_output_collapse');
-  var diff_output_collapse = $('#diff_output_collapse');
-  var qc_textarea = $('#qc_textarea');
-  var quant_textarea = $('#quant_textarea');
-  var diff_textarea = $('#diff_textarea');
+function set_output_listeners(progress_container) {
+  var qc_output_collapse = progress_container.find('#qc_output_collapse');
+  var quant_output_collapse = progress_container.find('#quant_output_collapse');
+  var diff_output_collapse = progress_container.find('#diff_output_collapse');
+  var qc_textarea = progress_container.find('#qc_textarea');
+  var quant_textarea = progress_container.find('#quant_textarea');
+  var diff_textarea = progress_container.find('#diff_textarea');
 
-  // qc textarea
-  qc_output_collapse.on('show.bs.collapse', {
-    textarea: qc_textarea
-  }, function (e) {
-    var textarea = e.data.textarea;
-    qc_output_interval = setInterval(get_output, 1000, 'qc', textarea);
-  });
-  qc_output_collapse.on('hide.bs.collapse', function () {
-    clearInterval(qc_output_interval);
-  });
+  var qc_status_badge = progress_container.find('#qc_status_badge');
+  var quant_status_badge = progress_container.find('#quant_status_badge');
+  var diff_status_badge = progress_container.find('#diff_status_badge');
 
-  // quant textarea
-  quant_output_collapse.on('show.bs.collapse', {
-    textarea: quant_textarea
-  }, function (e) {
-    var textarea = e.data.textarea;
-    quant_output_interval = setInterval(get_output, 1000, 'quant', textarea);
-  });
-  quant_output_collapse.on('hide.bs.collapse', function () {
-    clearInterval(quant_output_interval);
-  });
-
-  // diff textarea
-  diff_output_collapse.on('show.bs.collapse', {
-    textarea: diff_textarea
-  }, function (e) {
-    var textarea = e.data.textarea;
-    diff_output_interval = setInterval(get_output, 1000, 'diff', textarea);
-  });
-  diff_output_collapse.on('hide.bs.collapse', function () {
-    clearInterval(diff_output_interval);
-  });
+  set_output_listener_for_collapse(qc_output_collapse, 'qc', qc_textarea, qc_status_badge);
+  set_output_listener_for_collapse(quant_output_collapse, 'quant', quant_textarea, quant_status_badge);
+  set_output_listener_for_collapse(diff_output_collapse, 'diff', diff_textarea, diff_status_badge);
 }
 
 /**
@@ -2136,7 +2158,7 @@ function read_proj() {
 
       show_meta_input();
 
-      setTimeout(set_all_meta_inputs, 1000);
+      setTimeout(set_all_meta_inputs, 2000);
     }
   });
 }
@@ -4689,7 +4711,7 @@ function set_choose_controls_modal(modal, factors) {
         var sample_names = [];
         for (var j = 0; j < samples.length; j++) {
           var id = samples[j];
-          sample_names.append(id);
+          sample_names.push(proj.samples[id].name);
         }
 
         sample_names.sort();
@@ -4721,17 +4743,23 @@ function set_choose_controls_modal(modal, factors) {
   });
 
   // Bind the start analysis button.
-  start_btn.click(function () {
+  start_btn.click({
+    'modal': modal
+  }, function (e) {
     console.log('start analysis');
+    var modal = e.data.modal;
     write_proj();
-    start_analysis();
+    start_analysis(function () {
+      modal.modal('hide');
+      get_proj_status();
+    });
   });
 }
 
 /**
  * Set and finalize project. Then, start analysis.
  */
-function start_analysis() {
+function start_analysis(callback) {
   // Set project.
   $.ajax({
     type: 'POST',
@@ -4763,11 +4791,23 @@ function start_analysis() {
                 },
                 success:function(out) {
                   console.log(out);
+
+                  if (out.includes('performing')) {
+                    if (typeof callback === 'function') {
+                      callback();
+                    }
+                  } else {
+                    console.log('analysis could not be started');
+                  }
                 }
               });
+            } else {
+              console.log('project could not be finalized');
             }
           }
         });
+      } else {
+        console.log('project data could not be set');
       }
     }
   });
@@ -5814,6 +5854,7 @@ var test_samples_inputs = {
 
 // Global variables for holding interval ids.
 var project_progress_interval;
+var output_intervals = {};
 var qc_output_interval;
 var quant_output_interval;
 var diff_output_interval;
