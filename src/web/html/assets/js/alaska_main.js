@@ -2136,7 +2136,7 @@ function read_proj() {
 
       show_meta_input();
 
-      set_all_meta_inputs();
+      setTimeout(set_all_meta_inputs, 1000);
     }
   });
 }
