@@ -3976,28 +3976,15 @@ function validate_sample_meta_inputs(inputs, sample_form) {
   }
 }
 
-function validate_all_meta_inputs(modal) {
-  var valid = true;
-  var modal_body = modal.find('.modal-body');
-  var details_divs = modal_body.children('.check_meta_details');
-
-  // Remove.
-  details_divs.filter(':not([style*="display:none"])').remove();
-
-  var details_div = details_divs.filter('[style*="display:none"]');
-
-  // First, validate project metadata.
-  var proj_inputs = get_proj_meta_inputs(proj_form);
-  var failed_inputs = validate_proj_meta_inputs(proj_inputs, proj_form);
-
-  // Some inputs failed, so we need to add the failed descriptions to the
-  // modal.
+/**
+ *
+ */
+function add_check_meta_details(modal_body, details_div, title_class, title_text, failed_inputs) {
   if (Object.keys(failed_inputs).length > 0) {
     var new_details_div = details_div.clone();
-    var title = new_details_div.children('div:first');
-    title.addClass('alert-primary');
-    title.children('i').addClass('fa-cube');
-    title.text('Project Metadata Form');
+    var title = new_details_div.children('h5');
+    title.addClass(title_class);
+    title.text(title_text);
 
     var details_list = new_details_div.children('ul');
     for (var class_name in failed_inputs) {
@@ -4024,13 +4011,41 @@ function validate_all_meta_inputs(modal) {
     modal_body.append(new_details_div);
     new_details_div.show();
   }
+}
 
+function validate_all_meta_inputs(modal) {
+  var valid = true;
+  var modal_body = modal.find('.modal-body');
+  var details_divs = modal_body.children('.check_meta_details');
 
+  // Remove.
+  details_divs.filter(':not([style*="display:none"])').remove();
+
+  var details_div = details_divs.filter('[style*="display:none"]');
+
+  // First, validate project metadata.
+  var proj_inputs = get_proj_meta_inputs(proj_form);
+  var failed_inputs = validate_proj_meta_inputs(proj_inputs, proj_form);
+
+  // Some inputs failed, so we need to add the failed descriptions to the
+  // modal.
+  var title_text = '<i class="fas fa-cube"></i>Project Metadata Form';
+  add_check_meta_details(modal_body, details_div, 'alert-primary', title_text, failed_inputs);
+
+  // Common inputs.
   var common_inputs = get_common_meta_inputs(common_form);
+  failed_inputs = validate_common_meta_inputs(common_inputs, common_form);
+
+  title_text = '<i class="fas fa-share-alt"></i>Common Metadata Form';
+  add_check_meta_details(modal_body, details_div, 'alert-info', title_text, failed_inputs);
 
   for (var id in sample_forms) {
     var sample_form = sample_forms[id];
     var sample_inputs = get_sample_meta_inputs(sample_form);
+    failed_inputs = validate_sample_meta_inputs(sample_inputs, sample_form);
+
+    title_text = '<i class="fas fa-cubes"></i>Sample Metadata Form: ' + proj.samples[id].name;
+    add_check_meta_details(modal_body, details_div, 'alert-warning', title_text, failed_inputs);
   }
 }
 
