@@ -3835,11 +3835,40 @@ function validate_sample_meta_inputs(inputs, id) {
   var valid = true;
 
   for (var class_name in sample_meta_classes_to_functions) {
+    var form_group = sample_form.find('.' + class_name);
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    form_inputs = form_inputs.filter(':not([style*="display:none"])');
+    form_inputs.removeClass('is-invalid');
 
     switch (class_name) {
-      class 'sample_description_group':
-      class 'sample_factors_1_group':
-      class 'sample_factors_2_group':
+      case 'sample_description_group':
+      case 'sample_factors_1_group':
+        if (val == null || val == '') {
+          form_inputs.addClass('is-invalid');
+          valid = false;
+        }
+        break;
+
+      case 'sample_factors_2_group':
+        if (form_group.filter(':not(style*="display:none")').length > 0) {
+          if (val == null || val == '') {
+            form_inputs.addClass('is-invalid');
+            valid = false;
+          }
+        }
+        break;
+
+      case 'sample_specific_characteristics_group':
+        var rows = form_group.find('.sample_characteristics_row');
+        for (var i = 0; i < val.length; i++) {
+          var row = rows.eq(i);
+
+          if (val[i].length == 1) {
+            row.find('input:text').addClass('is-invalid');
+            valid = false;
+          }
+        }
+        break;
     }
   }
 }
