@@ -3681,6 +3681,7 @@ function get_sample_meta_inputs(card) {
 
 function validate_proj_meta_inputs(inputs) {
   var valid = true;
+  var failed_fields = {};
 
   for (var class_name in proj_meta_classes_to_functions) {
     var val = inputs[class_name];
@@ -3689,6 +3690,7 @@ function validate_proj_meta_inputs(inputs) {
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
+    failed_fields[class_name] = [];
     switch (class_name) {
       case 'proj_title_group':
       case 'proj_abstract_group':
@@ -3696,6 +3698,7 @@ function validate_proj_meta_inputs(inputs) {
         if (val == null || val == '') {
           form_inputs.addClass('is-invalid');
           valid = false;
+          failed_fields[class_name].push('Can not be empty or blank.');
         }
         break;
 
@@ -3703,6 +3706,7 @@ function validate_proj_meta_inputs(inputs) {
         if (val == null || val == '' || !isEmail(val)) {
           form_inputs.addClass('is-invalid');
           valid = false;
+          failed_fields[class_name].push('Must be a valid email.');
         }
         break;
 
@@ -3723,20 +3727,23 @@ function validate_proj_meta_inputs(inputs) {
           if (factor.name == null || factor.name == '') {
             name_inputs.addClass('is-invalid');
             valid = false;
+            failed_fields[class_name].push('Factor name for factor ' + (i+1) + ' can not be empty or blank.');
           } else {
             // Check that no two factors are the same.
             if (factor.name in names) {
               names[factor.name].addClass('is-invalid');
               name_inputs.addClass('is-invalid');
               valid = false;
+              failed_fields[class_name].push('Every factor name must be unique, but there are multiple factors with the name ' + factor.name);
             } else {
               names[factor.name] = name_inputs;
             }
           }
 
-          if(factor.values == null || factor.values.length < 1) {
+          if(factor.values == null || factor.values.length < 2) {
             name_inputs.addClass('is-invalid');
             valid = false;
+            failed_fields[class_name].push('Factor ' + (i+1) + ' does not have at least two values.');
           }
 
           // Check that no two values are the same.
@@ -3747,11 +3754,13 @@ function validate_proj_meta_inputs(inputs) {
             if (value == null || value == '') {
               value_input.addClass('is-invalid');
               valid = false;
+              failed_fields[class_name].push('Factor ' + (i+1) + ' has an empty or blank value'.);
             } else {
               if (value in values) {
                 values[value].addClass('is-invalid');
                 value_input.addClass('is-invalid');
                 valid = false;
+                failed_fields[class_name].push('Factor ' + (i+1) + ' has multiple idenical values: ' + value);
               } else {
                 values[value] = value_input;
               }
@@ -3762,11 +3771,16 @@ function validate_proj_meta_inputs(inputs) {
     }
   }
 
-  return valid;
+  if (valid) {
+    return {};
+  } else {
+    return failed_fields;
+  }
 }
 
 function validate_common_meta_inputs(inputs) {
   var valid = true;
+  var failed_fields = {};
 
   for (var class_name in common_meta_classes_to_functions) {
     var form_group = common_form.find('.' + class_name);
@@ -3779,6 +3793,7 @@ function validate_common_meta_inputs(inputs) {
     if (!checkbox.prop('disabled') && checkbox.prop('checked')) {
       var val = inputs[class_name];
 
+      failed_fields[class_name] = [];
       switch (class_name) {
         case 'sample_genotype_group':
         case 'sample_growth_conditions_group':
@@ -3791,6 +3806,7 @@ function validate_common_meta_inputs(inputs) {
           if (val == null || val == '') {
             form_inputs.addClass('is-invalid');
             valid = false;
+            failed_fields[class_name].push('Can not be empty or blank.');
           }
           break;
 
@@ -3803,12 +3819,14 @@ function validate_common_meta_inputs(inputs) {
             if (length == null || length == '' || length == 0) {
               single_inputs.eq(0).addClass('is-invalid');
               valid = false;
+              failed_fields[class_name].push('Read length can not be empty, blank, or zero.');
             }
 
             var stdev = val.stdev;
             if (stdev == null || stdev == '' || stdev == 0) {
               single_inputs.eq(1).addClass('is-invalid');
               valid = false;
+              failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
             }
           }
           break;
@@ -3821,6 +3839,7 @@ function validate_common_meta_inputs(inputs) {
             if (val[i].length == 1) {
               row.find('input:text').addClass('is-invalid');
               valid = false;
+              failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
             }
           }
           break;
@@ -3828,11 +3847,18 @@ function validate_common_meta_inputs(inputs) {
 
     }
   }
+
+  if (valid) {
+    return {};
+  } else {
+    return failed_fields;
+  }
 }
 
 function validate_sample_meta_inputs(inputs, id) {
   var sample_form = sample_forms[id];
   var valid = true;
+  var failed_fields = {};
 
   for (var class_name in sample_meta_classes_to_functions) {
     var form_group = sample_form.find('.' + class_name);
@@ -3840,12 +3866,14 @@ function validate_sample_meta_inputs(inputs, id) {
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
+    failed_fields[class_name] = [];
     switch (class_name) {
       case 'sample_description_group':
       case 'sample_factors_1_group':
         if (val == null || val == '') {
           form_inputs.addClass('is-invalid');
           valid = false;
+          failed_fields[class_name].push('Can not be empty or blank.');
         }
         break;
 
@@ -3854,6 +3882,7 @@ function validate_sample_meta_inputs(inputs, id) {
           if (val == null || val == '') {
             form_inputs.addClass('is-invalid');
             valid = false;
+            failed_fields[class_name].push('Can not be empty or blank.');
           }
         }
         break;
@@ -3866,10 +3895,81 @@ function validate_sample_meta_inputs(inputs, id) {
           if (val[i].length == 1) {
             row.find('input:text').addClass('is-invalid');
             valid = false;
+            failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
           }
         }
         break;
     }
+  }
+
+  for (var class_name in common_meta_classes_to_functions) {
+    var val = inputs[class_name];
+    var form_group = sample_form.find('.' + class_name);
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    form_inputs = form_inputs.filter(':not([style*="display:none"])');
+    form_inputs.removeClass('is-invalid');
+
+    // Only validate common inputs in the sample-specific metadata card.
+    var specific = form_group.parents('.sample_specific_card');
+
+    if (specific.length > 0) {
+      failed_fields[class_name] = [];
+      switch (class_name) {
+        case 'sample_genotype_group':
+        case 'sample_growth_conditions_group':
+        case 'sample_rna_extraction_group':
+        case 'sample_library_preparation_group':
+        case 'sample_organism_group':
+        case 'sample_life-stage_group':
+        case 'sample_tissue_group':
+        case 'sample_sequenced_molecules_group':
+          if (val == null || val == '') {
+            form_inputs.addClass('is-invalid');
+            valid = false;
+            failed_fields[class_name].push('Can not be empty or blank.');
+          }
+          break;
+
+        case 'sample_read_type_group':
+          var type = val.type;
+          if (type == 1) {
+            var single_group = form_group.find('.sample_read_type_single_collapse');
+            var single_inputs = single_group.find('input[type="number"]');
+            var length = val.length;
+            if (length == null || length == '' || length == 0) {
+              single_inputs.eq(0).addClass('is-invalid');
+              valid = false;
+              failed_fields[class_name].push('Read length can not be empty, blank, or zero.');
+            }
+
+            var stdev = val.stdev;
+            if (stdev == null || stdev == '' || stdev == 0) {
+              single_inputs.eq(1).addClass('is-invalid');
+              valid = false;
+              failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
+            }
+          }
+          break;
+
+        case 'sample_characteristics_group':
+          var rows = form_group.find('.sample_characteristics_row');
+          for (var i = 0; i < val.length; i++) {
+            var row = rows.eq(i);
+
+            if (val[i].length == 1) {
+              row.find('input:text').addClass('is-invalid');
+              valid = false;
+              failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
+            }
+          }
+          break;
+      }
+    }
+  }
+  if (valid) {
+    return {};
+  } else {
+    return failed_fields;
   }
 }
 

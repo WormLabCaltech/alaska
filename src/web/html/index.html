@@ -198,7 +198,7 @@
             <div class="form-group row proj_contributors_group">
                 <div class="col-sm-3">
                     <legend class="col-form-label">Contributors</legend>
-                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project.</small>
+                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project NOT INCLUDING THE CORRESPONDING AUTHOR.</small>
                 </div>
                 <div class="col contributors_inputs">
                     <div class="d-flex contributor_row">
@@ -1000,7 +1000,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal" data-target="#choose_controls_modal">Verify metadata</button></div>
+                <div class="col d-flex justify-content-center mt-1"><button class="btn btn-success btn-lg" type="button" id="verify_meta_btn" style="border-radius:24px" data-toggle="modal" data-target="#check_meta_modal">Verify metadata</button></div>
             </div><!--Choose samples modal.-->
 <div class="modal fade" id="check_meta_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -1015,7 +1015,13 @@
                 <div class="modal-title">
                     <h5>There are some fields that did not pass validation.</h5>
                 </div>
-                <p>Problematic input fields have been highlighted with red. Please fix those inputs and press the verify metadata button again.</p>
+                <p>Problematic input fields have been highlighted with red. Details of these fields are listed below. Please fix those inputs and press the verify metadata button again.</p>
+                <div class="check_meta_details" style="display:none">
+                    <hr>
+                    <h6 class="modal-title"></h6>
+                    <ul>
+                    </ul>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
