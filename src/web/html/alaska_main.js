@@ -821,7 +821,12 @@ function show_ftp_info(id, pw) {
   $('#refetch_reads_btn_2').click(refetch_reads);
 
   // Change url.
-  history.pushState(null, '', '/?id=' + id);
+  // If we are testing, keep testing variable.
+  if (testing) {
+    history.pushState(null, '', '/?id=' + id + '&testing=true');
+  } else {
+    history.pushState(null, '', '/?id=' + id);
+  }
   $('#proj_url').text(window.location.href);
 
   // Show the div.
@@ -5541,22 +5546,26 @@ var sample_pair_fields = {};
 var chars_to_samples = {};
 var chars_details_to_samples = {};
 var progress = {
-  'new':              0,
-  'raw_reads':        1,
-  'inferred':         2,
-  'set':              3,
-  'finalized':        4,
-  'qc_queued':        5,
-  'qc_started':       6,
-  'qc_finished':      7,
-  'quant_queued':     8,
-  'quant_started':    9,
-  'quant_finished':   10,
-  'diff_queued':      11,
-  'diff_started':     12,
-  'diff_finished':    13,
-  'server_open':      14
-  }
+      'diff_error':     -12,
+      'quant_error':     -9,
+      'qc_error':        -6,
+      'error':           -1,
+      'new':              0,
+      'raw_reads':        1,
+      'inferred':         2,
+      'set':              3,
+      'finalized':        4,
+      'qc_queued':        5,
+      'qc_started':       6,
+      'qc_finished':      7,
+      'quant_queued':     8,
+      'quant_started':    9,
+      'quant_finished':   10,
+      'diff_queued':      11,
+      'diff_started':     12,
+      'diff_finished':    13,
+      'server_open':      14
+};
 var factor_names_to_class_names = {
   'genotype':           'sample_genotype_group',
   'growth conditions':  'sample_growth_conditions_group',

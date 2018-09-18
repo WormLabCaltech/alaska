@@ -373,7 +373,7 @@ class AlaskaServer(Alaska):
                         self.out('INFO: finished job {}'.format(job.id))
                     else:
                         self.out('ERROR: job {} / container {} terminated with non-zero exit code!'.format(job.id, job.docker.id))
-                        proj.progress -= 2
+                        proj.progress = -proj.progress
                         # Add the job to stale list
                         self.stale_jobs.append(job.id)
 
@@ -1218,7 +1218,7 @@ class AlaskaServer(Alaska):
         self.broadcast(_id, '{}: job {} eta {} mins'.format(_id, job.id, self.calc_queue_exhaust()))
 
 
-    def qc(self, _id, close=True, check=True):
+    def qc(self, _id, close=True, check=True, progress=True):
         """
         Performs quality control on the given raw reads.
         """
@@ -1279,13 +1279,15 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = Alaska.PROGRESS['qc_queued'] # added to queue
+
+        if progress:
+            proj.progress = Alaska.PROGRESS['qc_queued'] # added to queue
 
         if close:
             self.close(_id)
 
 
-    def read_quant(self, _id, close=True, check=True):
+    def read_quant(self, _id, close=True, check=True, progress=True):
         """
         Checks if another analysis is running,
         then performs read quantification.
@@ -1346,12 +1348,14 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = Alaska.PROGRESS['quant_queued'] # added to queue
+
+        if progress:
+            proj.progress = Alaska.PROGRESS['quant_queued'] # added to queue
 
         if close:
             self.close(_id)
 
-    def diff_exp(self, _id, close=True, check=True):
+    def diff_exp(self, _id, close=True, check=True, progress=True):
         """
         Perform differential expression analysis.
         """
@@ -1409,22 +1413,40 @@ class AlaskaServer(Alaska):
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
-        proj.progress = Alaska.PROGRESS['diff_queued'] # added to queue
+
+        if progress;
+            proj.progress = Alaska.PROGRESS['diff_queued'] # added to queue
 
         if close:
             self.close(_id)
 
     def do_all(self, _id, close=True):
         """
-        Perform all three analyses.
+        Perform all three analyses. Assumes that the project is finalized.
         """
         self.broadcast(_id, '{}: performing all analyses'.format(_id))
         if close:
             self.close(_id)
 
-        self.qc(_id, close=False)
-        self.read_quant(_id, close=False, check=False)
-        self.diff_exp(_id, close=False, check=False)
+        if self.exists_var(_id):
+            proj = self.projects[_id]
+        else:
+            raise Exception('{}: not finalized'.format(_id))
+
+        # If the project is finalized.
+        if (proj.progress == Alaska.PROGRESS['finalized']
+            || proj.progress == Alaska.PROGRESS['qc_error']):
+            self.out('{}: starting from qc'.format(_id))
+            self.qc(_id, close=False, check=False, progress=True)
+            self.read_quant(_id, close=False, check=False, progress=False)
+            self.diff_exp(_id, close=False, check=False, progress=False)
+        elif (proj.progress == Alaska.PROGRESS['quant_error']):
+            self.out('{}: starting from read quant'.format(_id))
+            self.read_quant(_id, close=False, check=False, progress=True)
+            self.diff_exp(_id, close=False, check=False, progress=False)
+        elif (proj.progress == Alaska.PROGRESS['diff_error']):
+            self.out('{}: starting from diff'.format(_id))
+            self.diff_exp(_id, close=False, check=False, progress=True)
 
     def open_sleuth_server(self, _id, close=True):
         """

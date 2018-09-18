@@ -258,7 +258,7 @@ class AlaskaProject(Alaska):
         # First, let's construct a DataFrame with just one column.
         sample_names = []
         for sample_id in self.samples:
-            sample_names.append(self.samples[sample_id].name)
+            sample_names.append(self.samples[sample_id].name.replace(' ', '_'))
         df = pd.DataFrame(sample_names, columns=['sample'])
         df.set_index('sample', inplace=True)
 
@@ -279,9 +279,9 @@ class AlaskaProject(Alaska):
                 else:
                     factor_value = 'b_' + factor_value
 
-                column.append([name, factor_value])
+                column.append([name, factor_value.replace(' ', '_')])
 
-            col = pd.DataFrame(column, columns=['sample', control_name])
+            col = pd.DataFrame(column, columns=['sample', control_name.replace(' ', '_')])
             col.set_index('sample', inplace=True)
             df = pd.concat([df, col], axis=1, sort=True)
 
