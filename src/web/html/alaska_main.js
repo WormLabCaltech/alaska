@@ -4061,6 +4061,8 @@ function validate_all_meta_inputs(modal) {
       add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
     }
   }
+
+  return valid;
 }
 
 /**
@@ -4119,9 +4121,6 @@ function set_all_meta_inputs() {
 
   // Re-fire factor change.
   proj_inputs.find('.proj_experimental_design_group').find('select').change();
-
-  // Set listener for fill with test metadata button.
-  $('#test_metadata_btn').click(fill_with_test_metadata);
 }
 
 /**
@@ -4915,25 +4914,21 @@ function show_verify_meta_modal() {
   convert_all_meta_inputs();
 
   // Verify.
-  var valid = validate_all_meta();
+  var check_meta_modal = $('#check_meta_modal');
+  var choose_controls_modal = $('#choose_controls_modal');
+  var valid = validate_all_meta_inputs(check_meta_modal);
 
   // Depending on whether or not all the input is valid,
   // show different modal.
-  var modal;
-  if (false) {
-    modal = $('#choose_controls_modal');
-
-    var replacement = controls_modal.clone();
-    modal.replaceWith(replacement);
-    modal = replacement;
+  if (valid) {
+    var new_modal = choose_controls_modal.clone();
 
     set_chars_details_to_samples();
-    set_choose_controls_modal(modal, proj.factors);
+    set_choose_controls_modal(new_modal, proj.factors);
+    new_modal.modal('show');
   } else {
-    modal = $('#check_meta_modal');
+    check_meta_modal.modal('show');
   }
-
-  modal.modal('show');
 }
 
 /**
@@ -4955,6 +4950,9 @@ function set_meta_input() {
 
   // Then, add listener to verify metadata button.
   $('#verify_meta_btn').click(show_verify_meta_modal);
+
+  // Set listener for fill with test metadata button.
+  $('#test_metadata_btn').click(fill_with_test_metadata);
 }
 
 /*
@@ -5820,6 +5818,9 @@ var qc_output_interval;
 var quant_output_interval;
 var diff_output_interval;
 
+// Global variable to indicate if this is a testing environment.
+var testing = false;
+
 // To run when page is loaded.
 $(document).ready(function() {
   url_params = get_url_params();
@@ -5830,6 +5831,14 @@ $(document).ready(function() {
 
     // Go to whatever step we need to go to.
     get_proj_status();
+  }
+
+  if (url_params.has('testing')) {
+    if (url_params.get('testing') == 'true') {
+      testing = true;
+    }
+    // Enable all testing elements.
+    $('.testing').show();
   }
 
   // initialize tooltips
