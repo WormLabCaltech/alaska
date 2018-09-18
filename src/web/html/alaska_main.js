@@ -3980,38 +3980,36 @@ function validate_sample_meta_inputs(inputs, sample_form) {
  *
  */
 function add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs) {
-  if (Object.keys(failed_inputs).length > 0) {
-    var new_details_div = details_div.clone();
-    var title = new_details_div.children('div:first');
-    title.addClass(title_class);
-    title.children('i').addClass(title_icon_class);
-    title.children('h5').text(title_text);
+  var new_details_div = details_div.clone();
+  var title = new_details_div.children('div:first');
+  title.addClass(title_class);
+  title.children('i').addClass(title_icon_class);
+  title.children('h5').text(title_text);
 
-    var details_list = new_details_div.children('ul');
-    for (var class_name in failed_inputs) {
-      var descriptions = failed_inputs[class_name];
+  var details_list = new_details_div.children('ul');
+  for (var class_name in failed_inputs) {
+    var descriptions = failed_inputs[class_name];
 
-      if (descriptions.length > 0) {
-        var list_item = $('<li>', {
-          text: class_name
+    if (descriptions.length > 0) {
+      var list_item = $('<li>', {
+        text: class_name
+      });
+      var list = $('<ul>');
+
+      for (var i = 0; i < descriptions.length; i++) {
+        var description = descriptions[i];
+        var sub_item = $('<li>', {
+          text: description
         });
-        var list = $('<ul>');
-
-        for (var i = 0; i < descriptions.length; i++) {
-          var description = descriptions[i];
-          var sub_item = $('<li>', {
-            text: description
-          });
-          list.append(sub_item);
-        }
-
-        details_list.append(list_item);
-        details_list.append(list);
+        list.append(sub_item);
       }
+
+      details_list.append(list_item);
+      details_list.append(list);
     }
-    modal_body.append(new_details_div);
-    new_details_div.show();
   }
+  modal_body.append(new_details_div);
+  new_details_div.show();
 }
 
 function validate_all_meta_inputs(modal) {
@@ -4030,29 +4028,38 @@ function validate_all_meta_inputs(modal) {
 
   // Some inputs failed, so we need to add the failed descriptions to the
   // modal.
-  var title_icon_class = 'fa-cube';
-  var title_text = 'Project Metadata Form';
-  var title_class = 'alert-primary';
-  add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+  if (Object.keys(failed_inputs).length > 0) {
+    valid = false;
+    var title_icon_class = 'fa-cube';
+    var title_text = 'Project Metadata Form';
+    var title_class = 'alert-primary';
+    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+  }
 
   // Common inputs.
   var common_inputs = get_common_meta_inputs(common_form);
   failed_inputs = validate_common_meta_inputs(common_inputs, common_form);
 
-  title_icon_class = 'fa-share-alt';
-  title_text = 'Common Metadata Form';
-  title_class = 'alert-info';
-  add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+  if (Object.keys(failed_inputs).length > 0) {
+    valid = false;
+    title_icon_class = 'fa-share-alt';
+    title_text = 'Common Metadata Form';
+    title_class = 'alert-info';
+    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+  }
 
   for (var id in sample_forms) {
     var sample_form = sample_forms[id];
     var sample_inputs = get_sample_meta_inputs(sample_form);
     failed_inputs = validate_sample_meta_inputs(sample_inputs, sample_form);
 
-    title_icon_class = 'fa-cubes';
-    title_text = 'Sample Metadata Form: ' + proj.samples[id].name;
-    title_class = 'alert-warning';
-    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+    if (Object.keys(failed_inputs).length > 0) {
+      valid = false;
+      title_icon_class = 'fa-cubes';
+      title_text = 'Sample Metadata Form: ' + proj.samples[id].name;
+      title_class = 'alert-warning';
+      add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+    }
   }
 }
 
