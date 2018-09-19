@@ -320,7 +320,7 @@ class AlaskaServer(Alaska):
 
                         if email:
                             subject = 'Quality control started'
-                            msg = 'Alaska has started quality control of {} samples for project {}.'.format(len(proj.samples), proj_id)
+                            msg = 'Alaska has started quality control for project {}.'.format(proj_id)
                             self.send_email(email, subject, msg, _id)
 
                     elif job.name == 'kallisto':
@@ -329,16 +329,16 @@ class AlaskaServer(Alaska):
 
                         if email:
                             subject = 'Alignment and quantification started'
-                            msg = 'Alaska has started read alignment and quantification of {} samples for project {}.'.format(len(proj.samples), proj_id)
+                            msg = 'Alaska has started read alignment and quantification for project {}.'.format(proj_id)
                             self.send_email(email, subject, msg, _id)
 
                     elif job.name == 'sleuth':
                         proj.progress = Alaska.PROGRESS['diff_started']
                         out_dir = proj.diff_dir
 
-                        subject = 'Differential expression analysis started'
-                        msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
                         if email:
+                            subject = 'Differential expression analysis started'
+                            msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
                             self.send_email(email, subject, msg, _id)
                     else:
                         self.out('ERROR: job {} has unrecognized name'.format(job.id))
@@ -366,6 +366,7 @@ class AlaskaServer(Alaska):
                             self.out('{}: {}: {}'.format(proj_id, job_name, out))
                 except Exception as e:
                     self.out('ERROR: error occured while starting container {}'.format(job.docker.id))
+                    traceback.print_exc()
                 finally:
                     # check correct termination
                     try:
