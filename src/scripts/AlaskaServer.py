@@ -1551,7 +1551,7 @@ class AlaskaServer(Alaska):
         email = proj.meta['corresponding']['email']
         msg = 'Alaska has placed your project in the queue. Analysis will start shortly.'
         if email:
-            self.(email, 'Analysis queued for project {}'.format(_id), msg, _id)
+            self.send_email(email, 'Analysis queued for project {}'.format(_id), msg, _id)
 
     def open_sleuth_server(self, _id, close=True):
         """
