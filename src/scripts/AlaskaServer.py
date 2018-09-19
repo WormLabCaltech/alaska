@@ -307,6 +307,7 @@ class AlaskaServer(Alaska):
                 job_name = job.name
                 proj_id = job.proj_id
                 proj = self.projects[proj_id]
+                email = proj.meta['corresponding']['email']
 
                 try:
                     self.out('INFO: starting job {}'.format(job.id))
@@ -316,12 +317,29 @@ class AlaskaServer(Alaska):
                     if job.name == 'qc':
                         proj.progress = Alaska.PROGRESS['qc_started']
                         out_dir = proj.qc_dir
+
+                        if email:
+                            subject = 'Quality control started'
+                            msg = 'Alaska has started quality control of {} samples for project {}.'.format(len(proj.samples), proj_id)
+                            send_email(email, subject, msg, _id)
+
                     elif job.name == 'kallisto':
                         proj.progress = Alaska.PROGRESS['quant_started']
                         out_dir = proj.align_dir
+
+                        if email:
+                            subject = 'Alignment and quantification started'
+                            msg = 'Alaska has started read alignment and quantification of {} samples for project {}.'.format(len(proj.samples), proj_id)
+                            send_email(email, subject, msg, _id)
+
                     elif job.name == 'sleuth':
                         proj.progress = Alaska.PROGRESS['diff_started']
                         out_dir = proj.diff_dir
+
+                        subject = 'Differential expression analysis started'
+                        msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
+                        if email:
+                            send_email(email, , msg, _id)
                     else:
                         self.out('ERROR: job {} has unrecognized name'.format(job.id))
 
@@ -365,6 +383,24 @@ class AlaskaServer(Alaska):
                         if job.name in ['qc', 'kallisto', 'sleuth']:
                             proj.progress += 1
 
+                            if job.name == 'qc':
+                                # Send email.
+                                subject = 'Quality control finished'
+                                msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
+                                if email:
+                                    send_email(email, subject, msg, _id)
+                            elif job.name == 'kallisto':
+                                subject = 'Alignment and quantification finished'
+                                msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
+                                if email:
+                                    send_email(email, subject, msg, _id)
+
+                            elif job.name == 'sleuth':
+                                subject = 'Differential expression analysis finished'
+                                msg = 'Alaska has finished differential expression analysis for project {}.'.format(proj_id)
+                                if email:
+                                    send_email(email, subject, msg, _id)
+
                             # calculate average analysis time here
                             total = self.times[job.name] * self.counts[job.name]
                             total += job.run_duration
@@ -386,12 +422,29 @@ class AlaskaServer(Alaska):
                                 if ele.proj_id == proj_id and ele.name in ['kallisto', 'sleuth']:
                                     self.stale_jobs.append(ele.id)
 
+                            # Send email notifying of the error.
+                            subject = 'Error occurred during quality control'
+                            msg = 'Alaska encountered an error while performing quality control for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                            if email:
+                                send_email(email, subject, msg, _id)
+
                         # if error occurred during kallisto
                         elif job.name == 'kallisto':
                             # find any other queued analyses and make them stale
                             for ele in list(self.queue.queue):
                                 if ele.proj_id == proj_id and ele.name in ['sleuth']:
                                     self.stale_jobs.append(ele.id)
+
+                            subject = 'Error occurred during alignment and quantification'
+                            msg = 'Alaska encountered an error while performing read alignment and quantification for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                            if email:
+                                send_email(email, subject, msg, _id)
+
+                        elif job.name == 'sleuth':
+                            subject = 'Error occurred during differential expression analysis'
+                            msg = 'Alaska encountered an error while performing differential expression analysis for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                            if email:
+                                send_email(email, subject, msg, _id)
 
         except KeyboardInterrupt:
             self.out('INFO: stopping workers')
@@ -873,7 +926,7 @@ class AlaskaServer(Alaska):
         """
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT) + ' Pacific Time'
         url = 'http://alaska.caltech.edu:81/?id=' + _id
-        fr = 'noreply@alasak.caltech.edu'
+        fr = 'noreply@alaska.caltech.edu'
 
         # Footer that is appended to every email.
         full_msg = '\
@@ -883,9 +936,9 @@ class AlaskaServer(Alaska):
              <p>{}</p> \
              <br> \
              <hr> \
-             <p>Project ID: {}</p> \
-             <p>Unique URL: <a href="{}">{}</a></p> \
-             <p>This message was sent to {} at {}.</p> \
+             <p>Project ID: {}<br> \
+             Unique URL: <a href="{}">{}</a><br> \
+             This message was sent to {} at {}.</p> \
             </body> \
         </html> \
         '.format(msg, _id, url, url, to, datetime)
@@ -1494,6 +1547,11 @@ class AlaskaServer(Alaska):
         elif (proj.progress == Alaska.PROGRESS['diff_error']):
             self.out('{}: starting from diff'.format(_id))
             self.diff_exp(_id, close=False, check=False, progress=True)
+
+        email = proj.meta['corresponding']['email']
+        msg = 'Alaska has placed your project in the queue. Analysis will start shortly.'
+        if email:
+            send_email(email, 'Analysis queued for project {}'.format(_id), msg, _id)
 
     def open_sleuth_server(self, _id, close=True):
         """
