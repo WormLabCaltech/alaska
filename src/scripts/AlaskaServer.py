@@ -30,7 +30,7 @@ import docker
 import shutil
 import random
 import smtplib
-from email.message import EmailMessage
+from email.mime.text import MIMEText
 import traceback
 import warnings as w
 import datetime as dt
@@ -881,15 +881,12 @@ class AlaskaServer(Alaska):
         #         raise Exception('ERROR: email send to {} failed.'.format(to))
         # except docker.errors.NotFound as e:
         #     self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
-        msg = EmailMessage()
-        msg.set_content(msg)
+        msg = MIMEText(msg, 'plain')
         msg['Subject'] = subject
         msg['From'] = fr
-        msg['To'] = to
-        s = smtplib.SMTP('alaska.caltech.edu')
-        s.send_message(msg)
-        s.quit()
-
+        conn = smtplib.SMTP('localhost')
+        conn.sendmail(fr, to, msg.as_string())
+        conn.quit()
 
     def exists(self, _id):
         """
