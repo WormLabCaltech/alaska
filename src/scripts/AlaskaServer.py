@@ -2180,8 +2180,6 @@ if __name__ == '__main__':
     try:
         server = AlaskaServer()
 
-        server.send_email('kmin@caltech.edu', 'Test', 'message', 'id')
-
         # Register signal handler for SIGTERM.
         signal.signal(signal.SIGTERM, server.stop)
         signal.signal(signal.SIGILL, server.stop)
