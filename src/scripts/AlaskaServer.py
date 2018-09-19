@@ -883,7 +883,7 @@ class AlaskaServer(Alaska):
         #     self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
         msg = EmailMessage()
         msg.set_content(msg)
-        msgg['Subject'] = subject
+        msg['Subject'] = subject
         msg['From'] = fr
         msg['To'] = to
         s = smtplib.SMTP('localhost')
