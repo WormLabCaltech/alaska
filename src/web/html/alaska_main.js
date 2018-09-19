@@ -143,9 +143,6 @@ function goto_progress(status) {
     }
   });
 
-  // Set output listeners for live output.
-  set_output_listeners(progress_container);
-
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
       window.open('multiqc_report.php?id=' + proj_id, '_blank');
@@ -185,6 +182,9 @@ function goto_progress(status) {
       }
     });
   });
+
+  // Set output listeners for live output.
+  set_output_listeners(progress_container);
 
   // Set the progress page to the given progress.
   set_progress(status);
