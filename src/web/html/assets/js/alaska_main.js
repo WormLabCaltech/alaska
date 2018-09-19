@@ -134,6 +134,7 @@ function goto_progress(status) {
       action: 'do_all',
       id: proj_id
     };
+    $(this).hide();
     send_ajax_request(target, data, null, false);
     project_progress_interval = setInterval(update_progress, 10000);
   });
@@ -4491,6 +4492,7 @@ function set_choose_controls_modal(modal, factors) {
     'modal': modal
   }, function (e) {
     console.log('start analysis');
+    $(this).prop('disabled', true);
     var modal = e.data.modal;
     write_proj();
     start_analysis(function () {
