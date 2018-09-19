@@ -803,6 +803,12 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: FTP user modification exited with non-zero status.'
                                     .format(__id))
 
+            cmd = 'pure-pw mkdb'
+            out = ftp.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception('{}: FTP mkdb failed.'.format(__id))
+
             # return password
             return pw
 
@@ -1435,6 +1441,13 @@ class AlaskaServer(Alaska):
 
                 cmd = 'pure-pw userdel {}'.format(_id)
                 out = ftp.exec_run(cmd)
+
+                cmd = 'pure-pw mkdb'
+                out = ftp.exec_run(cmd)
+                exit_code = out[0]
+                if exit_code != 0:
+                    raise Exception('{}: FTP mkdb failed.'.format(__id))
+
             except docker.errors.NotFound as e:
                 self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
 
