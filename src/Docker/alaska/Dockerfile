@@ -49,6 +49,8 @@ RUN { \
   echo postfix postfix/main_mailer_type string 'Internet Site'; \
 } | debconf-set-selections \
   && apt-get update && apt-get install -y postfix
+RUN newaliases
+RUN systemctl restart postfix
 
 # Set up working directory
 WORKDIR /alaska/scripts
