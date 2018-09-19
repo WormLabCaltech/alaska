@@ -55,20 +55,12 @@ function get_server_status() {
   // $('#server_status_badge').addClass('flash');
   // $('#server_status_badge').addClass('infinite');
 
-  // submit ajax request
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: { action: 'is_online' },
-    success:function(out) {
-      console.log(out);
-      if (out.includes("true")) {
-        set_badge(true);
-      } else {
-        set_badge(false);
-      }
-    }
-  });
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'is_online'
+  };
+  var callback = parse_server_status;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -78,22 +70,14 @@ function goto_ftp_info() {
   $('#success_check').show();
   $('#new_proj_btn').prop('disabled', true);
 
-  // Send ajax request to get ftp password again.
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'get_ftp_info',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      // Parse pw.
-      var split = out.split('\n');
-      var pw = split[split.length - 3];
-      show_ftp_info(proj_id, pw);
-    }
-  });
+  // Send ajax request to get ftp password.
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'get_ftp_info',
+    id: proj_id
+  };
+  var callback = parse_ftp_info;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -143,9 +127,6 @@ function goto_progress(status) {
     }
   });
 
-  // Set output listeners for live output.
-  set_output_listeners(progress_container);
-
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
       window.open('multiqc_report.php?id=' + proj_id, '_blank');
@@ -164,27 +145,17 @@ function goto_progress(status) {
 
   // Set sleuth server open button listener.
   $('#diff_server_btn').click(function () {
-    $.ajax({
-      type: 'POST',
-      url: 'cgi_request.php',
-      data: {
-        id: proj_id,
-        action: 'open_sleuth_server'
-      },
-      success:function(out) {
-        console.log(out);
-        var split = out.split('\n');
-        var line = split[split.length - 3];
-        var split2 = line.split(' ');
-        var port = parseInt(split2[split2.length - 1]);
-
-        console.log(port);
-
-        var url = 'http://' + window.location.hostname + ':' + port + '/';
-        window.open(url, '_blank');
-      }
-    });
+    var target = 'cgi_request.php';
+    var data = {
+      id: proj_id,
+      action: 'open_sleuth_server'
+    };
+    var callback = parse_sleuth_server;
+    send_ajax_request(target, data, callback, true);
   });
+
+  // Set output listeners for live output.
+  set_output_listeners(progress_container);
 
   // Set the progress page to the given progress.
   set_progress(status);
@@ -194,19 +165,13 @@ function goto_progress(status) {
 }
 
 function get_output(type, textarea) {
-  $.ajax({
-    type: 'POST',
-    url: 'get_output.php',
-    data: {
-      'type': type,
-      'id': proj_id
-    },
-    success:function(out) {
-      textarea.val(out);
-      textarea.scrollTop(textarea[0].scrollHeight);
-    }
-  });
-
+  var target = 'get_output.php';
+  var data = {
+    'type': type,
+    'id': proj_id
+  };
+  var callback = parse_output_textarea;
+  send_ajax_request(target, data, callback, true, textarea);
 }
 
 function set_output_listener_for_collapse(collapse, type, textarea, badge, t=1000) {
@@ -264,33 +229,15 @@ function set_output_listeners(progress_container) {
  * Update progress.
  */
 function update_progress() {
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'get_proj_status',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      update_proj_status(out);
-    }
-  });
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'get_proj_status',
+    id: proj_id
+  };
+  var callback = update_proj_status;
+  send_ajax_request(target, data, callback, true);
 }
 
-/**
- * Helper function to parse output.
- */
-function update_proj_status(out) {
-  var split = out.split('\n');
-  var status = parseInt(split[split.length - 3]);
-
-  set_progress(status);
-
-  if (status >= progress.diff_finished) {
-    clearInterval(project_progress_interval);
-  }
-}
 
 /**
  * Sets the progress page to the given status.
@@ -628,69 +575,16 @@ function set_progress_bar_done() {
 }
 
 /**
- * Parse project status.
- */
-function parse_proj_status(out) {
-  var split = out.split('\n');
-  var status = parseInt(split[split.length - 3]);
-  console.log(split);
-  console.log(status);
-
-  switch (status) {
-    // Project created.
-    case progress.new:
-    case progress.raw_reads:
-      console.log('status: created');
-      goto_ftp_info();
-      break;
-
-    // Samples inferred
-    case progress.inferred:
-      console.log('status: samples inferred');
-      goto_ftp_info();
-      break;
-    case progress.set:
-      console.log('status: set');
-      goto_meta_input()
-      break;
-
-    // For all of these cases, we go to the progress page.
-    case progress.finalized:
-      console.log('status: finalized');
-
-    case progress.qc_queued:
-    case progress.qc_started:
-    case progress.qc_finished:
-    case progress.quant_queued:
-    case progress.quant_started:
-    case progress.quant_finished:
-    case progress.diff_queued:
-    case progress.diff_started:
-    case progress.diff_finished:
-    case progress.server_open:
-      goto_progress(status);
-
-      break;
-
-  }
-}
-
-/**
  * Get project status.
  */
 function get_proj_status() {
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'get_proj_status',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      parse_proj_status(out);
-    }
-  });
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'get_proj_status',
+    id: proj_id
+  };
+  var callback = parse_proj_status;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -716,39 +610,6 @@ function set_loading_spinner(button, spinner) {
       spinner.show();
     }
   });
-}
-
-/**
- * Retrieve project id (which is also the ftp login) and ftp password
- * from output of new_proj.
- */
-function get_id_pw(response) {
-  // Split response to lines.
-  var split = response.split('\n');
-
-  // Get third-to-last string.
-  split.pop();
-  split.pop();
-  var line = split.pop();
-
-  // Split with colon to get the id.
-  var split2 = line.split(':');
-  var id = split2[0];
-
-  // Split the second split2 with space to fetch password.
-  var split3 = split2[1].split(' ');
-  var pw = split3.pop();
-
-  // Create dict to return.
-  var result = {
-    'id': id,
-    'pw': pw
-  };
-
-  console.log('id: ' + id + '\n');
-  console.log('pw: ' + pw + '\n');
-
-  return result;
 }
 
 /**
@@ -786,20 +647,13 @@ function copy_test_reads() {
   var success = button.children('div:nth-of-type(2)');
   set_loading_spinner(button, spinner);
 
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'test_copy_reads',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-
-      spinner.hide();
-      success.show();
-    }
-  });
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'test_copy_reads',
+    id: proj_id
+  };
+  var callback = parse_copy_test;
+  send_ajax_request(target, data, callback, false, spinner, success);
 }
 
 /**
@@ -857,38 +711,12 @@ function new_proj() {
 
   // Send new project request.
   // submit ajax request
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: { action: 'new_proj' },
-    success:function(out) {
-      console.log(out);
-      id_pw = get_id_pw(out);
-
-      // Once we have an id and pw, stop the loading spinner.
-      spinner.hide();
-      $('#success_check').show();
-
-      // Set global variables.
-      proj_id = id_pw.id;
-      ftp_pw = id_pw.pw;
-
-      // Then, show ftp info.
-      show_ftp_info(proj_id, ftp_pw);
-    }
-  });
-}
-
-/**
- * Sets the md5.
- */
-function set_md5(md5_id, spinner_id, md5) {
-  // Remove the spinner.
-  $('#' + spinner_id).hide();
-
-  // Get md5 from output.
-  md5 = md5.split('  ')[0];
-  $('#' + md5_id).text(md5);
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'new_proj'
+  };
+  var callback = parse_new_proj;
+  send_ajax_request(target, data, callback, true, spinner);
 }
 
 /**
@@ -896,18 +724,13 @@ function set_md5(md5_id, spinner_id, md5) {
  */
 function get_md5(md5_id, spinner_id, path) {
   console.log(path);
-  // Send md5 request.
-  $.ajax({
-    type: 'POST',
-    url: 'md5sum.php',
-    data: {
-      'path': path
-    },
-    success:function(out) {
-      console.log(out);
-      set_md5(md5_id, spinner_id, out);
-    }
-  });
+
+  var target = 'md5sum.php';
+  var data = {
+    'path': path
+  };
+  var callback = parse_md5;
+  send_ajax_request(target, data, callback, true, md5_id, spinner_id);
 }
 
 /**
@@ -993,65 +816,16 @@ function set_fetch_failed() {
 }
 
 /**
- * Parse fetch_reads output.
- */
-function parse_reads(out) {
-  // Split by the array brackets
-  var split = out.split('[');
-  var split2 = split[1].split(']');
-
-  // Then, we have the raw json dump.
-  var dump = '[' + split2[0] + ']';
-
-  // Then, parse into json.
-  var reads = JSON.parse(dump);
-
-  // console.log(reads);
-
-  // If there are no raw reads, something went wrong.
-  if (reads.length < 1) {
-    set_fetch_failed();
-  } else {
-    // Pass on the parsed reads to set the table values.
-    set_raw_reads_table(reads);
-
-    set_fetch_succeeded();
-
-    // After everything has been added, set this table as a DataTable.
-    $('#raw_reads_table').DataTable({
-      'ordering': true,
-      'order': [[0, 'asc']],
-      'searching': false,
-      'paging': false,
-      'scrollY': 500,
-      'columnDefs':[{
-        'targets':[2,3],
-        'orderable': false
-      }]
-    });
-  }
-
-}
-
-/**
  * Fetch files in raw reads folder.
  */
 function fetch_reads() {
-  var proj_id = $('#proj_id').text();
-
-  // Send fetch_reads request.
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'fetch_reads',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      parse_reads(out);
-    }
-  });
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'fetch_reads',
+    id: proj_id
+  };
+  var callback = parse_reads;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -1184,7 +958,7 @@ function set_sample_name_input(proj) {
 /**
  * Populates the given select with the global organisms variable.
  */
-function populate_organisms_select(select) {
+function populate_organisms_select(select, organisms) {
   for (var i = 0; i < organisms.length; i++) {
     var option = $('<option>', {text: organisms[i]});
     select.append(option);
@@ -1195,56 +969,12 @@ function populate_organisms_select(select) {
  * Sets the internal list of available organisms.
  */
 function set_organisms_select(select) {
-  // Send request only if we haven't received the list of organisms yet.
-  if (organisms == null) {
-    // Send get_organisms request.
-    $.ajax({
-      type: 'POST',
-      url: 'cgi_request.php',
-      data: {
-        action: 'get_organisms'
-      },
-      success:function(out) {
-        console.log(out);
-
-        var split = out.split('[');
-        var split2 = split[1].split(']');
-        var dump = '[' + split2[0] + ']';
-
-        organisms = JSON.parse(dump);
-
-        // Set the dropdowns.
-        populate_organisms_select(select);
-      }
-    });
-  } else {
-    // Otherwise, we can just set the dropdown right away.
-    populate_organisms_select(select);
-  }
-
-}
-
-/**
- * Parse the string returned by infer_samples.
- */
-function parse_infer_samples(out) {
-  // Split by first opening bracket.
-  var i = out.indexOf('{');
-  var split = out.slice(i);
-
-  // Then, split by ending string.
-  var split2 = split.split('END');
-
-  // Then, we have the raw json dump.
-  var dump = split2[0];
-
-  console.log(dump);
-
-  // Parse json.
-  proj = JSON.parse(dump);
-
-  set_sample_name_input(proj);
-  show_sample_name_input();
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'get_organisms'
+  };
+  var callback = parse_organisms;
+  send_ajax_request(target, data, callback, true, select);
 }
 
 /**
@@ -1257,25 +987,13 @@ function infer_samples() {
   set_loading_spinner(button, spinner);
 
   // Send fetch_reads request.
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'infer_samples',
-      id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      parse_infer_samples(out);
-    }
-  });
-}
-
-/**
- * Set sample reads table.
- */
-function set_sample_reads(table, reads) {
-
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'infer_samples',
+    id: proj_id
+  };
+  var callback = parse_infer_samples;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -2153,22 +1871,12 @@ function set_paired_end_listener(id, form) {
  * Read project from temporary json.
  */
 function read_proj() {
-  // Send ajax request.
-  $.ajax({
-    type: 'POST',
-    url: 'read_proj.php',
-    data: { id: proj_id },
-    success:function(out) {
-      console.log(out);
-      proj = JSON.parse(out);
-
-      set_meta_input();
-
-      show_meta_input();
-
-      setTimeout(set_all_meta_inputs, 2000);
-    }
-  });
+  var target = 'read_proj.php';
+  var data = {
+    id: proj_id
+  };
+  var callback = parse_read_proj;
+  send_ajax_request(target, data, callback, true);
 }
 
 /**
@@ -4768,58 +4476,82 @@ function set_choose_controls_modal(modal, factors) {
 /**
  * Set and finalize project. Then, start analysis.
  */
-function start_analysis(callback) {
-  // Set project.
-  $.ajax({
-    type: 'POST',
-    url: 'cgi_request.php',
-    data: {
-      action: 'set_proj',
+function start_analysis(cb) {
+  var target = 'cgi_request.php';
+  var data = {
+    action: 'set_proj',
+    id: proj_id
+  };
+  function callback(cb) {
+    var target = 'cgi_request.php';
+    var data = {
+      action: 'finalize_proj',
       id: proj_id
-    },
-    success:function(out) {
-      console.log(out);
-      if (out.includes("successfully")) {
-        // Finalize project.
-        $.ajax({
-          type: 'POST',
-          url: 'cgi_request.php',
-          data: {
-            action: 'finalize_proj',
-            id: proj_id
-          },
-          success:function(out) {
-            console.log(out);
-            if (out.includes("successfully")) {
-              $.ajax({
-                type: 'POST',
-                url: 'cgi_request.php',
-                data: {
-                  action: 'do_all',
-                  id: proj_id
-                },
-                success:function(out) {
-                  console.log(out);
-
-                  if (out.includes('performing')) {
-                    if (typeof callback === 'function') {
-                      callback();
-                    }
-                  } else {
-                    console.log('analysis could not be started');
-                  }
-                }
-              });
-            } else {
-              console.log('project could not be finalized');
-            }
-          }
-        });
-      } else {
-        console.log('project data could not be set');
-      }
+    };
+    function callback(cb) {
+      var target = 'cgi_request.php';
+      var data = {
+        action: 'set_proj',
+        id: proj_id
+      };
+      var callback = cb;
+      send_ajax_request(target, data, callback, false);
     }
-  });
+    send_ajax_request(target, data, callback, false, cb);
+  }
+  send_ajax_request(target, data, callback, false, cb);
+
+  // // Set project.
+  // $.ajax({
+  //   type: 'POST',
+  //   url: 'cgi_request.php',
+  //   data: {
+  //     action: 'set_proj',
+  //     id: proj_id
+  //   },
+  //   success:function(out) {
+  //     console.log(out);
+  //     if (out.includes("successfully")) {
+  //       // Finalize project.
+  //       $.ajax({
+  //         type: 'POST',
+  //         url: 'cgi_request.php',
+  //         data: {
+  //           action: 'finalize_proj',
+  //           id: proj_id
+  //         },
+  //         success:function(out) {
+  //           console.log(out);
+  //           if (out.includes("successfully")) {
+  //             $.ajax({
+  //               type: 'POST',
+  //               url: 'cgi_request.php',
+  //               data: {
+  //                 action: 'do_all',
+  //                 id: proj_id
+  //               },
+  //               success:function(out) {
+  //                 console.log(out);
+  //
+  //                 if (out.includes('performing')) {
+  //                   if (typeof callback === 'function') {
+  //                     callback();
+  //                   }
+  //                 } else {
+  //                   console.log('analysis could not be started');
+  //                 }
+  //               }
+  //             });
+  //           } else {
+  //             console.log('project could not be finalized');
+  //           }
+  //         }
+  //       });
+  //     } else {
+  //       console.log('project data could not be set');
+  //     }
+  //   }
+  // });
 }
 
 //
@@ -5099,17 +4831,12 @@ function meta_input() {
   if (valid) {
     // First, save and set the project.
     write_proj(function () {
-      $.ajax({
-        type: 'POST',
-        url: 'cgi_request.php',
-        data: {
-          id: proj_id,
-          action: 'set_proj'
-        },
-        success:function(out) {
-          console.log(out);
-        }
-      });
+      var target = 'cgi_request.php';
+      var data = {
+        id: proj_id,
+        action: 'set_proj'
+      };
+      send_ajax_request(target, data, null, false);
     });
 
     $('#sample_names_modal').modal('hide');
@@ -5448,51 +5175,27 @@ function get_sample_meta(id) {
 /**
  * Read and return object.
  */
-function read_object_from_temp(fname, callback, form) {
-  // Send ajax request.
-  $.ajax({
-    type: 'POST',
-    url: 'read_proj.php',
-    data: {
-      'id': proj_id,
-      'fname': fname,
-    },
-    success:function(out) {
-      console.log(out);
-      var obj = JSON.parse(out);
-
-      if (typeof callback === 'function') {
-        if (form != null) {
-          callback(obj, form);
-        } else {
-          callback(obj);
-        }
-      }
-    }
-  });
+function read_object_from_temp(fname, cb, form) {
+  var target = 'read_proj.php';
+  var data = {
+    'id': proj_id,
+    'fname': fname,
+  };
+  var callback = parse_temp_obj;
+  send_ajax_request(target, data, callback, true, cb, form);
 }
 
 /**
  * Write specified object to temporary directory.
  */
 function write_object_to_temp(obj, fname, callback) {
-  // Send ajax request.
-  $.ajax({
-    type: 'POST',
-    url: 'jsonify.php',
-    data: {
-      'id': proj_id,
-      'fname': fname,
-      'json': JSON.stringify(obj, null, 4)
-    },
-    success:function(out) {
-      console.log(out);
-
-      if (typeof callback === 'function') {
-        callback();
-      }
-    }
-  });
+  var target = 'jsonify.php';
+  var data = {
+    'id': proj_id,
+    'fname': fname,
+    'json': JSON.stringify(obj, null, 4)
+  };
+  send_ajax_request(target, data, callback, false);
 }
 
 /**
@@ -5500,28 +5203,279 @@ function write_object_to_temp(obj, fname, callback) {
  * directory.
  */
 function write_proj(callback) {
+  var target = 'jsonify.php';
+  var data = {
+    id: proj_id,
+    json: JSON.stringify(proj, null, 4)
+  };
+  send_ajax_request(target, data, callback, false);
+}
+
+/******* Server output parsers ************************************/
+function parse_server_status(out) {
+  if (out.includes("true")) {
+    set_badge(true);
+  } else {
+    set_badge(false);
+  }
+}
+
+function parse_new_proj(out, spinner) {
+  id_pw = get_id_pw(out);
+
+  // Once we have an id and pw, stop the loading spinner.
+  spinner.hide();
+  $('#success_check').show();
+
+  // Set global variables.
+  proj_id = id_pw.id;
+  ftp_pw = id_pw.pw;
+
+  // Then, show ftp info.
+  show_ftp_info(proj_id, ftp_pw);
+}
+
+function get_id_pw(out) {
+  // Split response to lines.
+  var split = out.split('\n');
+
+  // Get third-to-last string.
+  split.pop();
+  split.pop();
+  var line = split.pop();
+
+  // Split with colon to get the id.
+  var split2 = line.split(':');
+  var id = split2[0];
+
+  // Split the second split2 with space to fetch password.
+  var split3 = split2[1].split(' ');
+  var pw = split3.pop();
+
+  // Create dict to return.
+  var result = {
+    'id': id,
+    'pw': pw
+  };
+
+  console.log('id: ' + id + '\n');
+  console.log('pw: ' + pw + '\n');
+
+  return result;
+}
+
+function parse_ftp_info(out) {
+  // Parse pw.
+  var split = out.split('\n');
+  var pw = split[split.length - 3];
+  show_ftp_info(proj_id, pw);
+}
+
+function parse_copy_test(spinner, success) {
+  spinner.hide();
+  success.show();
+}
+
+function parse_reads(out) {
+  // Split by the array brackets
+  var split = out.split('[');
+  var split2 = split[1].split(']');
+
+  // Then, we have the raw json dump.
+  var dump = '[' + split2[0] + ']';
+
+  // Then, parse into json.
+  var reads = JSON.parse(dump);
+
+  // console.log(reads);
+
+  // If there are no raw reads, something went wrong.
+  if (reads.length < 1) {
+    set_fetch_failed();
+  } else {
+    // Pass on the parsed reads to set the table values.
+    set_raw_reads_table(reads);
+
+    set_fetch_succeeded();
+
+    // After everything has been added, set this table as a DataTable.
+    $('#raw_reads_table').DataTable({
+      'ordering': true,
+      'order': [[0, 'asc']],
+      'searching': false,
+      'paging': false,
+      'scrollY': 500,
+      'columnDefs':[{
+        'targets':[2,3],
+        'orderable': false
+      }]
+    });
+  }
+}
+
+function parse_md5(out, md5_id, spinner_id) {
+  // Remove the spinner.
+  $('#' + spinner_id).hide();
+
+  // Get md5 from output.
+  md5 = md5.split('  ')[0];
+  $('#' + md5_id).text(md5);
+}
+
+
+function parse_infer_samples(out) {
+  // Split by first opening bracket.
+  var i = out.indexOf('{');
+  var split = out.slice(i);
+
+  // Then, split by ending string.
+  var split2 = split.split('END');
+
+  // Then, we have the raw json dump.
+  var dump = split2[0];
+
+  console.log(dump);
+
+  // Parse json.
+  proj = JSON.parse(dump);
+
+  set_sample_name_input(proj);
+  show_sample_name_input();
+}
+
+function parse_organisms(out, select) {
+  var split = out.split('[');
+  var split2 = split[1].split(']');
+  var dump = '[' + split2[0] + ']';
+
+  var organisms = JSON.parse(dump);
+
+  // Set the dropdowns.
+  populate_organisms_select(select, organisms);
+}
+
+function parse_read_proj(out) {
+  proj = JSON.parse(out);
+
+  set_meta_input();
+
+  show_meta_input();
+
+  setTimeout(set_all_meta_inputs, 2000);
+}
+
+function parse_temp_obj(out, callback, form) {
+  var obj = JSON.parse(out);
+
+  if (typeof callback === 'function') {
+    if (form != null) {
+      callback(obj, form);
+    } else {
+      callback(obj);
+    }
+  }}
+
+function parse_proj_status(out) {
+  var split = out.split('\n');
+  var status = parseInt(split[split.length - 3]);
+  console.log(split);
+  console.log(status);
+
+  switch (status) {
+    // Project created.
+    case progress.new:
+    case progress.raw_reads:
+      console.log('status: created');
+      goto_ftp_info();
+      break;
+
+    // Samples inferred
+    case progress.inferred:
+      console.log('status: samples inferred');
+      goto_ftp_info();
+      break;
+    case progress.set:
+      console.log('status: set');
+      goto_meta_input()
+      break;
+
+    // For all of these cases, we go to the progress page.
+    case progress.finalized:
+      console.log('status: finalized');
+
+    case progress.qc_queued:
+    case progress.qc_started:
+    case progress.qc_finished:
+    case progress.quant_queued:
+    case progress.quant_started:
+    case progress.quant_finished:
+    case progress.diff_queued:
+    case progress.diff_started:
+    case progress.diff_finished:
+    case progress.server_open:
+      goto_progress(status);
+
+      break;
+
+  }
+}
+
+function update_proj_status(out) {
+  var split = out.split('\n');
+  var status = parseInt(split[split.length - 3]);
+
+  set_progress(status);
+
+  if (status >= progress.diff_finished) {
+    clearInterval(project_progress_interval);
+  }
+}
+
+
+function parse_output_textarea(out, textarea) {
+  textarea.val(out);
+  textarea.scrollTop(textarea[0].scrollHeight);
+}
+
+function parse_sleuth_server(out) {
+  var split = out.split('\n');
+  var line = split[split.length - 3];
+  var split2 = line.split(' ');
+  var port = parseInt(split2[split2.length - 1]);
+
+  console.log(port);
+
+  var url = 'http://' + window.location.hostname + ':' + port + '/';
+  window.open(url, '_blank');
+}
+
+/**
+ * Sends request.
+ */
+function send_ajax_request(target, data, callback, include_out, ...args) {
   // Send ajax request.
   $.ajax({
     type: 'POST',
-    url: 'jsonify.php',
-    data: {
-      id: proj_id,
-      json: JSON.stringify(proj, null, 4)
-    },
+    url: target,
+    'data': data,
     success:function(out) {
       console.log(out);
 
-      if (typeof callback === 'function') {
-        callback();
+      if (out.includes('ERROR')) {
+        var modal = $('#error_modal');
+        modal.find('#error_output').val(output);
+      } else {
+
+        if (typeof callback === 'function') {
+          if (include_out) {
+            args.unshift(out);
+          }
+          callback.apply(this, args);
+        }
       }
     }
   });
 }
-
-/**
- *
- *
- */
 
 // Global variables.
 var proj_id;
