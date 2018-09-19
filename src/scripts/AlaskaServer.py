@@ -1424,6 +1424,20 @@ class AlaskaServer(Alaska):
         """
         Perform all three analyses. Assumes that the project is finalized.
         """
+        def delete_ftp(_id):
+            """
+            Deletes the ftp account for the given id.
+            """
+            try:
+                ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+                if ftp.status != 'running':
+                    self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+
+                cmd = 'pure-pw userdel {}'.format(_id)
+                out = ftp.exec_run(cmd)
+            except docker.errors.NotFound as e:
+                self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+
         self.broadcast(_id, '{}: performing all analyses'.format(_id))
         if close:
             self.close(_id)
@@ -1432,6 +1446,8 @@ class AlaskaServer(Alaska):
             proj = self.projects[_id]
         else:
             raise Exception('{}: not finalized'.format(_id))
+
+        delete_ftp(_id)
 
         # If the project is finalized.
         if (proj.progress == Alaska.PROGRESS['finalized']
@@ -1723,18 +1739,15 @@ class AlaskaServer(Alaska):
                 if fname in self.ftp:
                     del self.ftp[fname]
 
-                    try:
-                        ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-                        if ftp.status != 'running':
-                            self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+                try:
+                    ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+                    if ftp.status != 'running':
+                        self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
 
-                        cmd = 'pure-pw userdel {}'.format(fname)
-                        out = ftp.exec_run(cmd)
-                        exit_code = out[0]
-                        if exit_code != 0:
-                            raise Exception('ERROR: failed to remove ftp for {}'.format(fname))
-                    except docker.errors.NotFound as e:
-                        self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+                    cmd = 'pure-pw userdel {}'.format(fname)
+                    out = ftp.exec_run(cmd)
+                except docker.errors.NotFound as e:
+                    self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
 
         # Then, deal with jobs.
         self.out('INFO: cleaning up jobs')
@@ -1798,19 +1811,46 @@ class AlaskaServer(Alaska):
         _DOCKER = self.DOCKER
         _RUNNING = self.RUNNING
         # delete / replace
-        self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
-        self.projects = list(self.projects.keys())
-        self.samples = list(self.samples.keys())
-        self.projects_temp = list(self.projects_temp.keys())
-        self.samples_temp = list(self.samples_temp.keys())
-        self.queue = [job.id for job in list(self.queue.queue)]
-        self.jobs = list(self.jobs.keys())
+        try:
+            self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
+        except:
+            traceback.print_exc()
+        try:
+            self.projects = list(self.projects.keys())
+        except:
+            traceback.print_exc()
+        try:
+            self.samples = list(self.samples.keys())
+        except:
+            traceback.print_exc()
+        try:
+            self.projects_temp = list(self.projects_temp.keys())
+        except:
+            traceback.print_exc()
+        try:
+            self.samples_temp = list(self.samples_temp.keys())
+        except:
+            traceback.print_exc()
+        try:
+            self.queue = [job.id for job in list(self.queue.queue)]
+        except:
+            traceback.print_exc()
+        try:
+            self.jobs = list(self.jobs.keys())
+        except:
+            traceback.print_exc()
         # replace AlaskaOrganism object with list of versions
-        for genus, obj_1 in self.organisms.items():
-            for species, obj_2 in obj_1.items():
-                self.organisms[genus][species] = list(obj_2.refs.keys())
-        if self.current_job is not None:
-            self.current_job = self.current_job.id
+        try:
+            for genus, obj_1 in self.organisms.items():
+                for species, obj_2 in obj_1.items():
+                    self.organisms[genus][species] = list(obj_2.refs.keys())
+        except:
+            traceback.print_exc()
+        try:
+            if self.current_job is not None:
+                self.current_job = self.current_job.id
+        except:
+            traceback.print_exc()
         del self.sleuth_servers
         del self.idx_interval
         del self.available_ports

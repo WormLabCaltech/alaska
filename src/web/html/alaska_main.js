@@ -4491,7 +4491,7 @@ function start_analysis(cb) {
     function callback(cb) {
       var target = 'cgi_request.php';
       var data = {
-        action: 'set_proj',
+        action: 'do_all',
         id: proj_id
       };
       var callback = cb;
@@ -5463,7 +5463,7 @@ function send_ajax_request(target, data, callback, include_out, ...args) {
 
       if (out.includes('ERROR')) {
         var modal = $('#error_modal');
-        modal.find('#error_output').val(output);
+        modal.find('#error_output').val(out);
       } else {
 
         if (typeof callback === 'function') {
