@@ -339,7 +339,7 @@ class AlaskaServer(Alaska):
                         subject = 'Differential expression analysis started'
                         msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
                         if email:
-                            send_email(email, , msg, _id)
+                            send_email(email, subject, msg, _id)
                     else:
                         self.out('ERROR: job {} has unrecognized name'.format(job.id))
 
