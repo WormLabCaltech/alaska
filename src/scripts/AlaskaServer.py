@@ -890,7 +890,7 @@ class AlaskaServer(Alaska):
         </html> \
         '.format(msg, _id, url, url, to, datetime)
 
-        msg = MIMEText(msg, 'html')
+        msg = MIMEText(full_msg, 'html')
         msg['Subject'] = subject
         msg['From'] = fr
         try:
