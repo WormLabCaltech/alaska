@@ -121,7 +121,7 @@ function goto_progress(status) {
   $('#progress_bar_container').show();
   var progress_container = $('#progress_container');
   var html = progress_container.html();
-  progress_container.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id);
+  progress_container.html(html.replace(new RegExp('PROJECT_ID', 'g'), proj_id));
   progress_container.show();
 
   var obj = {pos: $(window).scrollTop()};
