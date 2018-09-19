@@ -867,26 +867,37 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def send_email(self, to, fr, subject, msg):
+    def send_email(self, to, subject, msg, _id):
         """
         Send mail with the given arguments.
         """
-        # cmd = 'echo "{}" | mail -r {} -s "{}" {}'.format(msg, fr, subject, to)
-        #
-        # try:
-        #     server = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-        #     out = server.exec_run(cmd)
-        #     exit_code = out[0]
-        #     if exit_code != 0:
-        #         raise Exception('ERROR: email send to {} failed.'.format(to))
-        # except docker.errors.NotFound as e:
-        #     self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
-        msg = MIMEText(msg, 'plain')
+        datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT) + ' Pacific Time'
+        url = 'http://alaska.caltech.edu:81/?id=' + _id
+        fr = 'noreply@alasak.caltech.edu'
+
+        # Footer that is appended to every email.
+        full_msg = '\
+        <html> \
+            <head></head> \
+            <body> \
+             <p>{}</p> \
+             <br> \
+             <hr> \
+             <p>Project ID: {}</p> \
+             <p>Unique URL: <a href="{}">{}</a></p> \
+             <p>This message was sent to {} at {}.</p> \
+            </body> \
+        </html> \
+        '.format(msg, _id, url, url, to, datetime)
+
+        msg = MIMEText(msg, 'html')
         msg['Subject'] = subject
         msg['From'] = fr
-        conn = smtplib.SMTP('localhost')
-        conn.sendmail(fr, to, msg.as_string())
-        conn.quit()
+        try:
+            conn = smtplib.SMTP('localhost')
+            conn.sendmail(fr, to, msg.as_string())
+        finally:
+            conn.quit()
 
     def exists(self, _id):
         """
@@ -2111,11 +2122,11 @@ if __name__ == '__main__':
     try:
         server = AlaskaServer()
 
+        server.send_email('kmin@caltech.edu', 'Test', 'message', 'id')
+
         # Register signal handler for SIGTERM.
         signal.signal(signal.SIGTERM, server.stop)
         signal.signal(signal.SIGILL, server.stop)
-
-        server.send_email('kmin@caltech.edu', 'noreply@alaska.caltech.edu', 'Test Subject', 'test msg')
 
         # Start the server.
         server.start(force=True)
