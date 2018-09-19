@@ -127,6 +127,17 @@ function goto_progress(status) {
     }
   });
 
+  // Set retry button.
+  $('#retry_btn').click(function () {
+    var target = 'cgi_request.php';
+    var data = {
+      action: 'do_all',
+      id: proj_id
+    };
+    send_ajax_request(target, data, null, false);
+    project_progress_interval = setInterval(update_progress, 10000);
+  });
+
   // Set multiqc report button listener.
   $('#qc_report_btn').click(function () {
       window.open('multiqc_report.php?id=' + proj_id, '_blank');
@@ -247,6 +258,8 @@ function set_progress(status) {
   var progress_container = $('#progress_container');
   var project_status_badge = progress_container.find('#project_status_badge');
   var project_download_btn = progress_container.find('#project_download_btn');
+  var error_modal = $('#progress_error_modal');
+  var error = false;
 
   // Set the project status badge
   if (status >= progress.diff_finished) {
@@ -255,9 +268,19 @@ function set_progress(status) {
   } else if (status >= progress.qc_started) {
     set_progress_badge(project_status_badge, 'started');
     project_download_btn.prop('disabled', true);
-  } else {
+  } else if (status > 0) {
     set_progress_badge(project_status_badge, 'queued');
     project_download_btn.prop('disabled', true);
+  } else {
+    set_progress_badge(project_status_badge, 'error');
+    // Show the retry button.
+    progress_container.find('#retry_btn').show();
+    project_download_btn.prop('disabled', true);
+    error = true;
+    status = -status;
+
+    // Show error modal.
+    error_modal.modal('show');
   }
 
   ids = [
@@ -274,7 +297,11 @@ function set_progress(status) {
     'diff_output_btn',
     'diff_server_btn',
     'diff_download_btn',
-    'diff_output_collapse'
+    'diff_output_collapse',
+    'ea_status_badge',
+    'ea_output_btn',
+    'ea_download_btn',
+    'ea_output_collapse'
   ];
 
   // Construct elements dictionary
@@ -308,17 +335,20 @@ function set_progress(status) {
   // Then, disable everything after.
   switch (status) {
     case progress.finalized:
+    case progress.qc_error:
     case progress.qc_queued:
       elements.qc_output_btn.prop('disabled', true);
     case progress.qc_started:
       elements.qc_report_btn.prop('disabled', true);
       elements.qc_download_btn.prop('disabled', true);
     case progress.qc_finished:
+    case progress.quant_error:
     case progress.quant_queued:
       elements.quant_output_btn.prop('disabled', true);
     case progress.quant_started:
       elements.quant_download_btn.prop('disabled', true);
     case progress.quant_finished:
+    case progress.diff_error:
     case progress.diff_queued:
       elements.diff_output_btn.prop('disabled', true);
     case progress.diff_started:
@@ -343,40 +373,37 @@ function set_progress(status) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
     set_progress_badge(elements.diff_status_badge, 'finished');
-
-    // Stop live output refreshing.
-    elements.qc_output_collapse.off('show.bs.collapse');
-    elements.qc_output_collapse.off('hide.bs.collapse');
-    elements.quant_output_collapse.off('show.bs.collapse');
-    elements.quant_output_collapse.off('hide.bs.collapse');
-    elements.diff_output_collapse.off('show.bs.collapse');
-    elements.diff_output_collapse.off('hide.bs.collapse');
   } else if (status >= progress.quant_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
-
-    // Stop live output refreshing.
-    elements.qc_output_collapse.off('show.bs.collapse');
-    elements.qc_output_collapse.off('hide.bs.collapse');
-    elements.quant_output_collapse.off('show.bs.collapse');
-    elements.quant_output_collapse.off('hide.bs.collapse');
   } else if (status >= progress.qc_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
-
-    // Stop live output refreshing.
-    elements.qc_output_collapse.off('show.bs.collapse');
-    elements.qc_output_collapse.off('hide.bs.collapse');
   }
-  switch (status) {
-    case progress.qc_started:
-      set_progress_badge(elements.qc_status_badge, 'started');
-      break;
-    case progress.quant_started:
-      set_progress_badge(elements.quant_status_badge, 'started');
-      break;
-    case progress.diff_started:
-      set_progress_badge(elements.diff_status_badge, 'started');
-      break;
+
+  if (!error) {
+    switch (status) {
+      case progress.qc_started:
+        set_progress_badge(elements.qc_status_badge, 'started');
+        break;
+      case progress.quant_started:
+        set_progress_badge(elements.quant_status_badge, 'started');
+        break;
+      case progress.diff_started:
+        set_progress_badge(elements.diff_status_badge, 'started');
+        break;
+    }
+  } else {
+    switch (-status) {
+      case progress.qc_error:
+        set_progress_badge(elements.qc_status_badge, 'error');
+        break;
+      case progress.quant_error:
+        set_progress_badge(elements.quant_status_badge, 'error');
+        break;
+      case progress.diff_error:
+        set_progress_badge(elements.diff_status_badge, 'error');
+        break;
+    }
   }
 }
 
@@ -5427,6 +5454,8 @@ function update_proj_status(out) {
   set_progress(status);
 
   if (status >= progress.diff_finished) {
+    clearInterval(project_progress_interval);
+  } else if (status < 0) {
     clearInterval(project_progress_interval);
   }
 }

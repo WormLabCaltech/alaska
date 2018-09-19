@@ -59,7 +59,7 @@
         </div>
         <div>
             <div class="row">
-                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="project_status_badge">Queued</span><i class="fas fa-redo ml-2 text-danger" id="retry_btn" style="display:none"></i><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
+                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="project_status_badge">Queued</span><i class="btn fas fa-redo ml-2 text-danger" id="retry_btn" style=""></i><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
                 </div>
             </div>
             <div class="row">
@@ -133,12 +133,41 @@
                     </div>
                 </td>
             </tr>
+            <tr>
+                <td class="align-middle">4</td>
+                <td class="align-middle">Enrichment Analysis</td>
+                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="ea_status_badge">Queued</span></td>
+                <td class="align-middle">
+                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#ea_output_collapse" id="ea_output_btn" disabled>View live output</button>
+                    <button class="btn btn-success btn-sm" type="button" id="ea_server_btn" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
+                </td>
+                <td class="align-middle">
+                    <button class="btn btn-secondary btn-sm" type="button" id="ea_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div></div>
             </div>
+        </div><!-- Progress error message div -->
+<div class="modal fade" id="progress_error_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-danger">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    An error occurred!
+                </h5>
+            </div>
+            <div class="modal-body text-dark">
+                <p id="progress_error_message">An error occured while performing a step in the analysis. Please check the live output for more information. Most issues can be resolved by retrying the analysis, by clicking the redo icon next to the project status. If this happens again, please contact WormBase for assistance, with your project ID.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
+</div></div>
     <div class="container" id="meta_container" style="display:none">
         <div id="proj_meta_header">
             <div class="row d-flex justify-content-center align-items-center">
@@ -1426,7 +1455,7 @@
                 </h5>
             </div>
             <div class="modal-body text-dark">
-                <p id="#error_message">An unknown error occured while processing your request. Most errors are resolved by reloading the page. If you encounter this issue again, please contact WormBase with your project ID and the server output below.</p>
+                <p id="error_message">An unknown error occured while processing your request. Most errors are resolved by reloading the page. If you encounter this issue again, please contact WormBase with your project ID and the server output below.</p>
                 <textarea id="error_output" class="form-control text-monospace" rows="10" readonly></textarea>
             </div>
             <div class="modal-footer">

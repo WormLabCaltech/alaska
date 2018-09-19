@@ -29,6 +29,8 @@ import signal
 import docker
 import shutil
 import random
+import smtplib
+from email.message import EmailMessage
 import traceback
 import warnings as w
 import datetime as dt
@@ -869,16 +871,24 @@ class AlaskaServer(Alaska):
         """
         Send mail with the given arguments.
         """
-        cmd = 'echo "{}" | mail -r {} -s "{}" {}'.format(msg, fr, subject, to)
-
-        try:
-            server = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-            out = server.exec_run(cmd)
-            exit_code = out[0]
-            if exit_code != 0:
-                raise Exception('ERROR: email send to {} failed.'.format(to))
-        except docker.errors.NotFound as e:
-            self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+        # cmd = 'echo "{}" | mail -r {} -s "{}" {}'.format(msg, fr, subject, to)
+        #
+        # try:
+        #     server = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+        #     out = server.exec_run(cmd)
+        #     exit_code = out[0]
+        #     if exit_code != 0:
+        #         raise Exception('ERROR: email send to {} failed.'.format(to))
+        # except docker.errors.NotFound as e:
+        #     self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+        msg = EmailMessage()
+        msg.set_content(msg)
+        msgg['Subject'] = subject
+        msg['From'] = fr
+        msg['To'] = to
+        s = smtplib.SMTP('localhost')
+        s.send_message(msg)
+        s.quit()
 
 
     def exists(self, _id):
@@ -2107,6 +2117,8 @@ if __name__ == '__main__':
         # Register signal handler for SIGTERM.
         signal.signal(signal.SIGTERM, server.stop)
         signal.signal(signal.SIGILL, server.stop)
+
+        server.send_email('kmin@caltech.edu', 'noreply@alaska.caltech.edu', 'Test Subject', 'test msg')
 
         # Start the server.
         server.start(force=True)
