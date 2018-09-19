@@ -1435,7 +1435,7 @@ class AlaskaServer(Alaska):
 
         # If the project is finalized.
         if (proj.progress == Alaska.PROGRESS['finalized']
-            || proj.progress == Alaska.PROGRESS['qc_error']):
+            or proj.progress == Alaska.PROGRESS['qc_error']):
             self.out('{}: starting from qc'.format(_id))
             self.qc(_id, close=False, check=False, progress=True)
             self.read_quant(_id, close=False, check=False, progress=False)
