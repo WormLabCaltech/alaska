@@ -5318,7 +5318,7 @@ function parse_md5(out, md5_id, spinner_id) {
   $('#' + spinner_id).hide();
 
   // Get md5 from output.
-  md5 = md5.split('  ')[0];
+  md5 = out.split('  ')[0];
   $('#' + md5_id).text(md5);
 }
 
