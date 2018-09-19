@@ -43,15 +43,6 @@ RUN apt-get update && apt-get install -y \
 # install pyunpack & docker
 RUN pip install docker && pip install patool && pip install pyunpack
 
-## install postfix for sending mails.
-RUN { \
-  echo postfix postfix/mailname string 'alaska.caltech.edu'; \
-  echo postfix postfix/main_mailer_type string 'Internet Site'; \
-} | debconf-set-selections \
-  && apt-get update && apt-get install -y postfix
-RUN newaliases
-RUN systemctl restart postfix
-
 # Set up working directory
 WORKDIR /alaska/scripts
 CMD ["python", "AlaskaServer.py"]

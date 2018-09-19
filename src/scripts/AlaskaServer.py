@@ -886,7 +886,7 @@ class AlaskaServer(Alaska):
         msg['Subject'] = subject
         msg['From'] = fr
         msg['To'] = to
-        s = smtplib.SMTP('localhost')
+        s = smtplib.SMTP('alaska.caltech.edu')
         s.send_message(msg)
         s.quit()
 
