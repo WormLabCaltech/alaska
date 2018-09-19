@@ -786,8 +786,8 @@ class AlaskaServer(Alaska):
                     -d /home/ftpusers/{}/{}/{}/{}"'.format(pw, pw, __id,
                                                 Alaska.DOCKER_DATA_VOLUME,
                                                 Alaska.PROJECTS_DIR,
-                                                Alaska.RAW_DIR,
-                                                __id)
+                                                __id,
+                                                Alaska.RAW_DIR)
             out = ftp.exec_run(cmd)
             exit_code = out[0]
             if exit_code != 0:
