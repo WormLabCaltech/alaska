@@ -1414,7 +1414,7 @@ class AlaskaServer(Alaska):
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
 
-        if progress;
+        if progress:
             proj.progress = Alaska.PROGRESS['diff_queued'] # added to queue
 
         if close:
