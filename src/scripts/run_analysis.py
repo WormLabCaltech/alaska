@@ -379,7 +379,45 @@ def run_sleuth(proj):
     """
     Runs differential expression analysis with sleuth.
     Assumes that the design matrix is already present in the directory.
+    Once sleuth is finished, runs TEA.
     """
+    def run_tea(d):
+        """
+        Runs TEA on sleuth output.
+        """
+        try:
+            import tissue_enrichment_analysis as tea
+        except ImportError, e:
+            print_with_flush('# TEA is not installed...skipping')
+            sys.exit(0)
+        try:
+            import pandas as pd
+        except ImportError, e:
+            print_with_flush('# pandas is not installed...skipping')
+            sys.exit(0)
+
+        analyses = ['tissue', 'phenotype', 'go']
+
+        # Load sleuth results.
+        wdir = os.getcwd()
+        print_with_flush('# entering 3_diff_exp')
+        os.chdir(d)
+        for file in os.listdir():
+            if file.startswith('sleuth_table') and file.endswith('.csv'):
+                df = pd.read_csv(file, index_col=0)
+                gene_list = df.ens_gene
+                name = os.path.splitext(file)[0]
+
+                for analysis in analyses:
+                    print_with_flush('# performing {} enrichment analysis for {}'.format(analysis, file))
+                    title = '{}_{}'.format(name, analysis)
+                    fname = '{}.csv'.format(title)
+                    df_dict = tea.fetch_dictionary(analysis)
+                    df_results = tea.enrichment_analysis(gene_list, df_dict, aname=fname, save=True)
+                    tea.plot_enrichment_results(df_results, analysis=analysis, title=title, save=True)
+        os.chdir(wdir)
+        print_with_flush('# returned to root')
+
     args = ['Rscript']
     args += ['./sleuth.R']
     args += ['-d', './3_diff_exp']
@@ -388,11 +426,13 @@ def run_sleuth(proj):
     # args += ['--shiny']
 
     run_sys(args)
-
     path = '3_diff_exp'
-    print_with_flush('# sleuth finished, archiving')
+    print_with_flush('# sleuth finished, starting enrichment analysis')
+    run_tea(path)
+    print_with_flush('# enrichment analysis finished, archiving')
     archive(path + '.tar.gz', path)
     print_with_flush('# done')
+
 
 if __name__ == '__main__':
     import argparse
