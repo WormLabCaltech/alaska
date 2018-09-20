@@ -387,12 +387,12 @@ def run_sleuth(proj):
         """
         try:
             import tissue_enrichment_analysis as tea
-        except ImportError, e:
+        except ImportError as e:
             print_with_flush('# TEA is not installed...skipping')
             sys.exit(0)
         try:
             import pandas as pd
-        except ImportError, e:
+        except ImportError as e:
             print_with_flush('# pandas is not installed...skipping')
             sys.exit(0)
 
