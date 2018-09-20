@@ -308,6 +308,7 @@ class AlaskaServer(Alaska):
                 proj_id = job.proj_id
                 proj = self.projects[proj_id]
                 email = proj.meta['corresponding']['email']
+                exitcode = None
 
                 try:
                     self.out('INFO: starting job {}'.format(job.id))
@@ -371,7 +372,7 @@ class AlaskaServer(Alaska):
                     # check correct termination
                     try:
                         exitcode = self.DOCKER.containers.get(job.docker.id).wait()['StatusCode']
-                    except:
+                    except Exception as e:
                         self.out('ERROR: container {} exited incorrectly'
                                         .format(job.docker.id))
                     finally:
@@ -379,73 +380,73 @@ class AlaskaServer(Alaska):
                         self.current_job = None
                         self.queue.task_done()
 
-                    # Check if docker exited successfully.
-                    if exitcode == 0:
-                        if job.name in ['qc', 'kallisto', 'sleuth']:
-                            proj.progress += 1
+                        # Check if docker exited successfully.
+                        if exitcode == 0:
+                            if job.name in ['qc', 'kallisto', 'sleuth']:
+                                proj.progress += 1
 
+                                if job.name == 'qc':
+                                    # Send email.
+                                    subject = 'Quality control finished'
+                                    msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
+                                    if email:
+                                        self.send_email(email, subject, msg, proj_id)
+                                elif job.name == 'kallisto':
+                                    subject = 'Alignment and quantification finished'
+                                    msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
+                                    if email:
+                                        self.send_email(email, subject, msg, proj_id)
+
+                                elif job.name == 'sleuth':
+                                    subject = 'Differential expression analysis finished'
+                                    msg = 'Alaska has finished differential expression analysis for project {}.'.format(proj_id)
+                                    if email:
+                                        self.send_email(email, subject, msg, proj_id)
+
+                                # calculate average analysis time here
+                                total = self.times[job.name] * self.counts[job.name]
+                                total += job.run_duration
+                                self.counts[job.name] += len(proj.samples)
+                                self.times[job.name] = total / self.counts[job.name]
+                            else:
+                                self.out('ERROR: job {} has unrecognized name'.format(job.id))
+                            self.out('INFO: finished job {}'.format(job.id))
+                        else:
+                            self.out('ERROR: job {} / container {} terminated with non-zero exit code!'.format(job.id, job.docker.id))
+                            proj.progress = -proj.progress
+                            # Add the job to stale list
+                            self.stale_jobs.append(job.id)
+
+                            # if error occurred during qc
                             if job.name == 'qc':
-                                # Send email.
-                                subject = 'Quality control finished'
-                                msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
+                                # find any other queued analyses and make them stale
+                                for ele in list(self.queue.queue):
+                                    if ele.proj_id == proj_id and ele.name in ['kallisto', 'sleuth']:
+                                        self.stale_jobs.append(ele.id)
+
+                                # Send email notifying of the error.
+                                subject = 'Error occurred during quality control'
+                                msg = 'Alaska encountered an error while performing quality control for project {}. Please visit your unique URL for more details.'.format(proj_id)
                                 if email:
                                     self.send_email(email, subject, msg, proj_id)
+
+                            # if error occurred during kallisto
                             elif job.name == 'kallisto':
-                                subject = 'Alignment and quantification finished'
-                                msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
+                                # find any other queued analyses and make them stale
+                                for ele in list(self.queue.queue):
+                                    if ele.proj_id == proj_id and ele.name in ['sleuth']:
+                                        self.stale_jobs.append(ele.id)
+
+                                subject = 'Error occurred during alignment and quantification'
+                                msg = 'Alaska encountered an error while performing read alignment and quantification for project {}. Please visit your unique URL for more details.'.format(proj_id)
                                 if email:
                                     self.send_email(email, subject, msg, proj_id)
 
                             elif job.name == 'sleuth':
-                                subject = 'Differential expression analysis finished'
-                                msg = 'Alaska has finished differential expression analysis for project {}.'.format(proj_id)
+                                subject = 'Error occurred during differential expression analysis'
+                                msg = 'Alaska encountered an error while performing differential expression analysis for project {}. Please visit your unique URL for more details.'.format(proj_id)
                                 if email:
                                     self.send_email(email, subject, msg, proj_id)
-
-                            # calculate average analysis time here
-                            total = self.times[job.name] * self.counts[job.name]
-                            total += job.run_duration
-                            self.counts[job.name] += len(proj.samples)
-                            self.times[job.name] = total / self.counts[job.name]
-                        else:
-                            self.out('ERROR: job {} has unrecognized name'.format(job.id))
-                        self.out('INFO: finished job {}'.format(job.id))
-                    else:
-                        self.out('ERROR: job {} / container {} terminated with non-zero exit code!'.format(job.id, job.docker.id))
-                        proj.progress = -proj.progress
-                        # Add the job to stale list
-                        self.stale_jobs.append(job.id)
-
-                        # if error occurred during qc
-                        if job.name == 'qc':
-                            # find any other queued analyses and make them stale
-                            for ele in list(self.queue.queue):
-                                if ele.proj_id == proj_id and ele.name in ['kallisto', 'sleuth']:
-                                    self.stale_jobs.append(ele.id)
-
-                            # Send email notifying of the error.
-                            subject = 'Error occurred during quality control'
-                            msg = 'Alaska encountered an error while performing quality control for project {}. Please visit your unique URL for more details.'.format(proj_id)
-                            if email:
-                                self.send_email(email, subject, msg, proj_id)
-
-                        # if error occurred during kallisto
-                        elif job.name == 'kallisto':
-                            # find any other queued analyses and make them stale
-                            for ele in list(self.queue.queue):
-                                if ele.proj_id == proj_id and ele.name in ['sleuth']:
-                                    self.stale_jobs.append(ele.id)
-
-                            subject = 'Error occurred during alignment and quantification'
-                            msg = 'Alaska encountered an error while performing read alignment and quantification for project {}. Please visit your unique URL for more details.'.format(proj_id)
-                            if email:
-                                self.send_email(email, subject, msg, proj_id)
-
-                        elif job.name == 'sleuth':
-                            subject = 'Error occurred during differential expression analysis'
-                            msg = 'Alaska encountered an error while performing differential expression analysis for project {}. Please visit your unique URL for more details.'.format(proj_id)
-                            if email:
-                                self.send_email(email, subject, msg, proj_id)
 
         except KeyboardInterrupt:
             self.out('INFO: stopping workers')
@@ -1836,6 +1837,9 @@ class AlaskaServer(Alaska):
 
                     cmd = 'pure-pw userdel {}'.format(fname)
                     out = ftp.exec_run(cmd)
+
+                    cmd = 'pure-pw mkdb'
+                    out = ftp.exec_run(cmd)
                 except docker.errors.NotFound as e:
                     self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
 
@@ -1860,6 +1864,17 @@ class AlaskaServer(Alaska):
             os.remove(path)
             del files[0]
 
+        self.out('INFO: cleaning up logs')
+        files = os.listdir(Alaska.LOG_DIR)
+        files = sorted(files)
+
+        # Remove oldest saves more than max.
+        while len(files) > Alaska.LOG_MAX:
+            path = '{}/{}'.format(Alaska.LOG_DIR, files[0])
+            self.out('INFO: removing log {}'.format(path))
+            os.remove(path)
+            del files[0]
+
     def save(self, _id=None):
         """
         Saves its current state.
@@ -1873,14 +1888,33 @@ class AlaskaServer(Alaska):
 
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
-            project.save()
+            try:
+                project.save()
+            except:
+                self.out('ERROR: failed to save project {}'.format(__id))
+                traceback.print_exc()
+
         for __id, project_temp in self.projects_temp.items():
-            project_temp.save(Alaska.TEMP_DIR)
+            try:
+                project_temp.save(Alaska.TEMP_DIR)
+            except:
+                self.out('ERROR: failed to save temporary project {}'.format(__id))
+                traceback.print_exc()
+
         for __id, job in self.jobs.items():
-            job.save()
+            try:
+                job.save()
+            except:
+                self.out('ERROR: failed to save job {}'.format(__id))
+                traceback.print_exc()
+
         for genus, obj_1 in self.organisms.items():
             for species, obj_2 in obj_1.items():
-                obj_2.save()
+                try:
+                    obj_2.save()
+                except:
+                    self.out('ERROR: failed to save organism {}_{}'.format(genus, species))
+                    traceback.print_exc()
         ### hide variables that should not be written to JSON
         _datetime = self.datetime
         _projects = self.projects
@@ -1904,43 +1938,61 @@ class AlaskaServer(Alaska):
         try:
             self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
         except:
+            self.out('ERROR: failed to convert datetime')
             traceback.print_exc()
+
         try:
             self.projects = list(self.projects.keys())
         except:
+            self.out('ERROR: failed to convert projects')
             traceback.print_exc()
+
         try:
             self.samples = list(self.samples.keys())
         except:
+            self.out('ERROR: failed to convert samples')
             traceback.print_exc()
+
         try:
             self.projects_temp = list(self.projects_temp.keys())
         except:
+            self.out('ERROR: failed to convert temporary projects')
             traceback.print_exc()
+
         try:
             self.samples_temp = list(self.samples_temp.keys())
         except:
+            self.out('ERROR: failed to convert temporary samples')
             traceback.print_exc()
+
         try:
             self.queue = [job.id for job in list(self.queue.queue)]
         except:
+            self.out('ERROR: failed to convert queue')
             traceback.print_exc()
+
         try:
             self.jobs = list(self.jobs.keys())
         except:
+            self.out('ERROR: failed to convert jobs')
             traceback.print_exc()
+
         # replace AlaskaOrganism object with list of versions
-        try:
-            for genus, obj_1 in self.organisms.items():
-                for species, obj_2 in obj_1.items():
+        for genus, obj_1 in self.organisms.items():
+            for species, obj_2 in obj_1.items():
+                try:
                     self.organisms[genus][species] = list(obj_2.refs.keys())
-        except:
-            traceback.print_exc()
+                except:
+                    self.out('ERROR: failed to convert organism {}_{}'.format(genus, species))
+                    traceback.print_exc()
+
         try:
             if self.current_job is not None:
                 self.current_job = self.current_job.id
         except:
+            self.out('ERROR: failed to convert current job')
             traceback.print_exc()
+
         del self.sleuth_servers
         del self.idx_interval
         del self.available_ports
@@ -2003,7 +2055,7 @@ class AlaskaServer(Alaska):
 
                 if os.path.isfile('{}/{}.json'.format(path, folder)):
                     projects.append(folder)
-            self.out('INFO: detected {} valid project folders'.format(len(projects)))
+            self.out('INFO: detected {} finalized project folders'.format(len(projects)))
 
             return projects
 
@@ -2105,61 +2157,140 @@ class AlaskaServer(Alaska):
         # IMPORTANT: must load entire json first
         # because projects must be loaded before jobs are
         for key, item in loaded.items():
-            if key == 'queue':
-                # the queue needs to be dealt specially
-                _queue = item
-                with self.queue.mutex:
-                    self.queue.queue.clear()
-            elif key == 'datetime':
-                setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
-            else:
-                setattr(self, key, item)
+            try:
+                if key == 'queue':
+                    # the queue needs to be dealt specially
+                    _queue = item
+                    with self.queue.mutex:
+                        self.queue.queue.clear()
+                elif key == 'datetime':
+                    setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
+                else:
+                    setattr(self, key, item)
+            except:
+                self.out('ERROR: failed to load {}:{}'.format(key, item))
+                traceback.print_exc()
 
         #### create necessary objects & assign
         for genus, dict_1 in self.organisms.items():
             for species, dict_2 in dict_1.items():
-                self.out('INFO: loading organism {}_{}'.format(genus, species))
-                # make new species
-                org = AlaskaOrganism(genus, species)
-                org.load()
-                self.organisms[genus][species] = org
+                try:
+                    self.out('INFO: loading organism {}_{}'.format(genus, species))
+                    # make new species
+                    org = AlaskaOrganism(genus, species)
+                    org.load()
+                    self.organisms[genus][species] = org
+                except:
+                    self.out('ERROR: failed to load organism {}_{}'.format(genus, species))
+                    traceback.print_exc()
 
         _projects = {}
         self.samples = {}
         for __id in self.projects:
-            self.out('INFO: loading project {}'.format(__id))
-            ap = AlaskaProject(__id)
-            ap.load()
-            _projects[__id] = ap
-            self.samples = {**self.samples, **ap.samples}
+            try:
+                self.out('INFO: loading project {}'.format(__id))
+                ap = AlaskaProject(__id)
+                ap.load()
+                _projects[__id] = ap
+                self.samples = {**self.samples, **ap.samples}
+            except:
+                self.out('ERROR: failed to load project {}'.format(__id))
+                traceback.print_exc()
         self.projects = _projects
 
         _projects_temp = {}
         self.samples_temp = {}
         for __id in self.projects_temp:
-            self.out('INFO: loading temporary project {}'.format(__id))
-            ap = AlaskaProject(__id)
-            ap.load(self.TEMP_DIR)
-            _projects_temp[__id] = ap
-            self.samples_temp = {**self.samples_temp, **ap.samples}
+            try:
+                self.out('INFO: loading temporary project {}'.format(__id))
+                ap = AlaskaProject(__id)
+                ap.load(self.TEMP_DIR)
+                _projects_temp[__id] = ap
+                self.samples_temp = {**self.samples_temp, **ap.samples}
+            except:
+                self.out('ERROR: failed to load temporary project {}'.format(__id))
+                traceback.print_exc()
         self.projects_temp = _projects_temp
+
+
+        # Then, load projects that are not in the save but have a folder.
+        for file in os.listdir(Alaska.PROJECTS_DIR):
+            if file.startswith('AP') and file not in self.projects \
+                and file not in self.projects_temp:
+                path = '{}/{}'.format(Alaska.PROJECTS_DIR, file)
+                json = '{}/{}.json'.format(path, file)
+                temp_json = '{}/{}/{}.json'.format(path, Alaska.TEMP_DIR, file)
+
+                if os.path.isfile(json):
+                    try:
+                        self.out('INFO: loading unsaved project {}'.format(file))
+                        ap = AlaskaProject(file)
+                        ap.load()
+
+                        if all(sample not in self.samples for sample in ap.samples):
+                            self.projects[file] = ap
+                            self.samples = {**self.samples, **ap.samples}
+                    except:
+                        self.out('ERROR: failed to load unsaved project {}'.format(file))
+                        traceback.print_exc()
+
+                elif os.path.isfile(temp_json):
+                    try:
+                        self.out('INFO: loading unsaved temporary project {}'.format(file))
+                        ap = AlaskaProject(file)
+                        ap.load(Alaska.TEMP_DIR)
+
+                        if all(sample not in self.samples_temp for sample in ap.samples):
+                            self.projects_temp[file] = ap
+                            self.samples_temp = {**self.samples_temp, **ap.samples}
+
+                    except:
+                        self.out('ERROR: failed to load unsaved temporary project {}'.format(file))
+                        traceback.print_exc()
 
         _jobs = {}
         for __id in self.jobs:
-            self.out('INFO: loading job {}'.format(__id))
-            job = AlaskaJob(__id)
-            job.load()
-            _jobs[__id] = job
+            try:
+                self.out('INFO: loading job {}'.format(__id))
+                job = AlaskaJob(__id)
+                job.load()
+                _jobs[__id] = job
+            except:
+                self.out('ERROR: failed to load job {}'.format(__id))
+                traceback.print_exc()
         self.jobs = _jobs
 
+        # Load the jobs that are not in the save but have a file.
+        for file in os.listdir(Alaska.JOBS_DIR):
+            if file not in self.jobs:
+                try:
+                    __id = os.path.splitext(file)[0]
+                    path = '{}/{}'.format(Alaska.JOBS_DIR, file)
+                    self.out('INFO: loading unsaved job {}'.format(file))
+                    job = AlaskaJob(__id)
+                    job.load()
+                    self.jobs[__id] = job
+                except:
+                    self.out('ERROR: failed to load unsaved job {}'.format(file))
+                    traceback.print_exc()
+
         if self.current_job is not None:
-            self.out('INFO: unfinished job {} was detected'.format(self.current_job))
-            self.current_job = self.jobs[self.current_job]
-            self.queue.put(self.current_job)
-            self.out('INFO: {} added to first in queue'.format(self.current_job.id))
+            try:
+                self.out('INFO: unfinished job {} was detected'.format(self.current_job))
+                self.current_job = self.jobs[self.current_job]
+                self.queue.put(self.current_job)
+                self.out('INFO: {} added to first in queue'.format(self.current_job.id))
+            except:
+                self.out('ERROR: failed to queue unfinished job {}'.format(self.current_job))
+                traceback.print_exc()
+
         for __id in _queue:
-            self.out('INFO: adding {} to queue'.format(__id))
-            self.queue.put(self.jobs[__id])
+            try:
+                self.out('INFO: adding {} to queue'.format(__id))
+                self.queue.put(self.jobs[__id])
+            except:
+                self.out('ERROR: failed to add {} to queue'.format(__id))
+                traceback.print_exc()
 
         self.out('INFO: loaded, unlocking threads')
         lock.release()

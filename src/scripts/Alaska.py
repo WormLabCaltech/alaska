@@ -31,6 +31,7 @@ class Alaska():
     #                     # needs to have host's absolute path
     ROOT_DIR = 'root' # root dir
     ROOT_PATH = '/alaska/{}'.format(ROOT_DIR)
+    TRASH_DIR = 'trash'
     SAVE_DIR = 'saves' # folder to save server states
     SAVE_MAX = 20   # maximum number of saves to keep
     # IMG_DIR = 'images'
@@ -47,6 +48,7 @@ class Alaska():
     BED_DIR = 'reference/bed'
     IDX_DIR = 'index' # index directory name
     LOG_DIR = 'logs' # log directory name
+    LOG_MAX = 200
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
