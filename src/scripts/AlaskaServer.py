@@ -2219,10 +2219,10 @@ class AlaskaServer(Alaska):
             if file.startswith('AP') and file not in self.projects \
                 and file not in self.projects_temp:
                 path = '{}/{}'.format(Alaska.PROJECTS_DIR, file)
-                json = '{}/{}.json'.format(path, file)
+                proj_json = '{}/{}.json'.format(path, file)
                 temp_json = '{}/{}/{}.json'.format(path, Alaska.TEMP_DIR, file)
 
-                if os.path.isfile(json):
+                if os.path.isfile(proj_json):
                     try:
                         self.out('INFO: loading unsaved project {}'.format(file))
                         ap = AlaskaProject(file)
