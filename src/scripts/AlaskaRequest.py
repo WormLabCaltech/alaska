@@ -86,6 +86,7 @@ class AlaskaRequest(Alaska):
         print('-' * 30)
         while True:
             response = self.SOCKET.recv_multipart()
+            print(response)
             print(response[1].decode(Alaska.ENCODING))
 
             # stop listening if message starts with END
