@@ -35,7 +35,7 @@ class AlaskaRequest(Alaska):
         self.PORT = port
         self.CONTEXT = zmq.Context()
         self.SOCKET = self.CONTEXT.socket(zmq.DEALER)
-        self.SOCKET.setsockopt(zmq.IDENTITY, _id)
+        self.SOCKET.set_string(zmq.IDENTITY, self.id)
 
     def send(self, msg):
         """
