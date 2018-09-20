@@ -71,7 +71,7 @@ class AlaskaRequest(Alaska):
 
         if poller.poll(3*1000): # wait for 3 seconds
             response = self.SOCKET.recv_multipart()
-            if response[0] == self.id:
+            if response[0].decode(Alaska.ENCODING) == self.id:
                 return True
             else:
                 return False
@@ -86,10 +86,10 @@ class AlaskaRequest(Alaska):
         print('-' * 30)
         while True:
             response = self.SOCKET.recv_multipart()
-            print(response[1])
+            print(response[1].decode(Alaska.ENCODING))
 
             # stop listening if message starts with END
-            if response[1].endswith('END'):
+            if response[1].decode(Alaska.ENCODING).endswith('END'):
                 self.SOCKET.close()
                 self.CONTEXT.term()
                 quit()
