@@ -2123,6 +2123,7 @@ class AlaskaServer(Alaska):
                         jsons[fname] = len(loaded['projects'])
                 except:
                     self.out('INFO: skipping {} due to an unknown error'.format(fname))
+                    stacktrace.print_exc()
                     continue
 
             # Choose the oldest one from the candidates.
