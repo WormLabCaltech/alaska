@@ -996,13 +996,21 @@ function populate_organisms_select(select, organisms) {
 /**
  * Sets the internal list of available organisms.
  */
-function set_organisms_select(select) {
+function set_organisms_select(select, cb) {
   var target = 'cgi_request.php';
   var data = {
     action: 'get_organisms'
   };
-  var callback = parse_organisms;
-  send_ajax_request(target, data, callback, true, select);
+  if (typeof cb === 'function') {
+    function callback(out, cb) {
+      parse_organisms(out);
+      cb();
+    }
+    send_ajax_request(target, data, callback, true, select, cb);
+  } else {
+    var callback = parse_organisms;
+    send_ajax_request(target, data, callback, true, select);
+  }
 }
 
 /**
@@ -2827,14 +2835,14 @@ function set_common_checkboxes(form) {
  * Sets few of the shared inputs for the common input form and
  * individual input forms.
  */
-function set_shared_inputs(form) {
+function set_shared_inputs(form, cb) {
   var organism_select = form.find('.sample_organism_select');
   var lifestage_dropdown = form.find('.sample_life-stage_inputs');
   var tissue_dropdown = form.find('.sample_tissue_inputs');
   var chars_inputs = form.find('.sample_characteristics_inputs');
   var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_inputs');
 
-  set_organisms_select(organism_select);
+  set_organisms_select(organism_select, cb);
   set_custom_dropdown(lifestage_dropdown, life_stages);
   set_custom_dropdown(tissue_dropdown, tissues);
   set_fluid_input_rows(chars_inputs);
@@ -2851,12 +2859,12 @@ function set_shared_inputs(form) {
 /**
  * Set the common metadata form.
  */
-function set_common_meta_input() {
+function set_common_meta_input(cb) {
   common_form = $('#sample_common_form');
   var form = common_form.children('form');
 
   // Set shared inputs.
-  set_shared_inputs(form);
+  set_shared_inputs(form, cb);
 
   // All samples must have even number of reads for the paired-end radio
   // to be active.
@@ -4744,14 +4752,14 @@ function show_verify_meta_modal() {
 /**
  * Set meta input form.
  */
-function set_meta_input() {
+function set_meta_input(cb) {
   // Then, set the samples metadata.
   set_samples_meta_input();
 
   // We have to set the common meta input form after setting up the samples
   // because this function assumes that the global sample_forms variable
   // is populated.
-  set_common_meta_input();
+  set_common_meta_input(cb);
 
   // Deal with project meta input form last.
   set_proj_meta_input();
@@ -5386,11 +5394,10 @@ function parse_organisms(out, select) {
 function parse_read_proj(out) {
   proj = JSON.parse(out);
 
-  set_meta_input();
+  set_meta_input(set_all_meta_inputs);
 
   show_meta_input();
 
-  setTimeout(set_all_meta_inputs, 2000);
 }
 
 function parse_temp_obj(out, callback, form) {
