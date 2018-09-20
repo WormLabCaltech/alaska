@@ -19,8 +19,6 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev
 
 ###### MINICONDA INSTALLATION ######
-RUN apt-get update && apt-get install -y \
-    bzip2 \
 # fetch miniconda installation script
 RUN curl $MINICONDA3_URL --create-dirs -o /downloads/miniconda.sh
 # make script executable
