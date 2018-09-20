@@ -493,7 +493,7 @@ class AlaskaServer(Alaska):
 
         response = [to, msg]
         # acquire lock
-        lock = threading.RLock()
+        lock = threading.Lock()
         if (lock.acquire()):
             self.SOCKET.send_multipart(response)
             lock.release()
