@@ -30,6 +30,8 @@ RUN /downloads/miniconda.sh -b -f -p /miniconda/
 ENV PATH="/miniconda/bin:${PATH}"
 # remove installation script
 RUN rm /downloads/miniconda.sh
+# install pandas
+RUN conda install pandas
 # install tea
 RUN pip install tissue_enrichment_analysis
 
