@@ -492,7 +492,11 @@ class AlaskaServer(Alaska):
             to = to.encode()
 
         response = [to, msg]
+        # acquire lock
+        lock = threading.Lock()
+        lock.acquire()
         self.SOCKET.send_multipart(response)
+        lock.release()
 
     def log(self, _id=None, close=True):
         """
