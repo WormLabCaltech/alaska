@@ -491,6 +491,8 @@ class AlaskaServer(Alaska):
         if isinstance(to, str):
             to = to.encode()
 
+        print('here')
+
         response = [to, msg]
         # acquire lock
         lock = threading.RLock()
