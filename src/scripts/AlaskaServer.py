@@ -493,10 +493,12 @@ class AlaskaServer(Alaska):
 
         response = [to, msg]
         # acquire lock
-        lock = threading.Lock()
-        lock.acquire()
-        self.SOCKET.send_multipart(response)
-        lock.release()
+        lock = threading.RLock()
+        if (lock.acquire()):
+            self.SOCKET.send_multipart(response)
+            lock.release()
+        else:
+            self.out('ERROR: failed to acquire lock to respond')
 
     def log(self, _id=None, close=True):
         """
