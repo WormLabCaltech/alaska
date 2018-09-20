@@ -98,6 +98,7 @@ class AlaskaRequest(Alaska):
 
 if __name__ == '__main__':
     import argparse
+    choices = Alaska.CODES.keys()
 
     # command line arguments
     parser = argparse.ArgumentParser(description='Send request to AlaskaServer.')
@@ -114,7 +115,6 @@ if __name__ == '__main__':
     if args.id is not None:
         print('ID: {}'.format(args.id))
     request = AlaskaRequest(_id=args.id)
-    choices = Alaska.CODES.keys()
 
     print('INFO: Creating {} request'.format(args.action))
 
