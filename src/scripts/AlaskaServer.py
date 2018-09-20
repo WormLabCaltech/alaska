@@ -74,6 +74,7 @@ class AlaskaServer(Alaska):
         self.ftp = {}
 
         self.workers_n = 1 # number of workers
+        self.lock = threading.Lock()
         self.queue = queue.Queue()  # job queue
         self.jobs = {} # dictionary of all jobs
         self.stale_jobs = [] # list of stale jobs (these are skipped)
@@ -485,20 +486,17 @@ class AlaskaServer(Alaska):
         """
         Respond to given REQ with message.
         """
-        # make sure id and message are byte literals
-        if isinstance(msg, str):
-            msg = msg.encode()
-        if isinstance(to, str):
-            to = to.encode()
-
-        print('here')
-
-        response = [to, msg]
         # acquire lock
-        lock = threading.Lock()
-        if (lock.acquire()):
+        if (self.lock.acquire()):
+            # make sure id and message are byte literals
+            if isinstance(msg, str):
+                msg = msg.encode()
+            if isinstance(to, str):
+                to = to.encode()
+
+            response = [to, msg]
             self.SOCKET.send_multipart(response)
-            lock.release()
+            self.lock.release()
         else:
             self.out('ERROR: failed to acquire lock to respond')
 
@@ -1891,8 +1889,7 @@ class AlaskaServer(Alaska):
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
         self.out('INFO: locking all threads to save server state')
-        lock = threading.Lock()
-        lock.acquire()
+        self.lock.acquire()
 
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
@@ -2010,6 +2007,7 @@ class AlaskaServer(Alaska):
         del self.CODES
         del self.DOCKER
         del self.RUNNING
+        del self.lock
 
         with open('{}/{}.json'.format(path, datetime), 'w') as f:
             # dump to json
@@ -2036,7 +2034,7 @@ class AlaskaServer(Alaska):
         self.RUNNING = _RUNNING
 
         self.out('INFO: saved, unlocking threads')
-        lock.release()
+        self.lock.release()
 
         # Once saved, clean up.
         self.cleanup()
