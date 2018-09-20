@@ -30,7 +30,7 @@ ENV PATH="/miniconda/bin:${PATH}"
 # remove installation script
 RUN rm /downloads/miniconda.sh
 # install tea
-RUN conda install tea
+RUN pip install tea
 
 ##### R INSTALLATION #####
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
