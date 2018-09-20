@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     libcurl4-openssl-dev \
     libssl-dev \
-    libxml2-dev
+    libxml2-dev \
+    gcc
 
 ###### MINICONDA INSTALLATION ######
 # fetch miniconda installation script
