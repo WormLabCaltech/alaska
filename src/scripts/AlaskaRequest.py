@@ -70,8 +70,8 @@ class AlaskaRequest(Alaska):
         poller.register(self.SOCKET, zmq.POLLIN)
 
         if poller.poll(3*1000): # wait for 3 seconds
-            response = self.SOCKET.recv_multipart()
-            if response[0].decode(Alaska.ENCODING) == self.id:
+            response = self.SOCKET.recv_string()
+            if response == self.id:
                 return True
             else:
                 return False
@@ -85,12 +85,11 @@ class AlaskaRequest(Alaska):
         print('INFO: Waiting for response')
         print('-' * 30)
         while True:
-            response = self.SOCKET.recv_multipart()
+            response = self.SOCKET.recv_string()
             print(response)
-            print(response[1].decode(Alaska.ENCODING))
 
             # stop listening if message starts with END
-            if response[1].decode(Alaska.ENCODING).endswith('END'):
+            if response.endswith('END'):
                 self.SOCKET.close()
                 self.CONTEXT.term()
                 quit()
