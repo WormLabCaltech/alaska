@@ -74,7 +74,8 @@ class AlaskaServer(Alaska):
         self.ftp = {}
 
         self.workers_n = 1 # number of workers
-        self.lock = threading.Lock()
+        self.io_lock = threading.Lock()
+        self.state_lock = threading.RLock()
         self.queue = queue.Queue()  # job queue
         self.jobs = {} # dictionary of all jobs
         self.stale_jobs = [] # list of stale jobs (these are skipped)
@@ -232,10 +233,11 @@ class AlaskaServer(Alaska):
             self.close(_id)
 
         try:
+            if not self.state_lock.acquire():
+                raise Exception('ERROR: failed to acquire state lock')
+
             self.RUNNING = False
             self.out('INFO: terminating ZeroMQ')
-            lock = threading.Lock()
-            lock.acquire()
             self.SOCKET.close()
             self.CONTEXT.term()
 
@@ -245,23 +247,39 @@ class AlaskaServer(Alaska):
             #     cont.remove(force=True)
 
             for port, item in self.sleuth_servers.items():
-                self.out('INFO: sleuth shiny app container {} is running...terminating'.format(item[1]))
-                self.DOCKER.containers.get(item[1]).remove(force=True)
-                self.out('INFO: termination successful')
+                try:
+                    self.out('INFO: sleuth shiny app container {} is running...terminating'.format(item[1]))
+                    self.DOCKER.containers.get(item[1]).remove(force=True)
+                    self.out('INFO: termination successful')
+                except:
+                    self.out('ERROR: error while closing shiny app container')
+                    traceback.print_exc()
 
             # stop running jobs
             if self.current_job is not None:
-                cont_id = self.current_job.docker.id
-                self.out('INFO: job {} is running...terminating container {}'
-                            .format(self.current_job.id, cont_id))
-                self.DOCKER.containers.get(cont_id).remove(force=True)
-                self.out('INFO: termination successful')
+                try:
+                    cont_id = self.current_job.docker.id
+                    self.out('INFO: job {} is running...terminating container {}'
+                                .format(self.current_job.id, cont_id))
+                    self.DOCKER.containers.get(cont_id).remove(force=True)
+                    self.out('INFO: termination successful')
+                except docker.errors.NotFound:
+                    self.out('INFO: container not found...probably already terminated')
+                except:
+                    self.out('ERROR: error while terminating container')
+                    traceback.print_exc()
 
             if self.org_update_id is not None:
-                self.out('INFO: organism update running...terminating container {}'
-                            .format(self.org_update_id))
-                self.DOCKER.containers.get(self.org_update_id).remove(force=True)
-                self.out('INFO: termination successful')
+                try:
+                    self.out('INFO: organism update running...terminating container {}'
+                                .format(self.org_update_id))
+                    self.DOCKER.containers.get(self.org_update_id).remove(force=True)
+                    self.out('INFO: termination successful')
+                except docker.errors.NotFound:
+                    self.out('INFO: container not found...probably already terminated')
+                except:
+                    self.out('ERROR: error while terminating container')
+                    traceback.print_exc()
 
             self.save()
 
@@ -271,6 +289,8 @@ class AlaskaServer(Alaska):
             self.log() # write all remaining logs
 
             os.remove('../_running')
+
+            self.state_lock.release()
 
             sys.exit(code)
         except Exception as e:
@@ -487,7 +507,7 @@ class AlaskaServer(Alaska):
         Respond to given REQ with message.
         """
         # acquire lock
-        if (self.lock.acquire()):
+        if self.io_lock.acquire():
             # make sure id and message are byte literals
             if isinstance(msg, str):
                 msg = msg.encode()
@@ -496,7 +516,7 @@ class AlaskaServer(Alaska):
 
             response = [to, msg]
             self.SOCKET.send_multipart(response)
-            self.lock.release()
+            self.io_lock.release()
         else:
             self.out('ERROR: failed to acquire lock to respond')
 
@@ -1885,6 +1905,25 @@ class AlaskaServer(Alaska):
             os.remove(path)
             del files[0]
 
+        # Clean up open sleuth servers.
+        self.out('INFO: cleaning up open sleuth servers')
+        for port, lst in self.sleuth_servers.items():
+            proj_id = lst[0]
+            cont_id = lst[1]
+            open_dt = lst[2]
+
+            # Calculate time delta between when it was last accessed and now.
+            delta = dt.datetime.now() - open_dt
+            seconds = delta.total_seconds()
+            minutes = seconds / 60
+            hours = minutes / 60
+            days = hours / 24
+
+            if days > Alaska.SHI_DURATION:
+                self.out('INFO: terminating sleuth server on container {} for project {}'.format(cont_id, proj_id))
+                self.DOCKER.containers.get(cont_id).remove(force=True)
+
+
     def save(self, _id=None):
         """
         Saves its current state.
@@ -1892,8 +1931,9 @@ class AlaskaServer(Alaska):
         path = self.SAVE_DIR
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
-        # self.out('INFO: locking all threads to save server state')
-        # self.lock.acquire()
+        self.out('INFO: acquiring state lock save server state')
+        if not self.state_lock.acquire():
+            raise Exception('ERROR: failed to acquire state lock')
 
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
@@ -1943,7 +1983,8 @@ class AlaskaServer(Alaska):
         _CODES = self.CODES
         _DOCKER = self.DOCKER
         _RUNNING = self.RUNNING
-        _lock = self.lock
+        _io_lock = self.io_lock
+        _state_lock = self.state_lock
         # delete / replace
         try:
             self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
@@ -2012,7 +2053,8 @@ class AlaskaServer(Alaska):
         del self.CODES
         del self.DOCKER
         del self.RUNNING
-        del self.lock
+        del self.io_lock
+        del self.state_lock
 
         with open('{}/{}.json'.format(path, datetime), 'w') as f:
             # dump to json
@@ -2037,10 +2079,11 @@ class AlaskaServer(Alaska):
         self.CODES = _CODES
         self.DOCKER = _DOCKER
         self.RUNNING = _RUNNING
-        self.lock = _lock
+        self.io_lock = _io_lock
+        self.state_lock = _state_lock
 
-        # self.out('INFO: saved, unlocking threads')
-        # self.lock.release()
+        self.out('INFO: saved, unlocking threads')
+        self.state_lock.release()
 
         # Once saved, clean up.
         self.cleanup()

@@ -40,6 +40,7 @@ class Alaska():
     ANL_SCRIPT = 'run_analysis.py'
     SLE_SCRIPT = 'sleuth.R'
     SHI_SCRIPT = 'open_sleuth_server.R'
+    SHI_DURATION = 1 # in days
     SHI_PORTS = list(range(40000, 45000))
     JOBS_DIR = 'jobs' # jobs directory
     ORGS_DIR = 'organisms'
