@@ -440,7 +440,7 @@ def run_sleuth(proj):
     print_with_flush('# all analyses finished, archiving entire project')
     dirs_to_archive = []
     for d in os.listdir():
-        if os.path.isdir(d) and d != '_temp':
+        if d != '_temp' and d != '0_raw_reads' and not d.endswith('.tar.gz'):
             dirs_to_archive.append(d)
     archive(proj['id'] + '.tar.gz', dirs_to_archive)
     print_with_flush('# done')
