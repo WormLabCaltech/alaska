@@ -442,7 +442,7 @@ def run_sleuth(proj):
     for d in os.listdir():
         if os.path.isdir(d) and d != '_temp':
             dirs_to_archive.append(d)
-    archive(proj.id + '.tar.gz', dirs_to_archive)
+    archive(proj['id'] + '.tar.gz', dirs_to_archive)
     print_with_flush('# done')
 
 
