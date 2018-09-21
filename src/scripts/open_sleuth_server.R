@@ -6,12 +6,12 @@
 # Parse command line arguments.
 # We use commandArgs here because we don't want to have to install optparse.
 if (require('sleuth')) {
-  args <- commandArgs(trailingOnly=TRUE, asValues=TRUE)
+  args <- commandArgs(trailingOnly=TRUE)
   so <- readRDS('so.rds')
 
   # If the server is opening it, we have to pass it specific options.
   # If the user is opening it, just call sleuth_live with no options.
-  if ('alaska' %in% names(args)) {
+  if ('alaska' %in% args) {
     sleuth_live(so, options=list(port=42427, host='0.0.0.0',
                                     launch.browser=FALSE))
   } else {
