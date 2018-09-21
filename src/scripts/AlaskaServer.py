@@ -1888,8 +1888,8 @@ class AlaskaServer(Alaska):
         path = self.SAVE_DIR
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
-        self.out('INFO: locking all threads to save server state')
-        self.lock.acquire()
+        # self.out('INFO: locking all threads to save server state')
+        # self.lock.acquire()
 
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
@@ -2035,8 +2035,8 @@ class AlaskaServer(Alaska):
         self.RUNNING = _RUNNING
         self.lock = _lock
 
-        self.out('INFO: saved, unlocking threads')
-        self.lock.release()
+        # self.out('INFO: saved, unlocking threads')
+        # self.lock.release()
 
         # Once saved, clean up.
         self.cleanup()
@@ -2153,9 +2153,9 @@ class AlaskaServer(Alaska):
             return
 
 
-        self.out('INFO: locking all threads to load server state')
-        lock = threading.Lock()
-        lock.acquire()
+        # self.out('INFO: locking all threads to load server state')
+        # lock = threading.Lock()
+        # lock.acquire()
 
 
 
@@ -2301,8 +2301,8 @@ class AlaskaServer(Alaska):
                 self.out('ERROR: failed to add {} to queue'.format(__id))
                 traceback.print_exc()
 
-        self.out('INFO: loaded, unlocking threads')
-        lock.release()
+        # self.out('INFO: loaded, unlocking threads')
+        # lock.release()
 
         self.close(_id)
 
