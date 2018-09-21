@@ -407,7 +407,7 @@ def run_sleuth(proj):
         print_with_flush('# entering 3_diff_exp')
         os.chdir(d)
         for file in os.listdir():
-            if file.startswith('sleuth_table') and file.endswith('.csv'):
+            if file.startswith('sleuth_table') and file.endswith('.csv') and !file.endswith(('tissue.csv', 'phenotype.csv', 'go.csv')):
                 df = pd.read_csv(file, index_col=0)
                 gene_list = df[df.qval < 0.05].ens_gene
                 name = os.path.splitext(file)[0]
