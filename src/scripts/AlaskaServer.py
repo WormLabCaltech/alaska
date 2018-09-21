@@ -1939,6 +1939,7 @@ class AlaskaServer(Alaska):
         _CODES = self.CODES
         _DOCKER = self.DOCKER
         _RUNNING = self.RUNNING
+        _lock = self.lock
         # delete / replace
         try:
             self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
@@ -2032,6 +2033,7 @@ class AlaskaServer(Alaska):
         self.CODES = _CODES
         self.DOCKER = _DOCKER
         self.RUNNING = _RUNNING
+        self.lock = _lock
 
         self.out('INFO: saved, unlocking threads')
         self.lock.release()
