@@ -878,7 +878,8 @@ class AlaskaServer(Alaska):
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(Alaska.PROJECT_L, ids)
         __id = 'AP{}'.format(__id)
-        self.projects_temp[__id] = AlaskaProject(__id)
+        proj = AlaskaProject(__id)
+        self.projects_temp[__id] = proj
 
         # make directories
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.TEMP_DIR)
