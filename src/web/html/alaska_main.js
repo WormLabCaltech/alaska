@@ -162,8 +162,10 @@ function goto_progress(status) {
       id: proj_id,
       action: 'open_sleuth_server'
     };
+    var btn = $(this);
+    btn.prop('disabled', true);
     var callback = parse_sleuth_server;
-    send_ajax_request(target, data, callback, true);
+    send_ajax_request(target, data, callback, true, btn);
   });
 
   // Set output listeners for live output.
@@ -5479,16 +5481,26 @@ function parse_output_textarea(out, textarea) {
   textarea.scrollTop(textarea[0].scrollHeight);
 }
 
-function parse_sleuth_server(out) {
+function parse_sleuth_server(out, btn) {
   var split = out.split('\n');
   var line = split[split.length - 3];
   var split2 = line.split(' ');
   var port = parseInt(split2[split2.length - 1]);
 
-  console.log(port);
+  function open_sleuth_window(port, btn) {
+    console.log(port);
 
-  var url = 'http://' + window.location.hostname + ':' + port + '/';
-  window.open(url, '_blank');
+    btn.prop('disabled', false);
+
+    var url = 'http://' + window.location.hostname + ':' + port + '/';
+    window.open(url, '_blank');
+  }
+
+  if (out.includes('already open')) {
+    open_sleuth_window(port, btn);
+  } else {
+    setTimeout(open_sleuth_window, 5000, port, btn);
+  }
 }
 
 /**
