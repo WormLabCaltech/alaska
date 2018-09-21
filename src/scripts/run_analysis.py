@@ -86,7 +86,11 @@ def archive(out, source_dir):
     Archive given source directory into output file.
     """
     with tarfile.open(out, 'w:gz') as tar:
-        tar.add(source_dir, arcname=os.path.sep)
+        if isinstance(source_dir, str):
+            tar.add(source_dir, arcname=os.path.sep)
+        else:
+            for d in source_dir:
+                tar.add(d, arcname=os.path.sep)
 
 ######### These functions must be here to allow multiprocessing.
 def read_distribution(_id, bed_path):
@@ -405,7 +409,7 @@ def run_sleuth(proj):
         for file in os.listdir():
             if file.startswith('sleuth_table') and file.endswith('.csv'):
                 df = pd.read_csv(file, index_col=0)
-                gene_list = df.ens_gene
+                gene_list = df[df.qval < 0.05].ens_gene
                 name = os.path.splitext(file)[0]
 
                 for analysis in analyses:
@@ -431,6 +435,14 @@ def run_sleuth(proj):
     run_tea(path)
     print_with_flush('# enrichment analysis finished, archiving')
     archive(path + '.tar.gz', path)
+
+    # Archive all
+    print_with_flush('# all analyses finished, archiving entire project')
+    dirs_to_archive = []
+    for d in os.listdir():
+        if os.path.isdir(d) and d != '_temp':
+            dirs_to_archive.append(d)
+    archive(proj.id + '.tar.gz', dirs_to_archive)
     print_with_flush('# done')
 
 

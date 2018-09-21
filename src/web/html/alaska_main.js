@@ -363,17 +363,21 @@ function set_progress(status) {
     set_progress_badge(elements.qc_status_badge, 'queued');
     set_progress_badge(elements.quant_status_badge, 'queued');
     set_progress_badge(elements.diff_status_badge, 'queued');
+    set_progress_bar_queued();
   } else if (status < progress.quant_started) {
     set_progress_badge(elements.quant_status_badge, 'queued');
     set_progress_badge(elements.diff_status_badge, 'queued');
+    set_progress_bar_qc();
   } else if (status < progress.diff_started) {
     set_progress_badge(elements.diff_status_badge, 'queued');
+    set_progress_bar_diff();
   }
 
   if (status >= progress.diff_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
     set_progress_badge(elements.diff_status_badge, 'finished');
+    set_progress_bar_done();
   } else if (status >= progress.quant_finished) {
     set_progress_badge(elements.qc_status_badge, 'finished');
     set_progress_badge(elements.quant_status_badge, 'finished');
