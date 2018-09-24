@@ -42,6 +42,8 @@ class Alaska():
     SHI_SCRIPT = 'open_sleuth_server.R'
     SHI_DURATION = 1 # in days
     SHI_PORTS = list(range(40000, 45000))
+    GEO_TEMP = 'seq_template_v2.1.xlsx'
+    GEO_FILE = 'seq_info.xlsx'
     JOBS_DIR = 'jobs' # jobs directory
     ORGS_DIR = 'organisms'
     REF_DIR = 'reference'

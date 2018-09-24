@@ -20,6 +20,8 @@ import json
 import pandas as pd
 import warnings as w
 import datetime as dt
+from copy import copy
+import openpyxl as opx
 from collections import defaultdict
 from pyunpack import Archive
 from BashWriter import BashWriter
@@ -285,7 +287,173 @@ class AlaskaProject(Alaska):
             col.set_index('sample', inplace=True)
             df = pd.concat([df, col], axis=1, sort=True)
 
-        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)
+        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)\
+
+    def write_geo_submission_form(self):
+        """
+        Writes the geo submission form for this project.
+        """
+        def find_header(sheet, header):
+            """
+            Finds row number of the given header.
+            """
+            for row in sheet.iter_rows(min_row=1, max_col=1):
+                for cell in row:
+                    if cell.value == header:
+                        return cell.row
+
+        def get_series_df():
+            """
+            Get a pandas dataframe for the SERIES category.
+            """
+            rows = []
+            rows.append(['title', self.meta['title']])
+            rows.append(['summary', self.meta['abstract']])
+            rows.append(['overall design', ''])
+
+            for contributor in self.meta['contributors']:
+                rows.append(['contributor', contributor])
+
+            rows.append(['supplementary file', ''])
+            rows.append(['SRA_center_name_code', self.meta['SRA_center_code']])
+
+            return pd.DataFrame(rows, columns=['SERIES', 'values']).set_index('SERIES')
+
+        def get_samples_df():
+            """
+            Gets a pandas dataframe for the SAMPLES category.
+            """
+            rows = []
+
+            # Extract all characteristics and check if PROTOCOLS are the same
+            # across all samples. If they aren't they must be included
+            # as additional columns for each sample.
+            chars = []
+
+
+
+            for sample_id, sample in self.samples.items():
+                name = sample_id
+                title = sample.name
+                source = sample.meta['source']
+                organism = sample.organism.replace('_', ' ').capitalize()
+                chars = sample.meta['chars']
+                molecule = sample.meta['molecule']
+                description = sample.meta['description']
+
+                #
+
+
+
+        def write_series(sheet):
+            """
+            Write data into the SERIES category.
+            """
+            header = 'SERIES'
+            start = find_header(sheet, header)
+
+            # Then, iterate
+            for row in sheet.iter_rows(min_row=start, max_col=2)
+                cells = list(row)
+                cell_1 = cells[0]
+                cell_2 = cells[1]
+
+                # current row number and value
+                row_n = cell_1.row
+                val = cell_1.value
+
+                cont_done = False
+                if val == 'title':
+                    cell_2.value = self.meta['title']
+                elif val == 'summary':
+                    cell_2.value = self.meta['abstract']
+                elif val == 'overall design':
+                    cell_2.value = ''
+                elif val == 'contributor' and not cont_done:
+                    # First, deal with first contributor.
+                    first = self.meta['contributors'][0]
+                    cell_2.value = first
+
+                    # Then, deal with the rest of the contributors.
+                    if len(self.meta['contributors'] > 1):
+                        for cont in self.meta['contributors'][1:]:
+                            row_n += 1
+
+                            # First, make a copy of this row.
+                            contributor_row = [copy(cell_1), copy(cell_2)]
+
+                            # insert a row after this row.
+                            sheet.insert_rows(row_n, amount=1)
+
+                            # Then, add the cells.
+                            contributor_row[0].row = row_n
+                            contributor_row[1].row = row_n
+                            contributor_row[1].value = cont
+                            sheet._add_cell(contributor_row[0])
+                            sheet._add_cell(contributor_row[1])
+
+                    cont_done = True
+
+                elif val == 'supplementary file':
+                    continue
+
+                elif val == 'SRA_center_name_code':
+                    if self.meta['SRA_center_code']:
+                        cell_2.value = self.meta['SRA_center_code']
+
+        def write_samples(sheet):
+            """
+            Write data into the SAMPLES category.
+            """
+            header = 'SAMPLES'
+            start = find_header(sheet, header)
+
+            for row in sheet.iter_rows(min_row=start, max_col=1):
+                cells = list(row)
+                cell = cells[0]
+                val = cell.value
+
+                if val == 'Sample name':
+                    row_n = cell.row
+
+        def write_protocols(sheet):
+            """
+            Write data into the PROTOCOLS category.
+            """
+            pass
+
+        def write_pipeline(sheet):
+            """
+            Write data into the DATA PROCESSING PIPELINE category.
+            """
+            pass
+
+        def write_processed(sheet):
+            """
+            Write data into the PROCESSED DATA FILES category.
+            """
+            pass
+
+        def write_raw(sheet):
+            """
+            Write data into the RAW FILES and PAIRED-END EXPERIMENTS categories.
+            """
+            pass
+
+        # Load template.
+        wb = opx.load_workbook(Alaska.GEO_FILE)
+        sheet = wb['METADATA TEMPLATE']
+
+        # Populate categories.
+        write_series(sheet)
+        write_samples(sheet)
+        write_protocols(sheet)
+        write_pipeline(sheet)
+        write_processed(sheet)
+        write_raw(sheet)
+
+        # Save back.
+        wb.save(Alaska.GEO_FILE)
 
     def save(self, folder=None):
         """

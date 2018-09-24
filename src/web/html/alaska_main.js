@@ -3920,7 +3920,7 @@ function convert_proj_meta_inputs(card) {
     switch (class_name) {
       case 'proj_corresponding_group':
         obj.meta.corresponding['name'] = input;
-        obj.meta.contributors.push(input);
+        obj.meta.contributors.unshift(input);
         break;
       case 'proj_corresponding_email_group':
         obj.meta.corresponding['email'] = input;
