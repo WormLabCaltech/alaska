@@ -854,6 +854,24 @@ class AlaskaServer(Alaska):
     #     except KeyboardInterrupt:
     #         self.out('INFO: terminating update loop')
 
+    def fix_permissions(self, _id):
+        """
+        Fix folder permissions for the given project.
+        """
+        if self.exists_var(_id):
+            proj = self.projects[_id]
+        else:
+            proj = self.projects_temp[_id]
+
+        # Set read & write permissions for everyone for this directory.
+        permission = 0o777
+        os.chmod(proj.dir, permission)
+        for root, dirs, files in os.walk(proj.dir):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), permission)
+            for f in files:
+                os.chmod(os.path.join(root, f), permission)
+
     def new_proj(self, _id, close=True):
         """
         Creates a new project.
@@ -917,16 +935,6 @@ class AlaskaServer(Alaska):
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.DIFF_DIR)
         os.makedirs(f)
         self.broadcast(_id, '{}: new project created'.format(__id))
-
-        # Set read & write permissions for everyone for this directory.
-        permission = 0o777
-        os.chmod(proj.dir, permission)
-        for root, dirs, files in os.walk(proj.dir):
-            for d in dirs:
-                os.chmod(os.path.join(root, d), permission)
-            for f in files:
-                os.chmod(os.path.join(root, f), permission)
-
 
         # check if ftp container is running
         try:

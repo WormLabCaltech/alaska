@@ -5523,6 +5523,7 @@ function send_ajax_request(target, data, callback, include_out, ...args) {
       if (out.includes('ERROR')) {
         var modal = $('#error_modal');
         modal.find('#error_output').val(out);
+        modal.modal('show');
       } else {
 
         if (typeof callback === 'function') {
