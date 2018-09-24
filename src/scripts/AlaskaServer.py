@@ -1096,7 +1096,7 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def get_raw_reads(self, _id, close=True, md5=False):
+    def get_raw_reads(self, _id, close=True, md5=True):
         """
         Retrieves list of uploaded sample files.
         """
