@@ -368,7 +368,7 @@ class AlaskaProject(Alaska):
                     files.append(path)
                     types.append(ext)
                     md5s.append(read['md5'])
-                    lengths.append(sample.length)
+                    lengths.append(str(sample.length))
 
                 f.write(format_attribute('Sample_raw_file_name_run1', ', '.join(files)))
                 f.write(format_attribute('Sample_raw_file_type_run1', ', '.join(types)))
