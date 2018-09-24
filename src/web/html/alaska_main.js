@@ -1118,7 +1118,7 @@ function set_reads_table(id, form) {
     var folder = path.replace('0_raw_reads', '');
     folder = folder.replace('/' + filename, '');
 
-    var size = proj.samples[id].reads[path].size / Math.pow(1024, 2);
+    var size = proj.samples[id].reads[path].size + ' MB';
     var md5 = proj.samples[id].reads[path].md5;
 
     var row = table.find('tr[style*="display:none"]').clone();

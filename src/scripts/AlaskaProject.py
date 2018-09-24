@@ -146,7 +146,7 @@ class AlaskaProject(Alaska):
                     md5 = None
 
                     read = {}
-                    read['size'] = size
+                    read['size'] = round(size / (1024 ** 2),1)
                     read['md5'] = md5
 
                     reads[path] = read

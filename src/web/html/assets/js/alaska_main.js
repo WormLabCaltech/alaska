@@ -1013,8 +1013,8 @@ function set_organisms_select(select, cb) {
     action: 'get_organisms'
   };
   if (typeof cb === 'function') {
-    function callback(out, cb) {
-      parse_organisms(out);
+    function callback(out, select, cb) {
+      parse_organisms(out, select);
       cb();
     }
     send_ajax_request(target, data, callback, true, select, cb);
@@ -1118,7 +1118,7 @@ function set_reads_table(id, form) {
     var folder = path.replace('0_raw_reads', '');
     folder = folder.replace('/' + filename, '');
 
-    var size = proj.samples[id].reads[path].size / Math.pow(1024, 2);
+    var size = proj.samples[id].reads[path].size + ' MB';
     var md5 = proj.samples[id].reads[path].md5;
 
     var row = table.find('tr[style*="display:none"]').clone();
