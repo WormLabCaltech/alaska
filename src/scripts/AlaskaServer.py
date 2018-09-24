@@ -1599,7 +1599,7 @@ class AlaskaServer(Alaska):
         Open sleuth shiny app.
         """
         if not self.exists_var(_id):
-            raise Exception('{}: project not found')
+            raise Exception('{}: project not found'.format(_id))
 
         proj = self.projects[_id]
 
@@ -1660,7 +1660,7 @@ class AlaskaServer(Alaska):
         Submit reads to geo.
         """
         if not self.exists_var(_id):
-            raise Exception('{}: project not found')
+            raise Exception('{}: project not found'.format(_id))
 
         proj = self.projects[_id]
         if proj.progress < Alaska.PROGRESS['diff_finished']:

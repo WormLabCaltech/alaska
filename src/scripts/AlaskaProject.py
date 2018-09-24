@@ -317,11 +317,10 @@ class AlaskaProject(Alaska):
                 f.write(format_attribute('Series_sample_id', sample_id))
 
             supplementary = []
-            diff_path = '{}/{}'.format(self.diff_dir, sample.name)
-            diff_files = os.listdir(diff_path)
+            diff_files = os.listdir(self.diff_dir)
             for diff_file in diff_files:
                 if not diff_file.endswith(('out.txt', '.rds', '.R')):
-                    supplementary.append('{}/{}'.format(diff_path, diff_file))
+                    supplementary.append('{}/{}'.format(Alaska.DIFF_DIR, diff_file))
 
             for file in supplementary:
                 f.write(format_attribute('Series_supplementary_file', file))
@@ -386,7 +385,7 @@ class AlaskaProject(Alaska):
 
             quant_files = os.listdir(quant_path)
             for quant_file in quant_files:
-                processed.append('{}/{}'.format(quant_path, quant_file))
+                processed.append('{}/{}/{}'.format(Alaska.ALIGN_DIR, sample.name, quant_file))
 
             for processed_file in processed:
                 f.write(format_attribute('Sample_processed_data_file', processed_file))
