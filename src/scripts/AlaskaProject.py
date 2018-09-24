@@ -345,7 +345,7 @@ class AlaskaProject(Alaska):
 
             for char, value in sample.meta['chars'].items():
                 if char not in to_exclude:
-                    f.write(format_attrubute('Sample_characteristics', '{}: {}'.format(char, value)))
+                    f.write(format_attribute('Sample_characteristics', '{}: {}'.format(char, value)))
 
             f.write(format_attribute('Sample_molecule', sample.meta['chars']['sequenced molecules']))
             f.write(format_attribute('Sample_growth_protocol', sample.meta['chars']['growth conditions']))
