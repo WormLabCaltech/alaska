@@ -120,7 +120,11 @@
                 <td class="align-middle"><span class="badge badge-pill badge-secondary" id="diff_status_badge">Queued</span></td>
                 <td class="align-middle">
                     <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#diff_output_collapse" id="diff_output_btn" disabled>View live output</button>
-                    <button class="btn btn-success btn-sm" type="button" id="diff_server_btn" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
+                    <button class="btn btn-success btn-sm align-items-center d-inline-flex" type="button" id="diff_server_btn" disabled>
+                        <i class="fas fa-external-link-alt mr-1"></i>
+                        Open Sleuth web server
+                        <div id="sleuth_loading_spinner" class="spinner-light ml-2" style="height:1em;width:1em;display:none"></div>
+                    </button>
                 </td>
                 <td class="align-middle">
                     <button class="btn btn-secondary btn-sm" type="button" id="diff_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
@@ -131,18 +135,6 @@
                     <div class="collapse m-3 p-0", id="diff_output_collapse">
                         <textarea class="form-control text-monospace" id="diff_textarea" rows="20" id="diff_textarea" style="font-size:0.8em" readonly></textarea>
                     </div>
-                </td>
-            </tr>
-            <tr style="display:none">
-                <td class="align-middle">4</td>
-                <td class="align-middle">Enrichment Analysis</td>
-                <td class="align-middle"><span class="badge badge-pill badge-secondary" id="ea_status_badge">Queued</span></td>
-                <td class="align-middle">
-                    <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#ea_output_collapse" id="ea_output_btn" disabled>View live output</button>
-                    <button class="btn btn-success btn-sm" type="button" id="ea_server_btn" disabled><i class="fas fa-external-link-alt mr-1"></i>Open Sleuth web server</button>
-                </td>
-                <td class="align-middle">
-                    <button class="btn btn-secondary btn-sm" type="button" id="ea_download_btn" disabled><i class="fas fa-download mr-1"></i>Download results</button>
                 </td>
             </tr>
         </tbody>
@@ -1474,10 +1466,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="assets/js/anime.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
     <script src="assets/js/alaska_main.js"></script>
+    <script src="assets/js/anime.min.js"></script>
     <script src="assets/js/jquery-ui.min.js"></script>
 </body>
 

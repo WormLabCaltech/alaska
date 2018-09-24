@@ -163,9 +163,10 @@ function goto_progress(status) {
       action: 'open_sleuth_server'
     };
     var btn = $(this);
-    btn.prop('disabled', true);
+    var spinner = btn.children('div:last');
+    set_loading_spinner(btn, spinner);
     var callback = parse_sleuth_server;
-    send_ajax_request(target, data, callback, true, btn);
+    send_ajax_request(target, data, callback, true, btn, spinner);
   });
 
   // Set output listeners for live output.
@@ -5481,25 +5482,26 @@ function parse_output_textarea(out, textarea) {
   textarea.scrollTop(textarea[0].scrollHeight);
 }
 
-function parse_sleuth_server(out, btn) {
+function parse_sleuth_server(out, btn, spinner) {
   var split = out.split('\n');
   var line = split[split.length - 3];
   var split2 = line.split(' ');
   var port = parseInt(split2[split2.length - 1]);
 
-  function open_sleuth_window(port, btn) {
+  function open_sleuth_window(port, btn, spinner) {
     console.log(port);
 
     btn.prop('disabled', false);
+    spinner.hide();
 
     var url = 'http://' + window.location.hostname + ':' + port + '/';
     window.open(url, '_blank');
   }
 
   if (out.includes('already open')) {
-    open_sleuth_window(port, btn);
+    open_sleuth_window(port, btn, spinner);
   } else {
-    setTimeout(open_sleuth_window, 5000, port, btn);
+    setTimeout(open_sleuth_window, 8000, port, btn, spinner);
   }
 }
 
