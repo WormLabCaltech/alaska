@@ -140,7 +140,8 @@ class AlaskaServer(Alaska):
             self.out('INFO: checking admin privilages')
             if not os.getuid() == 0:
                 raise Exception('ERROR: AlaskaServer requires admin rights')
-                self.out('INFO: AlaskaServer running as root')
+            self.out('INFO: AlaskaServer running as root')
+            os.umask(0)
 
             if force:
                 self.out('INFO: --force flag detected...bypassing instance check')
