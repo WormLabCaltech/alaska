@@ -66,10 +66,10 @@ class AlaskaRequest(Alaska):
         self.SOCKET.send(Alaska.CODES['check'])
 
         # use poller for timeout
-        poller = zmq.Poller()
-        poller.register(self.SOCKET, zmq.POLLIN)
+        self.poller = zmq.Poller()
+        self.poller.register(self.SOCKET, zmq.POLLIN)
 
-        if poller.poll(3*1000): # wait for 3 seconds
+        if self.poller.poll(3*1000): # wait for 3 seconds
             response = self.SOCKET.recv_string()
             if response == self.id:
                 return True
@@ -78,13 +78,15 @@ class AlaskaRequest(Alaska):
         else:
             return False
 
-    def listen(self):
+    def listen(self, timeout=300):
         """
         Listen for responses.
         """
         print('INFO: Waiting for response')
         print('-' * 30)
-        while True:
+
+        # use poller for timeout
+        while self.poller.poll(timeout * 1000):
             response = self.SOCKET.recv_string()
             print(response)
 
@@ -92,7 +94,7 @@ class AlaskaRequest(Alaska):
             if response.endswith('END'):
                 self.SOCKET.close()
                 self.CONTEXT.term()
-                quit()
+                sys.exit(0)
                 break
 
 
