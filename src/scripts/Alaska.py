@@ -120,6 +120,7 @@ class Alaska():
         'open_sleuth_server':   b'\x13',
         'get_proj_status':      b'\x14', # check project status
         'get_ftp_info':         b'\x15',
+        'submit_to_geo':        b'\x16',
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
