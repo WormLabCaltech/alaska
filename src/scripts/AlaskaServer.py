@@ -1669,6 +1669,8 @@ class AlaskaServer(Alaska):
         # First, write seq info.
         proj.write_soft()
 
+        if close:
+            self.close(_id)
 
     def copy_script(self, _id, script, dst=None):
         """
