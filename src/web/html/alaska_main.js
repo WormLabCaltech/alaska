@@ -136,7 +136,9 @@ function goto_progress(status) {
     };
     $(this).hide();
     send_ajax_request(target, data, null, false);
-    project_progress_interval = setInterval(update_progress, 10000);
+    if (project_progress_interval == null) {
+      project_progress_interval = setInterval(update_progress, 10000);
+    }
   });
 
   // Set multiqc report button listener.
@@ -176,7 +178,9 @@ function goto_progress(status) {
   set_progress(status);
 
   // Then, call update_progress regularly.
-  project_progress_interval = setInterval(update_progress, 10000);
+  if (project_progress_interval == null) {
+    project_progress_interval = setInterval(update_progress, 10000);
+  }
 }
 
 function get_output(type, textarea) {
@@ -5469,11 +5473,9 @@ function update_proj_status(out) {
 
   set_progress(status);
 
-  if (status >= progress.diff_finished) {
+  if (status >= progress.diff_finished || status < 0) {
     clearInterval(project_progress_interval);
-  } else if (status < 0) {
-    clearInterval(project_progress_interval);
-  }
+    project_progress_interval = null;
 }
 
 
