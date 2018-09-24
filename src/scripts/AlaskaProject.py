@@ -332,7 +332,7 @@ class AlaskaProject(Alaska):
             """
             f.write(format_indicator('SAMPLE', sample.id))
             f.write(format_attribute('Sample_type', 'SRA'))
-            f.write(format_attribute('Sample_title', sample.meta['title']))
+            f.write(format_attribute('Sample_title', sample.meta['name']))
             f.write(format_attribute('Sample_source_name', sample.meta['chars']['tissue']))
             f.write(format_attribute('Sample_organism', sample.organism.replace('_', ' ').capitalize()))
 
