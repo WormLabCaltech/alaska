@@ -320,8 +320,8 @@ class AlaskaProject(Alaska):
             diff_path = '{}/{}'.format(self.diff_dir, sample.name)
             diff_files = os.listdir(diff_path)
             for diff_file in diff_files:
-                if not diff_file.endswith(('out.txt', '.rds', '.R'))
-                supplementary.append('{}/{}'.format(diff_path, diff_file))
+                if not diff_file.endswith(('out.txt', '.rds', '.R')):
+                    supplementary.append('{}/{}'.format(diff_path, diff_file))
 
             for file in supplementary:
                 f.write(format_attribute('Series_supplementary_file', file))
