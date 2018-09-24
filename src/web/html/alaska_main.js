@@ -5476,6 +5476,7 @@ function update_proj_status(out) {
   if (status >= progress.diff_finished || status < 0) {
     clearInterval(project_progress_interval);
     project_progress_interval = null;
+  }
 }
 
 
