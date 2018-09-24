@@ -156,6 +156,9 @@ function goto_progress(status) {
   $('#diff_download_btn').click(function () {
       window.open('download.php?id=' + proj_id + '&type=diff', '_blank');
   });
+  $('#all_download_btn').click(function () {
+      window.open('download.php?id=' + proj_id + '&type=all', '_blank');
+  });
 
   // Set sleuth server open button listener.
   $('#diff_server_btn').click(function () {
@@ -306,10 +309,7 @@ function set_progress(status) {
     'diff_server_btn',
     'diff_download_btn',
     'diff_output_collapse',
-    'ea_status_badge',
-    'ea_output_btn',
-    'ea_download_btn',
-    'ea_output_collapse'
+    'all_download_btn'
   ];
 
   // Construct elements dictionary
@@ -325,6 +325,7 @@ function set_progress(status) {
     case progress.diff_finished:
       elements.diff_server_btn.prop('disabled', false);
       elements.diff_download_btn.prop('disabled', false);
+      elements.all_download_btn.prop('disabled', false);
     case progress.diff_started:
       elements.diff_output_btn.prop('disabled', false);
     case progress.diff_queued:
@@ -362,6 +363,7 @@ function set_progress(status) {
     case progress.diff_started:
       elements.diff_download_btn.prop('disabled', true);
       elements.diff_server_btn.prop('disabled', true);
+      elements.all_download_btn.prop('disabled', true);
   }
 
 

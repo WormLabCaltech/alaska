@@ -289,6 +289,114 @@ class AlaskaProject(Alaska):
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)\
 
+    def write_soft(self):
+        """
+        Writes project in SOFT format for GEO submission.
+        """
+        def format_indicator(indicator, value):
+            return '^{} = {}\n'.format(indicator, value)
+
+        def format_attribute(attribute, value):
+            return '!{} = {}\n'.format(attribute, value)
+
+        def write_series(f):
+            """
+            Writes SERIES in SOFT format.
+            """
+            f.write(format_indicator('SERIES', self.id))
+            f.write(format_attribute('Series_title', self.meta['title']))
+            f.write(format_attribute('Series_summary', self.meta['abstract']))
+            f.write(format_attribute('Series_overall_design', ''))
+
+            for cont in self.meta['contributors']:
+                f.write(format_attribute('Series_contributor', cont))
+
+            f.write(format_attribute('Series_supplementary_file', ''))
+
+            for sample_id in self.samples:
+                f.write(format_attribute('Series_sample_id', sample_id))
+
+            supplementary = []
+            diff_path = '{}/{}'.format(self.diff_dir, sample.name)
+            diff_files = os.listdir(diff_path)
+            for diff_file in diff_files:
+                if not diff_file.endswith(('out.txt', '.rds', '.R'))
+                supplementary.append('{}/{}'.format(diff_path, diff_file))
+
+            for file in supplementary:
+                f.write(format_attribute('Series_supplementary_file', file))
+
+
+        def write_sample(f, sample):
+            """
+            Writes the given sample in SOFT format.
+            """
+            f.write(format_indicator('SAMPLE', sample.id))
+            f.write(format_attribute('Sample_type', 'SRA'))
+            f.write(format_attribute('Sample_title', sample.meta['title']))
+            f.write(format_attribute('Sample_source_name', sample.meta['chars']['tissue']))
+            f.write(format_attribute('Sample_organism', sample.organism.replace('_', ' ').capitalize()))
+
+            to_exclude = [
+                'growth conditions',
+                'library preparation',
+                'sequenced molecules',
+                'miscellaneous'
+            ]
+
+            for char, value in sample.meta['chars'].items():
+                if char not in to_exclude:
+                    f.write(format_attrubute('Sample_characteristics', '{}: {}'.format(char, value)))
+
+            f.write(format_attribute('Sample_molecule', sample.meta['chars']['sequenced molecules']))
+            f.write(format_attribute('Sample_growth_protocol', sample.meta['chars']['growth conditions']))
+            f.write(format_attribute('Sample_library_construction_protocol', sample.meta['chars']['library preparation']))
+            f.write(format_attribute('Sample_library_strategy', 'RNA-Seq'))
+            f.write(format_attribute('Sample_data_processing', ''))
+            f.write(format_attribute('Sample_description', sample.meta['description']))
+
+            # Write raw files.
+            if sample.type == 1:
+                # construct values
+                files = []
+                types = []
+                md5s = []
+                lengths = []
+
+                for path, read in sample.reads:
+                    fname = os.path.basename(path)
+                    ext = os.path.splitext(fname)[1]
+                    files.append(path)
+                    types.append(ext)
+                    md5s.append(read['md5'])
+                    lengths.append(sample.length)
+
+                f.write(format_attribute('Sample_raw_file_name_run1', ', '.join(files)))
+                f.write(format_attribute('Sample_raw_file_type_run1', ', '.join(types)))
+                f.write(format_attribute('Sample_raw_file_checksum_run1', ', '.join(md5s)))
+                f.write(format_attribute('Sample_raw_file_read_length_run1', ', '.join(lengths)))
+                f.write(format_attribute('Sample_raw_file_standard_deviation_run1', sample.stdev))
+                f.write(format_attribute('Sample_raw_file_instrument_model_run1', ''))
+            elif sample.type == 2:
+                pass
+
+            # write processed data files.
+            processed = []
+            quant_path = '{}/{}'.format(self.align_dir, sample.name)
+
+            quant_files = os.listdir(quant_path)
+            for quant_file in quant_files:
+                processed.append('{}/{}'.format(quant_path, quant_file))
+
+            for processed_file in processed:
+                f.write(format_attribute('Sample_processed_data_file', processed_file))
+
+        with open('{}/seq_info.txt'.format(self.dir), 'w') as f:
+            write_series(f)
+
+            for sample_id, sample in self.samples:
+                write_sample(f, sample)
+
     def write_geo_submission_form(self):
         """
         Writes the geo submission form for this project.
@@ -328,18 +436,63 @@ class AlaskaProject(Alaska):
             # Extract all characteristics and check if PROTOCOLS are the same
             # across all samples. If they aren't they must be included
             # as additional columns for each sample.
+            excl_from_chars = [
+                'growth conditions',
+                'library preparation',
+                'sequenced molecules',
+                'miscellaneous'
+            ]
             chars = []
-
-
-
             for sample_id, sample in self.samples.items():
-                name = sample_id
-                title = sample.name
-                source = sample.meta['source']
-                organism = sample.organism.replace('_', ' ').capitalize()
-                chars = sample.meta['chars']
-                molecule = sample.meta['molecule']
-                description = sample.meta['description']
+                for char in sample.meta['chars']:
+                    if char not in chars:
+                        chars.append(char)
+
+            headers = [
+                'Sample name',
+                'title',
+                'source name',
+                'organism'
+            ]
+            for char in chars:
+                headers.append('characteristics: ' + char)
+            headers += [
+                'molecule',
+                'description'
+            ]
+
+            # For each header, construct a row.
+            ids = self.samples.keys()
+            ids = sorted(ids)
+            columns = ['SAMPLE'] + ids
+            rows = []
+            for header in headers:
+                row = []
+                row.append(header)
+
+                for sample_id in ids:
+                    sample = self.samples[id]
+
+                    if header == 'Sample name':
+                        row.append(sample.id)
+                    elif header == 'title':
+                        row.append(sample.name)
+                    elif header == 'source name':
+                        row.append(sample.meta['chars']['tissue'])
+                    elif header == 'organism':
+                        row.append(sample.organism.replace('_', ' ').capitalize())
+                    elif header.startswith('characteristics:'):
+                        char = header.split(': ')[1]
+                        row.append(sample.meta['chars'][char])
+                    elif header == 'molecule':
+                        row.append(sample.meta['chars']['sequenced molecules'])
+                    elif header == 'description':
+                        row.append(sample.meta['description'])
+
+                rows.append(row)
+
+            # make df
+            df = pd.DataFrame(rows, columns=columns)
 
                 #
 

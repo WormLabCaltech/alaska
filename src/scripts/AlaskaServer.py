@@ -1598,6 +1598,9 @@ class AlaskaServer(Alaska):
         """
         Open sleuth shiny app.
         """
+        if not self.exists_var(_id):
+            raise Exception('{}: project not found')
+
         proj = self.projects[_id]
 
         if proj.progress < Alaska.PROGRESS['diff_finished']:
@@ -1651,6 +1654,21 @@ class AlaskaServer(Alaska):
 
         if close:
             self.close(_id)
+
+    def submit_to_geo(self, _id, close=True):
+        """
+        Submit reads to geo.
+        """
+        if not self.exists_var(_id):
+            raise Exception('{}: project not found')
+
+        proj = self.projects[_id]
+        if proj.progress < Alaska.PROGRESS['diff_finished']:
+            raise Exception('{}: Sleuth not yet run'.format(_id))
+
+        # First, write seq info.
+        proj.write_soft()
+
 
     def copy_script(self, _id, script, dst=None):
         """

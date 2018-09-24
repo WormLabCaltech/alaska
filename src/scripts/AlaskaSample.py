@@ -37,13 +37,10 @@ class AlaskaSample(Alaska):
         self.reads = {} # list of paths if single-end
                         # list of lsit of paths, if pair-end
         self.projects = [] # list of projects that refer to this sample
-
         self.meta = {} # variable for all metadata
         # from GEO submission template
         self.meta['title'] = ''
         self.meta['contributors'] = []
-        self.meta['source'] = ''
-        self.meta['molecule'] = ''
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
