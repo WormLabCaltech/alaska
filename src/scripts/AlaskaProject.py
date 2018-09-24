@@ -393,7 +393,7 @@ class AlaskaProject(Alaska):
         with open('{}/seq_info.txt'.format(self.dir), 'w') as f:
             write_series(f)
 
-            for sample_id, sample in self.samples:
+            for sample_id, sample in self.samples.items():
                 write_sample(f, sample)
 
     def write_geo_submission_form(self):
