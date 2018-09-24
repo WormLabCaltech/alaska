@@ -5,7 +5,7 @@ source scripts/set_env_variables.sh
 
 # create alaska container
 docker create -it --name="$DOCKER_ALASKA_TAG" \
-              -user="alaska" \
+              --user="alaska" \
               -v $DOCKER_TIME_MOUNT \
               -v $DOCKER_SOCKET_MOUNT \
               -v $DOCKER_SCRIPT_MOUNT \
