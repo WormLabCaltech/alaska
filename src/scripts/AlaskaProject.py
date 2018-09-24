@@ -353,7 +353,7 @@ class AlaskaProject(Alaska):
             start = find_header(sheet, header)
 
             # Then, iterate
-            for row in sheet.iter_rows(min_row=start, max_col=2)
+            for row in sheet.iter_rows(min_row=start, max_col=2):
                 cells = list(row)
                 cell_1 = cells[0]
                 cell_2 = cells[1]

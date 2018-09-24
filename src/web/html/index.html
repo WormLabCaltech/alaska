@@ -31,7 +31,7 @@
                     <li class="dropdown"><a class="dropdown-toggle nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#" style="color:#ffffff;">Dropdown </a>
                         <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
                     </li>
-                </ul><span class="ml-auto navbar-text text-white">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span></span>
+                </ul><span class="ml-auto navbar-text text-white">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span><span class="badge badge-pill badge-info ml-1">alpha</span></span>
         </div>
         </div>
     </nav>
@@ -239,7 +239,7 @@
             <div class="form-group row proj_contributors_group">
                 <div class="col-sm-3">
                     <legend class="col-form-label">Contributors</legend>
-                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project NOT INCLUDING THE CORRESPONDING AUTHOR.</small>
+                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project EXCLUDING THE CORRESPONDING AUTHOR.</small>
                 </div>
                 <div class="col contributors_inputs">
                     <div class="d-flex contributor_row">
@@ -487,7 +487,7 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <label for="sample_share_organism" class="col-form-label">Organism</label>
-                        <small id="sample_share_organism_help" class="form-text text-muted">Some description.</small>
+                        <small id="sample_share_organism_help" class="form-text text-muted">Please select the reference organism.</small>
                     </div>
                     <div class="col-sm-5">
                         <select class="custom-select sample_organism_select" id="sample_share_organism" required>
@@ -519,7 +519,7 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Life-stage</legend>
-                        <small id="sample_share_life-stage_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                        <small id="sample_share_life-stage_help" class="form-text text-muted">Please select the life-stage the organisms were collected.</small>
                     </div>
                     <div class="col d-flex sample_life-stage_inputs">
                         <select class="custom-select mr-2 col-sm-4">
@@ -539,7 +539,7 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Tissue</legend>
-                        <small id="sample_share_tissue_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                        <small id="sample_share_tissue_help" class="form-text text-muted">Please select the tissue collected.</small>
                     </div>
                     <div class="col d-flex sample_tissue_inputs">
                         <select class="custom-select mr-2 col-sm-6">
@@ -589,7 +589,7 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Sequenced molecules</legend>
-                        <small id="sample_share_sequenced_molecules_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
+                        <small id="sample_share_sequenced_molecules_help" class="form-text text-muted">Please select the molecules sequenced.</small>
                     </div>
                     <div class="col d-flex sample_sequenced_molecules_inputs">
                         <select class="custom-select mr-2 col-sm-6">
@@ -609,7 +609,7 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label pt-0">Read type</legend>
-                        <small id="sample_share_type_help" class="form-text text-muted">Click here for more information.</small>
+                        <small id="sample_share_type_help" class="form-text text-muted">Please select the read type.</small>
                     </div>
                     <div class="col-sm-8 sample_read_type_inputs" id="sample_share_read_type">
                         <div class="row pl-3">
@@ -684,7 +684,7 @@
                     <div class="form-group row sample_name_group">
                         <div class="col-sm-3">
                             <label for="sample_name_SAMPLEID" class="col-form-label">Name</label>
-                            <small id="sample_name_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                            <small id="sample_name_SAMPLEID_help" class="form-text text-muted">The unique name of this sample.</small>
                         </div>
                         <div class="col-sm-3">
                             <input type="text" class="form-control sample_name_input" id="sample_name_SAMPLEID" required disabled>
@@ -693,7 +693,7 @@
                     <div class="form-group row sample_description_group">
                         <div class="col-sm-3">
                             <label for="sample_description_SAMPLEID" class="col-form-label">Description</label>
-                            <small id="sample_description_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                            <small id="sample_description_SAMPLEID_help" class="form-text text-muted">Sample description.</small>
                         </div>
                         <div class="col-sm-7">
                             <textarea class="form-control sample_description_input" id="sample_description_SAMPLEID" rows="3" required></textarea>
@@ -706,7 +706,7 @@
                                 <div class="form-group row sample_factors_1_group">
                                     <div class="col-sm-3">
                                         <label for="sample_factor_1_SAMPLEID" class="col-form-label">Factor 1: FACTOR_1</label>
-                                        <small id="sample_factor_1_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                                        <small id="sample_factor_1_SAMPLEID_help" class="form-text text-muted">Please select the value for the first factor you chose for this sample.</small>
                                     </div>
                                     <div class="col-sm-5">
                                         <select class="custom-select sample_factor_1_select" required>
@@ -717,7 +717,7 @@
                                 <div class="form-group row sample_factors_2_group" style="display:none">
                                     <div class="col-sm-3">
                                         <label for="sample_factor_2_SAMPLEID" class="col-form-label">Factor 2: FACTOR_2</label>
-                                        <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Some description.</small>
+                                        <small id="sample_factor_2_SAMPLEID_help" class="form-text text-muted">Please select the value for the second factor you chose for this sample.</small>
                                     </div>
                                     <div class="col-sm-5">
                                         <select class="custom-select sample_factor_2_select" required>
