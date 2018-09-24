@@ -362,7 +362,7 @@ class AlaskaProject(Alaska):
                 md5s = []
                 lengths = []
 
-                for path, read in sample.reads:
+                for path, read in sample.reads.items():
                     fname = os.path.basename(path)
                     ext = os.path.splitext(fname)[1]
                     files.append(path)
