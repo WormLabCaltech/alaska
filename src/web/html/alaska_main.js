@@ -1013,8 +1013,8 @@ function set_organisms_select(select, cb) {
     action: 'get_organisms'
   };
   if (typeof cb === 'function') {
-    function callback(out, cb) {
-      parse_organisms(out);
+    function callback(out, select, cb) {
+      parse_organisms(out, select);
       cb();
     }
     send_ajax_request(target, data, callback, true, select, cb);
