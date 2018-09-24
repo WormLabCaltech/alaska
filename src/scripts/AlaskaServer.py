@@ -1144,7 +1144,7 @@ class AlaskaServer(Alaska):
 
         return md5.hexdigest()
 
-    def infer_samples(self, _id, close=True, md5=False):
+    def infer_samples(self, _id, close=True, md5=True):
         """
         Infers samples from raw reads.
         """
