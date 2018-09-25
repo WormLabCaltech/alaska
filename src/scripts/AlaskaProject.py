@@ -321,7 +321,7 @@ class AlaskaProject(Alaska):
 
             # Then, write the SOFT format seq_info.txt
             out = 'seq_info.txt'
-            write_soft(out)
+            self.write_soft(out)
 
             # Add the softfile.
             full_path = '{}/{}'.format(self.dir, out)

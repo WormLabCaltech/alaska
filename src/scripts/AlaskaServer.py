@@ -1860,12 +1860,33 @@ class AlaskaServer(Alaska):
 
         return time
 
-    def get_queue(self, _id, close=False):
+    def get_queue(self, _id, close=True):
         """
         Gets the current queue status of the server.
         """
+        def broadcast_job_info(job):
+            self.broadcast(_id, 'Job: {}'.format(job.id))
+            self.broadcast(_id, '\tproject: {}'.format(job.proj_id))
+            self.broadcast(_id, '\tanalysis: {}'.format(job.name))
+            self.broadcast(_id, '\tcreated: {}'.format(job.datetime_created.strftime(Alaska.DATETIME_FORMAT)))
+            if job.datetime_started is not None:
+                self.broadcast(_id, '\tstarted: {}'.format(job.datetime_started.strftime(Alaska.DATETIME_FORMAT)))
+
         # number of jobs in queue
         count = self.queue.qsize()
+        if self.current_job is not None:
+            job = self.current_job
+            self.broadcast(_id, ('-' * 10) + 'Current job' + ('-' * 10))
+            broadcast_job_info(job)
+            self.broadcast(_id, '\n')
+
+        queue_list = list(self.queue)
+        if len(queue_list) > 0:
+            self.broadcast(_id, ('-' * 10) + 'Queued jobs' + ('-' * 10))
+
+            for job in queue_list:
+                broadcast_job_info(job)
+                self.broadcast(_id, '\n')
 
         time = self.calc_queue_exhaust()
         self.broadcast(_id, 'WARNING: these are crude estimates')
