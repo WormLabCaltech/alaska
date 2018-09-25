@@ -1668,6 +1668,7 @@ class AlaskaServer(Alaska):
         if proj.progress < Alaska.PROGRESS['diff_finished']:
             raise Exception('{}: Sleuth not yet run'.format(_id))
 
+        self.broadcast(_id, '{}: preparing submission'.format(_id))
         proj.prepare_submission()
 
         if close:
