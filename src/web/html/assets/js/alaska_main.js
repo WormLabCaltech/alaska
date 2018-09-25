@@ -2112,7 +2112,7 @@ function set_dropdown(select, choices) {
   for (var i = 0; i < choices.length; i++) {
     var choice = choices[i];
     var option = $('<option>', {
-      text = choice
+      text: choice
     });
     select.append(choice);
   }
