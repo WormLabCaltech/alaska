@@ -21,7 +21,6 @@ import pandas as pd
 import warnings as w
 import datetime as dt
 from copy import copy
-import openpyxl as opx
 from collections import defaultdict
 from pyunpack import Archive
 from BashWriter import BashWriter
@@ -311,8 +310,6 @@ class AlaskaProject(Alaska):
             for cont in self.meta['contributors']:
                 f.write(format_attribute('Series_contributor', cont))
 
-            f.write(format_attribute('Series_supplementary_file', ''))
-
             for sample_id in self.samples:
                 f.write(format_attribute('Series_sample_id', sample_id))
 
@@ -375,7 +372,7 @@ class AlaskaProject(Alaska):
                 f.write(format_attribute('Sample_raw_file_checksum_run1', ', '.join(md5s)))
                 f.write(format_attribute('Sample_raw_file_read_length_run1', ', '.join(lengths)))
                 f.write(format_attribute('Sample_raw_file_standard_deviation_run1', sample.stdev))
-                f.write(format_attribute('Sample_raw_file_instrument_model_run1', ''))
+                f.write(format_attribute('Sample_raw_file_instrument_model_run1', sample.meta['platform']))
             elif sample.type == 2:
                 pass
 
@@ -397,217 +394,6 @@ class AlaskaProject(Alaska):
             for sample_id, sample in self.samples.items():
                 write_sample(f, sample)
                 f.write('\n')
-
-    def write_geo_submission_form(self):
-        """
-        Writes the geo submission form for this project.
-        """
-        def find_header(sheet, header):
-            """
-            Finds row number of the given header.
-            """
-            for row in sheet.iter_rows(min_row=1, max_col=1):
-                for cell in row:
-                    if cell.value == header:
-                        return cell.row
-
-        def get_series_df():
-            """
-            Get a pandas dataframe for the SERIES category.
-            """
-            rows = []
-            rows.append(['title', self.meta['title']])
-            rows.append(['summary', self.meta['abstract']])
-            rows.append(['overall design', ''])
-
-            for contributor in self.meta['contributors']:
-                rows.append(['contributor', contributor])
-
-            rows.append(['supplementary file', ''])
-            rows.append(['SRA_center_name_code', self.meta['SRA_center_code']])
-
-            return pd.DataFrame(rows, columns=['SERIES', 'values']).set_index('SERIES')
-
-        def get_samples_df():
-            """
-            Gets a pandas dataframe for the SAMPLES category.
-            """
-            rows = []
-
-            # Extract all characteristics and check if PROTOCOLS are the same
-            # across all samples. If they aren't they must be included
-            # as additional columns for each sample.
-            excl_from_chars = [
-                'growth conditions',
-                'library preparation',
-                'sequenced molecules',
-                'miscellaneous'
-            ]
-            chars = []
-            for sample_id, sample in self.samples.items():
-                for char in sample.meta['chars']:
-                    if char not in chars:
-                        chars.append(char)
-
-            headers = [
-                'Sample name',
-                'title',
-                'source name',
-                'organism'
-            ]
-            for char in chars:
-                headers.append('characteristics: ' + char)
-            headers += [
-                'molecule',
-                'description'
-            ]
-
-            # For each header, construct a row.
-            ids = self.samples.keys()
-            ids = sorted(ids)
-            columns = ['SAMPLE'] + ids
-            rows = []
-            for header in headers:
-                row = []
-                row.append(header)
-
-                for sample_id in ids:
-                    sample = self.samples[id]
-
-                    if header == 'Sample name':
-                        row.append(sample.id)
-                    elif header == 'title':
-                        row.append(sample.name)
-                    elif header == 'source name':
-                        row.append(sample.meta['chars']['tissue'])
-                    elif header == 'organism':
-                        row.append(sample.organism.replace('_', ' ').capitalize())
-                    elif header.startswith('characteristics:'):
-                        char = header.split(': ')[1]
-                        row.append(sample.meta['chars'][char])
-                    elif header == 'molecule':
-                        row.append(sample.meta['chars']['sequenced molecules'])
-                    elif header == 'description':
-                        row.append(sample.meta['description'])
-
-                rows.append(row)
-
-            # make df
-            df = pd.DataFrame(rows, columns=columns)
-
-                #
-
-
-
-        def write_series(sheet):
-            """
-            Write data into the SERIES category.
-            """
-            header = 'SERIES'
-            start = find_header(sheet, header)
-
-            # Then, iterate
-            for row in sheet.iter_rows(min_row=start, max_col=2):
-                cells = list(row)
-                cell_1 = cells[0]
-                cell_2 = cells[1]
-
-                # current row number and value
-                row_n = cell_1.row
-                val = cell_1.value
-
-                cont_done = False
-                if val == 'title':
-                    cell_2.value = self.meta['title']
-                elif val == 'summary':
-                    cell_2.value = self.meta['abstract']
-                elif val == 'overall design':
-                    cell_2.value = ''
-                elif val == 'contributor' and not cont_done:
-                    # First, deal with first contributor.
-                    first = self.meta['contributors'][0]
-                    cell_2.value = first
-
-                    # Then, deal with the rest of the contributors.
-                    if len(self.meta['contributors'] > 1):
-                        for cont in self.meta['contributors'][1:]:
-                            row_n += 1
-
-                            # First, make a copy of this row.
-                            contributor_row = [copy(cell_1), copy(cell_2)]
-
-                            # insert a row after this row.
-                            sheet.insert_rows(row_n, amount=1)
-
-                            # Then, add the cells.
-                            contributor_row[0].row = row_n
-                            contributor_row[1].row = row_n
-                            contributor_row[1].value = cont
-                            sheet._add_cell(contributor_row[0])
-                            sheet._add_cell(contributor_row[1])
-
-                    cont_done = True
-
-                elif val == 'supplementary file':
-                    continue
-
-                elif val == 'SRA_center_name_code':
-                    if self.meta['SRA_center_code']:
-                        cell_2.value = self.meta['SRA_center_code']
-
-        def write_samples(sheet):
-            """
-            Write data into the SAMPLES category.
-            """
-            header = 'SAMPLES'
-            start = find_header(sheet, header)
-
-            for row in sheet.iter_rows(min_row=start, max_col=1):
-                cells = list(row)
-                cell = cells[0]
-                val = cell.value
-
-                if val == 'Sample name':
-                    row_n = cell.row
-
-        def write_protocols(sheet):
-            """
-            Write data into the PROTOCOLS category.
-            """
-            pass
-
-        def write_pipeline(sheet):
-            """
-            Write data into the DATA PROCESSING PIPELINE category.
-            """
-            pass
-
-        def write_processed(sheet):
-            """
-            Write data into the PROCESSED DATA FILES category.
-            """
-            pass
-
-        def write_raw(sheet):
-            """
-            Write data into the RAW FILES and PAIRED-END EXPERIMENTS categories.
-            """
-            pass
-
-        # Load template.
-        wb = opx.load_workbook(Alaska.GEO_FILE)
-        sheet = wb['METADATA TEMPLATE']
-
-        # Populate categories.
-        write_series(sheet)
-        write_samples(sheet)
-        write_protocols(sheet)
-        write_pipeline(sheet)
-        write_processed(sheet)
-        write_raw(sheet)
-
-        # Save back.
-        wb.save(Alaska.GEO_FILE)
 
     def save(self, folder=None):
         """

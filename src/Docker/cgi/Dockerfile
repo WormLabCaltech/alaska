@@ -19,10 +19,10 @@ RUN apt-get update && apt-get install -y \
     libapache2-mod-php
 
 ##### Perl Packages #####
-RUN apt-get update && apt-get install -y \
-    libcgi-pm-perl \
-    libjson-perl \
-    libtie-ixhash-perl
+# RUN apt-get update && apt-get install -y \
+#     libcgi-pm-perl \
+#     libjson-perl \
+#     libtie-ixhash-perl
 
 ##### MINICONDA (PYTHON) INSTALLATION #####
 # fetch miniconda installation script
