@@ -408,12 +408,14 @@ class AlaskaServer(Alaska):
                                 proj.progress += 1
 
                                 if job.name == 'qc':
+                                    pass
                                     # Send email.
                                     # subject = 'Quality control finished'
                                     # msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
                                     # if email:
                                     #     self.send_email(email, subject, msg, proj_id)
                                 elif job.name == 'kallisto':
+                                    pass
                                     # subject = 'Alignment and quantification finished'
                                     # msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
                                     # if email:
