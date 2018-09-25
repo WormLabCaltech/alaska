@@ -1880,7 +1880,7 @@ class AlaskaServer(Alaska):
             broadcast_job_info(job)
             self.broadcast(_id, '\n')
 
-        queue_list = list(self.queue)
+        queue_list = list(self.queue.queue)
         if len(queue_list) > 0:
             self.broadcast(_id, ('-' * 10) + 'Queued jobs' + ('-' * 10))
 
