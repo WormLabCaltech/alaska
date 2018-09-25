@@ -43,4 +43,5 @@ class AlaskaSample(Alaska):
         self.meta['contributors'] = []
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
+        self.meta['platform'] = ''
         self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
