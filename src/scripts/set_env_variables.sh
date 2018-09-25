@@ -23,7 +23,7 @@ DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
 DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin/alaska"
 
 # Port mappings & networking.
-DOCKER_CGI_PORT="81:80"
+DOCKER_CGI_PORT="80:80"
 
 # Declare array varables for required images, containers, volumes, and networks.
 declare -a images=(
