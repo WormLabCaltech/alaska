@@ -21,18 +21,18 @@
 
 <body style="background-color:transparent;">
     <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean" id="navbar_nav" style="background-color:#3f6075;">
-        <div class="container"><a class="navbar-brand" href="#" style="color:#ffffff;">WormBase</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div
-                class="collapse navbar-collapse" id="navcol-1">
+        <div class="container"><a class="navbar-brand text-light" href="#">WormBase</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse"
+                id="navcol-1">
                 <ul class="nav navbar-nav ml-auto navbar-right">
-                    <li class="nav-item" role="presentation"><a class="nav-link active" href="#" style="color:#ffffff;">Home</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="#" style="color:#ffffff;">About</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="#" style="color:#ffffff;">FAQ</a></li>
-                    <li class="dropdown"><a class="dropdown-toggle nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#" style="color:#ffffff;">Dropdown </a>
+                    <li class="nav-item" role="presentation"><a class="nav-link active text-light" href="index.html">Home</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="about.html">About</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="faq.html">FAQ</a></li>
+                    <li class="dropdown"><a class="dropdown-toggle nav-link dropdown-toggle text-light" data-toggle="dropdown" aria-expanded="false" href="#">Dropdown </a>
                         <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
                     </li>
                 </ul><span class="ml-auto navbar-text text-white">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span><span class="badge badge-pill badge-info ml-1">alpha</span></span>
-        </div>
+            </div>
         </div>
     </nav>
     <div class="container" id="progress_bar_container" style="margin-top:5em;margin-bottom:2em;display:none"><div class="progress" style="height:1.8em" id="progress_bar">
@@ -44,7 +44,7 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%" id="diff">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%" id="done">Done!</div>
 </div></div>
-    <div class="container" id="progress_container" style="display:none">
+    <div class="container" id="progress_container">
         <div>
             <div class="row">
                 <div class="col">
@@ -59,7 +59,7 @@
         </div>
         <div class="mb-5">
             <div class="row">
-                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="project_status_badge">Queued</span><i class="fas fa-redo ml-2 text-danger" id="retry_btn" style="display:none"></i><button class="btn btn-secondary btn-sm float-right" type="button" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
+                <div class="col"><span class="mr-auto text-white" style="font-size:1.2em;">Project Status:&nbsp;<span class="badge badge-secondary mb-3" id="project_status_badge">Queued</span><i class="fas fa-redo ml-2 text-danger" id="retry_btn" style="display:none"></i><button class="btn btn-secondary btn-sm float-right" type="button" id="all_download_btn" disabled><i class="fas fa-download mr-1"></i>Download all results</button></span>
                 </div>
             </div>
             <div class="row">
@@ -167,7 +167,7 @@
         </div>
     </div>
 </div></div>
-    <div class="container" id="meta_container" style="display:none">
+    <div class="container" id="meta_container">
         <div id="proj_meta_header">
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col">
@@ -193,7 +193,7 @@
         <small id="proj_id_help" class="form-text text-muted mb-4">The automatically generated ID associated with this project.</small>
         <form novalidate>
             <div class="form-group row proj_title_group">
-                <div class="col-sm-3">
+                <div class="col-sm-4">
                     <label for="proj_title" class="col-form-label">Title</label>
                     <small id="proj_title_help" class="form-text text-muted">Title of your project or paper.</small>
                 </div>
@@ -202,16 +202,16 @@
                 </div>
             </div>
             <div class="form-group row proj_abstract_group">
-                <div class="col-sm-3">
+                <div class="col-sm-4">
                     <label for="proj_abstract" class="col-form-label">Abstract</label>
                     <small id="proj_abstract_help" class="form-text text-muted">A brief description of the project, its intended findings, genotypes used, etc.</small>
                 </div>
-                <div class="col-sm-9">
+                <div class="col-sm-8">
                     <textarea class="form-control" id="proj_abstract" rows="3" required></textarea>
                 </div>
             </div>
             <div class="form-group row proj_corresponding_group">
-                <div class="col-sm-3">
+                <div class="col-sm-4">
                     <label for="proj_corresponding_name" class="col-form-label">Corresponding contributor</label>
                     <small id="proj_corresponding_name_help" class="form-text text-muted">The full name of an individual who should be contacted regarding the project files.</small>
                 </div>
@@ -220,7 +220,7 @@
                 </div>
             </div>
             <div class="form-group row proj_corresponding_email_group">
-                <div class="col-sm-3">
+                <div class="col-sm-4">
                     <label for="proj_corresponding_email" class="col-form-label">Email</label>
                     <small id="proj_corresponding_email_help" class="form-text text-muted">Please input the email of the corresponding contributor. This email will also be used to contact you when the analysis is finished.</small>
                 </div>
@@ -229,9 +229,9 @@
                 </div>
             </div>
             <div class="form-group row proj_contributors_group">
-                <div class="col-sm-3">
+                <div class="col-sm-4">
                     <legend class="col-form-label">Contributors</legend>
-                    <small class="form-text text-muted">The full name of all of the individuals or consortiums associated with this project EXCLUDING THE CORRESPONDING AUTHOR.</small>
+                    <small class="form-text text-muted">The full name "First,Initial,Last" of all of the individuals or consortiums associated with this project EXCLUDING THE CORRESPONDING AUTHOR.</small>
                 </div>
                 <div class="col contributors_inputs">
                     <div class="d-flex contributor_row">
@@ -572,6 +572,23 @@
                     </div>
                 </div>
                 <hr>
+                <div class="form-group row sample_sequencing_platform_group">
+                    <div class="col-sm-1">
+                        <div class="custom-control custom-checkbox my-1 mr-sm-2">
+                            <input type="checkbox" id="sample_sequencing_platform_checkbox" class="custom-control-input" checked>
+                            <label for="sample_sequencing_platform_checkbox" class="custom-control-label"></label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 pl-0">
+                        <label for="sample_share_sequencing_platform" class="col-form-label">Sequencing platform</label>
+                        <small id="sample_share_sequencing_platform_help" class="form-text text-muted">Please select the sequencing platform you used.</small>
+                    </div>
+                    <div class="col-sm-4">
+                        <select class="custom-select sample_sequencing_platform_select" id="sample_share_sequencing_platform" required>
+                            <option selected disabled hidden value="">Please select a sequencing platform.</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group row sample_sequenced_molecules_group">
                     <div class="col-sm-1">
                         <div class="custom-control custom-checkbox my-1 mr-sm-2">
@@ -1079,7 +1096,7 @@
                 </div>
                 <hr />
                 <div class="modal-title" id="design_description">
-                    <h5 id="choose_controls_header">This project is a FACTOR design.</h5>
+                    <h5 class="choose_controls_header">This project is a FACTOR design.</h5>
                 </div>
                 <form class="proj_control_form">
                     <div class="form-group proj_control_group" style="display:none">

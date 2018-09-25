@@ -169,9 +169,10 @@ function goto_progress(status) {
     };
     var btn = $(this);
     var spinner = btn.children('div:last');
+    var width = btn.width();
     set_loading_spinner(btn, spinner);
     var callback = parse_sleuth_server;
-    send_ajax_request(target, data, callback, true, btn, spinner);
+    send_ajax_request(target, data, callback, true, btn, spinner, width);
   });
 
   // Set output listeners for live output.
@@ -2107,6 +2108,16 @@ function set_custom_listener(select) {
   select.change(enable_custom_input);
 }
 
+function set_dropdown(select, choices) {
+  for (var i = 0; i < choices.length; i++) {
+    var choice = choices[i];
+    var option = $('<option>', {
+      text = choice
+    });
+    select.append(choice);
+  }
+}
+
 /**
  * Sets dropdown and text area wehre if the user selects 'other', the text
  * area is enabled..
@@ -2853,12 +2864,14 @@ function set_shared_inputs(form, cb) {
   var lifestage_dropdown = form.find('.sample_life-stage_inputs');
   var tissue_dropdown = form.find('.sample_tissue_inputs');
   var chars_inputs = form.find('.sample_characteristics_inputs');
+  var sequencing_platform_dropdown = form.find('.sample_sequencing_platform_select')
   var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_inputs');
 
   set_organisms_select(organism_select, cb);
   set_custom_dropdown(lifestage_dropdown, life_stages);
   set_custom_dropdown(tissue_dropdown, tissues);
   set_fluid_input_rows(chars_inputs);
+  set_dropdown(sequencing_platform_dropdown, sequencing_platforms);
   set_custom_dropdown(sequenced_molecules_dropdown, sequenced_molecules);
 
   // Then, set up div toggle for single-end reads, which need read lenght and
@@ -3339,6 +3352,7 @@ var common_meta_classes_to_functions = {
   'sample_life-stage_group': 'group_custom_dropdown',
   sample_tissue_group: 'group_custom_dropdown',
   sample_characteristics_group: 'group_fluid_rows',
+  sample_sequencing_platform_group: 'group_dropdown',
   sample_sequenced_molecules_group: 'group_custom_dropdown',
   sample_read_type_group: 'read_type'
 };
@@ -3591,6 +3605,7 @@ function validate_common_meta_inputs(inputs, common_form) {
         case 'sample_life-stage_group':
         case 'sample_tissue_group':
         case 'sample_sequenced_molecules_group':
+        case 'sample_sequencing_platform_group':
           if (val == null || val == '') {
             form_inputs.addClass('is-invalid');
             valid = false;
@@ -4067,6 +4082,10 @@ function convert_sample_meta_inputs(card) {
 
       case 'sample_rna_extraction_group':
         obj.meta.chars['rna extraction'] = input;
+        break;
+
+      case 'sample_sequencing_platform_group':
+        obj.meta['platform'] = input;
         break;
 
       case 'sample_sequenced_molecules_group':
@@ -5487,26 +5506,27 @@ function parse_output_textarea(out, textarea) {
   textarea.scrollTop(textarea[0].scrollHeight);
 }
 
-function parse_sleuth_server(out, btn, spinner) {
+function parse_sleuth_server(out, btn, spinner, width) {
   var split = out.split('\n');
   var line = split[split.length - 3];
   var split2 = line.split(' ');
   var port = parseInt(split2[split2.length - 1]);
 
-  function open_sleuth_window(port, btn, spinner) {
+  function open_sleuth_window(port, btn, spinner, width) {
     console.log(port);
 
     btn.prop('disabled', false);
     spinner.hide();
+    btn.width(width);
 
     var url = 'http://' + window.location.hostname + ':' + port + '/';
     window.open(url, '_blank');
   }
 
   if (out.includes('already open')) {
-    open_sleuth_window(port, btn, spinner);
+    open_sleuth_window(port, btn, spinner, width);
   } else {
-    setTimeout(open_sleuth_window, 8000, port, btn, spinner);
+    setTimeout(open_sleuth_window, 8000, port, btn, spinner, width);
   }
 }
 
@@ -5597,7 +5617,46 @@ var life_stages = [
 var tissues = [
   'Whole Organism (Multi-worm)',
   'Whole Organism (Single worm)',
-  'Dissected Tissue'
+];
+var sequencing_platforms = [
+  'Illumina Genome Analyzer',
+  'Illumina Genome Analyzer II',
+  'Illumina Genome Analyzer IIx',
+  'Illumina HiSeq 2500',
+  'Illumina HiSeq 2000',
+  'Illumina HiSeq 1500',
+  'Illumina HiSeq 1000',
+  'Illumina MiSeq',
+  'Illumina HiScanSQ',
+  'Illumina NextSeq 500',
+  'NextSeq 500',
+  'HiSeq X Ten',
+  'HiSeq X Five',
+  'Illumina HiSeq 3000',
+  'Illumina HiSeq 4000',
+  'NextSeq 550',
+  // AB SOLiD System
+  // AB SOLiD System 2.0
+  // AB SOLiD System 3.0
+  // AB SOLiD 3 Plus System
+  // AB SOLiD 4 System
+  // AB SOLiD 4hq System
+  // AB SOLiD PI System
+  'AB 5500 Genetic Analyzer',
+  'AB 5500xl Genetic Analyzer',
+  'AB 5500xl-W Genetic Analysis System',
+  '454 GS',
+  '454 GS 20',
+  '454 GS FLX',
+  '454 GS FLX+',
+  '454 GS Junior',
+  '454 GS FLX Titanium',
+  'Helicos HeliScope',
+  'PacBio RS',
+  'PacBio RS II',
+  'Complete Genomics',
+  'Ion Torrent PGM',
+  'Ion Torrent Proton',
 ];
 var sequenced_molecules = [
   'Poly-A Purified',
@@ -5605,15 +5664,6 @@ var sequenced_molecules = [
   'Tissue-specific tagged poly-A RNA',
   'Tissue-specific tagged total RNA'
 ];
-var proj_meta_inputs = {
-  'proj_title_group': get_value_from_group_textbox,
-  'proj_abstract_group': get_value_from_group_textarea,
-  'proj_corresponding_group': get_value_from_group_textbox,
-  'proj_corresponding_email_group': get_value_from_group_textbox,
-  'proj_contributors_group': get_values_from_fluid_rows,
-  'proj_sra_center_code_group': get_value_from_group_textbox,
-  'proj_experimental_design_group': ''
-};
 var sample_common_meta_inputs = {
 
 };
@@ -5635,6 +5685,8 @@ var common_meta_order = [
   'sample_read_type_group',
   'sample_specific_characteristics_group'
 ];
+
+
 
 var test_proj_inputs = {
     "proj_title_group": "test title",
@@ -5894,41 +5946,51 @@ var testing = false;
 
 // To run when page is loaded.
 $(document).ready(function() {
-  url_params = get_url_params();
-  console.log(url_params);
-  // If we are given an id, we need to resume where we left off with that project.
-  if (url_params.has('id')) {
-    proj_id = url_params.get('id');
+  var pathname = window.location.pathname;
+  // Do these only if we are at the home page.
+  if (pathname.includes('about.html')) {
 
-    // Go to whatever step we need to go to.
-    get_proj_status();
-  }
+  } else if (pathname.includes('faq.html')) {
 
-  if (url_params.has('testing')) {
-    if (url_params.get('testing') == 'true') {
-      console.log('testing: true');
-      testing = true;
+  } else {
+    // Otherwise, assume we are at home.
+    url_params = get_url_params();
+    console.log(url_params);
+    // If we are given an id, we need to resume where we left off with that project.
+    if (url_params.has('id')) {
+      proj_id = url_params.get('id');
+
+      // Go to whatever step we need to go to.
+      get_proj_status();
     }
-    // Enable all testing elements.
-    $('.testing').show();
+
+    if (url_params.has('testing')) {
+      if (url_params.get('testing') == 'true') {
+        console.log('testing: true');
+        testing = true;
+      }
+      // Enable all testing elements.
+      $('.testing').show();
+    }
+
+    // initialize tooltips
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    // initialize popovers
+    $(function () {
+      $('[data-toggle="popover"]').popover()
+    })
+
+    // Add on click handler for start project button.
+    $('#new_proj_btn').click(new_proj);
+
+    raw_reads_div = $('#raw_reads_div').clone(true);
+    controls_modal = $('#choose_controls_modal').clone(true);
+
+    // Fetch server status.
+    get_server_status();
+
   }
-
-  // initialize tooltips
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  });
-
-  // initialize popovers
-  $(function () {
-    $('[data-toggle="popover"]').popover()
-  })
-
-  // Add on click handler for start project button.
-  $('#new_proj_btn').click(new_proj);
-
-  raw_reads_div = $('#raw_reads_div').clone(true);
-  controls_modal = $('#choose_controls_modal').clone(true);
-
-  // Fetch server status.
-  get_server_status();
 });

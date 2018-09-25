@@ -40,8 +40,8 @@ RUN add-apt-repository \
 RUN apt-get update && apt-get install -y \
     docker-ce
 
-# install pyunpack, docker & openpyxl
-RUN pip install docker && pip install patool && pip install pyunpack && pip install openpyxl
+# install pyunpack, docker
+RUN pip install docker && pip install patool && pip install pyunpack
 
 # Set up working directory
 WORKDIR /alaska/scripts
