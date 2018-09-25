@@ -5988,9 +5988,8 @@ $(document).ready(function() {
     raw_reads_div = $('#raw_reads_div').clone(true);
     controls_modal = $('#choose_controls_modal').clone(true);
 
+    // Fetch server status.
+    get_server_status();
   }
-
-  // Fetch server status.
-  get_server_status();
 
 });

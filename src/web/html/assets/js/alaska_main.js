@@ -5686,8 +5686,6 @@ var common_meta_order = [
   'sample_specific_characteristics_group'
 ];
 
-
-
 var test_proj_inputs = {
     "proj_title_group": "test title",
     "proj_abstract_group": "test abstract",
@@ -5739,6 +5737,7 @@ var test_common_inputs = {
             "shared characteristic 2 value"
         ]
     ],
+    "sample_sequencing_platform_group": "Illumina Genome Analyzer",
     "sample_sequenced_molecules_group": "Total RNA",
     "sample_read_type_group": {
         "type": 1,
@@ -5989,9 +5988,8 @@ $(document).ready(function() {
     raw_reads_div = $('#raw_reads_div').clone(true);
     controls_modal = $('#choose_controls_modal').clone(true);
 
+    // Fetch server status.
+    get_server_status();
   }
-
-  // Fetch server status.
-  get_server_status();
 
 });
