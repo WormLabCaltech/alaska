@@ -2114,7 +2114,7 @@ function set_dropdown(select, choices) {
     var option = $('<option>', {
       text: choice
     });
-    select.append(choice);
+    select.append(option);
   }
 }
 
@@ -2864,14 +2864,14 @@ function set_shared_inputs(form, cb) {
   var lifestage_dropdown = form.find('.sample_life-stage_inputs');
   var tissue_dropdown = form.find('.sample_tissue_inputs');
   var chars_inputs = form.find('.sample_characteristics_inputs');
-  var sequencing_platform_dropdown = form.find('.sample_sequencing_platform_select')
+  var sequencing_platform_select = form.find('.sample_sequencing_platform_select')
   var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_inputs');
 
   set_organisms_select(organism_select, cb);
   set_custom_dropdown(lifestage_dropdown, life_stages);
   set_custom_dropdown(tissue_dropdown, tissues);
   set_fluid_input_rows(chars_inputs);
-  set_dropdown(sequencing_platform_dropdown, sequencing_platforms);
+  set_dropdown(sequencing_platform_select, sequencing_platforms);
   set_custom_dropdown(sequenced_molecules_dropdown, sequenced_molecules);
 
   // Then, set up div toggle for single-end reads, which need read lenght and
