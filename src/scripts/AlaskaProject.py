@@ -288,7 +288,46 @@ class AlaskaProject(Alaska):
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)\
 
-    def write_soft(self):
+    def prepare_submission(self):
+        """
+        Prepares files for GEO submission.
+        """
+        # Make a new archive.
+        geo_arch = '{}/{}'.format(self.dir, Alaska.GEO_ARCH)
+        with tarfile.open(geo_arch, 'w:gz') as tar:
+            for sample_id, sample in self.samples.items():
+                name = sample.name
+
+                for path in sample.reads:
+                    full_path = '{}/{}'.format(self.dir, path)
+                    basename = os.path.basename(path)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                    tar.add(full_path, arcname=arcname)
+
+                # deal with kallisto outputs
+                kal_dir = '{}/{}'.format(self.align_dir, name)
+                for file in os.listdir(kal_dir):
+                    full_path = '{}/{}'.format(kal_dir, file)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), file)
+                    tar.add(full_path, arcname=arcname)
+
+            # Add differential expression results.
+            for file in self.diff_dir:
+                if not file.endswith(('out.txt', '.rds', '.R')):
+                    full_path = '{}/{}'.format(self.diff_dir, file)
+                    arcname = file
+                    tar.add(full_path, arcname=arcname)
+
+            # Then, write the SOFT format seq_info.txt
+            out = 'seq_info.txt'
+            write_soft(out)
+
+            # Add the softfile.
+            full_path = '{}/{}'.format(self.dir, out)
+            tar.add(full_path, arcname=out)
+
+
+    def write_soft(self, out='seq_info.txt'):
         """
         Writes project in SOFT format for GEO submission.
         """
@@ -317,7 +356,7 @@ class AlaskaProject(Alaska):
             diff_files = os.listdir(self.diff_dir)
             for diff_file in diff_files:
                 if not diff_file.endswith(('out.txt', '.rds', '.R')):
-                    supplementary.append('{}/{}'.format(Alaska.DIFF_DIR, diff_file))
+                    supplementary.append(diff_file)
 
             for file in supplementary:
                 f.write(format_attribute('Series_supplementary_file', file))
@@ -360,9 +399,11 @@ class AlaskaProject(Alaska):
                 lengths = []
 
                 for path, read in sample.reads.items():
-                    fname = os.path.basename(path)
-                    ext = os.path.splitext(fname)[1]
-                    files.append(path)
+                    name = sample.name
+                    basename = os.path.basename(path)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                    ext = os.path.splitext(basename)[1]
+                    files.append(arcname)
                     types.append(ext)
                     md5s.append(read['md5'])
                     lengths.append(str(sample.length))
@@ -370,24 +411,46 @@ class AlaskaProject(Alaska):
                 f.write(format_attribute('Sample_raw_file_name_run1', ', '.join(files)))
                 f.write(format_attribute('Sample_raw_file_type_run1', ', '.join(types)))
                 f.write(format_attribute('Sample_raw_file_checksum_run1', ', '.join(md5s)))
+                f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'single'))
                 f.write(format_attribute('Sample_raw_file_read_length_run1', ', '.join(lengths)))
                 f.write(format_attribute('Sample_raw_file_standard_deviation_run1', sample.stdev))
                 f.write(format_attribute('Sample_raw_file_instrument_model_run1', sample.meta['platform']))
             elif sample.type == 2:
-                pass
+                # we need to add a new run for each pair.
+                for i in range(len(sample.pairs)):
+                    run = str(i + 1)
+                    pair = sample.pairs[i]
+                    read_1 = pair[0]
+                    read_2 = pair[1]
+                    files = []
+                    types = []
+                    md5s = []
+
+                    for read in pair:
+                        name = sample.name
+                        basename = os.path.basename(read)
+                        arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                        ext = os.path.splitext(basename)[1]
+                        files.append(arcname)
+                        types.append(ext)
+                        md5s.append(sample.reads[read])
+
+                    f.write(format_attribute('Sample_raw_file_name_run' + run, ', '.join(files)))
+                    f.write(format_attribute('Sample_raw_file_type_run' + run, ', '.join(types)))
+                    f.write(format_attribute('Sample_raw_file_checksum_run' + run, ', '.join(md5s)))
+                    f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'paired-end'))
+                    f.write(format_attribute('Sample_raw_file_instrument_model_run' + run, sample.meta['platform']))
+
 
             # write processed data files.
-            processed = []
             quant_path = '{}/{}'.format(self.align_dir, sample.name)
-
             quant_files = os.listdir(quant_path)
             for quant_file in quant_files:
-                processed.append('{}/{}/{}'.format(Alaska.ALIGN_DIR, sample.name, quant_file))
+                name = sample.name
+                arcname = '{}_{}'.format(name.replace(' ', '_'), quant_file)
+                f.write(format_attribute('Sample_processed_data_file', arcname))
 
-            for processed_file in processed:
-                f.write(format_attribute('Sample_processed_data_file', processed_file))
-
-        with open('{}/seq_info.txt'.format(self.dir), 'w') as f:
+        with open('{}/{}'.format(self.dir, out), 'w') as f:
             write_series(f)
             f.write('\n')
 

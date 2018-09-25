@@ -161,16 +161,17 @@ def run_qc(proj, nthreads):
         """
         args = ['bowtie2', '-x', bt2_path]
 
+        # single/paired-end
         if t == 1:
             args += ['-U', ','.join(reads)]
-        else:
-            pair1 = []
-            pair2 = []
+        elif t == 2:
+            m1 = []
+            m2 = []
             for pair in reads:
-                pair1.append(pair[0])
-                pair2.append(pair[1])
-            args += ['-1', ','.join(pair1)]
-            args += ['-2', ','.join(pair2)]
+                m1.append(pair[0])
+                m2.append(pair[1])
+            args += ['-1', ','.join(m1)]
+            args += ['-2', ','.join(m2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
         args += ['-u', str(1 * (10 ** 5))]
@@ -249,20 +250,14 @@ def run_qc(proj, nthreads):
         bt2_idx = '{}_{}_{}'.format(org[0][0], org[1], ver)
         bt2_path = '/alaska/root/organisms/{}/{}/{}/index/{}'.format(org[0], org[1], ver, bt2_idx)
 
-        # get all the raw reads for this sample
-        reads = []
-        # finally, add the sample reads
-        for read in proj['samples'][_id]['reads']:
-            reads.append(read)
-
         # Align with bowtie2
         if (proj['samples'][_id]['type'] == 1):
-            bowtie2(name, path, bt2_path, reads, 1)
+            reads = proj['samples'][_id]['reads'].keys()
         elif (proj['samples'][_id]['type'] == 2):
-            # TODO: implement
-            pass
+            reads = proj['samples'][_id]['pairs']
         else:
             print_with_flush('unrecognized sample type!')
+        bowtie2(name, path, bt2_path, reads, proj['samples'][_id]['type'])
 
         os.chdir(path)
         print_with_flush('# changed working directory to {}'.format(path))
@@ -357,17 +352,18 @@ def run_kallisto(proj, nthreads):
             length = proj['samples'][_id]['length']
             stdev = proj['samples'][_id]['stdev']
             arg = ['--single', '-l', str(length), '-s', str(stdev)]
+            args += arg
+
+            # finally, add the sample reads
+            for read in proj['samples'][_id]['reads']:
+                args.append(read)
 
         elif (proj['samples'][_id]['type'] == 2):
-            # TODO: implement
-            pass
+            for pair in proj['samples'][_id]['pairs']:
+                args.append(pair[0])
+                args.append(pair[1])
         else:
             print_with_flush('unrecognized sample type!')
-        args += arg
-
-        # finally, add the sample reads
-        for read in proj['samples'][_id]['reads']:
-            args.append(read)
 
         _id = name
 

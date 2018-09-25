@@ -342,27 +342,27 @@ class AlaskaServer(Alaska):
                         out_dir = proj.qc_dir
 
                         if email:
-                            subject = 'Quality control started'
-                            msg = 'Alaska has started quality control for project {}.'.format(proj_id)
+                            subject = 'Analysis started'
+                            msg = 'Alaska has started analysis of project {}.'.format(proj_id)
                             self.send_email(email, subject, msg, proj_id)
 
                     elif job.name == 'kallisto':
                         proj.progress = Alaska.PROGRESS['quant_started']
                         out_dir = proj.align_dir
 
-                        if email:
-                            subject = 'Alignment and quantification started'
-                            msg = 'Alaska has started read alignment and quantification for project {}.'.format(proj_id)
-                            self.send_email(email, subject, msg, proj_id)
+                        # if email:
+                        #     subject = 'Alignment and quantification started'
+                        #     msg = 'Alaska has started read alignment and quantification for project {}.'.format(proj_id)
+                        #     self.send_email(email, subject, msg, proj_id)
 
                     elif job.name == 'sleuth':
                         proj.progress = Alaska.PROGRESS['diff_started']
                         out_dir = proj.diff_dir
 
-                        if email:
-                            subject = 'Differential expression analysis started'
-                            msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
-                            self.send_email(email, subject, msg, proj_id)
+                        # if email:
+                        #     subject = 'Differential expression analysis started'
+                        #     msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
+                        #     self.send_email(email, subject, msg, proj_id)
                     else:
                         self.out('ERROR: job {} has unrecognized name'.format(job.id))
 
@@ -409,19 +409,19 @@ class AlaskaServer(Alaska):
 
                                 if job.name == 'qc':
                                     # Send email.
-                                    subject = 'Quality control finished'
-                                    msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
-                                    if email:
-                                        self.send_email(email, subject, msg, proj_id)
+                                    # subject = 'Quality control finished'
+                                    # msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
+                                    # if email:
+                                    #     self.send_email(email, subject, msg, proj_id)
                                 elif job.name == 'kallisto':
-                                    subject = 'Alignment and quantification finished'
-                                    msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
-                                    if email:
-                                        self.send_email(email, subject, msg, proj_id)
+                                    # subject = 'Alignment and quantification finished'
+                                    # msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
+                                    # if email:
+                                    #     self.send_email(email, subject, msg, proj_id)
 
                                 elif job.name == 'sleuth':
-                                    subject = 'Differential expression analysis finished'
-                                    msg = 'Alaska has finished differential expression analysis for project {}.'.format(proj_id)
+                                    subject = 'Analysis finished'
+                                    msg = 'Alaska has finished analysis of project {}.'.format(proj_id)
                                     if email:
                                         self.send_email(email, subject, msg, proj_id)
 
