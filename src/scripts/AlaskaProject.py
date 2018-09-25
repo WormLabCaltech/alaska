@@ -17,6 +17,7 @@ __status__ = "alpha"
 
 import os
 import json
+import tarfile
 import pandas as pd
 import warnings as w
 import datetime as dt
