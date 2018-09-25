@@ -21,18 +21,16 @@
 
 <body style="background-color:transparent;">
     <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean" id="navbar_nav" style="background-color:#3f6075;">
-        <div class="container"><a class="navbar-brand text-light" href="#">WormBase</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse"
-                id="navcol-1">
+        <div class="container"><a class="navbar-brand text-light" href="https://wormbase.org" target="_blank">WormBase</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div
+                class="collapse navbar-collapse" id="navcol-1">
                 <ul class="nav navbar-nav ml-auto navbar-right">
                     <li class="nav-item" role="presentation"><a class="nav-link active text-light" href="index.html">Home</a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link text-light" href="about.html">About</a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link text-light" href="faq.html">FAQ</a></li>
-                    <li class="dropdown"><a class="dropdown-toggle nav-link dropdown-toggle text-light" data-toggle="dropdown" aria-expanded="false" href="#">Dropdown </a>
-                        <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
-                    </li>
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="contact.html">Contact us</a></li>
                 </ul><span class="ml-auto navbar-text text-white">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge">Loading...</span><span class="badge badge-pill badge-info ml-1">alpha</span></span>
-            </div>
+        </div>
         </div>
     </nav>
     <div class="container" id="progress_bar_container" style="margin-top:5em;margin-bottom:2em;display:none"><div class="progress" style="height:1.8em" id="progress_bar">
@@ -194,7 +192,7 @@
         <form novalidate>
             <div class="form-group row proj_title_group">
                 <div class="col-sm-4">
-                    <label for="proj_title" class="col-form-label">Title</label>
+                    <label for="proj_title" class="col-form-label">Title<span class="text-danger">*</span></label>
                     <small id="proj_title_help" class="form-text text-muted">Title of your project or paper.</small>
                 </div>
                 <div class="col-sm-3">
@@ -203,7 +201,7 @@
             </div>
             <div class="form-group row proj_abstract_group">
                 <div class="col-sm-4">
-                    <label for="proj_abstract" class="col-form-label">Abstract</label>
+                    <label for="proj_abstract" class="col-form-label">Abstract<span class="text-danger">*</span></label>
                     <small id="proj_abstract_help" class="form-text text-muted">A brief description of the project, its intended findings, genotypes used, etc.</small>
                 </div>
                 <div class="col-sm-8">
@@ -212,7 +210,7 @@
             </div>
             <div class="form-group row proj_corresponding_group">
                 <div class="col-sm-4">
-                    <label for="proj_corresponding_name" class="col-form-label">Corresponding contributor</label>
+                    <label for="proj_corresponding_name" class="col-form-label">Corresponding contributor<span class="text-danger">*</span></label>
                     <small id="proj_corresponding_name_help" class="form-text text-muted">The full name of an individual who should be contacted regarding the project files.</small>
                 </div>
                 <div class="col-sm-3">
@@ -221,7 +219,7 @@
             </div>
             <div class="form-group row proj_corresponding_email_group">
                 <div class="col-sm-4">
-                    <label for="proj_corresponding_email" class="col-form-label">Email</label>
+                    <label for="proj_corresponding_email" class="col-form-label">Email<span class="text-danger">*</span></label>
                     <small id="proj_corresponding_email_help" class="form-text text-muted">Please input the email of the corresponding contributor. This email will also be used to contact you when the analysis is finished.</small>
                 </div>
                 <div class="col-sm-3">
@@ -257,7 +255,7 @@
             <hr>
             <div class="form-group row proj_experimental_design_group">
                 <div class="col-sm-3">
-                    <legend class="col-form-label pt-0">Experimental design</legend>
+                    <legend class="col-form-label pt-0">Experimental design<span class="text-danger">*</span></legend>
                     <small id="proj_design_help" class="form-text text-muted">Hover your mouse on each choice to learn more. A minimum of 8 samples are required for 2-factor design.</small>
                 </div>
                 <div class="col-sm-9 experimental_design_inputs">
@@ -274,7 +272,7 @@
                         <div class="card-body">
                             <div class="form-group row factor_name_group">
                                 <div class="col-sm-4">
-                                    <legend class="col-form-label">Name</legend>
+                                    <legend class="col-form-label">Name<span class="text-danger">*</span></legend>
                                     <small class="form-text text-muted">Leave blank if you don’t have one.</small>
                                 </div>
                                 <div class="col d-flex factor_name_inputs">
@@ -289,7 +287,7 @@
                             </div>
                             <div class="form-group row factor_values_group">
                                 <div class="col-sm-4">
-                                    <legend class="col-form-label">All possible values</legend>
+                                    <legend class="col-form-label">All possible values<span class="text-danger">*</span></legend>
                                     <small class="form-text text-muted">Leave blank if you don’t have one.</small>
                                 </div>
                                 <div class="col factor_values_inputs">
@@ -392,7 +390,7 @@
         </div>
         <div class="card-body" id="sample_common_form">
             <h4 class="card-title">Please select and fill out the metadata that are shared by all of your samples.</h4>
-            <p class="card-text mb-5">Checked inputs will be automatically applied to all samples.</p>
+            <p class="card-text mb-5">Checked inputs will be automatically applied to all samples. All the fields here are required, either as shared metadata (by activating the checkbox) or sample-specific metadata (by deactivating the checkbox).</p>
             <form novalidate class="common_sample_meta_form">
                 <div class="form-group row sample_genotype_group">
                     <div class="col-sm-1">
@@ -701,7 +699,7 @@
                     </div>
                     <div class="form-group row sample_description_group">
                         <div class="col-sm-3">
-                            <label for="sample_description_SAMPLEID" class="col-form-label">Description</label>
+                            <label for="sample_description_SAMPLEID" class="col-form-label">Description<span class="text-danger">*</span></label>
                             <small id="sample_description_SAMPLEID_help" class="form-text text-muted">Sample description.</small>
                         </div>
                         <div class="col-sm-7">
@@ -709,7 +707,7 @@
                         </div>
                     </div>
                     <div class="card mb-4 sample_factors_card">
-                        <h5 class="card-header alert-dark">Factors</h5>
+                        <h5 class="card-header alert-dark">Factors<span class="text-danger">*</span></h5>
                         <div class="card-body">
                             <form novalidate>
                                 <div class="form-group row sample_factors_1_group">
