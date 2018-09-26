@@ -59,6 +59,8 @@ class Alaska():
     FTP_SIZE_LIMIT = 20000 # limit to transfer size (in MB)
     FTP_COUNT_LIMIT = 1000 # limit to number of files
     RAW_DIR = '0_raw_reads' # raw reads directory name
+    RAW_NOTIFY = 7 # notify after 7 days
+    RAW_DURATION = 10 # keep reads for a max 10 days
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
     # archives that patool can unpack
     # patool supports 7z (.7z, .cb7), ACE (.ace, .cba), ADF (.adf), ALZIP (.alz),

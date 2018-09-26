@@ -1915,7 +1915,7 @@ class AlaskaServer(Alaska):
                 try:
                     ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
                     if ftp.status != 'running':
-                        self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+                        self.out('WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
 
                     cmd = 'pure-pw userdel {}'.format(fname)
                     out = ftp.exec_run(cmd)
@@ -1923,7 +1923,27 @@ class AlaskaServer(Alaska):
                     cmd = 'pure-pw mkdb'
                     out = ftp.exec_run(cmd)
                 except docker.errors.NotFound as e:
-                    self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+                    self.out('WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+                except:
+                    traceback.print_exc()
+
+        self.out('INFO: cleaning up raw reads')
+        for proj_id, proj in self.projects.items():
+            email = proj.meta['corresponding']['email']
+            delta = dt.datetime.now() - proj.meta['datetime']
+            seconds = delta.total_seconds()
+            minutes = seconds / 60
+            hours = minutes / 60
+            days = hours / 24
+
+            if days > Alaska.RAW_DURATION:
+                self.out('INFO: cleaning up raw reads for project {}'.format(proj_id))
+                shutil.rmtree(proj.raw_dir)
+            elif days > Alaska.RAW_NOTIFY and email:
+                self.out('INFO: sending notification for project {}'.format(proj_id))
+                subject = 'Raw read removal notification'
+                msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_DURATION - Alaska.RAW_NOTIFY)
+                self.send_email(email, subject, msg, proj_id)
 
         # Then, deal with jobs.
         self.out('INFO: cleaning up jobs')
