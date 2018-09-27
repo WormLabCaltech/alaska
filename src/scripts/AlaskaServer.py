@@ -1734,6 +1734,7 @@ class AlaskaServer(Alaska):
             host = loaded['ftp_host']
             uname = loaded['ftp_username']
             passwd = loaded['ftp_password']
+            fname = '{}_files.tar.gz'.format(geo_uname)
 
         proj.progress = Alaska.PROGRESS['geo_submitting']
         # proj.submit_geo(fname, host, uname, passwd)
