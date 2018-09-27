@@ -464,8 +464,6 @@ class AlaskaProject(Alaska):
         """
         Submit compiled geo submission to geo.
         """
-        def handle(block):
-            print('{} transferred'.format(block))
         # Open a new FTP connection.
         try:
             conn = ftplib.FTP(host, uname, passwd)
