@@ -44,4 +44,4 @@ class AlaskaSample(Alaska):
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
         self.meta['platform'] = ''
-        self.meta['datetime'] = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
+        self.datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)

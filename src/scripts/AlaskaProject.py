@@ -66,7 +66,7 @@ class AlaskaProject(Alaska):
         self.meta['contributors'] = []
         self.meta['SRA_center_code'] = ''
         # end from GEO submission template
-        self.meta['datetime'] = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
+        self.datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
     def fetch_reads(self):
         """

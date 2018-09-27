@@ -225,7 +225,7 @@ class AlaskaServer(Alaska):
 
             self.stop(code=1)
 
-    def stop(self, _id=None, code=0):
+    def stop(self, _id=None, code=0, save=True, log=True):
         """
         Stops the server.
         """
@@ -282,12 +282,14 @@ class AlaskaServer(Alaska):
                     self.out('ERROR: error while terminating container')
                     traceback.print_exc()
 
-            self.save()
+            if save:
+                self.save()
 
             if not code == 0:
                 self.out('TERMINATED WITH EXIT CODE {}'.format(code))
 
-            self.log() # write all remaining logs
+            if log:
+                self.log() # write all remaining logs
 
             os.remove('../_running')
 
@@ -1994,6 +1996,29 @@ class AlaskaServer(Alaska):
 
         if close:
             self.close(_id)
+
+    def reset(self, _id=None, close=True):
+        """
+        Resets the server to initial state.
+        """
+        if _id is not None and close:
+            self.close(_id)
+
+        folders_to_empty = [
+            Alaska.PROJECTS_DIR,
+            Alaska.JOBS_DIR,
+            Alaska.LOG_DIR,
+            Alaska.SAVE_DIR
+        ]
+
+        for folder in folders_to_empty:
+            for fname in os.listdir(folder):
+                path = '{}/{}'.format(folder, fname)
+                shutil.rmtree(path, ignore_errors=True)
+                self.out('INFO: removed {}'.format(path))
+
+        # Stop without saving or logging.
+        self.stop(save=False, log=False)
 
     def cleanup(self, _id=None, close=True):
         """
