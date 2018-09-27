@@ -464,12 +464,14 @@ class AlaskaProject(Alaska):
         """
         Submit compiled geo submission to geo.
         """
+        def handle(block):
+            print('{} transferred'.format(block))
         # Open a new FTP connection.
         try:
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd(Alaska.GEO_DIR)
             with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
-                conn.storbinary('STOR {}'.format(fname), f)
+                conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
