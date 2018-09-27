@@ -489,9 +489,7 @@ function set_progress(status) {
       elements.geo_submit_modal_btn.children('.loading_spinner').hide();
       elements.geo_submit_modal_btn.children('.success_check').show();
       break;
-
   }
-
 
   // Finally, set status badges.
   if (status < progress.qc_started) {

@@ -1112,6 +1112,25 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+    def remove_proj(self, _id, close=True):
+        """
+        Removes the given project.
+        """
+        proj = None
+        if self.exists_temp(_id):
+            del self.projects_temp[_id]
+        elif self.exists_var(_id):
+            del self.projects[_id]
+
+        # Remove folders.
+        shutil.rmtree('{}/{}'.format(Alaska.PROJECTS_DIR, _id), ignore_errors=True)
+
+        self.broadcast(_id, '{}: removed'.format(_id))
+
+        if close:
+            self.close(_id)
+
+
     def fetch_reads(self, _id, close=True):
         """
         Fetches all files & folders in the raw reads directory.
