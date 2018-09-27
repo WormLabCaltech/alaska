@@ -1980,7 +1980,7 @@ class AlaskaServer(Alaska):
                     msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_DURATION - Alaska.RAW_NOTIFY)
                     self.send_email(email, subject, msg, proj_id)
             except:
-                self.out('ERROR: can not clean up raw reads of {}'.fomat(proj_id))
+                self.out('ERROR: can not clean up raw reads of {}'.format(proj_id))
                 traceback.print_exc()
 
         # Then, deal with jobs.

@@ -468,15 +468,10 @@ class AlaskaProject(Alaska):
             print('{} transferred'.format(block))
         # Open a new FTP connection.
         try:
-            conn = ftplib.FTP()
-            conn.set_pasv(False)
-            conn.connect(host)
-            conn.getwelcome()
-            conn.login(uname, passwd)
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd('upload')
             f = open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb')
-            conn.storbinary('STOR {}'.format('test.tar.gz'), f, callback=handle)
+            conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
