@@ -468,8 +468,8 @@ class AlaskaProject(Alaska):
         try:
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd('upload')
-            f = open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb')
-            conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
+            with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
+                conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
