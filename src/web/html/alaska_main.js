@@ -441,7 +441,7 @@ function set_progress(status) {
       elements.diff_server_btn.prop('disabled', true);
       elements.all_download_btn.prop('disabled', true);
       elements.geo_compile_modal_btn.prop('disabled', true);
-      elements.geo_submit_modal_btn.prpo('disabled', true);
+      elements.geo_submit_modal_btn.prop('disabled', true);
       break;
     case progress.diff_finished:
     case progress.server_open:
