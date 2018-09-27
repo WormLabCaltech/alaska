@@ -469,6 +469,7 @@ class AlaskaProject(Alaska):
         # Open a new FTP connection.
         try:
             conn = ftplib.FTP()
+            conn.set_pasv(False)
             conn.connect(host)
             conn.getwelcome()
             conn.login(uname, passwd)
