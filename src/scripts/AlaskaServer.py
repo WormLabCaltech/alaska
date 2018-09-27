@@ -2014,7 +2014,10 @@ class AlaskaServer(Alaska):
         for folder in folders_to_empty:
             for fname in os.listdir(folder):
                 path = '{}/{}'.format(folder, fname)
-                shutil.rmtree(path, ignore_errors=True)
+                if os.path.isdir(path):
+                    shutil.rmtree(path, ignore_errors=True)
+                else:
+                    os.remove(path)
                 self.out('INFO: removed {}'.format(path))
 
         # Stop without saving or logging.
