@@ -66,7 +66,7 @@ class AlaskaProject(Alaska):
         self.meta['contributors'] = []
         self.meta['SRA_center_code'] = ''
         # end from GEO submission template
-        self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.meta['datetime'] = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
     def fetch_reads(self):
         """
@@ -468,10 +468,14 @@ class AlaskaProject(Alaska):
             print('{} transferred'.format(block))
         # Open a new FTP connection.
         try:
+            conn = ftplib.FTP()
+            conn.connect(host)
+            conn.getWelcome()
+            conn.login(uname, passwd)
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd(Alaska.GEO_DIR)
-            with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
-                conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
+            f = open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb')
+            conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))

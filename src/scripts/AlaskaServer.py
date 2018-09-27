@@ -1964,7 +1964,7 @@ class AlaskaServer(Alaska):
         self.out('INFO: cleaning up raw reads')
         for proj_id, proj in self.projects.items():
             email = proj.meta['corresponding']['email']
-            delta = dt.datetime.now() - proj.meta['datetime']
+            delta = dt.datetime.now() - dt.datetime.strptime(proj.meta['datetime'], Alaska.DATETIME_FORMAT)
             seconds = delta.total_seconds()
             minutes = seconds / 60
             hours = minutes / 60
