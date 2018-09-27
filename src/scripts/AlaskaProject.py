@@ -474,9 +474,9 @@ class AlaskaProject(Alaska):
             conn.getwelcome()
             conn.login(uname, passwd)
             conn = ftplib.FTP(host, uname, passwd)
-            conn.cwd(Alaska.GEO_DIR)
+            conn.cwd('upload')
             f = open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb')
-            conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f, callback=handle)
+            conn.storbinary('STOR {}'.format('test.tar.gz'), f, callback=handle)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))

@@ -1695,7 +1695,7 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: submitting project to GEO'.format(_id))
         proj.progress = Alaska.PROGRESS['geo_submitting']
-        proj.submit_geo('lioscro.tar.gz', 'alaska.caltech.edu', 'alaska', 'Fidopjedd8')
+        proj.submit_geo('lioscro.tar.gz', 'speedtest.tele2.net', 'anonymous', 'anonymous')
         proj.progress = Alaska.PROGRESS['geo_submitted']
 
         email = proj.meta['corresponding']['email']
@@ -1963,30 +1963,38 @@ class AlaskaServer(Alaska):
 
         self.out('INFO: cleaning up raw reads')
         for proj_id, proj in self.projects.items():
-            email = proj.meta['corresponding']['email']
-            delta = dt.datetime.now() - dt.datetime.strptime(proj.meta['datetime'], Alaska.DATETIME_FORMAT)
-            seconds = delta.total_seconds()
-            minutes = seconds / 60
-            hours = minutes / 60
-            days = hours / 24
+            try:
+                email = proj.meta['corresponding']['email']
+                delta = dt.datetime.now() - dt.datetime.strptime(proj.meta['datetime'], Alaska.DATETIME_FORMAT)
+                seconds = delta.total_seconds()
+                minutes = seconds / 60
+                hours = minutes / 60
+                days = hours / 24
 
-            if days > Alaska.RAW_DURATION:
-                self.out('INFO: cleaning up raw reads for project {}'.format(proj_id))
-                shutil.rmtree(proj.raw_dir)
-            elif days > Alaska.RAW_NOTIFY and email:
-                self.out('INFO: sending notification for project {}'.format(proj_id))
-                subject = 'Raw read removal notification'
-                msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_DURATION - Alaska.RAW_NOTIFY)
-                self.send_email(email, subject, msg, proj_id)
+                if days > Alaska.RAW_DURATION:
+                    self.out('INFO: cleaning up raw reads for project {}'.format(proj_id))
+                    shutil.rmtree(proj.raw_dir)
+                elif days > Alaska.RAW_NOTIFY and email:
+                    self.out('INFO: sending notification for project {}'.format(proj_id))
+                    subject = 'Raw read removal notification'
+                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_DURATION - Alaska.RAW_NOTIFY)
+                    self.send_email(email, subject, msg, proj_id)
+            except:
+                self.out('ERROR: can not clean up raw reads of {}'.fomat(proj_id))
+                traceback.print_exc()
 
         # Then, deal with jobs.
         self.out('INFO: cleaning up jobs')
         for fname in os.listdir(Alaska.JOBS_DIR):
             job = fname.split('.')[0]
             if job not in self.jobs and job not in self.stale_jobs:
-                path = '{}/{}'.format(Alaska.JOBS_DIR, fname)
-                self.out('INFO: removing job {}'.format(path))
-                os.remove(path)
+                try:
+                    path = '{}/{}'.format(Alaska.JOBS_DIR, fname)
+                    self.out('INFO: removing job {}'.format(path))
+                    os.remove(path)
+                except:
+                    self.out('ERROR: can not clean up job {}'.format(job))
+                    traceback.print_exc()
 
         # Then, deal with saves.
         self.out('INFO: cleaning up saves')
@@ -1995,10 +2003,14 @@ class AlaskaServer(Alaska):
 
         # Remove oldest saves more than max.
         while len(files) > Alaska.SAVE_MAX:
-            path = '{}/{}'.format(Alaska.SAVE_DIR, files[0])
-            self.out('INFO: removing save {}'.format(path))
-            os.remove(path)
-            del files[0]
+            try:
+                path = '{}/{}'.format(Alaska.SAVE_DIR, files[0])
+                self.out('INFO: removing save {}'.format(path))
+                os.remove(path)
+                del files[0]
+            except:
+                self.out('ERROR: can not clean up save {}'.format(path))
+                traceback.print_exc()
 
         self.out('INFO: cleaning up logs')
         files = os.listdir(Alaska.LOG_DIR)
@@ -2006,28 +2018,36 @@ class AlaskaServer(Alaska):
 
         # Remove oldest saves more than max.
         while len(files) > Alaska.LOG_MAX:
-            path = '{}/{}'.format(Alaska.LOG_DIR, files[0])
-            self.out('INFO: removing log {}'.format(path))
-            os.remove(path)
-            del files[0]
+            try:
+                path = '{}/{}'.format(Alaska.LOG_DIR, files[0])
+                self.out('INFO: removing log {}'.format(path))
+                os.remove(path)
+                del files[0]
+            except:
+                self.out('ERROR: can not clean up log {}'.format(path))
+                traceback.print_exc()
 
         # Clean up open sleuth servers.
         self.out('INFO: cleaning up open sleuth servers')
         for port, lst in self.sleuth_servers.items():
-            proj_id = lst[0]
-            cont_id = lst[1]
-            open_dt = lst[2]
+            try:
+                proj_id = lst[0]
+                cont_id = lst[1]
+                open_dt = lst[2]
 
-            # Calculate time delta between when it was last accessed and now.
-            delta = dt.datetime.now() - open_dt
-            seconds = delta.total_seconds()
-            minutes = seconds / 60
-            hours = minutes / 60
-            days = hours / 24
+                # Calculate time delta between when it was last accessed and now.
+                delta = dt.datetime.now() - open_dt
+                seconds = delta.total_seconds()
+                minutes = seconds / 60
+                hours = minutes / 60
+                days = hours / 24
 
-            if days > Alaska.SHI_DURATION:
-                self.out('INFO: terminating sleuth server on container {} for project {}'.format(cont_id, proj_id))
-                self.DOCKER.containers.get(cont_id).remove(force=True)
+                if days > Alaska.SHI_DURATION:
+                    self.out('INFO: terminating sleuth server on container {} for project {}'.format(cont_id, proj_id))
+                    self.DOCKER.containers.get(cont_id).remove(force=True)
+            except:
+                self.out('ERROR: can not terminate sleuth container {}'.format(cont_id))
+                traceback.print_exc()
 
 
     def save(self, _id=None):
