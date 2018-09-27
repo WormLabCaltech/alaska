@@ -17,6 +17,7 @@ __status__ = "alpha"
 
 import os
 import json
+import ftplib
 import tarfile
 import pandas as pd
 import warnings as w
@@ -458,6 +459,22 @@ class AlaskaProject(Alaska):
             for sample_id, sample in self.samples.items():
                 write_sample(f, sample)
                 f.write('\n')
+
+    def submit_geo(self, fname, host, uname, passwd):
+        """
+        Submit compiled geo submission to geo.
+        """
+        # Open a new FTP connection.
+        try:
+            conn = ftplib.FTP(host, uname, passwd)
+            conn.cwd(Alaska.GEO_DIR)
+            with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
+                conn.storbinary('STOR {}'.format(fname), f)
+            conn.quit()
+        except:
+            raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
+
+
 
     def save(self, folder=None):
         """

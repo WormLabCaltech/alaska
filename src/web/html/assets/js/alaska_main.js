@@ -175,6 +175,21 @@ function goto_progress(status) {
     send_ajax_request(target, data, callback, true, btn, spinner, width);
   });
 
+  // Set compile button.
+  $('#geo_compile_btn').click(function () {
+    // Set loading spinner.
+    var btn = $('#geo_compile_modal_btn');
+    var spinner = $('#geo_compile_loading_spinner');
+    set_loading_spinner(btn, spinner);
+
+    var target = 'cgi_request.php';
+    var data = {
+      id: proj_id,
+      action: 'prepare_geo'
+    }
+    send_ajax_request(target, data, null, true);
+  });
+
   // Set output listeners for live output.
   set_output_listeners(progress_container);
 
@@ -310,7 +325,9 @@ function set_progress(status) {
     'diff_server_btn',
     'diff_download_btn',
     'diff_output_collapse',
-    'all_download_btn'
+    'all_download_btn',
+    'geo_compile_modal_btn',
+    'geo_submit_modal_btn'
   ];
 
   // Construct elements dictionary
@@ -322,6 +339,11 @@ function set_progress(status) {
 
   // Deal with enabling buttons first.
   switch (status) {
+    case progress.geo_submitted:
+    case progress.geo_submitting:
+    case progress.geo_compiled:
+    case progress.geo_compiling:
+      elements.geo_compile_modal_btn.prop('disabled', true);
     case progress.server_open:
     case progress.diff_finished:
       elements.diff_server_btn.prop('disabled', false);
@@ -365,6 +387,56 @@ function set_progress(status) {
       elements.diff_download_btn.prop('disabled', true);
       elements.diff_server_btn.prop('disabled', true);
       elements.all_download_btn.prop('disabled', true);
+      elements.geo_compile_modal_btn.prop('disabled', true);
+      elements.geo_submit_modal_btn.prpo('disabled', true);
+      break;
+    case progress.diff_finished:
+    case progress.server_open:
+      elements.geo_compile_modal_btn.prop('disabled', false);
+      elements.geo_compile_modal_btn.children('.success_check').hide();
+      elements.geo_compile_modal_btn.children('.loading_spinner').hide();
+
+      elements.geo_submit_modal_btn.prop('disabled', true);
+      elements.geo_submit_modal_btn.children('.success_check').hide();
+      elements.geo_submit_modal_btn.children('.loading_spinner').hide();
+      break;
+    case progress.geo_compiling:
+      elements.geo_compile_modal_btn.prop('disabled', true);
+      elements.geo_compile_modal_btn.children('.success_check').hide();
+      elements.geo_compile_modal_btn.children('.loading_spinner').show();
+
+      elements.geo_submit_modal_btn.prop('disabled', true);
+      elements.geo_submit_modal_btn.children('.success_check').hide();
+      elements.geo_submit_modal_btn.children('.loading_spinner').hide();
+      break;
+    case progress.geo_compiled:
+      elements.geo_compile_modal_btn.prop('disabled', true);
+      elements.geo_compile_modal_btn.children('.loading_spinner').hide();
+      elements.geo_compile_modal_btn.children('.success_check').show();
+
+      elements.geo_submit_modal_btn.prop('disabled', false);
+      elements.geo_submit_modal_btn.children('.success_check').hide();
+      elements.geo_submit_modal_btn.children('.loading_spinner').hide();
+      break;
+    case progress.geo_submitting:
+      elements.geo_compile_modal_btn.prop('disabled', true);
+      elements.geo_compile_modal_btn.children('.success_check').hide();
+      elements.geo_compile_modal_btn.children('.loading_spinner').show();
+
+      elements.geo_submit_modal_btn.prop('disabled', true);
+      elements.geo_submit_modal_btn.children('.success_check').hide();
+      elements.geo_submit_modal_btn.children('.loading_spinner').show();
+      break;
+    case progress.geo_submitted:
+      elements.geo_compile_modal_btn.prop('disabled', true);
+      elements.geo_compile_modal_btn.children('.success_check').hide();
+      elements.geo_compile_modal_btn.children('.loading_spinner').show();
+
+      elements.geo_submit_modal_btn.prop('disabled', true);
+      elements.geo_submit_modal_btn.children('.loading_spinner').hide();
+      elements.geo_submit_modal_btn.children('.success_check').show();
+      break;
+
   }
 
 
@@ -5584,25 +5656,29 @@ var sample_pair_fields = {};
 var chars_to_samples = {};
 var chars_details_to_samples = {};
 var progress = {
-      'diff_error':     -12,
-      'quant_error':     -9,
-      'qc_error':        -6,
-      'error':           -1,
-      'new':              0,
-      'raw_reads':        1,
-      'inferred':         2,
-      'set':              3,
-      'finalized':        4,
-      'qc_queued':        5,
-      'qc_started':       6,
-      'qc_finished':      7,
-      'quant_queued':     8,
-      'quant_started':    9,
-      'quant_finished':   10,
-      'diff_queued':      11,
-      'diff_started':     12,
-      'diff_finished':    13,
-      'server_open':      14
+    'diff_error':     -12,
+    'quant_error':     -9,
+    'qc_error':        -6,
+    'error':           -1,
+    'new':              0,
+    'raw_reads':        1,
+    'inferred':         2,
+    'set':              3,
+    'finalized':        4,
+    'qc_queued':        5,
+    'qc_started':       6,
+    'qc_finished':      7,
+    'quant_queued':     8,
+    'quant_started':    9,
+    'quant_finished':   10,
+    'diff_queued':      11,
+    'diff_started':     12,
+    'diff_finished':    13,
+    'server_open':      14,
+    'geo_compiling':    15,
+    'geo_compiled':     16,
+    'geo_submitting':   17,
+    'geo_submitted':    18
 };
 var factor_names_to_class_names = {
   'genotype':           'sample_genotype_group',

@@ -81,6 +81,7 @@ class Alaska():
     ALIGN_DIR = '2_alignment' # alignment directory name
     DIFF_DIR = '3_diff_exp' # differential expression directory name
     GEO_ARCH = 'geo_submission.tar.gz'
+    GEO_DIR = 'NEW_SUBMISSIONS'
     CPUS = '1-3' # processing CPUs
     NTHREADS = 3 # number of threads for processing
     DOCKER_SCRIPT_VOLUME = 'alaska_script_volume'
@@ -123,7 +124,8 @@ class Alaska():
         'open_sleuth_server':   b'\x13',
         'get_proj_status':      b'\x14', # check project status
         'get_ftp_info':         b'\x15',
-        'submit_to_geo':        b'\x16',
+        'prepare_geo':          b'\x16',
+        'submit_geo':           b'\x17',
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
@@ -180,7 +182,11 @@ class Alaska():
         'diff_queued':      11,
         'diff_started':     12,
         'diff_finished':    13,
-        'server_open':      14
+        'server_open':      14,
+        'geo_compiling':    15,
+        'geo_compiled':     16,
+        'geo_submitting':   17,
+        'geo_submitted':    18
     }
 
     def rand_str(self, l):

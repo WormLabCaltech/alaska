@@ -42,7 +42,7 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%" id="diff">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%" id="done">Done!</div>
 </div></div>
-    <div class="container" id="progress_container" style="display:none">
+    <div class="container" id="progress_container">
         <div>
             <div class="row">
                 <div class="col">
@@ -142,9 +142,61 @@
         </div>
         <div id="geo_submission_div">
             <div class="row">
-                <div class="col d-flex justify-content-center align-items-center"><span class="d-inline-block" data-toggle="popover" data-trigger="hover" title="Coming soon!" data-content="Alaska will soon be able to automatically submit your project to the Gene Expression Omnibus (GEO)." data-placement="bottom">
-    <button class="btn btn-primary btn-lg" type="button" style="border-radius:24px;pointer-events:none" disabled>Submit project to GEO</button>
-</span></div>
+                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-primary d-flex align-items-center" type="button" style="border-radius:24px" data-toggle="modal" id="geo_compile_modal_btn" data-target="#geo_compile_modal" disabled>
+    Compile Project for Submission
+    <div class="spinner-light ml-3 loading_spinner" style="display:none"></div>
+    <div class="ml-3 success_check" style="display:none">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+          <circle class="path circle" fill="none" stroke="#97e570" stroke-width="14" stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1"/>
+          <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+        </svg>
+    </div>
+</button>
+
+<!-- Modal to start compiling project for GEO submission -->
+<div class="modal fade" id="geo_compile_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-primary">
+                <h5 class="modal-title">
+                    <i class="fas fa-archive"></i>
+                    Compile project for GEO submission.
+                </h5>
+            </div>
+            <div class="modal-body text-dark">
+                <p>Alaska will begin compiling your project for submission to the GEO. All your reads and analysis results will be compressed into a single file that may be either downloaded to submit yourself, or submitted by Alaska. This may take a while depending on the number of samples you have. We'll send you an email when everything's ready.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="geo_compile_btn">Start</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div></div>
+            </div>
+            <div class="row mt-2">
+                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-success btn-lg" type="button" style="border-radius:24px" data-toggle="modal" data-target="#geo_submit_modal" disabled>Submit Project to GEO</button>
+
+<!-- Modal to start compiling project for GEO submission -->
+<div class="modal fade" id="geo_submit_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h5 class="modal-title">
+                    <i class="fas fa-archive"></i>
+                    Compile project for GEO submission.
+                </h5>
+            </div>
+            <div class="modal-body text-dark">
+                <p>Alaska will begin compiling your project for submission to the GEO. All your reads and analysis results will be compressed into a single file that may be either downloaded to submit yourself, or submitted by Alaska. This may take a while depending on the number of samples you have. We'll send you an email when everything's ready.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="geo_compile_btn">Start</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div></div>
             </div>
         </div><!-- Progress error message div -->
 <div class="modal fade" id="progress_error_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">

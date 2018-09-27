@@ -1657,9 +1657,9 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def submit_to_geo(self, _id, close=True):
+    def prepare_geo(self, _id, close=True):
         """
-        Submit reads to geo.
+        Prepare submission to geo.
         """
         if not self.exists_var(_id):
             raise Exception('{}: project not found'.format(_id))
@@ -1669,10 +1669,44 @@ class AlaskaServer(Alaska):
             raise Exception('{}: Sleuth not yet run'.format(_id))
 
         self.broadcast(_id, '{}: preparing submission'.format(_id))
+        proj.progress = Alaska.PROGRESS['geo_compiling']
         proj.prepare_submission()
+        proj.progress = Alaska.PROGRESS['geo_compiled']
+
+        email = proj.meta['corresponding']['email']
+        if email:
+            subject = 'Project has been compiled'
+            msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
+            self.send_email(email, subject, msg, _id)
 
         if close:
             self.close(_id)
+
+    def submit_geo(self, _id, close=True):
+        """
+        Submit to geo.
+        """
+        if not self.exists_var(_id):
+            raise Exception('{}: project not found'.format(_id))
+
+        proj = self.projects[_id]
+        if proj.progress < Alaska.PROGRESS['geo_compiled']:
+            raise Exception('{}: project not compiled for GEO submission'.format(_id))
+
+        self.broadcast(_id, '{}: submitting project to GEO'.format(_id))
+        proj.progress = Alaska.PROGRESS['geo_submitting']
+        proj.submit_geo('lioscro.tar.gz', 'alaska.caltech.edu', 'alaska', 'Fidopjedd8')
+        proj.progress = Alaska.PROGRESS['geo_submitted']
+
+        email = proj.meta['corresponding']['email']
+        if email:
+            subject = 'Project has been compiled'
+            msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
+            self.send_email(email, subject, msg, _id)
+
+        if close:
+            self.close(_id)
+
 
     def copy_script(self, _id, script, dst=None):
         """
