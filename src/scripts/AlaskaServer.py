@@ -143,16 +143,16 @@ class AlaskaServer(Alaska):
             self.out('INFO: AlaskaServer running as root')
             os.umask(0)
 
-            if force:
-                self.out('INFO: --force flag detected...bypassing instance check')
-            else:
-                self.out('INFO: checking if another instance is running')
-                if os.path.isfile('_running'):
-                    raise Exception('ERROR: another instance was detected. If there '
-                    'is no other instance, this error may be because of an incorrect '
-                    'termination of a previous instance. In this case, please '
-                    'manually delete the \'_running\' file from the root directory.')
-            open('_running', 'w').close()
+            # if force:
+            #     self.out('INFO: --force flag detected...bypassing instance check')
+            # else:
+            #     self.out('INFO: checking if another instance is running')
+            #     if os.path.isfile('_running'):
+            #         raise Exception('ERROR: another instance was detected. If there '
+            #         'is no other instance, this error may be because of an incorrect '
+            #         'termination of a previous instance. In this case, please '
+            #         'manually delete the \'_running\' file from the root directory.')
+            # open('_running', 'w').close()
 
             # self.out('INFO: acquiring absolute path')
             # if not os.path.exists('PATH_TO_HERE'):
@@ -282,16 +282,17 @@ class AlaskaServer(Alaska):
                     self.out('ERROR: error while terminating container')
                     traceback.print_exc()
 
-            if save:
-                self.save()
+            if not save and not log:
+                sys.exit(0)
+
+            self.save()
 
             if not code == 0:
                 self.out('TERMINATED WITH EXIT CODE {}'.format(code))
 
-            if log:
-                self.log() # write all remaining logs
+            self.log() # write all remaining logs
 
-            os.remove('../_running')
+            # os.remove('../_running')
 
             self.state_lock.release()
 
@@ -2021,6 +2022,7 @@ class AlaskaServer(Alaska):
                 self.out('INFO: removed {}'.format(path))
 
         # Stop without saving or logging.
+        self.RUNNING = False
         self.stop(save=False, log=False)
 
     def cleanup(self, _id=None, close=True):
