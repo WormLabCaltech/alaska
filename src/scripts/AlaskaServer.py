@@ -2022,7 +2022,6 @@ class AlaskaServer(Alaska):
                 self.out('INFO: removed {}'.format(path))
 
         # Stop without saving or logging.
-        self.RUNNING = False
         self.stop(save=False, log=False)
 
     def cleanup(self, _id=None, close=True):
