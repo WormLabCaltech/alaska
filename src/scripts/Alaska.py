@@ -82,6 +82,7 @@ class Alaska():
     DIFF_DIR = '3_diff_exp' # differential expression directory name
     GEO_ARCH = 'geo_submission.tar.gz'
     GEO_DIR = 'NEW_SUBMISSIONS'
+    GEO_EMAIL = 'geo@ncbi.nlm.nih.gov'
     CPUS = '1-3' # processing CPUs
     NTHREADS = 3 # number of threads for processing
     DOCKER_SCRIPT_VOLUME = 'alaska_script_volume'

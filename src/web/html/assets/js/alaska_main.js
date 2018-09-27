@@ -236,7 +236,7 @@ function goto_progress(status) {
           id: proj_id,
           action: 'submit_geo'
         }
-        // send_ajax_request(target, data, null, false);
+        send_ajax_request(target, data, null, false);
       }
 
       write_object_to_temp(obj, 'ftp_info', callback);

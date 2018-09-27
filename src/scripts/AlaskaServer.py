@@ -1713,6 +1713,7 @@ class AlaskaServer(Alaska):
     def submit_geo(self, _id, close=True):
         """
         Submit to geo.
+        Assumes that FTP information is
         """
         if not self.exists_var(_id):
             raise Exception('{}: project not found'.format(_id))
@@ -1726,14 +1727,28 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+        # Read json file.
+        with open('{}/ftp_info.json'.format(proj.temp_dir)) as f:
+            loaded = json.load(f)
+            geo_uname = loaded['geo_username']
+            host = loaded['ftp_host']
+            uname = loaded['ftp_username']
+            passwd = loaded['ftp_password']
+
         proj.progress = Alaska.PROGRESS['geo_submitting']
         # proj.submit_geo(fname, host, uname, passwd)
         proj.progress = Alaska.PROGRESS['geo_submitted']
 
         email = proj.meta['corresponding']['email']
         if email:
-            subject = 'Project has been compiled'
-            msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
+            subject = 'Project has been submitted to GEO'
+            msg = 'Project {} has been successfully submitted to GEO.<br>'.format(_id)
+            msg += 'Please send an eemail to <a href="mailto:{}">{}</a>'.format(Alaska.GEO_EMAIL, Alaska.GEO_EMAIL)
+            msg += ' with the following information:<br>'
+            msg += '1) GEO account user name (<strong>{}</strong>)<br>'.format(geo_uname)
+            msg += '2) Name of the archive file deposited (<strong>{}</strong>)<br>'.format(fname)
+            msg += '3) Public release date (up to 3 years from now)<br>'
+            msg += 'Failure to send an email may result in the removal of your submission.'
             self.send_email(email, subject, msg, _id)
 
 
