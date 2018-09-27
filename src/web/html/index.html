@@ -43,7 +43,7 @@
     <div class="progress-bar bg-secondary border-right border-dark" role="progressbar" style="width: 20%" id="diff">Differential expression analysis</div>
     <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%" id="done">Done!</div>
 </div></div>
-    <div class="container" id="progress_container">
+    <div class="container" id="progress_container" style="display:none">
         <div>
             <div class="row">
                 <div class="col">
@@ -176,7 +176,7 @@
 </div></div>
             </div>
             <div class="row mt-2">
-                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-success btn-lg d-flex align-items-center" type="button" style="border-radius:24px" data-toggle="modal" id="geo_submit_modal_btn" data-target="#geo_submit_modal">
+                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-success btn-lg d-flex align-items-center" type="button" style="border-radius:24px" data-toggle="modal" id="geo_submit_modal_btn" data-target="#geo_submit_modal" disabled>
     Submit Project to GEO
     <div class="spinner-light ml-3 loading_spinner" style="display:none"></div>
     <div class="ml-3 success_check" style="display:none">
