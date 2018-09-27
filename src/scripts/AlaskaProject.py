@@ -470,7 +470,7 @@ class AlaskaProject(Alaska):
         try:
             conn = ftplib.FTP()
             conn.connect(host)
-            conn.getWelcome()
+            conn.getwelcome()
             conn.login(uname, passwd)
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd(Alaska.GEO_DIR)
