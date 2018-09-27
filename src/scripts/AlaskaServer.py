@@ -424,6 +424,8 @@ class AlaskaServer(Alaska):
                                 elif job.name == 'sleuth':
                                     subject = 'Analysis finished'
                                     msg = 'Alaska has finished analysis of project {}.'.format(proj_id)
+                                    msg += ' You may download the results at the unique project URL below or via FTP with '
+                                    msg += 'the credentials below.'
                                     if email:
                                         self.send_email(email, subject, msg, proj_id)
 
@@ -928,6 +930,9 @@ class AlaskaServer(Alaska):
         self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.RAW_DIR)
         os.makedirs(f)
+        # Drop a blank file for directions.
+        with open('{}/UPLOAD_HERE'.format(proj.raw_dir), 'w') as f:
+            f.write('\n')
         self.out('{}: {} created'.format(__id, f))
         f = './{}/{}/{}'.format(Alaska.PROJECTS_DIR, __id, Alaska.QC_DIR)
         os.makedirs(f)
@@ -979,19 +984,38 @@ class AlaskaServer(Alaska):
         fr = 'noreply@alaska.caltech.edu'
 
         # Footer that is appended to every email.
-        full_msg = '\
-        <html> \
-            <head></head> \
-            <body> \
-             <p>{}</p> \
-             <br> \
-             <hr> \
-             <p>Project ID: {}<br> \
-             Unique URL: <a href="{}">{}</a><br> \
-             This message was sent to {} at {}.</p> \
-            </body> \
-        </html> \
-        '.format(msg, _id, url, url, to, datetime)
+        if _id in self.ftp:
+            full_msg = '\
+            <html> \
+                <head></head> \
+                <body> \
+                 <p>{}</p> \
+                 <br> \
+                 <hr> \
+                 <p>Project ID: {}<br> \
+                 Unique URL: <a href="{}">{}</a><br> \
+                 FTP server: alaska.caltech.edu \
+                 FTP port: 21 \
+                 FTP username: {} \
+                 FTP password: {} \
+                 This message was sent to {} at {}.</p> \
+                </body> \
+            </html> \
+            '.format(msg, _id, url, url, _id, self.ftp[_id], to, datetime)
+        else:
+            full_msg = '\
+            <html> \
+                <head></head> \
+                <body> \
+                 <p>{}</p> \
+                 <br> \
+                 <hr> \
+                 <p>Project ID: {}<br> \
+                 Unique URL: <a href="{}">{}</a><br> \
+                 This message was sent to {} at {}.</p> \
+                </body> \
+            </html> \
+            '.format(msg, _id, url, url, to, datetime)
 
         msg = MIMEText(full_msg, 'html')
         msg['Subject'] = subject
@@ -1544,16 +1568,19 @@ class AlaskaServer(Alaska):
         """
         Perform all three analyses. Assumes that the project is finalized.
         """
-        def delete_ftp(_id):
+        def change_ftp(_id):
             """
-            Deletes the ftp account for the given id.
+            Changes ftp user's home directory to root of the project.
             """
             try:
                 ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
                 if ftp.status != 'running':
                     self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
 
-                cmd = 'pure-pw userdel {}'.format(_id)
+                cmd = 'pure-pw usermod {} -d /home/ftpuers/{}/{}/{}'.format(_id,
+                    Alaska.DOCKER_DATA_VOLUME,
+                    Alaska.PROJECTS_DIR,
+                    _id)
                 out = ftp.exec_run(cmd)
 
                 cmd = 'pure-pw mkdb'
@@ -1574,7 +1601,7 @@ class AlaskaServer(Alaska):
         else:
             raise Exception('{}: not finalized'.format(_id))
 
-        delete_ftp(_id)
+        change_ftp(_id)
 
         # If the project is finalized.
         if (proj.progress == Alaska.PROGRESS['finalized']
@@ -1669,6 +1696,10 @@ class AlaskaServer(Alaska):
             raise Exception('{}: Sleuth not yet run'.format(_id))
 
         self.broadcast(_id, '{}: preparing submission'.format(_id))
+
+        if close:
+            self.close(_id)
+
         proj.progress = Alaska.PROGRESS['geo_compiling']
         proj.prepare_submission()
         proj.progress = Alaska.PROGRESS['geo_compiled']
@@ -1678,9 +1709,6 @@ class AlaskaServer(Alaska):
             subject = 'Project has been compiled'
             msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
             self.send_email(email, subject, msg, _id)
-
-        if close:
-            self.close(_id)
 
     def submit_geo(self, _id, close=True):
         """
@@ -1694,8 +1722,12 @@ class AlaskaServer(Alaska):
             raise Exception('{}: project not compiled for GEO submission'.format(_id))
 
         self.broadcast(_id, '{}: submitting project to GEO'.format(_id))
+
+        if close:
+            self.close(_id)
+
         proj.progress = Alaska.PROGRESS['geo_submitting']
-        proj.submit_geo('lioscro.tar.gz', 'speedtest.tele2.net', 'anonymous', 'anonymous')
+        # proj.submit_geo(fname, host, uname, passwd)
         proj.progress = Alaska.PROGRESS['geo_submitted']
 
         email = proj.meta['corresponding']['email']
@@ -1704,8 +1736,6 @@ class AlaskaServer(Alaska):
             msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
             self.send_email(email, subject, msg, _id)
 
-        if close:
-            self.close(_id)
 
 
     def copy_script(self, _id, script, dst=None):

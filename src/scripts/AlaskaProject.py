@@ -329,7 +329,7 @@ class AlaskaProject(Alaska):
             tar.add(full_path, arcname=out)
 
 
-    def write_soft(self, out='seq_info.txt'):
+    def write_soft(self, out='soft_info.txt'):
         """
         Writes project in SOFT format for GEO submission.
         """
@@ -467,13 +467,12 @@ class AlaskaProject(Alaska):
         # Open a new FTP connection.
         try:
             conn = ftplib.FTP(host, uname, passwd)
-            conn.cwd('upload')
+            conn.cwd(Alaska.GEO_DIR)
             with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
                 conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f)
             conn.quit()
         except:
             raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
-
 
 
     def save(self, folder=None):

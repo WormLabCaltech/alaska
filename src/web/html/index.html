@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="assets/css/check.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker3.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
     <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
@@ -175,23 +176,72 @@
 </div></div>
             </div>
             <div class="row mt-2">
-                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-success btn-lg" type="button" style="border-radius:24px" data-toggle="modal" data-target="#geo_submit_modal" disabled>Submit Project to GEO</button>
+                <div class="col d-flex justify-content-center align-items-center"><button class="btn btn-success btn-lg d-flex align-items-center" type="button" style="border-radius:24px" data-toggle="modal" id="geo_submit_modal_btn" data-target="#geo_submit_modal">
+    Submit Project to GEO
+    <div class="spinner-light ml-3 loading_spinner" style="display:none"></div>
+    <div class="ml-3 success_check" style="display:none">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+          <circle class="path circle" fill="none" stroke="#97e570" stroke-width="14" stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1"/>
+          <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
+        </svg>
+    </div>
+</button>
 
-<!-- Modal to start compiling project for GEO submission -->
+<!-- Modal to submit project to GEO -->
 <div class="modal fade" id="geo_submit_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header alert-success">
                 <h5 class="modal-title">
-                    <i class="fas fa-archive"></i>
-                    Compile project for GEO submission.
+                    <i class="fas fa-share-square"></i>
+                    Submit project to GEO
                 </h5>
             </div>
             <div class="modal-body text-dark">
-                <p>Alaska will begin compiling your project for submission to the GEO. All your reads and analysis results will be compressed into a single file that may be either downloaded to submit yourself, or submitted by Alaska. This may take a while depending on the number of samples you have. We'll send you an email when everything's ready.</p>
+                <div class="alert alert-danger">
+                    <strong>IMPORTANT</strong>: GEO will keep your samples private for up to 3 years. If you need to keep it private for longer, please do not submit at this time.
+                </div>
+                <p>Alaska will upload your project to the Gene Expression Omnibus. In order to do so, Alaska needs some of your GEO user information.</p>
+                <form novalidate>
+                    <div class="form-group row geo_username_group">
+                        <div class="col-sm-4">
+                            <label for="geo_username" class="col-form-label">GEO account username</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="geo_username" required>
+                        </div>
+                    </div>
+                </form>
+                <p>Alaska also needs your GEO FTP information. Please login to GEO and go to the <a href="https://www.ncbi.nlm.nih.gov/geo/submission/depslip.cgi" target="_blank">Direct Deposit form</a>. At the bottom of the form, click on the <strong>FTP instructions</strong> link to show instructions on how to upload via FTP (Don't worry, we'll do this for you!) Scroll down to the <strong>GEO FTP login information</strong> header. Please copy and paste the login information below.</p>
+                <form novalidate>
+                    <div class="form-group row ftp_host_group">
+                        <div class="col-sm-4">
+                            <label for="ftp_host" class="col-form-label">FTP host</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="ftp_host" required>
+                        </div>
+                    </div>
+                    <div class="form-group row ftp_username_group">
+                        <div class="col-sm-4">
+                            <label for="ftp_username" class="col-form-label">FTP username</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="ftp_username" required>
+                        </div>
+                    </div>
+                    <div class="form-group row ftp_password_group">
+                        <div class="col-sm-4">
+                            <label for="ftp_password" class="col-form-label">FTP password</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="ftp_password" required>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="geo_compile_btn">Start</button>
+                <button type="button" class="btn btn-danger" id="geo_submit_btn">Submit</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -1537,6 +1587,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
     <script src="assets/js/alaska_main.js"></script>
     <script src="assets/js/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
     <script src="assets/js/jquery-ui.min.js"></script>
 </body>
 

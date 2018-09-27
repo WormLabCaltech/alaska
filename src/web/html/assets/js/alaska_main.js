@@ -128,7 +128,7 @@ function goto_progress(status) {
   });
 
   // Set retry button.
-  $('#retry_btn').click(function () {
+  progress_container.find('#retry_btn').click(function () {
     var target = 'cgi_request.php';
     var data = {
       action: 'do_all',
@@ -161,7 +161,7 @@ function goto_progress(status) {
   });
 
   // Set sleuth server open button listener.
-  $('#diff_server_btn').click(function () {
+  progress_container.find('#diff_server_btn').click(function () {
     var target = 'cgi_request.php';
     var data = {
       id: proj_id,
@@ -176,10 +176,10 @@ function goto_progress(status) {
   });
 
   // Set compile button.
-  $('#geo_compile_btn').click(function () {
+  progress_container.find('#geo_compile_btn').click(function () {
     // Set loading spinner.
     var btn = $('#geo_compile_modal_btn');
-    var spinner = $('#geo_compile_loading_spinner');
+    var spinner = btn.children('.loading_spinner');
     set_loading_spinner(btn, spinner);
 
     var target = 'cgi_request.php';
@@ -188,6 +188,59 @@ function goto_progress(status) {
       action: 'prepare_geo'
     }
     send_ajax_request(target, data, null, true);
+  });
+
+  // Set submit button.
+  progress_container.find('#geo_submit_btn').click({
+    progress_container: progress_container
+  }, function (e) {
+    var progress_container = e.data.progress_container;
+    var groups = {
+      geo_username: progress_container.find('.geo_username_group'),
+      ftp_host: progress_container.find('.ftp_host_group'),
+      ftp_username: progress_container.find('.ftp_username_group'),
+      ftp_password: progress_container.find('.ftp_password_group')
+    };
+    // Make new object.
+    var obj = {
+      geo_username: '',
+      ftp_host: '',
+      ftp_username: '',
+      ftp_password: ''
+    };
+
+    // Fetch inputs.
+    var valid = true;
+    for (var key in groups) {
+      var group = groups[key];
+      group.find('input').removeClass('is-invalid');
+      var val = get_value_from_group_textbox(group);
+
+      if (val != null && val != '') {
+        obj[key] = val;
+      } else {
+        group.find('input').addClass('is-invalid');
+        valid = false;
+      }
+    }
+
+    if (valid) {
+      // Dismiss modal.
+      var btn = $('#geo_submit_modal_btn');
+      var spinner = btn.children('.loading_spinner');
+      set_loading_spinner(btn, spinner);
+      progress_container.find('#geo_submit_modal').modal('hide');
+      function callback() {
+        var target = 'cgi_request.php';
+        var data = {
+          id: proj_id,
+          action: 'submit_geo'
+        }
+        // send_ajax_request(target, data, null, false);
+      }
+
+      write_object_to_temp(obj, 'ftp_info', callback);
+    }
   });
 
   // Set output listeners for live output.
@@ -420,8 +473,8 @@ function set_progress(status) {
       break;
     case progress.geo_submitting:
       elements.geo_compile_modal_btn.prop('disabled', true);
-      elements.geo_compile_modal_btn.children('.success_check').hide();
-      elements.geo_compile_modal_btn.children('.loading_spinner').show();
+      elements.geo_compile_modal_btn.children('.success_check').show();
+      elements.geo_compile_modal_btn.children('.loading_spinner').hide();
 
       elements.geo_submit_modal_btn.prop('disabled', true);
       elements.geo_submit_modal_btn.children('.success_check').hide();
@@ -5543,6 +5596,9 @@ function parse_proj_status(out) {
     case progress.finalized:
       console.log('status: finalized');
 
+    case progress.diff_error:
+    case progress.quant_error:
+    case progress.qc_error:
     case progress.qc_queued:
     case progress.qc_started:
     case progress.qc_finished:
@@ -5553,8 +5609,11 @@ function parse_proj_status(out) {
     case progress.diff_started:
     case progress.diff_finished:
     case progress.server_open:
+    case progress.geo_compiling:
+    case progress.geo_compiled:
+    case progress.geo_submitting:
+    case progress.geo_submitted:
       goto_progress(status);
-
       break;
 
   }
