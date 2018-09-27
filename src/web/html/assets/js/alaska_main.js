@@ -482,8 +482,8 @@ function set_progress(status) {
       break;
     case progress.geo_submitted:
       elements.geo_compile_modal_btn.prop('disabled', true);
-      elements.geo_compile_modal_btn.children('.success_check').hide();
-      elements.geo_compile_modal_btn.children('.loading_spinner').show();
+      elements.geo_compile_modal_btn.children('.success_check').show();
+      elements.geo_compile_modal_btn.children('.loading_spinner').hide();
 
       elements.geo_submit_modal_btn.prop('disabled', true);
       elements.geo_submit_modal_btn.children('.loading_spinner').hide();

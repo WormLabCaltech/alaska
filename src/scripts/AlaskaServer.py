@@ -994,10 +994,10 @@ class AlaskaServer(Alaska):
                  <hr> \
                  <p>Project ID: {}<br> \
                  Unique URL: <a href="{}">{}</a><br> \
-                 FTP server: alaska.caltech.edu \
-                 FTP port: 21 \
-                 FTP username: {} \
-                 FTP password: {} \
+                 FTP server: alaska.caltech.edu<br> \
+                 FTP port: 21<br> \
+                 FTP username: {}<br> \
+                 FTP password: {}<br> \
                  This message was sent to {} at {}.</p> \
                 </body> \
             </html> \
@@ -1744,7 +1744,7 @@ class AlaskaServer(Alaska):
         if email:
             subject = 'Project has been submitted to GEO'
             msg = 'Project {} has been successfully submitted to GEO.<br>'.format(_id)
-            msg += 'Please send an eemail to <a href="mailto:{}">{}</a>'.format(Alaska.GEO_EMAIL, Alaska.GEO_EMAIL)
+            msg += 'Please send an email to <a href="mailto:{}">{}</a>'.format(Alaska.GEO_EMAIL, Alaska.GEO_EMAIL)
             msg += ' with the following information:<br>'
             msg += '1) GEO account user name (<strong>{}</strong>)<br>'.format(geo_uname)
             msg += '2) Name of the archive file deposited (<strong>{}</strong>)<br>'.format(fname)
