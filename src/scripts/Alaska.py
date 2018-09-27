@@ -133,6 +133,7 @@ class Alaska():
         'test_read_quant':      b'\x50',
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
+        'cleanup':              b'\x90',
         'remove_proj':          b'\x91',
         'get_queue':            b'\x92',
         'is_online':            b'\x93',

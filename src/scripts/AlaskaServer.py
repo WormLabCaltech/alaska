@@ -1995,10 +1995,13 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    def cleanup(self):
+    def cleanup(self, _id=None, close=True):
         """
         Cleans up projects saves and jobs.
         """
+        if _id is not None and close:
+            self.close(_id)
+
         # First, deal with projects.
         self.out('INFO: cleaning up projects')
         for fname in os.listdir(Alaska.PROJECTS_DIR):
