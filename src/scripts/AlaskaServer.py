@@ -2008,6 +2008,7 @@ class AlaskaServer(Alaska):
         obj = self
         try:
             for name in split:
+                print(name)
                 obj = getattr(obj, name)
 
             # Print the object.
