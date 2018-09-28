@@ -2003,6 +2003,7 @@ class AlaskaServer(Alaska):
         The id is the variable.
         Period (.) is the separator.
         """
+        print(_id)
         split = _id.split('.')
 
         obj = self
