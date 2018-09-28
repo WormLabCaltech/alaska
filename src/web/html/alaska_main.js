@@ -3897,6 +3897,7 @@ function validate_sample_meta_inputs(inputs, sample_form) {
                   failed_fields[class_name].push('A read can not be assigned to multiple pairs.');
                 }
               }
+            }
           }
           break;
 

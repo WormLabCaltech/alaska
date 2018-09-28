@@ -1997,6 +1997,28 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
+    def get_var(self, _id):
+        """
+        Returns the requested variable.
+        The id is the variable.
+        Period (.) is the separator.
+        """
+        split = _id.split('.')
+
+        obj = self
+        try:
+            for name in split:
+                    obj = getattr(obj, name)
+
+            # Print the object.
+            self.respond(_id, str(obj))
+        except Exception as e:
+            self.respond(_id, 'ERROR: {} does not exist'.format(_id))
+            raise e
+
+        self.close(_id)
+
+
     def reset(self, _id=None, close=True):
         """
         Resets the server to initial state.
