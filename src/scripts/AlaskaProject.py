@@ -163,7 +163,7 @@ class AlaskaProject(Alaska):
         """
         Unpacks read archive.
         """
-        Archive(fname).extractall(fname + '_extracted', auto_create_dir=True)
+        Archive(fname).extractall(fname + '_ext', auto_create_dir=True)
 
     def infer_samples(self, f, temp=None, md5=True):
         """
@@ -178,6 +178,11 @@ class AlaskaProject(Alaska):
         # # make sure that md5 checksums have been calculated
         # if md5 and len(self.chk_md5) == 0:
         #     raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+
+        # Reset samples if we have already inferred them.
+        for sample_id, sample in self.samples.items():
+            if temp is not None and sample_id in temp:
+                del temp[sample_id]
 
         # loop through each folder with sample
         self.samples = {}

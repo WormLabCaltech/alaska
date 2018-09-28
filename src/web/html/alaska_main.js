@@ -1030,7 +1030,10 @@ function show_sample_name_input() {
   var second = $('#sample_names_modal');
 
   // First, add event listener for modal hide.
-  first.on('hidden.bs.modal', function (e) {
+  first.on('hidden.bs.modal', {
+    'second': second
+  }, function (e) {
+    var second = e.data.second;
     second.modal('show');
     $(this).off('hidden.bs.modal');
   });
@@ -1157,6 +1160,7 @@ function infer_samples() {
   // Show the loading spinner.
   var button = $('#infer_samples_btn');
   var spinner = $('#infer_samples_loading_spinner');
+  var width = button.width();
   set_loading_spinner(button, spinner);
 
   // Send fetch_reads request.
@@ -1166,7 +1170,7 @@ function infer_samples() {
     id: proj_id
   };
   var callback = parse_infer_samples;
-  send_ajax_request(target, data, callback, true);
+  send_ajax_request(target, data, callback, true, button, spinner, width);
 }
 
 /**
@@ -3197,7 +3201,7 @@ function get_values_from_single_collapse(collapse) {
  * Gets read pairs.
  */
 function get_values_from_paired_collapse(collapse) {
-  var pair_divs = collapse.children('div:not(style*="display:none")');
+  var pair_divs = collapse.children('div:not([style*="display:none"])');
 
   var pairs = [];
 
@@ -3877,6 +3881,22 @@ function validate_sample_meta_inputs(inputs, sample_form) {
               valid = false;
               failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
             }
+          } else if (type == 2) {
+            var reads = {};
+            for (var i = 0; i < reads.pairs.length; i++) {
+              for (var j = 0; j < reads.pairs[i].length; j++) {
+                var read = reads.pairs[i][j];
+                var select = form_group.find('option[value="' + read +'"]');
+
+                if (!(read in reads)) {
+                  reads[read] = select;
+                } else {
+                  select.addClass('is-invalid');
+                  reads[read].addClass('is-invalid');
+                  valid = false;
+                  failed_fields[class_name].push('A read can not be assigned to multiple pairs.');
+                }
+              }
           }
           break;
 
@@ -5496,7 +5516,7 @@ function parse_reads(out) {
       'order': [[0, 'asc']],
       'searching': false,
       'paging': false,
-      'scrollY': 500,
+      // 'scrollY': 500,
       'columnDefs':[{
         'targets':[2,3],
         'orderable': false
@@ -5515,7 +5535,7 @@ function parse_md5(out, md5_id, spinner_id) {
 }
 
 
-function parse_infer_samples(out) {
+function parse_infer_samples(out, button, spinner, width) {
   // Split by first opening bracket.
   var i = out.indexOf('{');
   var split = out.slice(i);
@@ -5531,8 +5551,29 @@ function parse_infer_samples(out) {
   // Parse json.
   proj = JSON.parse(dump);
 
-  set_sample_name_input(proj);
-  show_sample_name_input();
+  // Make sure there are at least 4 samples.
+  if (Object.keys(proj.samples).length < 4) {
+    // Reset start annotation button.
+    button.prop('disabled', false);
+    spinner.hide();
+    button.width(width);
+
+    var first = $('#infer_samples_modal');
+    var second = $('#sample_count_modal');
+
+    first.on('hidden.bs.modal', {
+      'second': second
+    }, function (e) {
+      var second = e.data.second;
+      second.modal('show');
+      $(this).off('hidden.bs.modal');
+    });
+
+    first.modal('hide');
+  } else {
+    set_sample_name_input(proj);
+    show_sample_name_input();
+  }
 }
 
 function parse_organisms(out, select) {

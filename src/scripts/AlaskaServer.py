@@ -1164,9 +1164,8 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: getting raw reads'.format(_id))
 
-        # if project exists, check if raw reads have already been calculated
-        if len(proj.raw_reads) == 0:
-            proj.get_raw_reads()
+        # always reset raw reads every time this is called
+        proj.get_raw_reads()
 
         # if md5 checksums are empty
         if md5:
