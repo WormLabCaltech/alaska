@@ -5061,16 +5061,8 @@ $(document).ready(function() {
   } else if (pathname.includes('faq.html')) {
 
   } else {
-    // Otherwise, assume we are at home.
-    url_params = get_url_params();
-    console.log(url_params);
-    // If we are given an id, we need to resume where we left off with that project.
-    if (url_params.has('id')) {
-      proj_id = url_params.get('id');
-
-      // Go to whatever step we need to go to.
-      get_proj_status();
-    }
+    // Fetch server status.
+    get_server_status();
 
     if (url_params.has('testing')) {
       if (url_params.get('testing') == 'true') {
@@ -5096,9 +5088,17 @@ $(document).ready(function() {
 
     raw_reads_div = $('#raw_reads_div').clone(true);
     controls_modal = $('#choose_controls_modal').clone(true);
+    
+    // Otherwise, assume we are at home.
+    url_params = get_url_params();
+    console.log(url_params);
+    // If we are given an id, we need to resume where we left off with that project.
+    if (url_params.has('id')) {
+      proj_id = url_params.get('id');
 
-    // Fetch server status.
-    get_server_status();
+      // Go to whatever step we need to go to.
+      get_proj_status();
+    }
   }
 
 });
