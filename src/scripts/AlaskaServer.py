@@ -25,7 +25,6 @@ import time
 import json
 import stat
 import queue
-import pprint
 import signal
 import docker
 import shutil
@@ -2015,7 +2014,7 @@ class AlaskaServer(Alaska):
                     obj = getattr(obj, name)
 
             # Print the object.
-            self.respond(_id, pprint.pformat(obj))
+            self.respond(_id, str(obj))
         except Exception as e:
             self.respond(_id, 'ERROR: {} does not exist'.format(_id))
             traceback.print_exc()

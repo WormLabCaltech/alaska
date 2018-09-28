@@ -347,7 +347,7 @@
             </div>
             <div class="form-group row proj_sra_center_code_group">
                 <div class="col-sm-4">
-                    <label for="proj_sra_center_code" class="col-form-label">SRA Center Code</label>
+                    <label for="proj_sra_center_code" class="col-form-label">SRA center code</label>
                     <small id="proj_sra_center_code_help" class="form-text text-muted">Leave blank if you don’t have one.</small>
                 </div>
                 <div class="col-sm-3">
@@ -1260,12 +1260,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center text-white" style="font-size:3em;margin-bottom:0px;">We've created a new project for you.</h1>
+                    <h1 class="text-center text-light" style="font-size:3em;margin-bottom:0px;">We've created a new project for you.</h1>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center" style="color:rgb(255,255,255);font-weight:100;font-size:2em;">Please follow the instructions below.</h2>
+                    <h2 class="text-center text-light" style="font-weight:100;font-size:2em;">Please follow the instructions below.</h2>
                 </div>
             </div>
             <div class="row mt-5">
@@ -1282,7 +1282,7 @@
     <div class="card text-white border-warning" style="background-color:transparent;">
         <h5 class="card-header">2. Preparing your reads for upload</h5>
         <div class="card-body">
-            <p class="card-text">Alaska accepts <mark><code>.fastq</code></mark> or <mark><code>.fastq.gz</code></mark> files in both compressed or non-compressed folders. The recommended compression format for folders is <mark><code>.tar.gz</code></mark>.</p>
+            <p class="card-text">Alaska accepts <mark><code>.fastq</code></mark> or <mark><code>.fastq.gz</code></mark> files in both compressed or non-compressed folders. The recommended compression format for folders is <mark><code>.tar.gz</code></mark>. For more information on supported formats, please check our FAQ page <a class="text-warning" href="faq.html#faq_extensions" target="_blank">here</a>.</p>
             <p class="card-text text-center">
                 <!--See example button trigger for modal-->
                 <button id="read_example_btn" class="btn btn-warning mt-2" type="button" data-toggle="modal" data-target="#read_example_modal">See examples</button>
@@ -1295,6 +1295,9 @@
                             <h5 class="modal-title"><i class="fa fa-file mr-2"></i>Valid submission examples</h5>
                         </div>
                         <div class="modal-body text-dark">
+                            <div class="alert alert-warning">
+                                Please note that you must have at least two replicates for each perturbation (including your control). This means you must submit at least 4 samples. The example below uses 2 samples for simplicity.
+                            </div>
                             <p>For all the examples, we are working with a project with 2 samples, with 4 read files each (for a total of 8 read files).</p>
                             <h5>Without folders</h5>
                             <p>You will prepare 2 archives, one for each sample, containing all the reads for their corresponding sample. Here is what it would look like.</p>
@@ -1373,7 +1376,7 @@
     <div class="card text-white border-danger" style="background-color:transparent;">
         <h5 class="card-header">3. Uploading your reads</h5>
         <div class="card-body">
-            <p class="card-text">Reads can only be uploaded using an FTP service. Large files may be transferred through a server. If you are not familiar with FTP transfers, we recommend that you use an FTP client, such as Cyberduck.</p>
+            <p class="card-text">Reads can only be uploaded using an FTP service. Large files may be transferred through a server. If you are not familiar with FTP transfers, we recommend that you use an FTP client, such as <a href="https://cyberduck.io/" target="_blank">Cyberduck</a>.</p>
             <!--
             <dl class="row" style="font-size:0.8em">
                 <dt class="col-sm-4">Server</dt>
@@ -1446,12 +1449,12 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center text-white" id="fetch_reads_results_header_1" style="font-size:3em;margin-bottom:0px;">We have received your reads!</h1>
+                    <h1 class="text-center text-light" id="fetch_reads_results_header_1" style="font-size:3em;margin-bottom:0px;">We have received your reads!</h1>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <h2 class="text-center text-white" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.5em;">This is the directory structure that we received. Please check it to make sure that the directory structure is correct and that all the files are listed within the folders you intended. Any files that are missing from this list will
+                    <h2 class="text-center text-light" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.5em;">This is the directory structure that we received. Please check it to make sure that the directory structure is correct and that all the files are listed within the folders you intended. Any files that are missing from this list will
                         not be used in downstream analyses.</h2>
                 </div>
             </div>
@@ -1491,7 +1494,7 @@
 <div class="modal fade" id="sample_count_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header alert-primary">
+            <div class="modal-header alert-danger">
                 <h5 class="modal-title">Not enough samples.</h5>
             </div>
             <div class="modal-body text-dark">
@@ -1563,13 +1566,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="text-center text-warning" id="fetch_reads_results_header_1" style="color:rgb(255,255,255);font-size:2.5em;margin-bottom:0px;">Alaska couldn't find any files... :(</h1>
+                    <h1 class="text-center text-warning text-light" id="fetch_reads_results_header_1" style="font-size:2.5em;margin-bottom:0px;">Alaska couldn't find any files... :(</h1>
                 </div>
             </div>
             <div class="row">
-                <div class="col">
-                    <h2 class="text-truncate text-center text-warning" id="fetch_reads_results_header_2" style="color:rgb(255,255,255);font-weight:100;font-size:1.8em;">Please check if the FTP transfer was successful.</h2>
-                </div>
+                <div class="col"><h2 class="text-center text-light" id="fetch_reads_results_header_2" style="font-weight:100;font-size:1.8em;">Please check if the FTP transfer was successful, or that all your uploads are in one of the <a class="text-warning" href="faq.html#faq_extensions">supported formats</a>.</h2></div>
             </div>
             <div class="row">
                 <div class="col d-flex justify-content-center"><button class="btn btn-primary btn-lg d-flex align-items-center" type="button" id="refetch_reads_btn_2">Re-fetch reads</button></div>
