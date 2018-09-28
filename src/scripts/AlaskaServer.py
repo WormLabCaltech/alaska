@@ -492,13 +492,13 @@ class AlaskaServer(Alaska):
                 raise Exception('ERROR: code {} was not recognized'.format(request[1]))
             _id = request[0].decode(Alaska.ENCODING)
 
-            # Deal with 'check' first.
-            if request[1] == Alaska.CODES['check']:
-                self.CODES[request[1]](_id)
-            elif not _id.startswith('_'):
-                # check if it exists
-                if not self.exists(_id):
-                    raise Exception('{}: does not exist'.format(_id))
+            # # Deal with 'check' first.
+            # if request[1] == Alaska.CODES['check']:
+            #     self.CODES[request[1]](_id)
+            # elif not _id.startswith('_'):
+            #     # check if it exists
+            #     if not self.exists(_id):
+            #         raise Exception('{}: does not exist'.format(_id))
 
             # distribute message to appropriate method
             self.CODES[request[1]](_id)
@@ -2003,13 +2003,11 @@ class AlaskaServer(Alaska):
         The id is the variable.
         Period (.) is the separator.
         """
-        print(_id)
         split = _id.split('.')
 
         obj = self
         try:
             for name in split:
-                print(name)
                 obj = getattr(obj, name)
 
             # Print the object.
