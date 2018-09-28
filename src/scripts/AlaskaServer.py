@@ -2014,6 +2014,7 @@ class AlaskaServer(Alaska):
             self.respond(_id, str(obj))
         except Exception as e:
             self.respond(_id, 'ERROR: {} does not exist'.format(_id))
+            traceback.print_exc()
             raise e
 
         self.close(_id)
@@ -2083,7 +2084,7 @@ class AlaskaServer(Alaska):
         for proj_id, proj in self.projects.items():
             try:
                 email = proj.meta['corresponding']['email']
-                delta = dt.datetime.now() - dt.datetime.strptime(proj.meta['datetime'], Alaska.DATETIME_FORMAT)
+                delta = dt.datetime.now() - dt.datetime.strptime(proj.datetime, Alaska.DATETIME_FORMAT)
                 seconds = delta.total_seconds()
                 minutes = seconds / 60
                 hours = minutes / 60
