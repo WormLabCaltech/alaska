@@ -5064,15 +5064,6 @@ $(document).ready(function() {
     // Fetch server status.
     get_server_status();
 
-    if (url_params.has('testing')) {
-      if (url_params.get('testing') == 'true') {
-        console.log('testing: true');
-        testing = true;
-      }
-      // Enable all testing elements.
-      $('.testing').show();
-    }
-
     // initialize tooltips
     $(function () {
       $('[data-toggle="tooltip"]').tooltip()
@@ -5088,10 +5079,18 @@ $(document).ready(function() {
 
     raw_reads_div = $('#raw_reads_div').clone(true);
     controls_modal = $('#choose_controls_modal').clone(true);
-    
+
     // Otherwise, assume we are at home.
     url_params = get_url_params();
     console.log(url_params);
+    if (url_params.has('testing')) {
+      if (url_params.get('testing') == 'true') {
+        console.log('testing: true');
+        testing = true;
+      }
+      // Enable all testing elements.
+      $('.testing').show();
+    }
     // If we are given an id, we need to resume where we left off with that project.
     if (url_params.has('id')) {
       proj_id = url_params.get('id');
