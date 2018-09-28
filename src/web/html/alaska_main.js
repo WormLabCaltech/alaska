@@ -3224,7 +3224,7 @@ var class_names_to_labels = {
   sample_characteristics_group: 'Misc. characteristics',
   sample_sequencing_platform_group: 'Sequencing platform',
   sample_sequenced_molecules_group: 'Sequenced molecules',
-  sample_read_type_group: 'Read type'
+  sample_read_type_group: 'Read type',
   sample_name_group: 'Name',
   sample_description_group: 'Description',
   sample_factors_1_group: 'Factor 1',
