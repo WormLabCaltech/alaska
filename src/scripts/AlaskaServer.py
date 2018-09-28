@@ -25,6 +25,7 @@ import time
 import json
 import stat
 import queue
+import pprint
 import signal
 import docker
 import shutil
@@ -2008,10 +2009,13 @@ class AlaskaServer(Alaska):
         obj = self
         try:
             for name in split:
-                obj = getattr(obj, name)
+                if type(obj) is dict:
+                    obj = obj[name]
+                else:
+                    obj = getattr(obj, name)
 
             # Print the object.
-            self.respond(_id, str(obj))
+            self.respond(_id, pprint.pformat(obj))
         except Exception as e:
             self.respond(_id, 'ERROR: {} does not exist'.format(_id))
             traceback.print_exc()
