@@ -2008,7 +2008,7 @@ class AlaskaServer(Alaska):
         obj = self
         try:
             for name in split:
-                    obj = getattr(obj, name)
+                obj = getattr(obj, name)
 
             # Print the object.
             self.respond(_id, str(obj))
