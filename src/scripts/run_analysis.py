@@ -18,16 +18,18 @@ import sys
 import time
 import json
 import queue
+import tarfile
 from threading import Thread
-from multiprocessing import Process, Pool
+import multiprocessing as mp
+from multiprocessing import Process
 import subprocess as sp
 
-def print_with_flush(str='', **kwargs):
+def print_with_flush(s='', **kwargs):
     """
     Prints the given string and passes on additional kwargs to the builtin
     print function. This function flushes stdout immediately.
     """
-    print(str, **kwargs)
+    print(s, **kwargs)
     sys.stdout.flush()
 
 def load_proj(_id):
@@ -48,24 +50,106 @@ def run_sys(cmd, prefix=''):
     print_with_flush('# ' + ' '.join(cmd))
     output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
+        # while p.poll() is None:
+        #     try:
+        #         line, _err = p.communicate(timeout=30)
+        #
+        #         if not line.isspace() and len(line) > 1:
+        #             output += line
+        #             print_with_flush('{}: {}'.format(prefix, line), end='')
+        #     except sp.TimeoutExpired:
+        #         sys.stdout.flush()
+        #         if p.poll() is None:
+        #             continue
+        #         else:
+        #             break
+        #
+        output = ''
         while p.poll() is None:
-            try:
-                line, _err = p.communicate(timeout=5)
-            except TimeoutExpired:
-                print_with_flush('timeout')
+            line = p.stdout.readline()
+            if not line.isspace() and len(line) > 1:
+                output += line
+                print(prefix + ': ' + line, end='')
                 sys.stdout.flush()
-                if p.poll() is None:
-                    continue
-                else:
-                    break
-
-            output += line
-            print_with_flush(prefix + ': ' + line, end='')
+        p.stdout.read()
+        # p.stderr.read()
+        p.stdout.close()
+        # p.stderr.close()
 
         if p.returncode != 0:
             sys.exit('command terminated with non-zero return code {}!'.format(p.returncode))
 
     return output
+
+def archive(out, source_dir):
+    """
+    Archive given source directory into output file.
+    """
+    with tarfile.open(out, 'w:gz') as tar:
+        if isinstance(source_dir, str):
+            tar.add(source_dir, arcname=os.path.sep)
+        else:
+            for d in source_dir:
+                tar.add(d, arcname=os.path.sep)
+
+######### These functions must be here to allow multiprocessing.
+def read_distribution(_id, bed_path):
+    """
+    Helper function to run read_distribution.py
+    """
+    args = ['read_distribution.py']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
+    args += ['-r', bed_path]
+
+    # print_with_flush(args)
+    output = run_sys(args, prefix=_id)
+    # output file
+    with open('{}_distribution.txt'.format(_id), 'w') as out:
+        out.write(output)
+
+
+def geneBody_coverage(_id, bed_path):
+    """
+    Helper function to run geneBody_coverage.py
+    """
+    args = ['geneBody_coverage.py']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
+    args += ['-r', bed_path]
+    args += ['-o', '{}_coverage'.format(_id)]
+
+    run_sys(args, prefix=_id)
+
+def tin(_id, bed_path):
+    """
+    Helper function to run tin.py
+    """
+    args = ['tin.py']
+    args += ['-i', '{}_sorted.bam'.format(_id)]
+    args += ['-r', bed_path]
+
+    output = run_sys(args, prefix=_id)
+    # output file
+    with open('{}_tin.txt'.format(_id), 'w') as out:
+        out.write(output)
+
+def fastqc(_id):
+    """
+    Helper function to run fastqc.
+    """
+    args = ['fastqc', '{}_sorted.bam'.format(_id)]
+    run_sys(args, prefix=_id)
+
+def mp_helper(f, args, name, _id):
+    """
+    Helper function for multiprocessing.
+    """
+    print_with_flush('# starting {} for {}'.format(name, _id))
+
+    f(*args)
+
+    print_with_flush('# finished {} for {}'.format(name, _id))
+######### These functions must be here to allow multiprocessing.
+
 
 def run_qc(proj, nthreads):
     """
@@ -77,21 +161,22 @@ def run_qc(proj, nthreads):
         """
         args = ['bowtie2', '-x', bt2_path]
 
+        # single/paired-end
         if t == 1:
             args += ['-U', ','.join(reads)]
-        else:
-            pair1 = []
-            pair2 = []
+        elif t == 2:
+            m1 = []
+            m2 = []
             for pair in reads:
-                pair1.append(pair[0])
-                pair2.append(pair[1])
-            args += ['-1', ','.join(pair1)]
-            args += ['-2', ','.join(pair2)]
+                m1.append(pair[0])
+                m2.append(pair[1])
+            args += ['-1', ','.join(m1)]
+            args += ['-2', ','.join(m2)]
 
-        args += ['-S', '{}/alignments.sam'.format(path)]
-        args += ['-u', str(2 * (10 ** 5))]
+        args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
+        args += ['-u', str(1 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
-        # args += ['--verbose']
+        args += ['--verbose']
         run_sys(args, prefix=_id)
 
 
@@ -99,19 +184,19 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to sort .bam
         """
-        sam_path = 'alignments.sam'
+        sam_path = '{}_alignments.sam'.format(_id)
         args = ['samtools', 'sort', sam_path]
-        sorted_bam = 'sorted.bam'
+        sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-@', str(nthreads-1)]
-        args += ['-m', '4G']
+        args += ['-m', '2G']
         run_sys(args, prefix=_id)
 
     def samtools_index(_id):
         """
         Helper function to call samtools to index .bam
         """
-        args = ['samtools', 'index', 'sorted.bam']
+        args = ['samtools', 'index', '{}_sorted.bam'.format(_id)]
         args += ['-@', str(nthreads-1)]
         run_sys(args, prefix=_id)
 
@@ -119,106 +204,31 @@ def run_qc(proj, nthreads):
         """
         Helper function to call samtools to sort .bam
         """
-        sam_path = 'alignments.sam'
+        sam_path = '{}_alignments.sam'.format(_id)
         args = ['sambamba', 'sort', sam_path]
-        sorted_bam = 'sorted.bam'
+        sorted_bam = '{}_sorted.bam'.format(_id)
         args += ['-o', sorted_bam]
         args += ['-t', str(nthreads-1)]
-        args += ['-m', '4G']
+        args += ['-m', '2G']
         run_sys(args, prefix=_id)
 
     def sambamba_index(_id):
         """
         Helper function to call samtools to index .bam
         """
-        args = ['sambamba', 'index', 'sorted.bam']
+        args = ['sambamba', 'index', '{}_sorted.bam'.format(_id)]
         args += ['-t', str(nthreads-1)]
         args += ['-p']
         run_sys(args, prefix=_id)
 
-    def read_distribution(_id, bed_path):
-        """
-        Helper function to run read_distribution.py
-        """
-        args = ['read_distribution.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-
-        # print_with_flush(args)
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}_distribution.txt'.format(_id), 'w') as out:
-            out.write(output)
-
-
-    def geneBody_coverage(_id, bed_path):
-        """
-        Helper function to run geneBody_coverage.py
-        """
-        args = ['geneBody_coverage.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-        args += ['-o', '{}_coverage'.format(_id)]
-
-        run_sys(args, prefix=_id)
-
-    def tin(_id, bed_path):
-        """
-        Helper function to run tin.py
-        """
-        args = ['tin.py']
-        args += ['-i', 'sorted.bam']
-        args += ['-r', bed_path]
-
-        output = run_sys(args, prefix=_id)
-        # output file
-        with open('{}_tin.txt'.format(_id), 'w') as out:
-            out.write(output)
-
-    def fastqc(_id):
-        """
-        Helper function to run fastqc.
-        """
-        args = ['fastqc', 'sorted.bam']
-        run_sys(args, prefix=_id)
-
-    def multiqc(_id):
+    def multiqc(_id=''):
         """
         Helper function to run multiqc.
         """
         args = ['multiqc', '.']
         run_sys(args, prefix=_id)
 
-
-    def worker(qu, i=0):
-        """
-        Worker function for multithreading.
-        """
-        while True:
-            # get item from queue
-            item = qu.get()
-
-            # a way to stop the workers
-            if item is None:
-                break
-
-            _id = item[0]
-            type = item[1]
-            path = item[2]
-            f = item[3]
-            args = item[4]
-
-            # change _id argument to reflect the thread number
-            args[0] = '[Thread-{}] {}'.format(i, args[0])
-
-            print_with_flush('# {}: starting {} on thread {}'.format(_id, type, i))
-            f(*args)
-
-            qu.task_done()
-
-
     ########## HELPER FUNCTIONS END HERE ###########
-
     print_with_flush('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print_with_flush('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')
@@ -227,10 +237,11 @@ def run_qc(proj, nthreads):
     # run kallisto to get pseudobam
     # run_kallisto(proj, nthreads, qc=True, nbootstraps=0, ver=235)
 
+    wdir = os.getcwd()
+
     for _id in proj['samples']:
         # define necessary variables
         name = proj['samples'][_id]['name']
-        wdir = os.getcwd()
         path = '1_qc/{}'.format(name)
         org = proj['samples'][_id]['organism'].split('_')
         ver = str(proj['samples'][_id]['ref_ver'])
@@ -239,20 +250,14 @@ def run_qc(proj, nthreads):
         bt2_idx = '{}_{}_{}'.format(org[0][0], org[1], ver)
         bt2_path = '/alaska/root/organisms/{}/{}/{}/index/{}'.format(org[0], org[1], ver, bt2_idx)
 
-        # get all the raw reads for this sample
-        reads = []
-        # finally, add the sample reads
-        for read in proj['samples'][_id]['reads']:
-            reads.append(read)
-
         # Align with bowtie2
         if (proj['samples'][_id]['type'] == 1):
-            bowtie2(_id, path, bt2_path, reads, 1)
+            reads = proj['samples'][_id]['reads'].keys()
         elif (proj['samples'][_id]['type'] == 2):
-            # TODO: implement
-            pass
+            reads = proj['samples'][_id]['pairs']
         else:
             print_with_flush('unrecognized sample type!')
+        bowtie2(name, path, bt2_path, reads, proj['samples'][_id]['type'])
 
         os.chdir(path)
         print_with_flush('# changed working directory to {}'.format(path))
@@ -263,26 +268,21 @@ def run_qc(proj, nthreads):
         samtools_index(_id)
         # sambamba_sort(_id)
 
-        # If nthread > 1, we want to multithread.
+        # If nthreads > 1, we want to multithread.
         if nthreads > 1:
-            with Pool(processes=nthreads) as pool:
-                # Enqueue everything here!
-                print_with_flush('# multithreading on.')
+            pool = mp.Pool(processes=nthreads)
+            print_with_flush('# multithreading on.')
 
-                pool.apply_async(read_distribution, (_id, bed_path,))
-                print_with_flush('# started read_distribution for {}'.format(_id))
+            args = [
+                [read_distribution, [_id, bed_path], 'read_distribution', _id],
+                [geneBody_coverage, [_id, bed_path], 'geneBody_coverage', _id],
+                [tin, [_id, bed_path], 'tin', _id],
+                [fastqc, [_id], 'fastqc', _id],
+            ]
 
-                pool.apply_async(geneBody_coverage, (_id, bed_path,))
-                print_with_flush('# started geneBody_coverage for {}'.format(_id))
+            # start processes
+            pool.starmap(mp_helper, args)
 
-                pool.apply_async(tin, (_id, bed_path,))
-                print_with_flush('# started tin for {}'.format(_id))
-
-                pool.apply_async(fastqc, (_id,))
-                print_with_flush('# started fastqc for {}'.format(_id))
-
-                pool.close()
-                pool.join()
         else:
             # read_distribution.py
             read_distribution(_id, bed_path)
@@ -296,11 +296,22 @@ def run_qc(proj, nthreads):
             # FastQC
             fastqc(_id)
 
-        # MultiQC
-        multiqc(_id)
+        # # MultiQC
+        # multiqc(_id)
 
         os.chdir(wdir)
         print_with_flush('# returned to {}'.format(wdir))
+
+    print_with_flush('# running multiqc for all samples')
+    path = '1_qc'
+    os.chdir(path)
+    multiqc()
+    os.chdir(wdir)
+
+    print_with_flush('# qc finished, archiving')
+    archive(path + '.tar.gz', path)
+    print_with_flush('# done')
+
 
 
 def run_kallisto(proj, nthreads):
@@ -341,36 +352,95 @@ def run_kallisto(proj, nthreads):
             length = proj['samples'][_id]['length']
             stdev = proj['samples'][_id]['stdev']
             arg = ['--single', '-l', str(length), '-s', str(stdev)]
+            args += arg
+
+            # finally, add the sample reads
+            for read in proj['samples'][_id]['reads']:
+                args.append(read)
 
         elif (proj['samples'][_id]['type'] == 2):
-            # TODO: implement
-            pass
+            for pair in proj['samples'][_id]['pairs']:
+                args.append(pair[0])
+                args.append(pair[1])
         else:
             print_with_flush('unrecognized sample type!')
-        args += arg
-
-        # finally, add the sample reads
-        for read in proj['samples'][_id]['reads']:
-            args.append(read)
 
         _id = name
 
         run_sys(args, prefix=_id)
+
+    path = '2_alignment'
+    print_with_flush('# kallisto finished, archiving')
+    archive(path + '.tar.gz', path)
+    print_with_flush('# done')
 
 
 def run_sleuth(proj):
     """
     Runs differential expression analysis with sleuth.
     Assumes that the design matrix is already present in the directory.
+    Once sleuth is finished, runs TEA.
     """
+    def run_tea(d):
+        """
+        Runs TEA on sleuth output.
+        """
+        try:
+            import tissue_enrichment_analysis as tea
+        except ImportError as e:
+            print_with_flush('# TEA is not installed...skipping')
+            sys.exit(0)
+        try:
+            import pandas as pd
+        except ImportError as e:
+            print_with_flush('# pandas is not installed...skipping')
+            sys.exit(0)
+
+        analyses = ['tissue', 'phenotype', 'go']
+
+        # Load sleuth results.
+        wdir = os.getcwd()
+        print_with_flush('# entering 3_diff_exp')
+        os.chdir(d)
+        for file in os.listdir():
+            if file.startswith('sleuth_table') and file.endswith('.csv') and not file.endswith(('tissue.csv', 'phenotype.csv', 'go.csv')):
+                df = pd.read_csv(file, index_col=0)
+                gene_list = df[df.qval < 0.05].ens_gene
+                name = os.path.splitext(file)[0]
+
+                for analysis in analyses:
+                    print_with_flush('# performing {} enrichment analysis for {}'.format(analysis, file))
+                    title = '{}_{}'.format(name, analysis)
+                    fname = '{}.csv'.format(title)
+                    df_dict = tea.fetch_dictionary(analysis)
+                    df_results = tea.enrichment_analysis(gene_list, df_dict, aname=fname, save=True)
+                    tea.plot_enrichment_results(df_results, analysis=analysis, title=title, save=True)
+        os.chdir(wdir)
+        print_with_flush('# returned to root')
+
     args = ['Rscript']
     args += ['./sleuth.R']
-    args += ['-d', '.']
+    args += ['-d', './3_diff_exp']
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
     # args += ['--shiny']
 
     run_sys(args)
+    path = '3_diff_exp'
+    print_with_flush('# sleuth finished, starting enrichment analysis')
+    run_tea(path)
+    print_with_flush('# enrichment analysis finished, archiving')
+    archive(path + '.tar.gz', path)
+
+    # Archive all
+    print_with_flush('# all analyses finished, archiving entire project')
+    dirs_to_archive = []
+    for d in os.listdir():
+        if d != '_temp' and d != '0_raw_reads' and not d.endswith('.tar.gz'):
+            dirs_to_archive.append(d)
+    archive(proj['id'] + '.tar.gz', dirs_to_archive)
+    print_with_flush('# done')
+
 
 if __name__ == '__main__':
     import argparse

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html style="background-color: #eaeeef;">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Alaska</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/alaska.css">
+    <link rel="stylesheet" href="assets/css/check.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker3.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="assets/css/loading.css">
+    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="assets/css/spinner.css">
+</head>
+
+<body style="background-color:transparent;">
+    <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean" id="navbar_nav" style="background-color:#3f6075;">
+        <div class="container"><a class="navbar-brand text-light" href="https://wormbase.org" target="_blank">WormBase</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div
+                class="collapse navbar-collapse" id="navcol-1">
+                <ul class="nav navbar-nav ml-auto navbar-right">
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="/">Home</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="about.html">About</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link active text-light" href="faq.html">FAQ</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link text-light" href="contact.html">Contact us</a></li>
+                </ul><span class="ml-auto navbar-text" style="color: #3f6075;">Server Status:&nbsp;<span class="badge badge-pill badge-warning flash animated infinite" id="server_status_badge" style="background-color: #3f6075;color: #3f6075;">Loading...</span>
+                <span
+                    class="badge badge-pill badge-info ml-1" style="background-color: #3f6075;color: #3f6075;">alpha</span>
+                    </span>
+        </div>
+        </div>
+    </nav><div class="container-fluid" id="main_content_div" style="margin-top: 7em;margin-bottom: 2em">
+    <div class="row d-flex justify-content-center align-items-center mx-5">
+        <div class="col">
+            <h1 class="text-left display-4" style="color: #3f6075;">Frequently Asked Questions</h1>
+            <hr>
+            <div class="faq_group mb-5" id="faq_alaska">
+                <h3>What is Alaska?</h3>
+                <p class="lead" style="font-weight:400">Alaska is a program that is meant to help you perform RNA-sequence analysis. At the moment, Alaska can help you analyze RNA-seq experiments that compare mutants-vs-wild-type as well as two-factor designs where there are two distinct perturbations.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_use">
+                <h3>How do I start using Alaska?</h3>
+                <p class="lead" style="font-weight:400">Go to the <a href="index.html">homepage</a> and follow the instructions!</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_organisms">
+                <h3>What organisms do Alaska support?</h3>
+                <p class="lead" style="font-weight:400">At this moment, Alaska supports <i>C. elegans</i> only.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_more_organisms">
+                <h3>Are there plans to support more organisms?</h3>
+                <p class="lead" style="font-weight:400">Yes. Eventually.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_contact">
+                <h3>How do I get help? How do I contact WormBase?</h3>
+                <p class="lead" style="font-weight:400">Click on the <a href="contact.html">Contact us</a> links and follow the instructions!</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_free">
+                <h3>Is Alaska free?</h3>
+                <p class="lead" style="font-weight:400">Yes. Alaska is completely free to use.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_open_source">
+                <h3>Is Alaska open-source?</h3>
+                <p class="lead" style="font-weight:400">Yes, as is all the software that Alaska uses. You may access the full source code on Github <a href="https://github.com/WormLabCaltech/alaska" target="_blank">here</a>.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_improve">
+                <h3>How do I help improve Alaska?</h3>
+                <p class="lead" style="font-weight:400">Please <a href="contact.html">contact</a> us if you run into problems. We need to know about bugs so we can fix them.</p>
+            </div>
+            <hr>
+            <div class="faq_group mb-5" id="faq_return">
+                <h3>I closed my browser while I was preparing my project! How do I get back to where I left off?</h3>
+                <p class="lead" style="font-weight:400">No worries. You may return to your project at any time with the unique URL for your project. If you know your project ID, you may manually enter the URL into your browser: <code>http://alaska.caltech.edu/?id=[PROJECT_ID]</code>, replacing the <code>[PROJECT_ID]</code> with your actual project ID.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_upload">
+                <h3>How do I upload my reads?</h3>
+                <p class="lead" style="font-weight:400">Raw reads can be uploaded using an FTP client. Alternatively, you can upload your reads through the command-line setting up an FTP connection. In the past, <a href="https://cyberduck.io/" target="_blank">Cyberduck</a> has worked well for us.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_store_time">
+                <h3>How long will my reads be stored?</h3>
+                <p class="lead" style="font-weight:400">We will store your reads for up to 10 days after the time your project was created. After that, Alaska will automatically remove them, so that we can free up space for other users to upload their reads as well. Your analysis results, including the Read Quantification &amp; Alignment and Differential Expression Analysis, will be stored indefinitely.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_public">
+                <h3>If I upload my reads, does that mean they are open to the public?</h3>
+                <p class="lead" style="font-weight:400">No. Alaska will not make any of your data public.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_extensions">
+                <h3>What file extensions are supported by Alaska?</h3>
+                <p class="lead" style="font-weight:400">Alaska supports a variety of compression formats. Raw reads may either be <code>.fastq</code> or <code>.fastq.gz</code>. Archives may be <code>.tar.gz</code>, <code>.tar</code>, <code>.zip</code>, or <code>.rar</code>,</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_no_show">
+                <h3>Alaska doesn't show some of my files! What should I do?</h3>
+                <p class="lead" style="font-weight:400">Please ensure all of the files you uploaded are in one of the supported formats, as described above.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_checksums">
+                <h3>What are MD5 checksums?</h3>
+                <p class="lead" style="font-weight:400">MD5 checksums are unique identifiers for your files. This is a way to make sure that a file got transferred correctly.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_checksums_incorrect">
+                <h3>Some of the MD5 checksums are incorrect. What should I do?</h3>
+                <p class="lead" style="font-weight:400">You will need to reupload your reads. When the MD5 checksums do not agree, it is a sign the file was corrupted during transfer.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_sample_number">
+                <h3>Alaska detects the wrong number of samples. What should I do?</h3>
+                <p class="lead" style="font-weight:400">Alaska identifies samples by the directory structure. Please make sure each of your samples are in their own directory, and that all of your uploaded files are in one of the supported formats.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_factor">
+                <h3>What are "factor"s?</h3>
+                <p class="lead" style="font-weight:400">“Factor” in statistics means an experimental perturbation. So, for example, the comparison between a mutant genotype and a wild-type has “genotype” as the factor, since this is the variable we would like to contrast between the samples.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_designs">
+                <h3>What are 1-factor and 2-factor designs?</h3>
+                <p class="lead" style="font-weight:400">A 1-factor design only compares a single kind of experimental perturbation to a baseline. An example of a 1-factor design is a design where we find the differentially expressed genes of several single mutant genotypes relative to a wild-type control.</p>
+                <p class="lead" style="font-weight:400">In a 2-factor design, we now have two kinds of experimental perturbations. For example, we may be interested in simultaneously exploring the effects of mutation and hypoxia. In this case, ‘genotype’ and ‘oxygen status’ are the two factors under investigation.</p>
+                <p class="lead" style="font-weight:400">2-factor designs are interesting because they allow us to explore the independent effects of two perturbations simultaneously without increasing the number of comparisons we are doing. So, instead of finding the differentially expressed genes in mutant animals, hypoxic animals and mutant hypoxic animals relative to the wild-type through 3-pairwise comparisons, we could fit a 2-factor design to identify the effects of hypoxia and mutation that add.</p>
+                <p class="lead" style="font-weight:400">In some cases, factor effects don’t add, however. In biology, an important kind of non-additivity is called epistasis and happens when both factors under exploration break the same module. In this case, the power of a 2-factor design lies in its ability to include a third parameter that identifies the genes where the 2-factors under investigation do not add. See <a href="https://dx.doi.org/10.1534%2Fg3.117.300080" target="_blank">this paper</a> for a thorough introduction to 2-factor designs.</p>
+                <p>NOTE: If you want to quantify non-additivity, you will need to have samples for the entire matrix of the 2-factor design. That means you need to have at least 2 replicates for each square in the grid below:</p>
+                <table class="table table-bordered col-sm-6 mx-auto table-dark">
+                    <tbody>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Factor 1 baseline</th>
+                            <th scope="col">Factor 1 perturbation</th>
+                        </tr>
+                        <tr>
+                            <th scope="col">Factor 2 baseline</th>
+                            <td class="text-success" align="center"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-success" align="center"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <th scope="col">Factor 2 perturbation</th>
+                            <td class="text-success" align="center"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-success" align="center"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="faq_group mb-5" id="faq_2-factor">
+                <h3>I want to do a 2-factor analysis, but the button is disabled!</h3>
+                <p class="lead" style="font-weight:400">You probably have not added enough samples to perform a 2-factor analysis. Please read the above for more details.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_qc_tools">
+                <h3>What tool(s) are used in the Quality Control step?</h3>
+                <ul class="lead" style="font-weight:400">
+                    <li><a href="http://bowtie-bio.sourceforge.net/bowtie2/index.shtml" target="_blank">Bowtie2</a></li>
+                    <li><a href="http://samtools.sourceforge.net/" target="_blank">Samtools</a></li>
+                    <li><a href="http://rseqc.sourceforge.net/" target="_blank">RSeQC</a></li>
+                    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
+                    <li><a href="http://multiqc.info/" target="_blank">MultiQC</a></li>
+                </ul>
+            </div>
+            <div class="faq_group mb-5" id="faq_quant_tools">
+                <h3>What tool(s) are used in the Read Alignment &amp; Quantification step?</h3>
+                <ul class="lead" style="font-weight:400">
+                    <li><a href="https://pachterlab.github.io/kallisto/" target="_blank">Kallisto</a></li>
+                </ul>
+            </div>
+            <div class="faq_group mb-5" id="faq_diff_tools">
+                <h3>What tool(s) are used in the Differential Expression Analysis step?</h3>
+                <ul class="lead" style="font-weight:400">
+                    <li><a href="http://pachterlab.github.io/sleuth/" target="_blank">Sleuth</a></li>
+                    <li><a href="https://doi.org/10.1186/s12859-016-1229-9" target="_blank">TEA</a></li>
+                </ul>
+            </div>
+            <div class="faq_group mb-5" id="faq_args">
+                <h3>How can I see the arguments used for each tool?</h3>
+                <p class="lead" style="font-weight:400">The output of each analysis contains lines starting with a hash symbol "<code>#</code>" which contain important information about the exact command and arguments used to run a specific tool. The output can be viewed either at the Analysis Progress page or in a <code>.txt</code> file within the project download.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_error">
+                <h3>I got a message saying there was an error during my analysis. What should I do?</h3>
+                <p class="lead" style="font-weight:400">Most issues are resolved by either refreshing the page or retrying the analysis. There will be a red retry icon located next to the project status indicator. If the issue persists, please <a href="contact.html">contact</a> WormBase with your project ID and analysis output.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_other_tools">
+                <h3>Are there plans to support other tools?</h3>
+                <p class="lead" style="font-weight:400">Not at the moment. Alaska is meant as a minimalist tool for molecular biologists and is developed by a very small group of people.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_time">
+                <h3>How long does analysis usually take?</h3>
+                <p class="lead" style="font-weight:400">After you've filled out the metadata, analysis can take anywhere from 30 minutes to a couple of hours. This is not including the time your project may be held in the queue.</p>
+            </div>
+            <div class="faq_group mb-5" id="faq_submit">
+                <h3>Do I have to submit my reads to the GEO through Alaska?</h3>
+                <p class="lead" style="font-weight:400">No. You may download a pre-archived file with everything you need to submit to the GEO yourself.</p>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <script src="assets/js/alaska_main.js"></script>
+    <script src="assets/js/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="assets/js/jquery-ui.min.js"></script>
+</body>
+
+</html>

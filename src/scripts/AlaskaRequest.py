@@ -22,16 +22,20 @@ class AlaskaRequest(Alaska):
     AlaskaRequest
     """
 
-    def __init__(self, port=8888):
+    def __init__(self, port=8888, _id=None):
         """
         AlaskaRequest constructor. Connects to given port.
         """
-        self.id = '_{}'.format(self.rand_str(4))
+        if _id is None:
+            self.id = '_{}'.format(self.rand_str(4))
+        else:
+            self.id = _id
 
         # connect to server
         self.PORT = port
         self.CONTEXT = zmq.Context()
         self.SOCKET = self.CONTEXT.socket(zmq.DEALER)
+        self.SOCKET.set_string(zmq.IDENTITY, self.id)
 
     def send(self, msg):
         """
@@ -43,7 +47,6 @@ class AlaskaRequest(Alaska):
 
         # TODO: how to tell if server is online?
         print('INFO: Connecting to server on port {}'.format(self.PORT))
-        self.SOCKET.setsockopt(zmq.IDENTITY, _id)
         self.SOCKET.connect('tcp://localhost:{}'.format(self.PORT))
 
         if self.check():
@@ -63,10 +66,10 @@ class AlaskaRequest(Alaska):
         self.SOCKET.send(Alaska.CODES['check'])
 
         # use poller for timeout
-        poller = zmq.Poller()
-        poller.register(self.SOCKET, zmq.POLLIN)
+        self.poller = zmq.Poller()
+        self.poller.register(self.SOCKET, zmq.POLLIN)
 
-        if poller.poll(3*1000): # wait for 3 seconds
+        if self.poller.poll(3*1000): # wait for 3 seconds
             response = self.SOCKET.recv_string()
             if response == self.id:
                 return True
@@ -75,13 +78,15 @@ class AlaskaRequest(Alaska):
         else:
             return False
 
-    def listen(self):
+    def listen(self, timeout=300):
         """
         Listen for responses.
         """
         print('INFO: Waiting for response')
         print('-' * 30)
-        while True:
+
+        # use poller for timeout
+        while self.poller.poll(timeout * 1000):
             response = self.SOCKET.recv_string()
             print(response)
 
@@ -89,15 +94,13 @@ class AlaskaRequest(Alaska):
             if response.endswith('END'):
                 self.SOCKET.close()
                 self.CONTEXT.term()
-                quit()
+                sys.exit(0)
                 break
 
 
 if __name__ == '__main__':
     import argparse
-
-    request = AlaskaRequest()
-    choices = request.CODES.keys()
+    choices = Alaska.CODES.keys()
 
     # command line arguments
     parser = argparse.ArgumentParser(description='Send request to AlaskaServer.')
@@ -113,7 +116,7 @@ if __name__ == '__main__':
     # assign ID if given
     if args.id is not None:
         print('ID: {}'.format(args.id))
-        request.id = args.id
+    request = AlaskaRequest(_id=args.id)
 
     print('INFO: Creating {} request'.format(args.action))
 

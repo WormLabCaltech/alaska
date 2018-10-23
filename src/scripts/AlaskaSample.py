@@ -28,22 +28,20 @@ class AlaskaSample(Alaska):
         self.id = _id
         self.name = name
         self.type = 1 # 1: single-end, 2: pair-end
+        self.pairs = []
         self.organism = ''
         self.ref_ver = '' # kallisto index for this sample
         self.length = 0 # used for single-end
         self.stdev = 0 # used for single-end
         self.bootstrap_n = 100 # number of bootstraps to perform
-        self.reads = [] # list of paths if single-end
+        self.reads = {} # list of paths if single-end
                         # list of lsit of paths, if pair-end
-        self.chk_md5 = [] # MD5 checksums of read files
         self.projects = [] # list of projects that refer to this sample
-
         self.meta = {} # variable for all metadata
         # from GEO submission template
         self.meta['title'] = ''
         self.meta['contributors'] = []
-        self.meta['source'] = ''
         self.meta['chars'] = {} # multiple allowed
         self.meta['description'] = ''
-        self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
+        self.meta['platform'] = ''
+        self.datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)

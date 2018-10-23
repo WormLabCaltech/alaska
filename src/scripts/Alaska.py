@@ -31,6 +31,7 @@ class Alaska():
     #                     # needs to have host's absolute path
     ROOT_DIR = 'root' # root dir
     ROOT_PATH = '/alaska/{}'.format(ROOT_DIR)
+    TRASH_DIR = 'trash'
     SAVE_DIR = 'saves' # folder to save server states
     SAVE_MAX = 20   # maximum number of saves to keep
     # IMG_DIR = 'images'
@@ -39,7 +40,10 @@ class Alaska():
     ANL_SCRIPT = 'run_analysis.py'
     SLE_SCRIPT = 'sleuth.R'
     SHI_SCRIPT = 'open_sleuth_server.R'
+    SHI_DURATION = 1 # in days
     SHI_PORTS = list(range(40000, 45000))
+    GEO_TEMP = 'seq_template_v2.1.xlsx'
+    GEO_FILE = 'seq_info.xlsx'
     JOBS_DIR = 'jobs' # jobs directory
     ORGS_DIR = 'organisms'
     REF_DIR = 'reference'
@@ -47,10 +51,16 @@ class Alaska():
     BED_DIR = 'reference/bed'
     IDX_DIR = 'index' # index directory name
     LOG_DIR = 'logs' # log directory name
+    LOG_MAX = 200
     TEMP_DIR = '_temp' # temporary files directory
     PROJECTS_DIR = 'projects' # project directory name
     PROJECT_L = 6 # length of project ids
+    FTP_PW_L = 10 # length of ftp password
+    FTP_SIZE_LIMIT = 20000 # limit to transfer size (in MB)
+    FTP_COUNT_LIMIT = 1000 # limit to number of files
     RAW_DIR = '0_raw_reads' # raw reads directory name
+    RAW_NOTIFY = 7 # notify after 7 days
+    RAW_DURATION = 10 # keep reads for a max 10 days
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
     # archives that patool can unpack
     # patool supports 7z (.7z, .cb7), ACE (.ace, .cba), ADF (.adf), ALZIP (.alz),
@@ -70,6 +80,9 @@ class Alaska():
     QC_DIR = '1_qc' # quality control directory name
     ALIGN_DIR = '2_alignment' # alignment directory name
     DIFF_DIR = '3_diff_exp' # differential expression directory name
+    GEO_ARCH = 'geo_submission.tar.gz'
+    GEO_DIR = 'NEW_SUBMISSIONS'
+    GEO_EMAIL = 'geo@ncbi.nlm.nih.gov'
     CPUS = '1-3' # processing CPUs
     NTHREADS = 3 # number of threads for processing
     DOCKER_SCRIPT_VOLUME = 'alaska_script_volume'
@@ -77,6 +90,8 @@ class Alaska():
     DOCKER_QC_TAG = 'alaska_qc:latest'
     DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest' # kallisto image version to use
     DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest' # sleuth image version to use
+    DOCKER_SERVER_TAG = 'alaska_server'
+    DOCKER_FTP_TAG = 'ftpd_server'
 
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
                             'test_samples/raw/minimum/mt2',
@@ -85,10 +100,9 @@ class Alaska():
 
     TEST_RAW_READS_FULL = ['test_samples/raw/full/mt1',
                             'test_samples/raw/full/mt2',
-                            'test_samples/raw/full/mt3',
                             'test_samples/raw/full/wt1',
-                            'test_samples/raw/full/wt2',
-                            'test_samples/raw/full/wt3']
+                            'test_samples/raw/full/wt2'
+                            ]
 
 
     # messeging codes
@@ -97,9 +111,11 @@ class Alaska():
         'new_proj':             b'\x01', # create new project
         'load_proj':            b'\x02', # load project from JSON
         'save_proj':            b'\x03', # save project to JSON
-        'infer_samples':        b'\x04', # extract raw reads and infer samples
+        'fetch_reads':          b'\x04',
+        'infer_samples':        b'\x05', # extract raw reads and infer samples
         # 'get_idx':              b'\x05', # get list of avaliable indices
         # 'new_sample':           b'\x06', # create new sample with unique id
+        'get_organisms':        b'\x06',
         'set_proj':             b'\x07', # set project data by reading temporary JSON
         'finalize_proj':        b'\x08', # finalize project
         'qc':                   b'\x09',
@@ -108,20 +124,27 @@ class Alaska():
         'do_all':               b'\x12', # perform qc, read quant, and diff exp
         'open_sleuth_server':   b'\x13',
         'get_proj_status':      b'\x14', # check project status
+        'get_ftp_info':         b'\x15',
+        'prepare_geo':          b'\x16',
+        'submit_geo':           b'\x17',
         'test_copy_reads':      b'\x47',
         'test_set_vars':        b'\x48',
         'test_qc':              b'\x49',
         'test_read_quant':      b'\x50',
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
+        'get_var':              b'\x88',
+        'reset':                b'\x89',
+        'cleanup':              b'\x90',
+        'remove_proj':          b'\x91',
         'get_queue':            b'\x92',
-        'get_status':           b'\x93',
+        'is_online':            b'\x93',
         'save':                 b'\x94', # saves server state
         'load':                 b'\x95', # loads server state
         'log':                  b'\x96', # force log
         'update_orgs':          b'\x97', # force organism update
         'start':                b'\x98', # start server
-        'stop':                 b'\x99'  # stop server
+        'stop':                 b'\x99', # stop server
     }
 
     # Server state.
@@ -145,8 +168,31 @@ class Alaska():
     # 12: Diff exp started
     # 13: Diff exp finished.
     # 14: Server opened
-
-
+    PROGRESS = {
+        'diff_error':     -12,
+        'quant_error':     -9,
+        'qc_error':        -6,
+        'error':           -1,
+        'new':              0,
+        'raw_reads':        1,
+        'inferred':         2,
+        'set':              3,
+        'finalized':        4,
+        'qc_queued':        5,
+        'qc_started':       6,
+        'qc_finished':      7,
+        'quant_queued':     8,
+        'quant_started':    9,
+        'quant_finished':   10,
+        'diff_queued':      11,
+        'diff_started':     12,
+        'diff_finished':    13,
+        'server_open':      14,
+        'geo_compiling':    15,
+        'geo_compiled':     16,
+        'geo_submitting':   17,
+        'geo_submitted':    18
+    }
 
     def rand_str(self, l):
         """

@@ -68,7 +68,6 @@ class AlaskaJob(Alaska):
         delta = self.datetime_finished - self.datetime_started
         self.run_duration = delta.total_seconds() / 60
 
-
         self.save() # save job info
 
     def save(self, folder=None):
@@ -98,7 +97,7 @@ class AlaskaJob(Alaska):
         # restore datetime objects after saving
         self.datetime_created = _datetime_created
         self.datetime_started = _datetime_started
-        self.datetime_finsihed = _datetime_finished
+        self.datetime_finished = _datetime_finished
 
     def load(self, folder=None, proj=None):
         """
@@ -119,7 +118,7 @@ class AlaskaJob(Alaska):
         for key, item in loaded.items():
             if key == 'docker':
                 self.docker = AlaskaDocker(item['img_tag'])
-            elif key.startswith('datetime'):
+            elif key.startswith('datetime') and item is not None:
                 setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
             else:
                 setattr(self, key, item)

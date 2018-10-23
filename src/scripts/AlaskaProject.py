@@ -17,9 +17,12 @@ __status__ = "alpha"
 
 import os
 import json
+import ftplib
+import tarfile
 import pandas as pd
 import warnings as w
 import datetime as dt
+from copy import copy
 from collections import defaultdict
 from pyunpack import Archive
 from BashWriter import BashWriter
@@ -45,23 +48,52 @@ class AlaskaProject(Alaska):
         self.temp_dir = '{}/{}'.format(self.dir, Alaska.TEMP_DIR)
         self.jobs = [] # jobs related to this project
         self.raw_reads = {}
-        self.chk_md5 = {} # md5 checksums
         self.samples = {}
         self.design = 1 # 1: single-factor, 2: two-factor
-        self.ctrls = {} # controls
+        self.controls = [] # controls
+        self.factors = []
 
         self.progress = 0 # int to denote current analysis progress
 
         self.meta = {} # variable for all metadata
         # from GEO submission template
         self.meta['title'] = ''
-        self.meta['summary'] = ''
+        self.meta['abstract'] = ''
+        self.meta['corresponding'] = {
+            'email': '',
+            'name': ''
+        }
         self.meta['contributors'] = []
         self.meta['SRA_center_code'] = ''
-        self.meta['email'] = ''
         # end from GEO submission template
-        self.meta['datetime'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
+    def fetch_reads(self):
+        """
+        Simply fetches all files & folders in the raw reads directory in JSON format.
+        """
+        reads = []
+        # walk through the raw directory
+        for root, dirs, files in os.walk(self.raw_dir):
+            for fname in files:
+                # skip files that are not one of the recognized extensions.
+                extensions = Alaska.RAW_EXT + Alaska.ARCH_EXT
+                if not fname.endswith(extensions):
+                    continue
+
+                # otherwise, save info about the file
+                path = '{}/{}/{}'.format(Alaska.ROOT_PATH, root, fname)
+                folder = root.replace(self.raw_dir, '')
+                filename = fname
+                size = os.path.getsize(path) / (1024 ** 2)
+                read = {
+                    'folder': folder,
+                    'filename': fname,
+                    'size': '{} MB'.format(round(size,1)),
+                    'path': path
+                }
+                reads.append(read)
+        return reads
 
     def get_raw_reads(self):
         """
@@ -92,21 +124,34 @@ class AlaskaProject(Alaska):
             self.out('{}: unpacking finished'.format(self.id))
 
         # walk through raw reads directory
+        self.raw_reads = {}
         for root, dirs, files in os.walk(self.raw_dir):
             # go straight to deepest directory
             if not len(dirs) == 0:
                 continue
 
-            reads = [] # list to contain read files for each directory
+            reads = {} # list to contain read files for each directory
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
                 if fname.endswith(Alaska.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
+                    full_path = '{}/{}'.format(root, fname)
+
                     # remove project folder from root
                     split = root.split('/')
                     split.remove(Alaska.PROJECTS_DIR)
                     split.remove(self.id)
-                    reads.append('{}/{}'.format('/'.join(split), fname))
+
+                    path = '{}/{}'.format('/'.join(split), fname)
+                    size = os.path.getsize(full_path)
+                    md5 = None
+
+                    read = {}
+                    read['size'] = round(size / (1024 ** 2),1)
+                    read['md5'] = md5
+
+                    reads[path] = read
+
 
             # assign list to dictionary
             if not len(reads) == 0:
@@ -118,7 +163,7 @@ class AlaskaProject(Alaska):
         """
         Unpacks read archive.
         """
-        Archive(fname).extractall(fname + '_extracted', auto_create_dir=True)
+        Archive(fname).extractall(fname + '_ext', auto_create_dir=True)
 
     def infer_samples(self, f, temp=None, md5=True):
         """
@@ -130,26 +175,28 @@ class AlaskaProject(Alaska):
         w.warn('{}: Alaska is currently unable to infer paired-end samples'
                 .format(self.id), Warning)
 
-        # make sure that md5 checksums have been calculated
-        if md5 and len(self.chk_md5) == 0:
-            raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+        # # make sure that md5 checksums have been calculated
+        # if md5 and len(self.chk_md5) == 0:
+        #     raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+
+        # Reset samples if we have already inferred them.
+        for sample_id, sample in self.samples.items():
+            if temp is not None and sample_id in temp:
+                del temp[sample_id]
 
         # loop through each folder with sample
+        self.samples = {}
         for folder, reads in self.raw_reads.items():
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id, folder)
+
             if temp is not None: # if temporary variable is given
                 temp[_id] = sample
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
 
-            if md5:
-                for read, md5 in zip(reads, self.chk_md5[folder]):
-                    sample.reads.append(read)
-                    sample.chk_md5.append(md5)
-            else:
-                for read in reads:
-                    sample.reads.append(read)
+            for read, item in reads.items():
+                sample.reads[read] = item
 
             sample.projects.append(self.id)
             self.samples[_id] = sample
@@ -216,23 +263,222 @@ class AlaskaProject(Alaska):
         """
         Writes rna_seq_info.txt
         """
-        if self.design == 1: # single-factor
-            # write design matrix txt
-            ctrl_ftr = list(self.ctrls.values())[0]
-            head = ['sample', 'condition']
-            data = []
-            for _id, sample in self.samples.items():
-                if _id in self.ctrls:
-                    ftr = 'a_{}'.format(sample.meta['chars'][ctrl_ftr])
-                else:
-                    ftr = 'b_{}'.format(sample.meta['chars'][ctrl_ftr])
-                data.append([sample.name, ftr]) # TODO: batch??
-            # convert to dataframe and save with space as delimiter
-            df = pd.DataFrame(data, columns=head)
-        elif self.design == 2: # two-factor
-            pass # TODO: implement
+        # First, let's construct a DataFrame with just one column.
+        sample_names = []
+        for sample_id in self.samples:
+            sample_names.append(self.samples[sample_id].name.replace(' ', '_'))
+        df = pd.DataFrame(sample_names, columns=['sample'])
+        df.set_index('sample', inplace=True)
 
-        df.to_csv('{}/rna_seq_info.txt'.format(self.dir), sep=' ', index=False)
+        # Add a column for each factor.
+        for i in range(self.design):
+            column = []
+            control = self.controls[i]
+            control_name = control['name']
+            control_value = control['value']
+
+            for sample_id, sample in self.samples.items():
+                name = sample.name
+                factor_value = sample.meta['chars'][control_name]
+
+                # append a_ if this is a control. otherwise append b_
+                if (factor_value == control_value):
+                    factor_value = 'a_' + factor_value
+                else:
+                    factor_value = 'b_' + factor_value
+
+                column.append([name, factor_value.replace(' ', '_')])
+
+            col = pd.DataFrame(column, columns=['sample', control_name.replace(' ', '_')])
+            col.set_index('sample', inplace=True)
+            df = pd.concat([df, col], axis=1, sort=True)
+
+        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)\
+
+    def prepare_submission(self):
+        """
+        Prepares files for GEO submission.
+        """
+        # Make a new archive.
+        geo_arch = '{}/{}'.format(self.dir, Alaska.GEO_ARCH)
+        with tarfile.open(geo_arch, 'w:gz') as tar:
+            for sample_id, sample in self.samples.items():
+                name = sample.name
+
+                for path in sample.reads:
+                    full_path = '{}/{}'.format(self.dir, path)
+                    basename = os.path.basename(path)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                    tar.add(full_path, arcname=arcname)
+
+                # deal with kallisto outputs
+                kal_dir = '{}/{}'.format(self.align_dir, name)
+                for file in os.listdir(kal_dir):
+                    full_path = '{}/{}'.format(kal_dir, file)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), file)
+                    tar.add(full_path, arcname=arcname)
+
+            # Add differential expression results.
+            for file in os.listdir(self.diff_dir):
+                if not file.endswith(('out.txt', '.rds', '.R')):
+                    full_path = '{}/{}'.format(self.diff_dir, file)
+                    arcname = file
+                    tar.add(full_path, arcname=arcname)
+
+            # Then, write the SOFT format seq_info.txt
+            out = 'seq_info.txt'
+            self.write_soft(out)
+
+            # Add the softfile.
+            full_path = '{}/{}'.format(self.dir, out)
+            tar.add(full_path, arcname=out)
+
+
+    def write_soft(self, out='soft_info.txt'):
+        """
+        Writes project in SOFT format for GEO submission.
+        """
+        def format_indicator(indicator, value):
+            return '^{} = {}\n'.format(indicator, value)
+
+        def format_attribute(attribute, value):
+            return '!{} = {}\n'.format(attribute, value)
+
+        def write_series(f):
+            """
+            Writes SERIES in SOFT format.
+            """
+            f.write(format_indicator('SERIES', self.id))
+            f.write(format_attribute('Series_title', self.meta['title']))
+            f.write(format_attribute('Series_summary', self.meta['abstract']))
+            f.write(format_attribute('Series_overall_design', ''))
+
+            for cont in self.meta['contributors']:
+                f.write(format_attribute('Series_contributor', cont))
+
+            for sample_id in self.samples:
+                f.write(format_attribute('Series_sample_id', sample_id))
+
+            supplementary = []
+            diff_files = os.listdir(self.diff_dir)
+            for diff_file in diff_files:
+                if not diff_file.endswith(('out.txt', '.rds', '.R')):
+                    supplementary.append(diff_file)
+
+            for file in supplementary:
+                f.write(format_attribute('Series_supplementary_file', file))
+
+
+        def write_sample(f, sample):
+            """
+            Writes the given sample in SOFT format.
+            """
+            f.write(format_indicator('SAMPLE', sample.id))
+            f.write(format_attribute('Sample_type', 'SRA'))
+            f.write(format_attribute('Sample_title', sample.name))
+            f.write(format_attribute('Sample_source_name', sample.meta['chars']['tissue']))
+            f.write(format_attribute('Sample_organism', sample.organism.replace('_', ' ').capitalize()))
+
+            to_exclude = [
+                'growth conditions',
+                'library preparation',
+                'sequenced molecules',
+                'miscellaneous'
+            ]
+
+            for char, value in sample.meta['chars'].items():
+                if char not in to_exclude:
+                    f.write(format_attribute('Sample_characteristics', '{}: {}'.format(char, value)))
+
+            f.write(format_attribute('Sample_molecule', sample.meta['chars']['sequenced molecules']))
+            f.write(format_attribute('Sample_growth_protocol', sample.meta['chars']['growth conditions']))
+            f.write(format_attribute('Sample_library_construction_protocol', sample.meta['chars']['library preparation']))
+            f.write(format_attribute('Sample_library_strategy', 'RNA-Seq'))
+            f.write(format_attribute('Sample_data_processing', ''))
+            f.write(format_attribute('Sample_description', sample.meta['description']))
+
+            # Write raw files.
+            if sample.type == 1:
+                # construct values
+                files = []
+                types = []
+                md5s = []
+                lengths = []
+
+                for path, read in sample.reads.items():
+                    name = sample.name
+                    basename = os.path.basename(path)
+                    arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                    ext = os.path.splitext(basename)[1]
+                    files.append(arcname)
+                    types.append(ext)
+                    md5s.append(read['md5'])
+                    lengths.append(str(sample.length))
+
+                f.write(format_attribute('Sample_raw_file_name_run1', ', '.join(files)))
+                f.write(format_attribute('Sample_raw_file_type_run1', ', '.join(types)))
+                f.write(format_attribute('Sample_raw_file_checksum_run1', ', '.join(md5s)))
+                f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'single'))
+                f.write(format_attribute('Sample_raw_file_read_length_run1', ', '.join(lengths)))
+                f.write(format_attribute('Sample_raw_file_standard_deviation_run1', sample.stdev))
+                f.write(format_attribute('Sample_raw_file_instrument_model_run1', sample.meta['platform']))
+            elif sample.type == 2:
+                # we need to add a new run for each pair.
+                for i in range(len(sample.pairs)):
+                    run = str(i + 1)
+                    pair = sample.pairs[i]
+                    read_1 = pair[0]
+                    read_2 = pair[1]
+                    files = []
+                    types = []
+                    md5s = []
+
+                    for read in pair:
+                        name = sample.name
+                        basename = os.path.basename(read)
+                        arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                        ext = os.path.splitext(basename)[1]
+                        files.append(arcname)
+                        types.append(ext)
+                        md5s.append(sample.reads[read])
+
+                    f.write(format_attribute('Sample_raw_file_name_run' + run, ', '.join(files)))
+                    f.write(format_attribute('Sample_raw_file_type_run' + run, ', '.join(types)))
+                    f.write(format_attribute('Sample_raw_file_checksum_run' + run, ', '.join(md5s)))
+                    f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'paired-end'))
+                    f.write(format_attribute('Sample_raw_file_instrument_model_run' + run, sample.meta['platform']))
+
+
+            # write processed data files.
+            quant_path = '{}/{}'.format(self.align_dir, sample.name)
+            quant_files = os.listdir(quant_path)
+            for quant_file in quant_files:
+                name = sample.name
+                arcname = '{}_{}'.format(name.replace(' ', '_'), quant_file)
+                f.write(format_attribute('Sample_processed_data_file', arcname))
+
+        with open('{}/{}'.format(self.dir, out), 'w') as f:
+            write_series(f)
+            f.write('\n')
+
+            for sample_id, sample in self.samples.items():
+                write_sample(f, sample)
+                f.write('\n')
+
+    def submit_geo(self, fname, host, uname, passwd):
+        """
+        Submit compiled geo submission to geo.
+        """
+        # Open a new FTP connection.
+        try:
+            conn = ftplib.FTP(host, uname, passwd)
+            conn.cwd(Alaska.GEO_DIR)
+            with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
+                conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f)
+            conn.quit()
+        except:
+            raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
+
 
     def save(self, folder=None):
         """
