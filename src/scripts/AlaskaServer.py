@@ -88,7 +88,7 @@ class AlaskaServer(Alaska):
         self.idx_conts = []
         self.idx_interval = 600 # index update interval (in seconds)
         self.log_pool = [] # pool of logs to be flushed
-        self.log_interval = 3600 * 3 # log interval (in seconds)
+        self.log_interval = 3600 * 12 # log interval (in seconds)
 
         # server state. 1: active, 0: under maintenance
         self.state = 1
@@ -2183,6 +2183,28 @@ class AlaskaServer(Alaska):
         if not self.state_lock.acquire():
             raise Exception('ERROR: failed to acquire state lock')
 
+        ### hide variables that should not be written to JSON
+        _datetime = self.datetime
+        _projects = self.projects
+        _samples = self.samples
+        _projects_temp = self.projects_temp
+        _samples_temp = self.samples_temp
+        _queue = self.queue
+        _jobs = self.jobs
+        _organisms = self.organisms
+        _current_job = self.current_job
+        _sleuth_servers = self.sleuth_servers
+        _idx_interval = self.idx_interval
+        _available_ports = self.available_ports
+        _PORT = self.PORT
+        _CONTEXT = self.CONTEXT
+        _SOCKET = self.SOCKET
+        _CODES = self.CODES
+        _DOCKER = self.DOCKER
+        _RUNNING = self.RUNNING
+        _io_lock = self.io_lock
+        _state_lock = self.state_lock
+
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
             try:
@@ -2212,27 +2234,7 @@ class AlaskaServer(Alaska):
                 except:
                     self.out('ERROR: failed to save organism {}_{}'.format(genus, species))
                     traceback.print_exc()
-        ### hide variables that should not be written to JSON
-        _datetime = self.datetime
-        _projects = self.projects
-        _samples = self.samples
-        _projects_temp = self.projects_temp
-        _samples_temp = self.samples_temp
-        _queue = self.queue
-        _jobs = self.jobs
-        _organisms = self.organisms
-        _current_job = self.current_job
-        _sleuth_servers = self.sleuth_servers
-        _idx_interval = self.idx_interval
-        _available_ports = self.available_ports
-        _PORT = self.PORT
-        _CONTEXT = self.CONTEXT
-        _SOCKET = self.SOCKET
-        _CODES = self.CODES
-        _DOCKER = self.DOCKER
-        _RUNNING = self.RUNNING
-        _io_lock = self.io_lock
-        _state_lock = self.state_lock
+
         # delete / replace
         try:
             self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
