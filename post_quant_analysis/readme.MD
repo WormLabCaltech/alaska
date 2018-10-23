@@ -23,4 +23,8 @@ These analyses will:
 5. Output a summary of the number of diff. exp. genes in all strains.
 
 ## Two factor interaction analyses
-Are not yet implemented.
+Are not yet implemented but should include:
+1. Summary of DE genes in each factor and interaction
+2. Pairwise correlation plots with Orthogonal Regressions.
+3. Transcriptome-wide epistasis plot
+4. Batesonian Comparison plot
