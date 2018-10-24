@@ -2215,8 +2215,6 @@ class AlaskaServer(Alaska):
         _io_lock = self.io_lock
         _state_lock = self.state_lock
 
-        print(_organisms)
-
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
             try:
@@ -2291,16 +2289,16 @@ class AlaskaServer(Alaska):
             traceback.print_exc()
 
         # replace AlaskaOrganism object with list of versions
-        for genus in self.organisms:
-            for species in self.organisms[genus]:
+        self.organisms = {}
+        for genus in _organisms:
+            self.organisms[genus] = {}
+            for species in _organisms[genus]:
                 try:
-                    converted = list(self.organisms[genus][species].refs.keys())
+                    converted = list(_organisms[genus][species].refs.keys())
                     self.organisms[genus][species] = converted
                 except:
                     self.out('ERROR: failed to convert organism {}_{}'.format(genus, species))
                     traceback.print_exc()
-
-        print(_organisms)
 
         try:
             if self.current_job is not None:
