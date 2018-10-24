@@ -60,6 +60,7 @@ class Alaska():
     FTP_COUNT_LIMIT = 1000 # limit to number of files
     RAW_DIR = '0_raw_reads' # raw reads directory name
     RAW_NOTIFY = 7 # notify after 7 days
+    RAW_NOTIFY_2 = 9 # when to send second notification
     RAW_DURATION = 10 # keep reads for a max 10 days
     RAW_EXT = ('.fastq.gz', '.fastq') # extensions for raw reads (needs to be tuple)
     # archives that patool can unpack
