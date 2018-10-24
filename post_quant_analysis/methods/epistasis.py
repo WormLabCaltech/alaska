@@ -36,9 +36,9 @@ mpl.rcParams['ytick.labelsize'] = 16
 mpl.rcParams['legend.fontsize'] = 16
 
 
-def perform_odr(add, dev, wadd, wdev, beta0=[0]):
+def perform_odr(add, dev, wadd, wdev, beta0=[0.]):
     """
-    A wrapper to calculate an ODR regression.
+    A wrapper around scipy.ODR.
 
     Params:
     -------
@@ -46,6 +46,8 @@ def perform_odr(add, dev, wadd, wdev, beta0=[0]):
                 x and y coordinates of the regression
     wadd, wdev: np.array
                 standard deviations
+    beta0:      float
+                initialization for ODR
 
     Output:
     -------
@@ -371,6 +373,10 @@ class epistasis:
 
         def label(a, b):
             """Epistasis label for the plot."""
+            if type(a) is not str:
+                a = str(a)
+            if type(b) is not str:
+                b = str(b)
             a + ' > ' + b
 
         colors = {'actual': 'k', 'xy=x': 'blue', 'xy=y': '#33a02c',
