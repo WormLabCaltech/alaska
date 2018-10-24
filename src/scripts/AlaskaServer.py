@@ -88,7 +88,7 @@ class AlaskaServer(Alaska):
         self.idx_conts = []
         self.idx_interval = 600 # index update interval (in seconds)
         self.log_pool = [] # pool of logs to be flushed
-        self.log_interval = 10 # log interval (in seconds)
+        self.log_interval = 3600 * 12 # log interval (in seconds)
 
         # server state. 1: active, 0: under maintenance
         self.state = 1
