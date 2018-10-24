@@ -2215,6 +2215,8 @@ class AlaskaServer(Alaska):
         _io_lock = self.io_lock
         _state_lock = self.state_lock
 
+        print(_organisms)
+
         # save all projects, jobs and organisms first
         for __id, project in self.projects.items():
             try:
@@ -2297,6 +2299,8 @@ class AlaskaServer(Alaska):
                 except:
                     self.out('ERROR: failed to convert organism {}_{}'.format(genus, species))
                     traceback.print_exc()
+
+        print(_organisms)
 
         try:
             if self.current_job is not None:
