@@ -2101,10 +2101,10 @@ class AlaskaServer(Alaska):
                 elif days < Alaska.RAW_NOTIFY_2 and email and proj.notifications == 1:
                     self.out('INFO: sending notification for project {}'.format(proj_id))
                     subject = 'Raw read removal notification'
-                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY)
+                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY_2)
                     self.send_email(email, subject, msg, proj_id)
                     proj.notifications += 1
-                elif days < Alaska.RAW_NOTIFY and email and proj.notifications == 2:
+                elif days < Alaska.RAW_NOTIFY and email and proj.notifications == 0:
                     self.out('INFO: sending notification for project {}'.format(proj_id))
                     subject = 'Raw read removal notification'
                     msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY)
