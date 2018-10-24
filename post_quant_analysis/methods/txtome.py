@@ -2,7 +2,7 @@
 A module to deal more easily with dataframes containing transcriptome data.
 
 Author: David Angeles-Albores
-Date: May 16, 2018
+Date: October 22, 2018
 """
 import pandas as pd
 import numpy as np
@@ -20,18 +20,25 @@ class fc_transcriptome:
 
     Attributes:
     -----------
-    df: DataFrame associated with the object
-    tx_col, strain, b, se_b, qval: names of the columns containing the unique
-                                   transcript identifiers, strain identifiers,
-                                   log-fold change estimates, standard error of
-                                   the log-fold-change, and q-values
-                                   respectively.
-    q: float, the significance threshold. Defaults to 0.1
+    df:                             DataFrame
+                                    Tidy dataframe containing RNA-seq data.
+    tx_col, strain, b, se_b, qval:  names of the columns containing the unique
+                                    transcript identifiers, strain identifiers,
+                                    log-fold change estimates, standard error
+                                    of the log-fold-change, and q-values
+                                    respectively.
+    q:                              float
+                                    Significance threshold. Defaults to 0.1
 
     Functions:
     ----------
     overlap: Given a list of strain names (strings), find the transcripts that
              are differentially expresed in all strains.
+    make_matrix:
+    plot_STP:
+    select_sample:
+    select_from_overlap:
+    subset_sig:
     """
 
     def __init__(self, df, tx_col='target_id',
@@ -41,18 +48,24 @@ class fc_transcriptome:
 
         Params:
         -------
-        df: pandas DataFrame with the RNA-seq information
-        tx_col: string. Name of the column that contains the unique transcript
-                or gene name information.
-        strain: string. Name of the column that contains the strain IDs of the
+        df:     pandas.DataFrame
+                RNA-seq data in tidy format.
+        tx_col: string
+                Name of the column that contains the unique transcript or gene
+                name information.
+        strain: string
+                Name of the column that contains the strain IDs of the
                 genotypes that were studied.
-        b: string. Name of the column that contains the fold-change or log-fold
-           change estimates for each transcript/gene for each strain studied
-           relative to the control sample.
-        se_b: string. Name of the column that contains the standard error
-              estimates of the 'b' column.
-        qval: string. Name of the column that contains the FDR adjusted
-              q-values associated with each transcript/gene.
+        b:      string
+                Name of the column that contains the fold-change or log-fold
+                change estimates for each transcript/gene for each strain
+                studied relative to the control sample.
+        se_b:   string
+                Name of the column that contains the standard error estimates
+                of the 'b' column.
+        qval:   string
+                Name of the column that contains the FDR adjusted q-values
+                associated with each transcript/gene.
         """
         self.df = df
         self.tx_col = tx_col
@@ -82,13 +95,19 @@ class fc_transcriptome:
 
         Params:
         -------
-        strains: list of names of the strains to overlap (strings)
+        strains:    list of strings
+                    Strains to overlap (strings)
 
         Output:
         -------
         np.array of transcripts that were commonly differentially expressed in
         all genotypes provided
         """
+        check_strains = (strain_i not in self.df[self.strain].unique()
+                         for strain_i in strains)
+        if any(check_strains is True):
+            raise ValueError('Some strains are not in the DataFrame')
+
         # limit search to desired strains:
         cond_strains = (self.df[self.strain].isin(strains))
         # set the q-value cutoff and remove anything above it:
@@ -98,6 +117,7 @@ class fc_transcriptome:
         sig = self.df[conds].groupby(self.tx_col)[self.strain].agg('count')
         # find the isoforms that are in both genotypes
         sig = sig[sig.values == len(strains)]
+
         return sig.index.values
 
     def make_matrix(self, col=None, exclude=[], include=[],
@@ -110,22 +130,28 @@ class fc_transcriptome:
 
         Params:
         -------
-        col: string. The column to pivot on. If not specified, the strain
-             column will be used to pivot.
-        exclude: list-like. List of strains to be excluded from the matrix.
-                 Defaults to empty if not specified.
-        include: list-like. List of strains to be included in the matrix.
-                 If not specified, all strains not specifically excluded are
-                 included
-        subset_tx: Boolean. If True, includes only transcripts that are
-                   differentially expressed in at least one of the included
-                   strains. If False, all transcripts are included.
-        norm: Boolean. If True, normalizes the rows of the matrix by their
-              mean and standard deviation.
+        col:        string
+                    The column to pivot on. If not specified, the strain column
+                    will be used to pivot.
+        exclude:    list-like
+                    List of strains to be excluded from the matrix. Defaults to
+                    empty if not specified.
+        include:    list-like
+                    List of strains to be included in the matrix. If not
+                    specified, all strains not specifically excluded are
+                    included
+        subset_tx:  Boolean
+                    If True, includes only transcripts that are differentially
+                    expressed in at least one of the included strains. If
+                    False, all transcripts are included.
+        norm:       Boolean
+                    If True, normalizes the rows of the matrix by their mean
+                    and standard deviation.
 
         Output:
         -------
-        mat, clusters
+        mat:    np.ndarray
+                Matrix of extracted values
         """
         if len(self.df[self.strain].unique()) < 2:
             m = 'The provided dataframe does not contain multiple strains'
@@ -136,12 +162,12 @@ class fc_transcriptome:
 
         temp = self.df
         # exclude desired strains:
-        temp = temp[~temp[self.strain].isin(exclude)]
+        temp = temp[(~temp[self.strain].isin(exclude))]
 
         # include desired strains only if 2 or more strains were specified
         if len(include) >= 2:
-            temp = temp[temp[self.strain].isin(include)]
-        elif len(include) == 1:
+            temp = temp[(temp[self.strain].isin(include))]
+        else:
             raise ValueError('Please specify at least 2 strains to include')
 
         # restrict transcripts to those that are diff. exp. in at least one
@@ -189,6 +215,7 @@ class fc_transcriptome:
         subset_tx:
         label:
         ax:
+        **kwargs
 
         Output:
         -------
@@ -263,14 +290,17 @@ class fc_transcriptome:
 
         Params:
         -------
-        selection: str, slice selection.
-        col: str, column to perform slicing on.
-        sig: None, limit selection to differentially expressed genes at the
-             predetermined significance value for this object.
+        selection:  string
+                    slice selection.
+        col:        string
+                    column to perform slicing on.
+        sig:        Boolean
+                    limit selection to differentially expressed genes at the
+                    predetermined significance value for this object.
 
         Output:
         -------
-        a sliced pandas DataFrame
+        a sliced pandas.DataFrame
         """
         cond = (self.df[col] == selection)
 
@@ -285,11 +315,12 @@ class fc_transcriptome:
 
         Params:
         -------
-        array: list-like, a list of strains to overlap
+        array:  list-like
+                A list of strains to overlap
 
         Output:
         -------
-        a sliced pandas DataFrame
+        a sliced pandas.DataFrame
         """
         overlap = self.overlap(array)
         return self.df[self.df[self.tx_col].isin(overlap)]
