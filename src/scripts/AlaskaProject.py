@@ -54,6 +54,7 @@ class AlaskaProject(Alaska):
         self.factors = []
 
         self.progress = 0 # int to denote current analysis progress
+        self.notifications = 0 # number of raw read deletion notifications sent
 
         self.meta = {} # variable for all metadata
         # from GEO submission template

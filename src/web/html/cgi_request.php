@@ -12,12 +12,11 @@ function cgi_request($action, $id) {
     }
 
     # now, run the command and get output
-    $out = shell_exec($cmd);
-
-    // sleep(5);
-
-    # simply spit out the output
-    echo $out;
+    if (is_executable($script_path)) {
+      echo shell_exec($cmd);
+    } else {
+      throw new Exception("script not executable");
+    }
 }
 
 # if there is an id

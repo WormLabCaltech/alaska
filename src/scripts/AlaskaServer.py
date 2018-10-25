@@ -2087,20 +2087,30 @@ class AlaskaServer(Alaska):
         for proj_id, proj in self.projects.items():
             try:
                 email = proj.meta['corresponding']['email']
-                delta = dt.datetime.now() - dt.datetime.strptime(proj.datetime, Alaska.DATETIME_FORMAT)
+                proj_dt  = dt.datetime.strptime(proj.datetime, Alaska.DATETIME_FORMAT)
+                to_remove = proj_dt + dt.timedelta(days=Alaska.RAW_DURATION)
+                delta = to_remove - dt.datetime.now()
                 seconds = delta.total_seconds()
                 minutes = seconds / 60
                 hours = minutes / 60
-                days = hours / 24
+                days = hours / 24   # Days left until reads are removed
 
-                if days > Alaska.RAW_DURATION:
+                if days < 0:
                     self.out('INFO: cleaning up raw reads for project {}'.format(proj_id))
                     shutil.rmtree(proj.raw_dir)
-                elif days > Alaska.RAW_NOTIFY and email:
+                elif days < Alaska.RAW_NOTIFY_2 and email and proj.notifications == 1:
                     self.out('INFO: sending notification for project {}'.format(proj_id))
                     subject = 'Raw read removal notification'
-                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_DURATION - Alaska.RAW_NOTIFY)
+                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY_2)
                     self.send_email(email, subject, msg, proj_id)
+                    proj.notifications += 1
+                elif days < Alaska.RAW_NOTIFY and email and proj.notifications == 0:
+                    self.out('INFO: sending notification for project {}'.format(proj_id))
+                    subject = 'Raw read removal notification'
+                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY)
+                    self.send_email(email, subject, msg, proj_id)
+                    proj.notifications += 1
+
             except:
                 self.out('ERROR: can not clean up raw reads of {}'.format(proj_id))
                 traceback.print_exc()
@@ -2279,10 +2289,13 @@ class AlaskaServer(Alaska):
             traceback.print_exc()
 
         # replace AlaskaOrganism object with list of versions
-        for genus, obj_1 in self.organisms.items():
-            for species, obj_2 in obj_1.items():
+        self.organisms = {}
+        for genus in _organisms:
+            self.organisms[genus] = {}
+            for species in _organisms[genus]:
                 try:
-                    self.organisms[genus][species] = list(obj_2.refs.keys())
+                    converted = list(_organisms[genus][species].refs.keys())
+                    self.organisms[genus][species] = converted
                 except:
                     self.out('ERROR: failed to convert organism {}_{}'.format(genus, species))
                     traceback.print_exc()
