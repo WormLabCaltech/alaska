@@ -1597,8 +1597,8 @@ class AlaskaServer(Alaska):
             raise Exception('{}: currently running'.format(_id))
 
         # make directories
-        self.broadcast(_id, ('{}: making directories for ''
-                             + read alignment').format(_id))
+        self.broadcast(_id, ('{}: making directories for '
+                             + 'read alignment').format(_id))
         for __id, sample in proj.samples.items():
             f = '{}/{}'.format(proj.align_dir, sample.name)
             os.makedirs(f, exist_ok=True)
