@@ -1,18 +1,15 @@
 /**
- * Summary. (use period)
+ * alaska_main.js
+ * Author: Kyung Hoi (Joseph) Min
+ * Contact: kmin@caltech.edu
  *
- * Description. (use period)
+ * This Javascript file is responsible for all non-static elements of the
+ * Alaska portal.
  *
- * @link   URL
- * @file   This files defines the MyClass class.
- * @author AuthorName.
- * @since  x.x.x
  */
 
 /**
  * Sets the server status badge to either online or offline.
- *
- * @param {bool}  on  Whether the server is on.
  */
 function set_badge(on) {
   $('#server_status_badge').removeClass();
@@ -47,14 +44,6 @@ function set_badge(on) {
  *
  */
 function get_server_status() {
-  // show loading badge
-  // $('#server_status_badge').removeClass();
-  // $('#server_status_badge').addClass('badge');
-  // $('#server_status_badge').addClass('badge-pill');
-  // $('#server_status_badge').addClass('badge-warning');
-  // $('#server_status_badge').addClass('flash');
-  // $('#server_status_badge').addClass('infinite');
-
   var target = 'cgi_request.php';
   var data = {
     action: 'is_online'
@@ -265,7 +254,8 @@ function get_output(type, textarea) {
   send_ajax_request(target, data, callback, true, textarea);
 }
 
-function set_output_listener_for_collapse(collapse, type, textarea, badge, t=1000) {
+function set_output_listener_for_collapse(collapse, type, textarea, badge,
+                                          t=1000) {
   collapse.on('show.bs.collapse', {
     'type': type,
     'badge': badge,
@@ -311,9 +301,12 @@ function set_output_listeners(progress_container) {
   var quant_status_badge = progress_container.find('#quant_status_badge');
   var diff_status_badge = progress_container.find('#diff_status_badge');
 
-  set_output_listener_for_collapse(qc_output_collapse, 'qc', qc_textarea, qc_status_badge);
-  set_output_listener_for_collapse(quant_output_collapse, 'quant', quant_textarea, quant_status_badge);
-  set_output_listener_for_collapse(diff_output_collapse, 'diff', diff_textarea, diff_status_badge);
+  set_output_listener_for_collapse(qc_output_collapse, 'qc', qc_textarea,
+                                   qc_status_badge);
+  set_output_listener_for_collapse(quant_output_collapse, 'quant',
+                                   quant_textarea, quant_status_badge);
+  set_output_listener_for_collapse(diff_output_collapse, 'diff', diff_textarea,
+                                   diff_status_badge);
 }
 
 /**
@@ -721,7 +714,8 @@ function set_progress_bar_done() {
   var diff = bar.children('#diff');
   var done = bar.children('#done');
 
-  bar.children().removeClass('progress-bar-striped progress-bar-animated bg-secondary border-right border-dark');
+  bar.children().removeClass('progress-bar-striped progress-bar-animated');
+  bar.children().removeClass('bg-secondary border-right border-dark');
 
   // Set queued classes.
   queued.addClass('bg-dark');
@@ -1708,7 +1702,8 @@ function set_values_of_fluid_rows(div, vals) {
  * Sets listener to change content of the given sample factor group depending on
  * the values of the factor card.
  */
-function set_factor_card_to_sample_listener(factor_card, sample_factor_group_class_name) {
+function set_factor_card_to_sample_listener(factor_card,
+                                            sample_factor_group_class_name) {
   var name_div = factor_card.find('.factor_name_inputs');
   var values_div = factor_card.find('.factor_values_inputs');
 
@@ -1803,7 +1798,8 @@ function set_factor_card_to_sample_listener(factor_card, sample_factor_group_cla
  * Sets up factor 1 and factor 2 listeners so that appropriate information
  * is displayed in the factor card of each sample.
  */
-function set_factor_to_sample_listeners(design_1_radio, design_2_radio, design_inputs) {
+function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
+                                        design_inputs) {
   var factor_1_card = design_inputs.children('.factor_card:first');
   var factor_2_card = design_inputs.children('.factor_card:last');
 
@@ -2012,8 +2008,10 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var radios = inputs.find('input:radio');
       var radio_1 = radios.eq(0);
       var radio_2 = radios.eq(1);
-      var single_collapse = inputs.children('.sample_read_type_single_collapse');
-      var paired_collapse = inputs.children('.sample_read_type_paired_collapse');
+      var single_collapse = inputs.children('.sample_read_type_single_'
+                                            + 'collapse');
+      var paired_collapse = inputs.children('.sample_read_type_paired_'
+                                            + 'collapse');
       var paired_row = paired_collapse.find('div[style*="display:none"]');
 
       // Set up the single-end read listener.
@@ -2210,7 +2208,8 @@ function refresh_checkbox(checkbox) {
   // If this is a click event.
   // Deal with read type specially.
   if (checkbox.prop('checked')) {
-    if (class_name == 'sample_read_type_group' && parseInt(form_group.find('input:radio:checked').val()) == 2) {
+    if (class_name == 'sample_read_type_group'
+        && parseInt(form_group.find('input:radio:checked').val()) == 2) {
       copy_to_form(form_group, specific_form_class_name, false);
       remove_from_form(form_group, common_form_class_name);
     } else {
@@ -2252,7 +2251,8 @@ function set_common_checkboxes(form) {
       var custom_parent = get_closest_custom_parent(input);
       var checkbox = custom_parent.find('input:checkbox');
 
-      while (custom_parent.length < 1 || !get_custom_class(custom_parent).includes('group')) {
+      while (custom_parent.length < 1
+             || !get_custom_class(custom_parent).includes('group')) {
         custom_parent = get_closest_custom_parent(custom_parent);
         checkbox = custom_parent.find('input:checkbox');
       }
@@ -2271,8 +2271,10 @@ function set_shared_inputs(form, cb) {
   var lifestage_dropdown = form.find('.sample_life-stage_inputs');
   var tissue_dropdown = form.find('.sample_tissue_inputs');
   var chars_inputs = form.find('.sample_characteristics_inputs');
-  var sequencing_platform_select = form.find('.sample_sequencing_platform_select')
-  var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_inputs');
+  var sequencing_platform_select = form.find('.sample_sequencing_platform_'
+                                             + 'select')
+  var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_'
+                                               + 'inputs');
 
   set_organisms_select(organism_select, cb);
   set_custom_dropdown(lifestage_dropdown, life_stages);
@@ -2286,7 +2288,8 @@ function set_shared_inputs(form, cb) {
   var single_show_radio = form.find('.sample_read_type_single');
   var single_hide_radio = form.find('.sample_read_type_paired');
   var div_to_toggle = form.find('.sample_read_type_single_collapse');
-  set_radio_collapse_toggle(single_hide_radio, single_show_radio, div_to_toggle);
+  set_radio_collapse_toggle(single_hide_radio, single_show_radio,
+                            div_to_toggle);
 }
 
 /**
@@ -2326,6 +2329,7 @@ function set_common_meta_input(cb) {
     scroll_to_ele(meta);
   });
 }
+
 /*******************************************************************/
 /* These are functions used to easily fetch data from form groups. */
 /*******************************************************************/
@@ -2656,12 +2660,14 @@ function set_values_of_paired_collapse(collapse, vals) {
     var pair_2_select = inputs.children('select:last');
 
     if (pair_1 != null && pair_1 != '') {
-      pair_1_select.children('option[value="' + pair_1 + '"]').prop('selected', true);
+      pair_1_select.children('option[value="' + pair_1 + '"]').prop('selected',
+                                                                    true);
     } else {
       pair_1_select.children('option:disabled').prop('selected', true);
     }
     if (pair_2 != null && pair_2 != '') {
-      pair_2_select.children('option[value="' + pair_2 + '"]').prop('selected', true);
+      pair_2_select.children('option[value="' + pair_2 + '"]').prop('selected',
+                                                                    true);
     } else {
       pair_2_select.children('option:disabled').prop('selected', true);
     }
@@ -2895,7 +2901,8 @@ function validate_proj_meta_inputs(inputs, proj_form) {
   for (var class_name in proj_meta_classes_to_functions) {
     var val = inputs[class_name];
     var form_group = proj_form.find('.' + class_name);
-    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    var form_inputs = form_group.find('input:text,textarea,input[type=email]'
+                                      + ',input[type="number"],select');
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
@@ -2930,20 +2937,25 @@ function validate_proj_meta_inputs(inputs, proj_form) {
           var values_group = factor_card.find('.factor_values_group');
 
           var name_inputs = name_group.find('select,input:text');
-          var values_inputs = values_group.find('input:text:not([style*="display:none"])');
+          var values_inputs = values_group.find('input:text:not([style*="'
+                                                + 'display:none"])');
 
 
           if (factor.name == null || factor.name == '') {
             name_inputs.addClass('is-invalid');
             valid = false;
-            failed_fields[class_name].push('Factor name for factor ' + (i+1) + ' can not be empty or blank.');
+            failed_fields[class_name].push('Factor name for factor ' + (i+1)
+                                           + ' can not be empty or blank.');
           } else {
             // Check that no two factors are the same.
             if (factor.name in names) {
               names[factor.name].addClass('is-invalid');
               name_inputs.addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Every factor name must be unique, but there are multiple factors with the name ' + factor.name);
+              failed_fields[class_name].push('Every factor name must be '
+                                             + 'unique, but there are '
+                                             + 'multiple factors with the '
+                                             + 'name ' + factor.name);
             } else {
               names[factor.name] = name_inputs;
             }
@@ -2952,7 +2964,8 @@ function validate_proj_meta_inputs(inputs, proj_form) {
           if(factor.values == null || factor.values.length < 2) {
             name_inputs.addClass('is-invalid');
             valid = false;
-            failed_fields[class_name].push('Factor ' + (i+1) + ' does not have at least two values.');
+            failed_fields[class_name].push('Factor ' + (i+1) + ' does not '
+                                           + 'have at least two values.');
           }
 
           // Check that no two values are the same.
@@ -2963,13 +2976,16 @@ function validate_proj_meta_inputs(inputs, proj_form) {
             if (value == null || value == '') {
               value_input.addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Factor ' + (i+1) + ' has an empty or blank value.');
+              failed_fields[class_name].push('Factor ' + (i+1) + ' has an '
+                                             + 'empty or blank value.');
             } else {
               if (value in values) {
                 values[value].addClass('is-invalid');
                 value_input.addClass('is-invalid');
                 valid = false;
-                failed_fields[class_name].push('Factor ' + (i+1) + ' has multiple idenical values: ' + value);
+                failed_fields[class_name].push('Factor ' + (i+1) + ' has '
+                                               + 'multiple idenical values: '
+                                               + value);
               } else {
                 values[value] = value_input;
               }
@@ -2993,7 +3009,8 @@ function validate_common_meta_inputs(inputs, common_form) {
 
   for (var class_name in common_meta_classes_to_functions) {
     var form_group = common_form.find('.' + class_name);
-    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],'
+                                      + 'input[type="number"],select');
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
@@ -3023,20 +3040,23 @@ function validate_common_meta_inputs(inputs, common_form) {
         case 'sample_read_type_group':
           var type = val.type;
           if (type == 1) {
-            var single_group = form_group.find('.sample_read_type_single_collapse');
+            var single_group = form_group.find('.sample_read_type_single_'
+                                               + 'collapse');
             var single_inputs = single_group.find('input[type="number"]');
             var length = val.length;
             if (length == null || length == '' || isNaN(length) || length == 0) {
               single_inputs.eq(0).addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Read length can not be empty, blank, or zero.');
+              failed_fields[class_name].push('Read length can not be empty, '
+                                             + 'blank, or zero.');
             }
 
             var stdev = val.stdev;
             if (stdev == null || stdev == '' || isNaN(stdev) || stdev == 0) {
               single_inputs.eq(1).addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
+              failed_fields[class_name].push('Read standard deviation can not '
+                                             + 'be empty, blank, or zero.');
             }
           }
           break;
@@ -3049,7 +3069,8 @@ function validate_common_meta_inputs(inputs, common_form) {
             if (val[i].length == 1) {
               row.find('input:text').addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
+              failed_fields[class_name].push('Characteristic ' + val[i][0]
+                                             + ' does not have a value.');
             }
           }
           break;
@@ -3072,7 +3093,8 @@ function validate_sample_meta_inputs(inputs, sample_form) {
   for (var class_name in sample_meta_classes_to_functions) {
     var val = inputs[class_name];
     var form_group = sample_form.find('.' + class_name);
-    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],'
+                                      + 'input[type="number"],select');
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
@@ -3091,11 +3113,13 @@ function validate_sample_meta_inputs(inputs, sample_form) {
         var name = val.name;
         var value = val.value;
 
-        if (name != 'FACTOR_1' && name != 'FACTOR_2' && name != null && name != '') {
+        if (name != 'FACTOR_1' && name != 'FACTOR_2' && name != null
+            && name != '') {
           if (value == null || value == '') {
             form_inputs.addClass('is-invalid');
             valid = false;
-            failed_fields[class_name].push('No value selected for factor ' + name + '.');
+            failed_fields[class_name].push('No value selected for factor '
+                                           + name + '.');
           }
         }
         break;
@@ -3108,7 +3132,8 @@ function validate_sample_meta_inputs(inputs, sample_form) {
           if (val[i].length == 1) {
             row.find('input:text').addClass('is-invalid');
             valid = false;
-            failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
+            failed_fields[class_name].push('Characteristic ' + val[i][0]
+                                           + ' does not have a value.');
           }
         }
         break;
@@ -3118,7 +3143,8 @@ function validate_sample_meta_inputs(inputs, sample_form) {
   for (var class_name in common_meta_classes_to_functions) {
     var val = inputs[class_name];
     var form_group = sample_form.find('.' + class_name);
-    var form_inputs = form_group.find('input:text,textarea,input[type=email],input[type="number"],select');
+    var form_inputs = form_group.find('input:text,textarea,input[type=email],'
+                                      + 'input[type="number"],select');
     form_inputs = form_inputs.filter(':not([style*="display:none"])');
     form_inputs.removeClass('is-invalid');
 
@@ -3146,20 +3172,23 @@ function validate_sample_meta_inputs(inputs, sample_form) {
         case 'sample_read_type_group':
           var type = val.type;
           if (type == 1) {
-            var single_group = form_group.find('.sample_read_type_single_collapse');
+            var single_group = form_group.find('.sample_read_type_single_'
+                                               + 'collapse');
             var single_inputs = single_group.find('input[type="number"]');
             var length = val.length;
             if (length == null || length == '' || length == 0) {
               single_inputs.eq(0).addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Read length can not be empty, blank, or zero.');
+              failed_fields[class_name].push('Read length can not be empty, '
+                                             + 'blank, or zero.');
             }
 
             var stdev = val.stdev;
             if (stdev == null || stdev == '' || stdev == 0) {
               single_inputs.eq(1).addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Read standard deviation can not be empty, blank, or zero.');
+              failed_fields[class_name].push('Read standard deviation can not '
+                                             + 'be empty, blank, or zero.');
             }
           } else if (type == 2) {
             var reads = {};
@@ -3174,7 +3203,8 @@ function validate_sample_meta_inputs(inputs, sample_form) {
                   select.addClass('is-invalid');
                   reads[read].addClass('is-invalid');
                   valid = false;
-                  failed_fields[class_name].push('A read can not be assigned to multiple pairs.');
+                  failed_fields[class_name].push('A read can not be assigned '
+                                                 + 'to multiple pairs.');
                 }
               }
             }
@@ -3189,7 +3219,8 @@ function validate_sample_meta_inputs(inputs, sample_form) {
             if (val[i].length == 1) {
               row.find('input:text').addClass('is-invalid');
               valid = false;
-              failed_fields[class_name].push('Characteristic ' + val[i][0] + ' does not have a value.');
+              failed_fields[class_name].push('Characteristic ' + val[i][0]
+                                             + ' does not have a value.');
             }
           }
           break;
@@ -3232,7 +3263,8 @@ var class_names_to_labels = {
   sample_specific_characteristics_group: 'Additional Characteristics'
 };
 
-function add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs) {
+function add_check_meta_details(modal_body, details_div, title_class,
+                                title_icon_class, title_text, failed_inputs) {
   var new_details_div = details_div.clone();
   var title = new_details_div.children('div:first');
   title.addClass(title_class);
@@ -3286,7 +3318,8 @@ function validate_all_meta_inputs(modal) {
     var title_icon_class = 'fa-cube';
     var title_text = 'Project Metadata Form';
     var title_class = 'alert-primary';
-    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+    add_check_meta_details(modal_body, details_div, title_class,
+                           title_icon_class, title_text, failed_inputs);
   }
 
   // Common inputs.
@@ -3298,7 +3331,8 @@ function validate_all_meta_inputs(modal) {
     title_icon_class = 'fa-share-alt';
     title_text = 'Common Metadata Form';
     title_class = 'alert-info';
-    add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+    add_check_meta_details(modal_body, details_div, title_class,
+                           title_icon_class, title_text, failed_inputs);
   }
 
   for (var id in sample_forms) {
@@ -3311,7 +3345,8 @@ function validate_all_meta_inputs(modal) {
       title_icon_class = 'fa-cubes';
       title_text = 'Sample Metadata Form: ' + proj.samples[id].name;
       title_class = 'alert-warning';
-      add_check_meta_details(modal_body, details_div, title_class, title_icon_class, title_text, failed_inputs);
+      add_check_meta_details(modal_body, details_div, title_class,
+                             title_icon_class, title_text, failed_inputs);
     }
   }
 
@@ -3626,7 +3661,8 @@ function get_all_characteristics() {
           } else {
             characteristics[char] = [];
           }
-        } else if (!characteristics[char].includes(detail) && detail != '' && detail != null) {
+        } else if (!characteristics[char].includes(detail) && detail != ''
+                   && detail != null) {
           characteristics[char].push(detail);
         }
       }
@@ -3721,7 +3757,8 @@ function set_samples_meta_input() {
     set_reads_table(id, new_sample_form);
 
     // Characteristics.
-    set_fluid_input_rows(new_sample_form.find('.sample_specific_characteristics_group'));
+    set_fluid_input_rows(new_sample_form.find('.sample_specific_'
+                                              + 'characteristics_group'));
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
@@ -3828,7 +3865,8 @@ function set_choose_controls_modal(modal, factors) {
   var validate_btn = modal.find('#validate_controls_btn');
   var start_btn = modal.find('#start_analysis_btn');
   var start_tooltip = modal.find('#start_analysis_tooltip');
-  var control_group = modal.find('.proj_control_group[style*="display:none"]').clone();
+  var control_group = modal.find('.proj_control_group[style*="'
+                                 + 'display:none"]').clone();
   var samples_group = modal.find('.proj_control_samples_group');
 
   // Initialize tooltip.
@@ -3844,7 +3882,8 @@ function set_choose_controls_modal(modal, factors) {
     var btn = e.data.btn;
     var tooltip = e.data.tooltip;
     var select = $(this);
-    var samples_group = select.parent().parent().parent().children('.proj_control_samples_group');
+    var samples_group = select.parent().parent().parent().children('.proj_'
+                                                + 'control_samples_group');
 
     btn.prop('disabled', true);
     btn.css('pointer-events', 'none');
@@ -3904,7 +3943,8 @@ function set_choose_controls_modal(modal, factors) {
       var name_input = control_group.find('input:text:disabled');
       var name = name_input.val();
       var value_select = control_group.find('select');
-      var value = value_select.children('option:selected:not(:disabled)').val();
+      var value = value_select.children('option:selected'
+                                        + ':not(:disabled)').val();
 
       // If the value is null or empty, the user did not make a selection.
       if (value == null || value == '') {
@@ -4249,7 +4289,8 @@ function get_sample_meta(id) {
   sample_meta['meta'] = {};
 
   sample_meta['name'] = sample_input_fields['name'].val();
-  sample_meta.meta['description'] = sample_input_fields.meta['description'].val();
+  sample_meta.meta['description'] = sample_input_fields.meta['description']
+                                                       .val();
 
   // Get contributors.
   sample_meta.meta['contributors'] = [];
@@ -4276,7 +4317,8 @@ function get_sample_meta(id) {
   }
 
   sample_meta.meta['source'] = sample_input_fields.meta['source'].val();
-  sample_meta['type'] = parseInt(sample_input_fields['type'].find('input:checked').val());
+  sample_meta['type'] = parseInt(sample_input_fields['type']
+                                 .find('input:checked').val());
 
   // If reads are paired-end, we need to replace the reads dictionary as well.
   if (sample_meta['type'] == 2) {
@@ -5091,7 +5133,8 @@ $(document).ready(function() {
       // Enable all testing elements.
       $('.testing').show();
     }
-    // If we are given an id, we need to resume where we left off with that project.
+    // If we are given an id, we need to resume where we left off with that
+    // project.
     if (url_params.has('id')) {
       proj_id = url_params.get('id');
 

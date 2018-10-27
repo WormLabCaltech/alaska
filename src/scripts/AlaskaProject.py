@@ -25,19 +25,35 @@ import datetime as dt
 from copy import copy
 from collections import defaultdict
 from pyunpack import Archive
-from BashWriter import BashWriter
 from AlaskaSample import AlaskaSample
-# from multiprocessing import Process
 from Alaska import Alaska
+
 
 class AlaskaProject(Alaska):
     """
     AlaskaProject. Class to wrap all project data.
+
+    Methods:
+    fetch_reads
+    get_raw_reads
+    unpack_reads
+    infer_samples
+    write_matrix
+    prepare_submission
+    write_soft
+    submit_geo
+    save
+    load
     """
 
     def __init__(self, _id):
         """
         AlaskaProject constructor. Must receive id.
+
+        Arguments:
+        _id -- (str) id of this project
+
+        Returns: None
         """
         self.id = _id
         self.dir = '{}/{}'.format(Alaska.PROJECTS_DIR, _id)
@@ -46,18 +62,18 @@ class AlaskaProject(Alaska):
         self.align_dir = '{}/{}'.format(self.dir, Alaska.ALIGN_DIR)
         self.diff_dir = '{}/{}'.format(self.dir, Alaska.DIFF_DIR)
         self.temp_dir = '{}/{}'.format(self.dir, Alaska.TEMP_DIR)
-        self.jobs = [] # jobs related to this project
+        self.jobs = []  # jobs related to this project
         self.raw_reads = {}
         self.samples = {}
-        self.design = 1 # 1: single-factor, 2: two-factor
-        self.controls = [] # controls
+        self.design = 1  # 1: single-factor, 2: two-factor
+        self.controls = []
         self.factors = []
 
-        self.progress = 0 # int to denote current analysis progress
-        self.notifications = 0 # number of raw read deletion notifications sent
+        self.progress = 0       # int to denote current analysis progress
+        self.notifications = 0  # number of raw read deletion notifications sent
 
-        self.meta = {} # variable for all metadata
-        # from GEO submission template
+        # METADATA
+        self.meta = {}
         self.meta['title'] = ''
         self.meta['abstract'] = ''
         self.meta['corresponding'] = {
@@ -66,12 +82,16 @@ class AlaskaProject(Alaska):
         }
         self.meta['contributors'] = []
         self.meta['SRA_center_code'] = ''
-        # end from GEO submission template
         self.datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
 
     def fetch_reads(self):
         """
-        Simply fetches all files & folders in the raw reads directory in JSON format.
+        Simply fetches all files & folders in the raw reads directory in JSON
+        format.
+
+        Arguments: None
+
+        Returns: (list) of reads
         """
         reads = []
         # walk through the raw directory
@@ -90,7 +110,7 @@ class AlaskaProject(Alaska):
                 read = {
                     'folder': folder,
                     'filename': fname,
-                    'size': '{} MB'.format(round(size,1)),
+                    'size': '{} MB'.format(round(size, 1)),
                     'path': path
                 }
                 reads.append(read)
@@ -99,13 +119,18 @@ class AlaskaProject(Alaska):
     def get_raw_reads(self):
         """
         Retrieves list of uploaded sample files. Unpacks archive if detected.
+
+        Arguments: None
+
+        Returns: None
         """
         unpack = []
         for root, dirs, files in os.walk(self.raw_dir):
             for fname in files:
                 # if the file name does not end in a known raw read extension,
                 # and is a known (and unpackable) archive, add to list
-                if not fname.endswith(Alaska.RAW_EXT) and fname.endswith(Alaska.ARCH_EXT):
+                if not fname.endswith(Alaska.RAW_EXT) \
+                   and fname.endswith(Alaska.ARCH_EXT):
                     unpack.append('{}/{}'.format(root, fname))
 
         # if files need to be unpack_reads
@@ -114,14 +139,10 @@ class AlaskaProject(Alaska):
             for fname in unpack:
                 self.out('{}: unpacking {}'.format(self.id, fname))
                 try:
-                    # p = Process(target=self.unpack_reads, args=(fname,))
-                    # p.daemon = True
-                    # p.start()
-                    # p.join()
                     self.unpack_reads(fname)
                 except Exception as e:
-                    print(str(e))
-                    raise Exception('{}: exception occured while unpacking {}'.format(self.id, fname))
+                    raise Exception('{}: exception occured ' +
+                                    'while unpacking {}'.format(self.id, fname))
             self.out('{}: unpacking finished'.format(self.id))
 
         # walk through raw reads directory
@@ -131,11 +152,12 @@ class AlaskaProject(Alaska):
             if not len(dirs) == 0:
                 continue
 
-            reads = {} # list to contain read files for each directory
+            reads = {}  # list to contain read files for each directory
             for fname in files:
                 # only files ending with certain extensions
                 # and not directly located in raw read directory should be added
-                if fname.endswith(Alaska.RAW_EXT) and '{}/{}'.format(root, fname) not in unpack:
+                if fname.endswith(Alaska.RAW_EXT) \
+                   and '{}/{}'.format(root, fname) not in unpack:
                     full_path = '{}/{}'.format(root, fname)
 
                     # remove project folder from root
@@ -148,21 +170,26 @@ class AlaskaProject(Alaska):
                     md5 = None
 
                     read = {}
-                    read['size'] = round(size / (1024 ** 2),1)
+                    read['size'] = round(size / (1024 ** 2), 1)
                     read['md5'] = md5
 
                     reads[path] = read
-
 
             # assign list to dictionary
             if not len(reads) == 0:
                 self.raw_reads[root.replace(self.raw_dir, '')[1:]] = reads
             else:
-                raise Exception('{}: raw reads folder is empty!'.format(self.id))
+                raise Exception('{}: raw reads folder is empty!'.format(
+                                self.id))
 
     def unpack_reads(self, fname):
         """
         Unpacks read archive.
+
+        Arguments:
+        fname -- (str) filename of archive to unpack
+
+        Returns: None
         """
         Archive(fname).extractall(fname + '_ext', auto_create_dir=True)
 
@@ -171,14 +198,17 @@ class AlaskaProject(Alaska):
         Infers samples from raw reads.
         Assumes each sample is in separate folders.
         Only to be called when raw reads is not empty.
+
+        Arguments:
+        f    -- (func) to generate unique id
+        temp -- (dict) that holds temporary samples (default: None)
+        md5  -- (bool) whether or not to compute md5 checksums (default: True)
+
+        Returns: None
         """
         # TODO: add way to infer single- or pair-end read
         w.warn('{}: Alaska is currently unable to infer paired-end samples'
-                .format(self.id), Warning)
-
-        # # make sure that md5 checksums have been calculated
-        # if md5 and len(self.chk_md5) == 0:
-        #     raise Exception('{}: MD5 checksums have not been calculated'.format(self.id))
+               .format(self.id), Warning)
 
         # Reset samples if we have already inferred them.
         for sample_id, sample in self.samples.items():
@@ -191,7 +221,7 @@ class AlaskaProject(Alaska):
             _id = 'AS{}'.format(f())
             sample = AlaskaSample(_id, folder)
 
-            if temp is not None: # if temporary variable is given
+            if temp is not None:  # if temporary variable is given
                 temp[_id] = sample
 
             self.out('{}: new sample created with id {}'.format(self.id, _id))
@@ -202,67 +232,13 @@ class AlaskaProject(Alaska):
             sample.projects.append(self.id)
             self.samples[_id] = sample
 
-    def analyze_reads(self):
-        """
-        Analyzes reads to infer whether samples are single or paired end.
-        """
-        # TODO: implement
-
-    def check(self):
-        """
-        Checks all data.
-        """
-        # Have to check: design vs sample
-        w.warn('{}: Alaska is currently unable to verify experimental designs'.format(self.id),
-                Warning)
-
-        # ctrl_chars = {}
-        # # first, get control characteristics
-        # for _id, char in self.ctrls.items():
-        #     if char not in ctrl_chars:
-        #         ctrl_chars[char] = self.samples[_id].meta[char]
-        #
-        # # check controls & their characteristics
-        # for _id, sample in self.samples.items():
-        #     if _id in self.ctrls:
-        #         char = self.ctrls[_id]
-        #         if not sample.meta[char] == ctrl_chars[char]:
-        #             msg = '{}: control sample {} does not have {} : {}' \
-        #                     .format(self.id, _id, char, ctrl_chars[char])
-        #             raise Exception(msg)
-        #     else:
-        #         if sample.meta[char] == ctrl_chars[char]:
-        #             msg = '{}: non-control sample {} has {} : {}' \
-        #                     .format(self.id, _id, char, ctrl_chars[char])
-        #             raise Exception(msg)
-
-
-
-        # # first check controls have matching control factors
-        # # then check if non-controls have different factors
-        # # TODO: check other data and ensure other factors are the same
-        # for _id, sample in self.samples.items():
-        #     # check controls have matching control factors
-        #     if _id in self.ctrls:
-        #         for __id, char in self.ctrls.items():
-        #             val = self.samples[_id].meta[key]
-        #             if not val == item:
-        #                 msg = '{}: control sample {} does not have {}:{}. \
-        #                     instead, has {}'.format(self.id, _id, key, item, val)
-        #                 raise Exception(msg)
-        #     else:
-        #         # check if non-controls have different factors
-        #         for key, item in self.ctrl_ftrs.items():
-        #             val = self.samples[_id].meta[key]
-        #             if val == item:
-        #                 msg = '{}: non-control sample {} has {}:{}'.format(self.id, _id, key, item)
-        #                 raise Exception(msg)
-
-
-
     def write_matrix(self):
         """
-        Writes rna_seq_info.txt
+        Writes design matrix to rna_seq_info.txt
+
+        Arguments: None
+
+        Returns: None
         """
         # First, let's construct a DataFrame with just one column.
         sample_names = []
@@ -290,15 +266,21 @@ class AlaskaProject(Alaska):
 
                 column.append([name, factor_value.replace(' ', '_')])
 
-            col = pd.DataFrame(column, columns=['sample', control_name.replace(' ', '_')])
+            col = pd.DataFrame(column, columns=['sample',
+                               control_name.replace(' ', '_')])
             col.set_index('sample', inplace=True)
             df = pd.concat([df, col], axis=1, sort=True)
 
-        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir), sep=' ', index=True)\
+        df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir),
+                  sep=' ', index=True)
 
     def prepare_submission(self):
         """
         Prepares files for GEO submission.
+
+        Arguments: None
+
+        Returns: None
         """
         # Make a new archive.
         geo_arch = '{}/{}'.format(self.dir, Alaska.GEO_ARCH)
@@ -334,20 +316,47 @@ class AlaskaProject(Alaska):
             full_path = '{}/{}'.format(self.dir, out)
             tar.add(full_path, arcname=out)
 
-
     def write_soft(self, out='soft_info.txt'):
         """
         Writes project in SOFT format for GEO submission.
+
+        Arguments:
+        out -- (str) output soft filename (default: soft_info.txt)
+
+        Returns: None
         """
         def format_indicator(indicator, value):
+            """
+            Helper function to format indicators in soft format.
+
+            Arguments:
+            indicator -- (str) soft format indicator
+            value     -- (str) value for the given indicator
+
+            Returns: (str) of formatted indicator
+            """
             return '^{} = {}\n'.format(indicator, value)
 
         def format_attribute(attribute, value):
+            """
+            Helper function to format attributes in soft format.
+
+            Arguments:
+            attribute -- (str) soft format attribute
+            value     -- (str) value for the given attribute
+
+            Returns: (str) of formatted attribute
+            """
             return '!{} = {}\n'.format(attribute, value)
 
         def write_series(f):
             """
-            Writes SERIES in SOFT format.
+            Helper function to write SERIES in SOFT format.
+
+            Arguments:
+            f -- (file descriptor) of output file
+
+            Returns: None
             """
             f.write(format_indicator('SERIES', self.id))
             f.write(format_attribute('Series_title', self.meta['title']))
@@ -369,16 +378,23 @@ class AlaskaProject(Alaska):
             for file in supplementary:
                 f.write(format_attribute('Series_supplementary_file', file))
 
-
         def write_sample(f, sample):
             """
-            Writes the given sample in SOFT format.
+            Helper function to write the given sample in SOFT format.
+
+            Arguments:
+            f      -- (file descriptor) of output file
+            sample -- (AlaskaSample) sample
+
+            Returns: None
             """
             f.write(format_indicator('SAMPLE', sample.id))
             f.write(format_attribute('Sample_type', 'SRA'))
             f.write(format_attribute('Sample_title', sample.name))
-            f.write(format_attribute('Sample_source_name', sample.meta['chars']['tissue']))
-            f.write(format_attribute('Sample_organism', sample.organism.replace('_', ' ').capitalize()))
+            f.write(format_attribute('Sample_source_name',
+                                     sample.meta['chars']['tissue']))
+            f.write(format_attribute('Sample_organism',
+                    sample.organism.replace('_', ' ').capitalize()))
 
             to_exclude = [
                 'growth conditions',
@@ -389,14 +405,19 @@ class AlaskaProject(Alaska):
 
             for char, value in sample.meta['chars'].items():
                 if char not in to_exclude:
-                    f.write(format_attribute('Sample_characteristics', '{}: {}'.format(char, value)))
+                    f.write(format_attribute('Sample_characteristics',
+                            '{}: {}'.format(char, value)))
 
-            f.write(format_attribute('Sample_molecule', sample.meta['chars']['sequenced molecules']))
-            f.write(format_attribute('Sample_growth_protocol', sample.meta['chars']['growth conditions']))
-            f.write(format_attribute('Sample_library_construction_protocol', sample.meta['chars']['library preparation']))
+            f.write(format_attribute('Sample_molecule',
+                    sample.meta['chars']['sequenced molecules']))
+            f.write(format_attribute('Sample_growth_protocol',
+                    sample.meta['chars']['growth conditions']))
+            f.write(format_attribute('Sample_library_construction_protocol',
+                    sample.meta['chars']['library preparation']))
             f.write(format_attribute('Sample_library_strategy', 'RNA-Seq'))
             f.write(format_attribute('Sample_data_processing', ''))
-            f.write(format_attribute('Sample_description', sample.meta['description']))
+            f.write(format_attribute('Sample_description',
+                    sample.meta['description']))
 
             # Write raw files.
             if sample.type == 1:
@@ -416,13 +437,22 @@ class AlaskaProject(Alaska):
                     md5s.append(read['md5'])
                     lengths.append(str(sample.length))
 
-                f.write(format_attribute('Sample_raw_file_name_run1', ', '.join(files)))
-                f.write(format_attribute('Sample_raw_file_type_run1', ', '.join(types)))
-                f.write(format_attribute('Sample_raw_file_checksum_run1', ', '.join(md5s)))
-                f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'single'))
-                f.write(format_attribute('Sample_raw_file_read_length_run1', ', '.join(lengths)))
-                f.write(format_attribute('Sample_raw_file_standard_deviation_run1', sample.stdev))
-                f.write(format_attribute('Sample_raw_file_instrument_model_run1', sample.meta['platform']))
+                f.write(format_attribute(
+                        'Sample_raw_file_name_run1', ', '.join(files)))
+                f.write(format_attribute(
+                        'Sample_raw_file_type_run1', ', '.join(types)))
+                f.write(format_attribute(
+                        'Sample_raw_file_checksum_run1', ', '.join(md5s)))
+                f.write(format_attribute(
+                        'Sample_raw_file_single_or_paired-end_run1', 'single'))
+                f.write(format_attribute(
+                        'Sample_raw_file_read_length_run1', ', '.join(lengths)))
+                f.write(format_attribute(
+                        'Sample_raw_file_standard_deviation_run1',
+                        sample.stdev))
+                f.write(format_attribute(
+                        'Sample_raw_file_instrument_model_run1',
+                        sample.meta['platform']))
             elif sample.type == 2:
                 # we need to add a new run for each pair.
                 for i in range(len(sample.pairs)):
@@ -437,18 +467,26 @@ class AlaskaProject(Alaska):
                     for read in pair:
                         name = sample.name
                         basename = os.path.basename(read)
-                        arcname = '{}_{}'.format(name.replace(' ', '_'), basename)
+                        arcname = '{}_{}'.format(name.replace(' ', '_'),
+                                                 basename)
                         ext = os.path.splitext(basename)[1]
                         files.append(arcname)
                         types.append(ext)
                         md5s.append(sample.reads[read])
 
-                    f.write(format_attribute('Sample_raw_file_name_run' + run, ', '.join(files)))
-                    f.write(format_attribute('Sample_raw_file_type_run' + run, ', '.join(types)))
-                    f.write(format_attribute('Sample_raw_file_checksum_run' + run, ', '.join(md5s)))
-                    f.write(format_attribute('Sample_raw_file_single_or_paired-end_run1', 'paired-end'))
-                    f.write(format_attribute('Sample_raw_file_instrument_model_run' + run, sample.meta['platform']))
-
+                    f.write(format_attribute(
+                            'Sample_raw_file_name_run' + run, ', '.join(files)))
+                    f.write(format_attribute(
+                            'Sample_raw_file_type_run' + run, ', '.join(types)))
+                    f.write(format_attribute(
+                            'Sample_raw_file_checksum_run' + run,
+                            ', '.join(md5s)))
+                    f.write(format_attribute(
+                            'Sample_raw_file_single_or_paired-end_run1',
+                            'paired-end'))
+                    f.write(format_attribute(
+                            'Sample_raw_file_instrument_model_run' + run,
+                            sample.meta['platform']))
 
             # write processed data files.
             quant_path = '{}/{}'.format(self.align_dir, sample.name)
@@ -457,6 +495,7 @@ class AlaskaProject(Alaska):
                 name = sample.name
                 arcname = '{}_{}'.format(name.replace(' ', '_'), quant_file)
                 f.write(format_attribute('Sample_processed_data_file', arcname))
+            # END HELPER FUNCTIONS
 
         with open('{}/{}'.format(self.dir, out), 'w') as f:
             write_series(f)
@@ -469,23 +508,36 @@ class AlaskaProject(Alaska):
     def submit_geo(self, fname, host, uname, passwd):
         """
         Submit compiled geo submission to geo.
+
+        Arguments:
+        fname  -- (str) filename to store on GEO FTP
+        host   -- (str) GEO FTP host
+        uname  -- (str) GEO FTP username
+        passwd -- (str) GEO FTP password
+
+        Returns: None
         """
         # Open a new FTP connection.
         try:
             conn = ftplib.FTP(host, uname, passwd)
             conn.cwd(Alaska.GEO_DIR)
             with open('{}/{}'.format(self.dir, Alaska.GEO_ARCH), 'rb') as f:
-                conn.storbinary('STOR {}'.format(Alaska.GEO_ARCH), f)
+                conn.storbinary('STOR {}'.format(fname), f)
             conn.quit()
-        except:
-            raise Exception('{}: error occurred while connecting to FTP'.format(self.id))
-
+        except Exception as e:
+            raise Exception('{}: error occurred while connecting to FTP'
+                            .format(self.id))
 
     def save(self, folder=None):
         """
         Save project to JSON.
+
+        Arguments:
+        folder -- (str) folder to save (default: self.dir)
+
+        Returns: None
         """
-        if folder is None: # if folder not given, save to project root
+        if folder is None:  # if folder not given, save to project root
             path = self.dir
         else:
             path = '{}/{}'.format(self.dir, folder)
@@ -493,12 +545,16 @@ class AlaskaProject(Alaska):
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
 
-
     def load(self, folder=None):
         """
         Loads project from JSON.
+
+        Arguments:
+        folder -- (str) folder to load (default: self.dir)
+
+        Returns: None
         """
-        if folder is None: # if folder not given, load from project root
+        if folder is None:  # if folder not given, load from project root
             path = self.dir
         else:
             path = '{}/{}'.format(self.dir, folder)
@@ -508,7 +564,7 @@ class AlaskaProject(Alaska):
 
         if not loaded['id'] == self.id:
             raise Exception('{}: JSON id {} does not match object id'
-                        .format(self.id, loaded['id']))
+                            .format(self.id, loaded['id']))
 
         for key, item in loaded.items():
             if key == 'samples':

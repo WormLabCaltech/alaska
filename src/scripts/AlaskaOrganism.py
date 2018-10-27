@@ -18,15 +18,25 @@ import json
 from Alaska import Alaska
 from AlaskaReference import AlaskaReference
 
+
 class AlaskaOrganism(Alaska):
     """
-    AlaskaOrganism class.
+    AlaskaOrganism class. Every organism that is supported by Alaska
+    has its own AlaskaOrganism object.
+
+    Methods:
+    add_new_ref
+    save
+    load
     """
 
     def __init__(self, genus, species):
         """
-        AlaskaOrganism constructor.
-        See implementation for member variables.
+        Constructor.
+
+        Arguments:
+        genus   -- (str) genus of organism
+        species -- (str) species of organism
         """
         self.genus = genus
         self.species = species
@@ -35,16 +45,29 @@ class AlaskaOrganism(Alaska):
         self.refs = {}
         self.path = '{}/{}/{}'.format(Alaska.ORGS_DIR, genus, species)
 
-    def add_new_ref(self, version, cds, bed):
+    def add_new_ref(self, ver, dna, cdna, bed):
         """
-        Adds a new reference object to the list of references.
+        Adds a new reference object to the dictionary of references.
+
+        Arguments:
+        ver  -- (str) reference version
+        dna  -- (str) dna file
+        cdna -- (str) cdna file
+        bed  -- (str) bed file
+
+        Returns: None
         """
-        ref = AlaskaReference(version, cds, bed)
-        self.refs[ref] = ref
+        ref = AlaskaReference(ver, dna, cdna, bed)
+        self.refs[ver] = ref
 
     def save(self, folder=None):
         """
         Saves organism data to JSON.
+
+        Arguments:
+        folder -- (str) folder to save JSON (default: Alaska.ORGS_DIR)
+
+        Returns: None
         """
         if folder is None:
             path = Alaska.ORGS_DIR
@@ -59,6 +82,11 @@ class AlaskaOrganism(Alaska):
     def load(self, folder=None):
         """
         Loads organism from JSON.
+
+        Arguments:
+        folder -- (str) folder to load JSON (default: Alaska.ORGS_DIR)
+
+        Returns: None
         """
         if folder is None:
             path = Alaska.ORGS_DIR
@@ -78,5 +106,6 @@ class AlaskaOrganism(Alaska):
                     kallisto_idx = obj['kallisto_idx']
                     bowtie_idx = obj['bowtie_idx']
 
-                    ref = AlaskaReference(ver, dna, cdna, bed, kallisto_idx, bowtie_idx)
+                    ref = AlaskaReference(ver, dna, cdna, bed, kallisto_idx,
+                                          bowtie_idx)
                     self.refs[ver] = ref

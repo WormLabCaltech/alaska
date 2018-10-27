@@ -17,14 +17,26 @@ import zmq
 import sys
 from Alaska import Alaska
 
+
 class AlaskaRequest(Alaska):
     """
-    AlaskaRequest
+    AlaskaRequest.
+
+    Methods:
+    send
+    check
+    listen
     """
 
     def __init__(self, port=8888, _id=None):
         """
         AlaskaRequest constructor. Connects to given port.
+
+        Arguments:
+        port -- (int) port to connect to (default: 8888)
+        _id  -- (str) id of ZeroMQ socket (default: None)
+
+        Returns: None
         """
         if _id is None:
             self.id = '_{}'.format(self.rand_str(4))
@@ -40,6 +52,11 @@ class AlaskaRequest(Alaska):
     def send(self, msg):
         """
         Sends message to server.
+
+        Arguments:
+        msg -- (str) message to send
+
+        Returns: None
         """
         # encode message to byte
         _id = self.id.encode()
@@ -62,6 +79,10 @@ class AlaskaRequest(Alaska):
     def check(self):
         """
         Check if server is responding correctly.
+
+        Arguments: None
+
+        Returns: None
         """
         self.SOCKET.send(Alaska.CODES['check'])
 
@@ -69,7 +90,7 @@ class AlaskaRequest(Alaska):
         self.poller = zmq.Poller()
         self.poller.register(self.SOCKET, zmq.POLLIN)
 
-        if self.poller.poll(3*1000): # wait for 3 seconds
+        if self.poller.poll(3*1000):  # wait for 3 seconds
             response = self.SOCKET.recv_string()
             if response == self.id:
                 return True
@@ -81,6 +102,11 @@ class AlaskaRequest(Alaska):
     def listen(self, timeout=300):
         """
         Listen for responses.
+
+        Arguments:
+        timeout -- (int) time to wait for response in seconds
+
+        Returns: None
         """
         print('INFO: Waiting for response')
         print('-' * 30)
@@ -103,7 +129,7 @@ if __name__ == '__main__':
     choices = Alaska.CODES.keys()
 
     # command line arguments
-    parser = argparse.ArgumentParser(description='Send request to AlaskaServer.')
+    parser = argparse.ArgumentParser(description='Send request to server.')
     parser.add_argument('action',
                         type=str,
                         choices=choices)

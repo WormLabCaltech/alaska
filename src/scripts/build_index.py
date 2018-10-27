@@ -17,17 +17,24 @@ import time
 import datetime as dt
 import subprocess as sp
 
+
 def run_sys(cmd, prefix='', file=None):
     """
     Runs a system command and echos all output.
     This function blocks until command execution is terminated.
+
+    Arguments:
+    prefix -- (str) to append to beginning of every output line
+    file   -- (file descriptor) file to write output to
     """
     for i in range(len(cmd)):
         if not isinstance(cmd[i], str):
             cmd[i] = str(cmd[i])
     print(' '.join(cmd))
 
-    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
+    # start process
+    with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1,
+                  universal_newlines=True) as p:
         output = '# process started {}\n'.format(get_current_datetime())
         output += '# ' + ' '.join(cmd) + '\n'
 
@@ -43,9 +50,7 @@ def run_sys(cmd, prefix='', file=None):
                 print(prefix + ': ' + line, end='')
                 sys.stdout.flush()
         p.stdout.read()
-        # p.stderr.read()
         p.stdout.close()
-        # p.stderr.close()
 
         last = '# process finished {}\n'.format(get_current_datetime())
         output += last
@@ -58,12 +63,14 @@ def run_sys(cmd, prefix='', file=None):
         sys.exit('command terminated with non-zero return code!')
     return output
 
+
 def get_current_datetime():
     """
     Returns current date and time as a string.
     """
     now = dt.datetime.now()
     return now.strftime('%Y-%m-%d %H:%M:%S')
+
 
 def build_bowtie2(dna, out, nthreads):
     """
@@ -79,7 +86,6 @@ def build_bowtie2(dna, out, nthreads):
     # if execution comes here, the command ran successfully
     with open('bowtie2_log.txt', 'a') as f:
         f.write('# success')
-
 
 
 def build_kallisto(cdna, out):

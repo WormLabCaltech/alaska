@@ -16,6 +16,7 @@ __status__ = "alpha"
 
 from Alaska import Alaska
 
+
 class AlaskaReference(Alaska):
     """
     AlaskaReference class.
@@ -24,6 +25,16 @@ class AlaskaReference(Alaska):
         """
         AlaskaReference constructor.
         See implementation for member variables.
+
+        Arguments:
+        version      -- (str) reference version
+        dna          -- (str) dna file
+        cdna         -- (str) cdna file
+        bed          -- (str) bed file
+        kallisto_idx -- (str) kallisto index file
+        bowtie_idx   -- (list) of bowtie index files
+
+        Returns: None
         """
         self.version = version
         self.dna = dna

@@ -41,21 +41,76 @@ from AlaskaReference import AlaskaReference
 from AlaskaOrganism import AlaskaOrganism
 from AlaskaJob import AlaskaJob
 from AlaskaProject import AlaskaProject
-from BashWriter import BashWriter
 import threading
 from threading import Thread
+
 
 class AlaskaServer(Alaska):
     """AlaskaServer class.
 
-    Member variables:
-
-    Member functions:
+    Methods:
+    start
+    stop
+    worker
+    decode
+    respond
+    log
+    log_loop
+    out
+    broadcast
+    close
+    check
+    update_orgs
+    make_idx
+    new_proj
+    get_ftp_info
+    send_email
+    exists
+    exists_var
+    exists_temp
+    load_proj
+    save_proj
+    remove_proj
+    fetch_reads
+    get_raw_reads
+    md5_chksum
+    infer_samples
+    get_json
+    get_organisms
+    set_proj
+    finalize_proj
+    enqueue_job
+    qc
+    read_quant
+    diff_exp
+    do_all
+    open_sleuth_server
+    prepare_geo
+    submit_geo
+    copy_script
+    get_proj_status
+    test_copy_reads
+    test_set_vars
+    test_qc
+    test_read_quant
+    test_diff_exp
+    test_all
+    is_online
+    calc_queue_exhaust
+    get_queue
+    get_var
+    reset
+    cleanup
+    save
+    load
     """
 
     def __init__(self, port=8888):
         """
         AlaskaServer constructor. Starts the server at the given port.
+
+        Arguments:
+        port -- (int) port for the server to listen on (default: 8888)
         """
         # date and time server was initialized
         self.datetime = dt.datetime.now()
@@ -69,26 +124,26 @@ class AlaskaServer(Alaska):
 
         # Projects/samples are put in the temporary dictionary when they
         # have not been finalized yet.
-        self.projects_temp = {} # temporary projects
-        self.samples_temp = {} # temporary samples
+        self.projects_temp = {}  # temporary projects
+        self.samples_temp = {}   # temporary samples
         self.ftp = {}
 
-        self.workers_n = 1 # number of workers
+        self.workers_n = 1       # number of workers
         self.io_lock = threading.Lock()
         self.state_lock = threading.RLock()
         self.queue = queue.Queue()  # job queue
-        self.jobs = {} # dictionary of all jobs
-        self.stale_jobs = [] # list of stale jobs (these are skipped)
-        self.current_job = None # job currently undergoing analysis
-        self.org_update_id = None # container ID for organism update
+        self.jobs = {}              # dictionary of all jobs
+        self.stale_jobs = []        # list of stale jobs (these are skipped)
+        self.current_job = None     # job currently undergoing analysis
+        self.org_update_id = None   # container ID for organism update
 
         self.available_ports = Alaska.SHI_PORTS
-        self.sleuth_servers = {} # dict of port:container_id pairs
+        self.sleuth_servers = {}  # dict of port:container_id pairs
 
         self.idx_conts = []
-        self.idx_interval = 600 # index update interval (in seconds)
-        self.log_pool = [] # pool of logs to be flushed
-        self.log_interval = 3600 * 12 # log interval (in seconds)
+        self.idx_interval = 600        # index update interval (in seconds)
+        self.log_pool = []             # pool of logs to be flushed
+        self.log_interval = 3600 * 12  # log interval (in seconds)
 
         # server state. 1: active, 0: under maintenance
         self.state = 1
@@ -120,19 +175,20 @@ class AlaskaServer(Alaska):
             temp[code] = getattr(self, op)
         self.CODES = temp
 
-        self.DOCKER = docker.from_env() # docker client
+        self.DOCKER = docker.from_env()  # docker client
 
-        os.chdir('../') # go to parent of script directory
+        os.chdir('../')  # go to parent of script directory
 
         self.out('INFO: AlaskaServer initialized')
 
-    def start(self, _id=None, force=False):
+    def start(self):
         """
         Starts the server.
-        """
-        # make log file
-        # self.log = open('{}-{}.log'.format(self.date, self.time))
 
+        Arguments: None
+
+        Returns: None
+        """
         self.out('INFO: starting AlaskaServer {}'.format(self.VERSION))
         self.RUNNING = True
 
@@ -143,33 +199,13 @@ class AlaskaServer(Alaska):
             self.out('INFO: AlaskaServer running as root')
             os.umask(0)
 
-            # if force:
-            #     self.out('INFO: --force flag detected...bypassing instance check')
-            # else:
-            #     self.out('INFO: checking if another instance is running')
-            #     if os.path.isfile('_running'):
-            #         raise Exception('ERROR: another instance was detected. If there '
-            #         'is no other instance, this error may be because of an incorrect '
-            #         'termination of a previous instance. In this case, please '
-            #         'manually delete the \'_running\' file from the root directory.')
-            # open('_running', 'w').close()
-
-            # self.out('INFO: acquiring absolute path')
-            # if not os.path.exists('PATH_TO_HERE'):
-            #     raise Exception('ERROR: absolute path file doesn\'t exist')
-            #
-            # with open('PATH_TO_HERE', 'r') as pathf:
-            #     path = pathf.readlines()[0].strip()
-            #     Alaska.HOST_DIR = path
-            #     Alaska.ROOT_PATH = '{}/{}'.format(path, self.ROOT_DIR)
-
             # check if all necessary folders are there
             folders = [Alaska.SAVE_DIR,
-                        Alaska.SCRIPT_DIR,
-                        Alaska.JOBS_DIR,
-                        Alaska.ORGS_DIR,
-                        Alaska.LOG_DIR,
-                        Alaska.PROJECTS_DIR]
+                       Alaska.SCRIPT_DIR,
+                       Alaska.JOBS_DIR,
+                       Alaska.ORGS_DIR,
+                       Alaska.LOG_DIR,
+                       Alaska.PROJECTS_DIR]
 
             for folder in folders:
                 # this path is the path on the alaska container...not host!
@@ -180,7 +216,6 @@ class AlaskaServer(Alaska):
 
             # switch working directory to root
             os.chdir(Alaska.ROOT_DIR)
-
 
         except Exception as e:
             self.out(str(e), override=True)
@@ -195,10 +230,6 @@ class AlaskaServer(Alaska):
             p.daemon = True
             p.start()
 
-            # self.out('INFO: starting organism update worker')
-            # p = Thread(target=self.update_orgs_loop, args=(self.idx_interval,))
-            # p.daemon = True
-            # p.start()
             self.out('INFO: updating organisms')
             self.update_orgs()
 
@@ -228,6 +259,14 @@ class AlaskaServer(Alaska):
     def stop(self, _id=None, code=0, save=True, log=True):
         """
         Stops the server.
+
+        Arguments:
+        _id  -- (str) socket id of request
+        code -- (int) exit code
+        save -- (bool) whether or not to save server state (default: True)
+        log  -- (bool) whether or not to dump log (default: True)
+
+        Returns: None
         """
         # if stop is called with request
         if _id is not None:
@@ -242,17 +281,13 @@ class AlaskaServer(Alaska):
             self.SOCKET.close()
             self.CONTEXT.term()
 
-            # stop all containers
-            # for cont in self.DOCKER.containers.list():
-            #     self.out('INFO: terminating container {}'.format(cont.short_id))
-            #     cont.remove(force=True)
-
             for port, item in self.sleuth_servers.items():
                 try:
-                    self.out('INFO: sleuth shiny app container {} is running...terminating'.format(item[1]))
+                    self.out('INFO: sleuth shiny app container {} ' +
+                             'is running...terminating'.format(item[1]))
                     self.DOCKER.containers.get(item[1]).remove(force=True)
                     self.out('INFO: termination successful')
-                except:
+                except Exception as e:
                     self.out('ERROR: error while closing shiny app container')
                     traceback.print_exc()
 
@@ -260,25 +295,29 @@ class AlaskaServer(Alaska):
             if self.current_job is not None:
                 try:
                     cont_id = self.current_job.docker.id
-                    self.out('INFO: job {} is running...terminating container {}'
-                                .format(self.current_job.id, cont_id))
+                    self.out(('INFO: job {} is running...terminating '
+                              + 'container {}').format(self.current_job.id,
+                                                       cont_id))
                     self.DOCKER.containers.get(cont_id).remove(force=True)
                     self.out('INFO: termination successful')
                 except docker.errors.NotFound:
-                    self.out('INFO: container not found...probably already terminated')
-                except:
+                    self.out(('INFO: container not found...probably '
+                             + 'already terminated'))
+                except Exception as e:
                     self.out('ERROR: error while terminating container')
                     traceback.print_exc()
 
             if self.org_update_id is not None:
                 try:
-                    self.out('INFO: organism update running...terminating container {}'
-                                .format(self.org_update_id))
-                    self.DOCKER.containers.get(self.org_update_id).remove(force=True)
+                    self.out(('INFO: organism update running...terminating '
+                              + 'container {}').format(self.org_update_id))
+                    cont = self.DOCKER.containers.get(self.org_update_id)
+                    cont.remove(force=True)
                     self.out('INFO: termination successful')
                 except docker.errors.NotFound:
-                    self.out('INFO: container not found...probably already terminated')
-                except:
+                    self.out(('INFO: container not found...probably '
+                              + 'already terminated'))
+                except Exception as e:
                     self.out('ERROR: error while terminating container')
                     traceback.print_exc()
 
@@ -290,7 +329,7 @@ class AlaskaServer(Alaska):
             if not code == 0:
                 self.out('TERMINATED WITH EXIT CODE {}'.format(code))
 
-            self.log() # write all remaining logs
+            self.log()  # write all remaining logs
 
             # os.remove('../_running')
 
@@ -304,24 +343,32 @@ class AlaskaServer(Alaska):
     def worker(self):
         """
         Worker function.
+
+        Arguments: None
+
+        Returns: None
         """
         try:
             while self.RUNNING:
                 # get non-stale job
                 while True:
-                    job = self.queue.get() # receive job from queue
+                    job = self.queue.get()  # receive job from queue
                                             # block if there is no job
-                    self.out('INFO: retrieved job {} from queue (size: {})'.format(job.id, self.queue.qsize()))
+                    self.out('INFO: retrieved job {} from queue '
+                             + '(size: {})'.format(job.id, self.queue.qsize()))
 
                     # skip if stale job
                     if job.id in self.stale_jobs:
-                        self.out('INFO: skipping and removing stale job {}'.format(job.id))
+                        self.out(('INFO: skipping and removing stale '
+                                  + 'job {}').format(job.id))
                         # remove job because it is stale
-                        path = '{}/{}/{}.json'.format(Alaska.ROOT_PATH, Alaska.JOBS_DIR, job.id)
+                        path = '{}/{}/{}.json'.format(Alaska.ROOT_PATH,
+                                                      Alaska.JOBS_DIR, job.id)
                         if os.path.isfile(path):
                             os.remove(path)
                         del self.jobs[job.id]
                         self.stale_jobs.remove(job.id)
+
                         # indicate the job is "done"
                         self.queue.task_done()
                         continue
@@ -346,60 +393,61 @@ class AlaskaServer(Alaska):
 
                         if email:
                             subject = 'Analysis started'
-                            msg = 'Alaska has started analysis of project {}.'.format(proj_id)
+                            msg = ('Alaska started analysis '
+                                   + 'of project {}.').format(proj_id)
                             self.send_email(email, subject, msg, proj_id)
 
                     elif job.name == 'kallisto':
                         proj.progress = Alaska.PROGRESS['quant_started']
                         out_dir = proj.align_dir
 
-                        # if email:
-                        #     subject = 'Alignment and quantification started'
-                        #     msg = 'Alaska has started read alignment and quantification for project {}.'.format(proj_id)
-                        #     self.send_email(email, subject, msg, proj_id)
-
                     elif job.name == 'sleuth':
                         proj.progress = Alaska.PROGRESS['diff_started']
                         out_dir = proj.diff_dir
 
-                        # if email:
-                        #     subject = 'Differential expression analysis started'
-                        #     msg = 'Alaska has started differential expression analysis for project {}.'.format(proj_id)
-                        #     self.send_email(email, subject, msg, proj_id)
                     else:
-                        self.out('ERROR: job {} has unrecognized name'.format(job.id))
+                        self.out(('ERROR: job {} has '
+                                  + 'unrecognized name').format(job.id))
 
-                    self.out('INFO: container started with id {}'.format(job.docker.id))
-                    hook = self.DOCKER.containers.get(job.docker.id).logs(stdout=True, stderr=True, stream=True)
+                    self.out(('INFO: container started with id '
+                              + '{}').format(job.docker.id))
+                    cont = self.DOCKER.containers.get(job.docker.id)
+                    hook = cont.logs(stdout=True, stderr=True, stream=True)
 
                     out_path = '{}/{}_out.txt'.format(out_dir, job.name)
                     with open(out_path, 'w') as out:
-                        out.write('# this is the output from job {} / container {}, running {}\n'.format(job.id, job.docker.id, job.name))
+                        out.write(('# this is the output from job {} / '
+                                   + 'container {}, running {}\n')
+                                  .format(job.id, job.docker.id, job.name))
 
                     # hook to container output
-                    for l in hook:
-                        l = l.decode(Alaska.ENCODING).strip()
+                    for line in hook:
+                        line = line.decode(Alaska.ENCODING).strip()
 
-                        if '\n' in l:
-                            outs = l.split('\n')
+                        if '\n' in line:
+                            outs = line.split('\n')
                         else:
-                            outs = [l]
+                            outs = [line]
 
                         for out in outs:
-                            job.docker.output.append(out) # append output
+                            job.docker.output.append(out)  # append output
                             with open(out_path, 'a') as f:
                                 f.write('{}\n'.format(out))
-                            self.out('{}: {}: {}'.format(proj_id, job_name, out))
+                            self.out('{}: {}: {}'.format(proj_id,
+                                                         job_name,
+                                                         out))
                 except Exception as e:
-                    self.out('ERROR: error occured while starting container {}'.format(job.docker.id))
+                    self.out(('ERROR: error occured while starting '
+                              + 'container {}').format(job.docker.id))
                     traceback.print_exc()
                 finally:
                     # check correct termination
                     try:
-                        exitcode = self.DOCKER.containers.get(job.docker.id).wait()['StatusCode']
+                        cont = self.DOCKER.containers.get(job.docker.id)
+                        exitcode = cont.wait()['StatusCode']
                     except Exception as e:
                         self.out('ERROR: container {} exited incorrectly'
-                                        .format(job.docker.id))
+                                 .format(job.docker.id))
                     finally:
                         job.finished()
                         self.current_job = None
@@ -412,70 +460,102 @@ class AlaskaServer(Alaska):
 
                                 if job.name == 'qc':
                                     pass
-                                    # Send email.
-                                    # subject = 'Quality control finished'
-                                    # msg = 'Alaska has finished quality control for project {}.'.format(proj_id)
-                                    # if email:
-                                    #     self.send_email(email, subject, msg, proj_id)
+
                                 elif job.name == 'kallisto':
                                     pass
-                                    # subject = 'Alignment and quantification finished'
-                                    # msg = 'Alaska has finished read alignment and quantification for project {}.'.format(proj_id)
-                                    # if email:
-                                    #     self.send_email(email, subject, msg, proj_id)
 
                                 elif job.name == 'sleuth':
                                     subject = 'Analysis finished'
-                                    msg = 'Alaska has finished analysis of project {}.'.format(proj_id)
-                                    msg += ' You may download the results at the unique project URL below or via FTP with '
-                                    msg += 'the credentials below.'
+                                    msg = 'Alaska has finished analysis of '
+                                    msg += 'project {}.'.format(proj_id)
+                                    msg += ' You may download the results at '
+                                    msg += 'the unique project URL below or '
+                                    msg += 'via FTP with the credentials '
+                                    msg += 'below.'
                                     if email:
-                                        self.send_email(email, subject, msg, proj_id)
+                                        self.send_email(email,
+                                                        subject,
+                                                        msg,
+                                                        proj_id)
 
                                 # calculate average analysis time here
-                                total = self.times[job.name] * self.counts[job.name]
+                                total = (self.times[job.name]
+                                         * self.counts[job.name])
                                 total += job.run_duration
                                 self.counts[job.name] += len(proj.samples)
-                                self.times[job.name] = total / self.counts[job.name]
+                                self.times[job.name] = (total /
+                                                        self.counts[job.name])
                             else:
-                                self.out('ERROR: job {} has unrecognized name'.format(job.id))
+                                self.out(('ERROR: job {} has unrecognized '
+                                          + 'name').format(job.id))
                             self.out('INFO: finished job {}'.format(job.id))
                         else:
-                            self.out('ERROR: job {} / container {} terminated with non-zero exit code!'.format(job.id, job.docker.id))
+                            self.out(('ERROR: job {} / container {} '
+                                      + 'terminated with non-zero exit code!')
+                                     .format(job.id, job.docker.id))
                             proj.progress = -proj.progress
                             # Add the job to stale list
                             self.stale_jobs.append(job.id)
 
                             # if error occurred during qc
                             if job.name == 'qc':
-                                # find any other queued analyses and make them stale
+                                # find any other queued analyses
+                                # and make them stale
                                 for ele in list(self.queue.queue):
-                                    if ele.proj_id == proj_id and ele.name in ['kallisto', 'sleuth']:
+                                    if ele.proj_id == proj_id \
+                                       and ele.name in ['kallisto', 'sleuth']:
                                         self.stale_jobs.append(ele.id)
 
                                 # Send email notifying of the error.
-                                subject = 'Error occurred during quality control'
-                                msg = 'Alaska encountered an error while performing quality control for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                                subject = ('Error occurred during '
+                                           + 'quality control')
+                                msg = ('Alaska encountered an error while '
+                                       + 'performing quality control for '
+                                       + 'project {}. Please visit your '
+                                       + 'unique URL for more '
+                                       + 'details.').format(proj_id)
                                 if email:
-                                    self.send_email(email, subject, msg, proj_id)
+                                    self.send_email(email,
+                                                    subject,
+                                                    msg,
+                                                    proj_id)
 
                             # if error occurred during kallisto
                             elif job.name == 'kallisto':
-                                # find any other queued analyses and make them stale
+                                # find any other queued analyses
+                                # and make them stale
                                 for ele in list(self.queue.queue):
-                                    if ele.proj_id == proj_id and ele.name in ['sleuth']:
+                                    if ele.proj_id == proj_id \
+                                       and ele.name in ['sleuth']:
                                         self.stale_jobs.append(ele.id)
 
-                                subject = 'Error occurred during alignment and quantification'
-                                msg = 'Alaska encountered an error while performing read alignment and quantification for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                                subject = ('Error occurred during alignment '
+                                           + 'and quantification')
+                                msg = ('Alaska encountered an error while '
+                                       + 'performing read alignment and '
+                                       + 'quantification for project {}. '
+                                       + 'Please visit your unique URL for '
+                                       + 'more details.').format(proj_id)
                                 if email:
-                                    self.send_email(email, subject, msg, proj_id)
+                                    self.send_email(email,
+                                                    subject,
+                                                    msg,
+                                                    proj_id)
 
                             elif job.name == 'sleuth':
-                                subject = 'Error occurred during differential expression analysis'
-                                msg = 'Alaska encountered an error while performing differential expression analysis for project {}. Please visit your unique URL for more details.'.format(proj_id)
+                                subject = ('Error occurred during '
+                                           + 'differential expression '
+                                           + 'analysis')
+                                msg = ('Alaska encountered an error while '
+                                       + 'performing differential expression '
+                                       + 'analysis for project {}. Please '
+                                       + 'visit your unique URL for more '
+                                       + 'details.').format(proj_id)
                                 if email:
-                                    self.send_email(email, subject, msg, proj_id)
+                                    self.send_email(email,
+                                                    subject,
+                                                    msg,
+                                                    proj_id)
 
         except KeyboardInterrupt:
             self.out('INFO: stopping workers')
@@ -485,20 +565,17 @@ class AlaskaServer(Alaska):
     def decode(self, request):
         """
         Method to decode messages received from AlaskaRequest.
+
+        Arguments:
+        request -- (list) of frames in the multipart message
+
+        Returns: None
         """
-        # self.out('{}: received {}'.format(request[0], request[1]))
         try:
             if request[1] not in self.CODES:
-                raise Exception('ERROR: code {} was not recognized'.format(request[1]))
+                raise Exception(('ERROR: code {} was not '
+                                 + 'recognized').format(request[1]))
             _id = request[0].decode(Alaska.ENCODING)
-
-            # # Deal with 'check' first.
-            # if request[1] == Alaska.CODES['check']:
-            #     self.CODES[request[1]](_id)
-            # elif not _id.startswith('_'):
-            #     # check if it exists
-            #     if not self.exists(_id):
-            #         raise Exception('{}: does not exist'.format(_id))
 
             # distribute message to appropriate method
             self.CODES[request[1]](_id)
@@ -506,13 +583,20 @@ class AlaskaServer(Alaska):
             _id = request[0]
             self.broadcast(_id, 'ERROR: {}'.format(request))
             self.respond(_id, str(e))
-            self.out(''.join(traceback.format_exception(None, e, e.__traceback__)),
-                        override=True)
+            self.out(''.join(traceback.format_exception(None,
+                                                        e, e.__traceback__)),
+                     override=True)
             self.close(_id)
 
     def respond(self, to, msg):
         """
         Respond to given REQ with message.
+
+        Arguments:
+        to  -- (str) ZeroMQ socket id to send the message to
+        msg -- (str) message to send
+
+        Returns: None
         """
         # acquire lock
         if self.io_lock.acquire():
@@ -531,6 +615,12 @@ class AlaskaServer(Alaska):
     def log(self, _id=None, close=True):
         """
         Writes contents of log_pool to log file.
+
+        Arguments:
+        _id   -- (str) ZeroMQ id of the request (default: None)
+        close -- (bool) whether or not to close connection (default: True)
+
+        Returns: None
         """
         self.out('INFO: writing log')
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
@@ -551,6 +641,11 @@ class AlaskaServer(Alaska):
         """
         Log loop.
         Runs log in intervals.
+
+        Arguments:
+        t -- (int) log interval in seconds (default: 600)
+
+        Returns: None
         """
         try:
             while self.RUNNING:
@@ -563,6 +658,12 @@ class AlaskaServer(Alaska):
     def out(self, out, override=False):
         """
         Overrides parent's out().
+
+        Arguments:
+        out      -- (str) message to output
+        override -- (bool) override sent to parent's out() (default: False)
+
+        Return: None
         """
         line = super().out(out, override)
         self.log_pool.append(line)
@@ -570,6 +671,10 @@ class AlaskaServer(Alaska):
     def broadcast(self, to, msg):
         """
         Print to console, save to log, and respond.
+
+        Arguments:
+        to  -- (str) ZeroMQ socket id to send message
+        msg -- (str) message to send
         """
         self.out(msg)
         self.respond(to, msg)
@@ -577,6 +682,11 @@ class AlaskaServer(Alaska):
     def close(self, to):
         """
         Closes connection to AlaskaRequest.
+
+        Arguments:
+        to -- (str) ZeroMQ socket id to close connection
+
+        Returns: None
         """
         if to is not None:
             self.respond(to, 'END')
@@ -585,6 +695,12 @@ class AlaskaServer(Alaska):
         """
         Responds to check request.
         Check request is sent to check if server is up and running.
+
+        Arguments:
+        to    -- (str) ZeroMQ socket id to send response
+        close -- (bool) whether or not to close connection (default: False)
+
+        Returns: None
         """
         self.respond(to, to)
 
@@ -594,6 +710,11 @@ class AlaskaServer(Alaska):
     def update_orgs(self, _id=None):
         """
         Updates organisms.
+
+        Arguments:
+        _id -- (str) ZeroMQ socket id (default: None)
+
+        Returns: None
         """
         # find deepest directory
         for root, dirs, files in os.walk(Alaska.ORGS_DIR):
@@ -612,13 +733,13 @@ class AlaskaServer(Alaska):
                 genus = split[-3]
                 species = split[-2]
                 ver = split[-1]
-                folder = '{}/{}/{}/{}'.format(Alaska.ORGS_DIR, genus, species, ver)
+                folder = '{}/{}/{}/{}'.format(Alaska.ORGS_DIR,
+                                              genus, species, ver)
 
                 # Check if this is a new organism.
                 if genus not in self.organisms \
-                    or species not in self.organisms[genus] \
-                    or ver not in self.organisms[genus][species]:
-
+                   or species not in self.organisms[genus] \
+                   or ver not in self.organisms[genus][species]:
                     self.out('INFO: detected new organism - {}_{}_{}'.format(
                         genus, species, ver
                     ))
@@ -626,7 +747,9 @@ class AlaskaServer(Alaska):
                     # parse reference variables
                     # reference folder MUST contain only three files
                     if len(os.listdir(ref_dir)) is not 3:
-                        self.out('INFO: {}/{}/{} does not have only two files...skipping'.format(genus, species, ver))
+                        self.out(('INFO: {}/{}/{} does not have only two '
+                                  + 'files...skipping').format(genus,
+                                                               species, ver))
                         continue
 
                     # make sure all the files we need exists
@@ -646,7 +769,8 @@ class AlaskaServer(Alaska):
                         elif fname.startswith('{}.bed'.format(prefix)):
                             bed = fname
                     if dna is None or cdna is None or bed is None:
-                        self.out('INFO: {}/{}/{} does not have correct files'.format(genus, species, ver))
+                        self.out(('INFO: {}/{}/{} does not have correct '
+                                  + 'files').format(genus, species, ver))
                         continue
 
                     # genus exists?
@@ -662,10 +786,13 @@ class AlaskaServer(Alaska):
 
                     if ver not in self.organisms[genus][species].refs:
                         # make new version
-                        ref = AlaskaReference(ver, dna, cdna, bed)
-                        self.organisms[genus][species].refs[ver] = ref
+                        self.organisms[genus][species].add_new_ref(ver,
+                                                                   dna,
+                                                                   cdna,
+                                                                   bed)
 
                 # now, we check which index needs to be made
+                ref = self.organisms[genus][species].refs[ver]
                 need_bt2 = True
                 need_kal = True
                 bt2_log = '{}/bowtie2_log.txt'.format(root)
@@ -689,27 +816,39 @@ class AlaskaServer(Alaska):
 
                 # we need to make one or more indices
                 if need_bt2 or need_kal:
-                    self.make_idx(genus, species, ver, bt2=need_bt2, kal=need_kal)
+                    self.make_idx(genus, species, ver, bt2=need_bt2,
+                                  kal=need_kal)
 
                 # once made, populate AlaskaReference object appropriately
+                ref = self.organisms[genus][species].refs[ver]
                 for f in os.listdir('{}/{}'.format(folder, self.IDX_DIR)):
                     if f.endswith('.idx'):
                         ref.kallisto_idx = f
                     elif f.endswith('.bt2'):
                         ref.bowtie_idx.append(f)
 
-
     def make_idx(self, genus, species, ver, bt2=True, kal=True):
         """
         Runs docker containers to make indices (both for kallisto and bowtie2)
         of the specified genus, species, and version.
+
+        Arguments:
+        genus   -- (str) genus of organism
+        species -- (str) species of organism
+        ver     -- (str) reference version
+        bt2     -- (bool) whether or not to generate bowtie2 index
+                          (default: True)
+        kal     -- (bool) whether or not to generate kallisto index
+                          (default: True)
+
+        Returns: None
         """
         # copy index build script to target
         script_src = '{}/{}'.format(Alaska.SCRIPT_DIR, Alaska.IDX_SCRIPT)
         script_tgt = '{}/{}'.format(self.organisms[genus][species].path, ver)
         shutil.copy2(script_src, script_tgt)
 
-        ### begin container variables
+        # begin container variables
         src = Alaska.DOCKER_DATA_VOLUME
         tgt = Alaska.ROOT_PATH
         volumes = {
@@ -720,10 +859,12 @@ class AlaskaServer(Alaska):
             'volumes': volumes,
             'cpuset_cpus': Alaska.CPUS
         }
-        ### end variables
+        # end variables
 
-        self.out('INFO: making indices for {}_{}_{}'.format(genus, species, ver))
-        cmd = 'python3 {} --threads {} '.format(Alaska.IDX_SCRIPT, Alaska.NTHREADS)
+        self.out('INFO: making indices for {}_{}_{}'.format(genus,
+                                                            species, ver))
+        cmd = 'python3 {} --threads {} '.format(Alaska.IDX_SCRIPT,
+                                                Alaska.NTHREADS)
         if bt2 and kal:
             cmd += 'all'
         elif bt2:
@@ -731,186 +872,77 @@ class AlaskaServer(Alaska):
         elif kal:
             cmd += 'kallisto'
 
-        self.out('INFO: starting docker container with {} core allocation'.format(self.CPUS))
+        self.out(('INFO: starting docker container with {} core '
+                  + 'allocation').format(self.CPUS))
         cont = AlaskaDocker(Alaska.DOCKER_QC_TAG)
         cont.run(cmd, working_dir=wdir,
-                          volumes=volumes,
-                          cpuset_cpus=self.CPUS,
-                          )
+                 volumes=volumes,
+                 cpuset_cpus=self.CPUS)
         self.out('INFO: container started with id {}'.format(cont.id))
         self.org_update_id = cont.id
 
-        for l in cont.hook():
-            l = l.decode(self.ENCODING).strip()
+        for line in cont.hook():
+            line = line.decode(self.ENCODING).strip()
 
             # since kallisto output can be multiple lines
-            if '\n' in l:
-                outs = l.split('\n')
+            if '\n' in line:
+                outs = line.split('\n')
             else:
-                outs = [l]
+                outs = [line]
 
             for out in outs:
                 pass
-                # self.out('INFO: {}: {}'.format(cont.id, out))
-
-        ################### 4/2/2018 FIXED UNTIL HERE #####################
 
         self.org_update_id = None
         self.out('INFO: index build for {}_{}_{} successful'.format(
             genus, species, ver
         ))
 
-    # def update_orgs_loop(self, t=600):
-    #     """
-    #     Organism update loop.
-    #     Runs update_idx in intervals.
-    #     """
-    #     try:
-    #         while self.RUNNING:
-    #             self.update_orgs()
-    #             time.sleep(t)
-    #     except KeyboardInterrupt:
-    #         self.out('INFO: terminating organism update loop')
-
-
-    # def update_idx(self, _id=None):
-    #     """
-    #     Writes bash script to update indices.
-    #     """
-    #     self.out('INFO: starting index update')
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #     self.transcripts = os.listdir(self.TRANS_DIR)
-    #     self.indices = os.listdir(self.IDX_DIR)
-    #     sh = BashWriter('update_idx', folder=self.SCRIPT_DIR)
-    #
-    #     for trans in self.transcripts:
-    #         name = trans.split('.')[:-2] # remove extension
-    #         name = '.'.join(name)
-    #         if all(not idx.startswith(name) for idx in self.indices):
-    #             self.out('INFO: index must be built for {}'.format(trans))
-    #             sh.add('kallisto index -i {}/{}.idx {}/{}'.format(self.IDX_DIR,
-    #                                             name, self.TRANS_DIR, trans))
-    #
-    #     if not len(sh.commands) == 0:
-    #         self.out('INFO: writing update script')
-    #         sh.write() # write script
-    #
-    #         ### begin variables
-    #         __id = self.rand_str_except(self.PROJECT_L, self.jobs.keys())
-    #         # source and target mounting points
-    #         src_scrpt = '/{}/{}'.format(self.ROOT_PATH, self.SCRIPT_DIR)
-    #         tgt_scrpt = '/{}'.format(self.SCRIPT_DIR)
-    #         src_trans = '/{}/{}'.format(self.ROOT_PATH, self.TRANS_DIR)
-    #         tgt_trans = '/{}'.format(self.TRANS_DIR)
-    #         src_idx = '/{}/{}'.format(self.ROOT_PATH, self.IDX_DIR)
-    #         tgt_idx = '/{}'.format(self.IDX_DIR)
-    #         # volumes to mount to container
-    #         volumes = {
-    #             src_scrpt: {'bind': tgt_scrpt, 'mode': 'ro'},
-    #             src_trans: {'bind': tgt_trans, 'mode': 'ro'},
-    #             src_idx: {'bind': tgt_idx, 'mode': 'rw'}
-    #         }
-    #         cmd = 'bash {}/update_idx.sh'.format(self.SCRIPT_DIR)
-    #         args = {
-    #             'volumes': volumes,
-    #             'cpuset_cpus': self.CPUS,
-    #         }
-    #         ### end variables
-    #
-    #         self.out('INFO: starting docker container with {} core allocation'.format(self.CPUS))
-    #         cont = self.DOCKER.containers.run(self.KAL_VERSION,
-    #                                 'bash {}/update_idx.sh'.format(self.SCRIPT_DIR),
-    #                                 volumes=volumes,
-    #                                 cpuset_cpus=self.CPUS,
-    #                                 detach=True)
-    #         self.out('INFO: container started with id {}'.format(cont.short_id))
-    #
-    #         for l in cont.attach(stream=True):
-    #             l = l.decode(self.ENCODING).strip()
-    #
-    #             # since kallisto output can be multiple lines
-    #             if '\n' in l:
-    #                 outs = l.split('\n')
-    #             else:
-    #                 outs = [l]
-    #
-    #             for out in outs:
-    #                 self.out('INFO: index: {}'.format(out))
-    #
-    #         self.out('INFO: index build successful')
-    #         self.update_idx()
-    #     else:
-    #         self.out('INFO: indices up to date. no update required')
-    #
-    # def update_idx_loop(self, t=600):
-    #     """
-    #     Index update loop.
-    #     Runs update_idx in intervals.
-    #     """
-    #     try:
-    #         while self.RUNNING:
-    #             self.update_idx()
-    #             time.sleep(t)
-    #     except KeyboardInterrupt:
-    #         self.out('INFO: terminating update loop')
-
-    def fix_permissions(self, _id):
-        """
-        Fix folder permissions for the given project.
-        """
-        if self.exists_var(_id):
-            proj = self.projects[_id]
-        else:
-            proj = self.projects_temp[_id]
-
-        # Set read & write permissions for everyone for this directory.
-        permission = 0o777
-        os.chmod(proj.dir, permission)
-        for root, dirs, files in os.walk(proj.dir):
-            for d in dirs:
-                os.chmod(os.path.join(root, d), permission)
-            for f in files:
-                os.chmod(os.path.join(root, f), permission)
-
     def new_proj(self, _id, close=True):
         """
         Creates a new project.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         def make_ftp(__id, ftp):
             """
             Makes the given ftp user with id and a random pw.
             Returns the pw.
+
+            Arguments:
+            __id -- (str) ftp user id
+            ftp  -- (docker.container) ftp docker container
+
+            Returns: None
             """
             pw = self.rand_str(Alaska.FTP_PW_L)
 
-            cmd = '/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m -u ftpuser \
-                    -d /home/ftpusers/{}/{}/{}/{}"'.format(pw, pw, __id,
-                                                Alaska.DOCKER_DATA_VOLUME,
-                                                Alaska.PROJECTS_DIR,
-                                                __id,
-                                                Alaska.RAW_DIR)
+            cmd = ('/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m '
+                   + '-u ftpuser -d /home/ftpusers/'
+                   + '{}/{}/{}/{}"').format(pw, pw, __id,
+                                            Alaska.DOCKER_DATA_VOLUME,
+                                            Alaska.PROJECTS_DIR,
+                                            __id,
+                                            Alaska.RAW_DIR)
             out = ftp.exec_run(cmd)
             exit_code = out[0]
             if exit_code != 0:
-                raise Exception('{}: FTP user creation exited with non-zero status.'
-                                    .format(__id))
+                raise Exception(('{}: FTP user creation exited with '
+                                 + 'non-zero status.').format(__id))
 
-            cmd = '/bin/bash -c "pure-pw usermod {} -n {} -N {} -m"'.format(__id,
-                                                Alaska.FTP_COUNT_LIMIT,
-                                                Alaska.FTP_SIZE_LIMIT)
+            cmd = ('/bin/bash -c "pure-pw usermod '
+                   + '{} -n {} -N {} -m"').format(__id,
+                                                  Alaska.FTP_COUNT_LIMIT,
+                                                  Alaska.FTP_SIZE_LIMIT)
             out = ftp.exec_run(cmd)
             exit_code = out[0]
             if exit_code != 0:
-                raise Exception('{}: FTP user modification exited with non-zero status.'
-                                    .format(__id))
+                raise Exception(('{}: FTP user modification exited with '
+                                 + 'non-zero status.').format(__id))
 
             cmd = 'pure-pw mkdb'
             out = ftp.exec_run(cmd)
@@ -951,7 +983,8 @@ class AlaskaServer(Alaska):
         try:
             ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
             if ftp.status != 'running':
-                self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+                self.broadcast(_id, ('WARNING: container {} is not '
+                               + 'running').format(Alaska.DOCKER_FTP_TAG))
 
             # once we know that the ftp is running,
             pw = make_ftp(__id, ftp)
@@ -959,9 +992,11 @@ class AlaskaServer(Alaska):
             # add to global variable
             self.ftp[__id] = pw
 
-            self.broadcast(_id, '{}: ftp user created with password {}'.format(__id, pw))
+            self.broadcast(_id, ('{}: ftp user created with '
+                           + 'password {}').format(__id, pw))
         except docker.errors.NotFound as e:
-            self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+            self.broadcast(_id, ('WARNING: container {} does '
+                           + 'not exist').format(Alaska.DOCKER_FTP_TAG))
 
         if close:
             self.close(_id)
@@ -969,6 +1004,12 @@ class AlaskaServer(Alaska):
     def get_ftp_info(self, _id, close=True):
         """
         Responds with the ftp password.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id not in self.ftp:
             raise Exception('{}: no ftp account'.format(_id))
@@ -982,7 +1023,8 @@ class AlaskaServer(Alaska):
         """
         Send mail with the given arguments.
         """
-        datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT) + ' Pacific Time'
+        datetime = (dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
+                    + ' Pacific Time')
         url = 'http://alaska.caltech.edu:81/?id=' + _id
         fr = 'noreply@alaska.caltech.edu'
 
@@ -1032,6 +1074,11 @@ class AlaskaServer(Alaska):
     def exists(self, _id):
         """
         Checks if project with id exists.
+
+        Arguments:
+        _id   -- (str) project id to check existence
+
+        Returns: None
         """
         if (_id in self.projects) or (_id in self.projects_temp):
             return True
@@ -1041,6 +1088,11 @@ class AlaskaServer(Alaska):
     def exists_var(self, _id):
         """
         Checks if project with id exists in project.
+
+        Arguments:
+        _id   -- (str) project id to check existence
+
+        Returns: None
         """
         if _id in self.projects:
             return True
@@ -1050,6 +1102,11 @@ class AlaskaServer(Alaska):
     def exists_temp(self, _id):
         """
         Checks if project with id exists in project_temp.
+
+        Arguments:
+        _id   -- (str) project id to check existence
+
+        Returns: None
         """
         if _id in self.projects_temp:
             return True
@@ -1059,6 +1116,12 @@ class AlaskaServer(Alaska):
     def load_proj(self, _id, close=True):
         """
         Loads project.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         # TODO: change checking to catching exceptions
         self.out('{}: loading'.format(_id))
@@ -1095,6 +1158,12 @@ class AlaskaServer(Alaska):
     def save_proj(self, _id, close=True):
         """
         Saves project to JSON.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         # TODO: change checking to catching exceptions
         self.broadcast(_id, '{}: saving'.format(_id))
@@ -1118,6 +1187,12 @@ class AlaskaServer(Alaska):
     def remove_proj(self, _id, close=True):
         """
         Removes the given project.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         proj = None
         if self.exists_temp(_id):
@@ -1126,7 +1201,8 @@ class AlaskaServer(Alaska):
             del self.projects[_id]
 
         # Remove folders.
-        shutil.rmtree('{}/{}'.format(Alaska.PROJECTS_DIR, _id), ignore_errors=True)
+        shutil.rmtree('{}/{}'.format(Alaska.PROJECTS_DIR, _id),
+                      ignore_errors=True)
 
         self.broadcast(_id, '{}: removed'.format(_id))
 
@@ -1137,6 +1213,12 @@ class AlaskaServer(Alaska):
     def fetch_reads(self, _id, close=True):
         """
         Fetches all files & folders in the raw reads directory.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if self.exists_temp(_id):
             proj = self.projects_temp[_id]
@@ -1156,6 +1238,12 @@ class AlaskaServer(Alaska):
     def get_raw_reads(self, _id, close=True, md5=True):
         """
         Retrieves list of uploaded sample files.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id in self.projects:
             raise Exception('This project is already finalized!')
@@ -1180,16 +1268,17 @@ class AlaskaServer(Alaska):
         if proj.progress < 1:
             proj.progress = Alaska.PROGRESS['raw_reads']
 
-        # 11/27/2017
-        # self.respond(_id, json.dumps(self.projects_temp[_id].raw_reads, default=self.encode_json, indent=4))
-        # self.respond(_id, json.dumps(self.projects_temp[_id].chk_md5, default=self.encode_json, indent=4))
-
         if close:
             self.close(_id)
 
     def md5_chksum(self, fname):
         """
         Calculates the md5 checksum of the given file at location.
+
+        Arguments:
+        fname -- (str) filename to calculate md5
+
+        Returns: (str) md5
         """
         md5 = hl.md5()
 
@@ -1203,22 +1292,31 @@ class AlaskaServer(Alaska):
     def infer_samples(self, _id, close=True, md5=True):
         """
         Infers samples from raw reads.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+        md5   -- (bool) whether or not to calculate md5
+
+        Returns: None
         """
         if _id in self.projects:
             raise Exception('This project is already finalized!')
         # Project we are concerned about.
         proj = self.projects_temp[_id]
 
-        self.get_raw_reads(_id, close=False, md5=md5) # make sure raw reads have been extracted
+        self.get_raw_reads(_id, close=False, md5=md5)
 
         self.broadcast(_id, '{}: inferring samples from raw reads'.format(_id))
 
         # function to get new sample ids
-        ids = lambda : list(self.samples.keys()) + list(self.samples_temp.keys())
+        ids = lambda : (list(self.samples.keys())
+                        + list(self.samples_temp.keys()))
         f = lambda : self.rand_str_except(self.PROJECT_L, ids())
 
         proj.infer_samples(f, temp=self.samples_temp, md5=md5)
-        self.broadcast(_id, '{}: {} samples successfully inferred'.format(_id, len(proj.samples)))
+        self.broadcast(_id, '{}: {} samples successfully inferred'.format(_id,
+                       len(proj.samples)))
 
         if proj.progress < 2:
             proj.progress = Alaska.PROGRESS['inferred']
@@ -1231,15 +1329,18 @@ class AlaskaServer(Alaska):
         # Then, output the JSON.
         self.get_json(_id, close=False)
 
-        # 11/27/2017
-        # self.respond(_id, json.dumps(self.projects_temp[_id].samples, default=self.encode_json, indent=4))
-
         if close:
             self.close(_id)
 
     def get_json(self, _id, close=True):
         """
         Sends the project as json.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if self.exists_temp(_id):
             proj = self.projects_temp[_id]
@@ -1257,6 +1358,12 @@ class AlaskaServer(Alaska):
     def get_organisms(self, _id, close=True):
         """
         Sends a list of available organisms.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         orgs = []
         for genus, item in self.organisms.items():
@@ -1271,21 +1378,16 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-
-    # def get_idx(self, _id, close=True):
-    #     """
-    #     Responds with the list of available indices.
-    #     """
-    #     self.out('INFO: available indices {}'.format(self.indices))
-    #     self.respond(_id, self.indices)
-    #
-    #     if close:
-    #         self.close(_id)
-
     def set_proj(self, _id, close=True):
         """
         Sets project params.
         Only to be called after the project has been created.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id in self.projects:
             raise Exception('This project is already finalized!')
@@ -1298,10 +1400,7 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: setting project data'.format(_id))
 
-        # TODO: what if sample id exists?
         proj.load(Alaska.TEMP_DIR)
-        self.broadcast(_id, '{}: validating data'.format(_id))
-        proj.check()
 
         proj.progress = Alaska.PROGRESS['set']
 
@@ -1311,26 +1410,16 @@ class AlaskaServer(Alaska):
         if close:
             self.close(_id)
 
-    # def new_sample(self, _id, close=True):
-    #     """
-    #     Creates new sample.
-    #     """
-    #     self.broadcast(_id, '{}: creating new sample'.format(_id))
-    #
-    #     ids = list(self.samples.keys()) + list(self.samples_temp.keys())
-    #     __id = self.rand_str_except(self.PROJECT_L, ids) # get unique id
-    #     self.projects_temp[_id].new_sample(__id)
-    #
-    #     self.samples_temp[__id] = self.projects_temp[_id].samples[__id]
-    #     self.broadcast(_id, '{}: new sample created with id {}'.format(_id, __id))
-    #
-    #     if close:
-    #         self.close(_id)
-
     def finalize_proj(self, _id, close=True):
         """
         Finalizes project and samples by creating appropriate json and
-        sample directories
+        sample directories.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id in self.projects:
             raise Exception('This project is already finalized!')
@@ -1370,22 +1459,40 @@ class AlaskaServer(Alaska):
     def enqueue_job(self, _id, job):
         """
         Enqueues an AlaskaJob.
+
+        Arguments:
+        _id -- (str) project id
+        job -- (AlaskaJob) job to enqueue
+
+        Returns: None
         """
         self.broadcast(_id, '{}: checking queue'.format(_id, job.id))
-        if self.current_job is None and self.queue.qsize() == 0: # no other job running
-            self.broadcast(_id, '{}: queue is empty...immediately starting'.format(_id))
+        if self.current_job is None and self.queue.qsize() == 0:
+            self.broadcast(_id, ('{}: queue is empty...'
+                                 + 'immediately starting').format(_id))
         else:
             self.broadcast(_id, '{}: job {} added to queue (size: {})'
                             .format(_id, job.id, self.queue.qsize()))
-        self.queue.put(job) # put job into queue
-                            # job must be put into queue
-                            # regardless of it being empty
-        self.broadcast(_id, '{}: job {} eta {} mins'.format(_id, job.id, self.calc_queue_exhaust()))
-
+        self.queue.put(job)  # put job into queue
+                             # job must be put into queue
+                             # regardless of it being empty
+        self.broadcast(_id, '{}: job {} eta {} mins'.format(_id, job.id,
+                       self.calc_queue_exhaust()))
 
     def qc(self, _id, close=True, check=True, progress=True):
         """
         Performs quality control on the given raw reads.
+
+        Arguments:
+        _id      -- (str) ZeroMQ socket id that sent this request
+        close    -- (bool) whether or not to close the connection
+                           (default: True)
+        check    -- (bool) whether or not to check project progress
+                           (default: True)
+        progress -- (bool) whether or not to update project progress
+                           (default: True)
+
+        Returns: None
         """
         if check and _id not in self.projects:
             raise Exception('This project has not been finalized.')
@@ -1403,13 +1510,14 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: already in queue'.format(_id))
 
         # check if qc is currently running
-        if self.current_job is not None\
-            and self.current_job.proj_id == _id\
-            and self.current_job.name == 'qc':
+        if self.current_job is not None \
+           and self.current_job.proj_id == _id \
+           and self.current_job.name == 'qc':
             raise Exception('{}: currently running'.format(_id))
 
         # make directories
-        self.broadcast(_id, '{}: making directories for quality control'.format(_id))
+        self.broadcast(_id, ('{}: making directories for '
+                             + 'quality control').format(_id))
         for __id, sample in proj.samples.items():
             f = '{}/{}'.format(proj.qc_dir, sample.name)
             os.makedirs(f, exist_ok=True)
@@ -1417,9 +1525,9 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: creating new job'.format(_id))
 
-        ### begin job variables
+        # begin job variables
         __id = self.rand_str_except(Alaska.PROJECT_L, self.jobs.keys())
-        self.jobs[__id] = None # initialize empty job to prevent duplicate ids
+        self.jobs[__id] = None  # initialize empty job to prevent duplicate ids
         # source and target mounting points
         # src_proj = os.path.abspath(self.projects[_id].dir)
         src = Alaska.DOCKER_DATA_VOLUME
@@ -1436,28 +1544,39 @@ class AlaskaServer(Alaska):
             'volumes': volumes,
             'cpuset_cpus': Alaska.CPUS,
         }
-        ### end job variables
+        # end job variables
 
         job = AlaskaJob(__id, 'qc', _id,
-                         Alaska.DOCKER_QC_TAG, cmd, **args)
+                        Alaska.DOCKER_QC_TAG, cmd, **args)
         job.save()
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
 
         if progress:
-            proj.progress = Alaska.PROGRESS['qc_queued'] # added to queue
+            proj.progress = Alaska.PROGRESS['qc_queued']  # added to queue
 
         if close:
             self.close(_id)
-
 
     def read_quant(self, _id, close=True, check=True, progress=True):
         """
         Checks if another analysis is running,
         then performs read quantification.
+
+        Arguments:
+        _id      -- (str) ZeroMQ socket id that sent this request
+        close    -- (bool) whether or not to close the connection
+                           (default: True)
+        check    -- (bool) whether or not to check project progress
+                           (default: True)
+        progress -- (bool) whether or not to update project progress
+                           (default: True)
+
+        Returns: None
         """
-        if check and self.projects[_id].progress < Alaska.PROGRESS['qc_finished']:
+        if check \
+           and self.projects[_id].progress < Alaska.PROGRESS['qc_finished']:
             raise Exception('{}: Quality control has not been performed.'
                             .format(_id))
         # The project we are interested in.
@@ -1472,13 +1591,14 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: already in queue'.format(_id))
 
         # check if alignment is currently running
-        if self.current_job is not None\
-            and self.current_job.proj_id == _id\
-            and self.current_job.name == 'kallisto':
+        if self.current_job is not None \
+           and self.current_job.proj_id == _id \
+           and self.current_job.name == 'kallisto':
             raise Exception('{}: currently running'.format(_id))
 
         # make directories
-        self.broadcast(_id, '{}: making directories for read alignment'.format(_id))
+        self.broadcast(_id, ('{}: making directories for ''
+                             + read alignment').format(_id))
         for __id, sample in proj.samples.items():
             f = '{}/{}'.format(proj.align_dir, sample.name)
             os.makedirs(f, exist_ok=True)
@@ -1486,9 +1606,9 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: creating new job'.format(_id))
 
-        ### begin job variables
+        # begin job variables
         __id = self.rand_str_except(Alaska.PROJECT_L, self.jobs.keys())
-        self.jobs[__id] = None # initialize empty job to prevent duplicate ids
+        self.jobs[__id] = None  # initialize empty job to prevent duplicate ids
         # source and target mounting points
         # src_proj = os.path.abspath(self.projects[_id].dir)
         src = Alaska.DOCKER_DATA_VOLUME
@@ -1499,23 +1619,24 @@ class AlaskaServer(Alaska):
             src: {'bind': tgt, 'mode': 'rw'},
         }
 
-        cmd = 'python3 run_analysis.py kallisto --threads {}'.format(Alaska.NTHREADS)
+        cmd = ('python3 run_analysis.py kallisto '
+               + '--threads {}').format(Alaska.NTHREADS)
         args = {
             'working_dir': wdir,
             'volumes': volumes,
             'cpuset_cpus': Alaska.CPUS,
         }
-        ### end job variables
+        # end job variables
 
         job = AlaskaJob(__id, 'kallisto', _id,
-                         Alaska.DOCKER_KALLISTO_TAG, cmd, **args)
+                        Alaska.DOCKER_KALLISTO_TAG, cmd, **args)
         job.save()
         self.jobs[__id] = job
         proj.jobs.append(__id)
         self.enqueue_job(_id, job)
 
         if progress:
-            proj.progress = Alaska.PROGRESS['quant_queued'] # added to queue
+            proj.progress = Alaska.PROGRESS['quant_queued']  # added to queue
 
         if close:
             self.close(_id)
@@ -1523,10 +1644,23 @@ class AlaskaServer(Alaska):
     def diff_exp(self, _id, close=True, check=True, progress=True):
         """
         Perform differential expression analysis.
+
+        Arguments:
+        _id      -- (str) ZeroMQ socket id that sent this request
+        close    -- (bool) whether or not to close the connection
+                           (default: True)
+        check    -- (bool) whether or not to check project progress
+                           (default: True)
+        progress -- (bool) whether or not to update project progress
+                           (default: True)
+
+        Returns: None
         """
-        if check and self.projects[_id].progress < Alaska.PROGRESS['quant_finished']:
-            raise Exception('{}: project must be aligned before differential expression analysis'
-                            .format(_id))
+        if check \
+           and self.projects[_id].progress < Alaska.PROGRESS['quant_finished']:
+            raise Exception(('{}: project must be aligned before differential '
+                             + 'expression analysis').format(_id))
+
         # The project we are interested in.
         proj = self.projects[_id]
 
@@ -1542,9 +1676,9 @@ class AlaskaServer(Alaska):
                 raise Exception('{}: already in queue'.format(_id))
 
         # check if diff. exp. is currently running
-        if self.current_job is not None\
-            and self.current_job.proj_id == _id\
-            and self.current_job.name == 'sleuth':
+        if self.current_job is not None \
+           and self.current_job.proj_id == _id \
+           and self.current_job.name == 'sleuth':
             raise Exception('{}: currently running'.format(_id))
 
         # write sleuth matrix and bash script
@@ -1553,9 +1687,9 @@ class AlaskaServer(Alaska):
 
         self.broadcast(_id, '{}: creating new job'.format(_id))
 
-        ### begin job variables
+        # begin job variables
         __id = self.rand_str_except(Alaska.PROJECT_L, self.jobs.keys())
-        self.jobs[__id] = None # initialize empty job to prevent duplicate ids
+        self.jobs[__id] = None  # initialize empty job to prevent duplicate ids
         # source and target mouting points
         src = Alaska.DOCKER_DATA_VOLUME
         tgt = Alaska.ROOT_PATH
@@ -1564,13 +1698,14 @@ class AlaskaServer(Alaska):
         volumes = {
             src: {'bind': tgt, 'mode': 'rw'},
         }
-        cmd = 'python3 run_analysis.py sleuth --threads {}'.format(Alaska.NTHREADS)
+        cmd = ('python3 run_analysis.py sleuth '
+               + '--threads {}').format(Alaska.NTHREADS)
         args = {
             'working_dir': wdir,
             'volumes': volumes,
             'cpuset_cpus': self.CPUS,
         }
-        ### end job variables
+        # end job variables
 
         job = AlaskaJob(__id, 'sleuth', _id,
                         self.DOCKER_SLEUTH_TAG, cmd, **args)
@@ -1580,7 +1715,7 @@ class AlaskaServer(Alaska):
         self.enqueue_job(_id, job)
 
         if progress:
-            proj.progress = Alaska.PROGRESS['diff_queued'] # added to queue
+            proj.progress = Alaska.PROGRESS['diff_queued']  # added to queue
 
         if close:
             self.close(_id)
@@ -1588,20 +1723,35 @@ class AlaskaServer(Alaska):
     def do_all(self, _id, close=True):
         """
         Perform all three analyses. Assumes that the project is finalized.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         def change_ftp(_id):
             """
-            Changes ftp user's home directory to root of the project.
+            Helper function to change ftp user's home directory
+            to root of the project.
+
+            Arguments:
+            _id -- (str) ftp user id
+
+            Returns: None
             """
             try:
                 ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
                 if ftp.status != 'running':
-                    self.broadcast(_id, 'WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+                    self.broadcast(_id, ('WARNING: container {} is not '
+                                         + 'running').format(
+                                         Alaska.DOCKER_FTP_TAG))
 
-                cmd = 'pure-pw usermod {} -d /home/ftpusers/{}/{}/{}'.format(_id,
-                    Alaska.DOCKER_DATA_VOLUME,
-                    Alaska.PROJECTS_DIR,
-                    _id)
+                cmd = 'pure-pw usermod {} -d /home/ftpusers/{}/{}/{}'.format(
+                      _id,
+                      Alaska.DOCKER_DATA_VOLUME,
+                      Alaska.PROJECTS_DIR,
+                      _id)
                 out = ftp.exec_run(cmd)
 
                 cmd = 'pure-pw mkdb'
@@ -1611,7 +1761,8 @@ class AlaskaServer(Alaska):
                     raise Exception('{}: FTP mkdb failed.'.format(__id))
 
             except docker.errors.NotFound as e:
-                self.broadcast(_id, 'WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
+                self.broadcast(_id, ('WARNING: container {} does not '
+                                     + 'exist').format(Alaska.DOCKER_FTP_TAG))
 
         self.broadcast(_id, '{}: performing all analyses'.format(_id))
         if close:
@@ -1625,8 +1776,8 @@ class AlaskaServer(Alaska):
         change_ftp(_id)
 
         # If the project is finalized.
-        if (proj.progress == Alaska.PROGRESS['finalized']
-            or proj.progress == Alaska.PROGRESS['qc_error']):
+        if (proj.progress == Alaska.PROGRESS['finalized']) \
+           or (proj.progress == Alaska.PROGRESS['qc_error']):
             self.out('{}: starting from qc'.format(_id))
             self.qc(_id, close=False, check=False, progress=True)
             self.read_quant(_id, close=False, check=False, progress=False)
@@ -1640,13 +1791,20 @@ class AlaskaServer(Alaska):
             self.diff_exp(_id, close=False, check=False, progress=True)
 
         email = proj.meta['corresponding']['email']
-        msg = 'Alaska has placed your project {} in the queue. Analysis will start shortly.'.format(_id)
+        msg = ('Alaska has placed your project {} in the queue. '
+               + 'Analysis will start shortly.').format(_id)
         if email:
             self.send_email(email, 'Analysis queued', msg, _id)
 
     def open_sleuth_server(self, _id, close=True):
         """
         Open sleuth shiny app.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if not self.exists_var(_id):
             raise Exception('{}: project not found'.format(_id))
@@ -1660,7 +1818,8 @@ class AlaskaServer(Alaska):
         # port.
         for port, item in self.sleuth_servers.items():
             if item[0] == _id:
-                self.broadcast(_id, '{}: server already open on port {}'.format(_id, port))
+                self.broadcast(_id, ('{}: server already open on '
+                                     + 'port {}').format(_id, port))
                 # refresh open time
                 item[2] = dt.datetime.now()
                 if close:
@@ -1694,10 +1853,11 @@ class AlaskaServer(Alaska):
 
         cont = AlaskaDocker(Alaska.DOCKER_SLEUTH_TAG)
         cont.run(cmd, working_dir=wdir,
-                          volumes=volumes,
-                          ports=ports)
+                 volumes=volumes,
+                 ports=ports)
         cont_id = cont.id
-        self.out('INFO: shiny app container started with id {}'.format(cont_id))
+        self.out(('INFO: shiny app container started with '
+                  + 'id {}').format(cont_id))
         self.sleuth_servers[port] = [_id, cont_id, dt.datetime.now()]
 
         self.broadcast(_id, '{}: server opened on port {}'.format(_id, port))
@@ -1708,6 +1868,12 @@ class AlaskaServer(Alaska):
     def prepare_geo(self, _id, close=True):
         """
         Prepare submission to geo.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if not self.exists_var(_id):
             raise Exception('{}: project not found'.format(_id))
@@ -1728,20 +1894,27 @@ class AlaskaServer(Alaska):
         email = proj.meta['corresponding']['email']
         if email:
             subject = 'Project has been compiled'
-            msg = 'Project {} has been successfully compiled for GEO submission.'.format(_id)
+            msg = ('Project {} has been successfully compiled for '
+                   + 'GEO submission.').format(_id)
             self.send_email(email, subject, msg, _id)
 
     def submit_geo(self, _id, close=True):
         """
         Submit to geo.
-        Assumes that FTP information is
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if not self.exists_var(_id):
             raise Exception('{}: project not found'.format(_id))
 
         proj = self.projects[_id]
         if proj.progress < Alaska.PROGRESS['geo_compiled']:
-            raise Exception('{}: project not compiled for GEO submission'.format(_id))
+            raise Exception(('{}: project not compiled for '
+                             + 'GEO submission').format(_id))
 
         self.broadcast(_id, '{}: submitting project to GEO'.format(_id))
 
@@ -1764,21 +1937,31 @@ class AlaskaServer(Alaska):
         email = proj.meta['corresponding']['email']
         if email:
             subject = 'Project has been submitted to GEO'
-            msg = 'Project {} has been successfully submitted to GEO.<br>'.format(_id)
-            msg += 'Please send an email to <a href="mailto:{}">{}</a>'.format(Alaska.GEO_EMAIL, Alaska.GEO_EMAIL)
+            msg = ('Project {} has been successfully submitted '
+                   + 'to GEO.<br>').format(_id)
+            msg += ('Please send an email to <a href="mailto:'
+                    + '{}">{}</a>').format(Alaska.GEO_EMAIL, Alaska.GEO_EMAIL)
             msg += ' with the following information:<br>'
-            msg += '1) GEO account user name (<strong>{}</strong>)<br>'.format(geo_uname)
-            msg += '2) Name of the archive file deposited (<strong>{}</strong>)<br>'.format(fname)
+            msg += ('1) GEO account user name '
+                    + '(<strong>{}</strong>)<br>').format(geo_uname)
+            msg += ('2) Name of the archive file deposited '
+                    + '(<strong>{}</strong>)<br>').format(fname)
             msg += '3) Public release date (up to 3 years from now)<br>'
-            msg += 'Failure to send an email may result in the removal of your submission.'
+            msg += ('Failure to send an email may result in the '
+                    + 'removal of your submission.')
             self.send_email(email, subject, msg, _id)
-
-
 
     def copy_script(self, _id, script, dst=None):
         """
         Copies specified script (and overwrites if it already exists) to
         project.
+
+        Arguments:
+        _id    -- (str) project id
+        script -- (str) script filename
+        dist   -- (str) folder name within project to copy script to
+
+        Returns: None
         """
         # retrieve project
         proj = self.projects[_id]
@@ -1798,6 +1981,12 @@ class AlaskaServer(Alaska):
     def get_proj_status(self, _id, close=True):
         """
         Checks project status.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if self.exists_temp(_id):
             proj = self.projects_temp[_id]
@@ -1814,6 +2003,12 @@ class AlaskaServer(Alaska):
     def test_copy_reads(self, _id, close=True):
         """
         Copy test reads for testing.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         # project to test
         proj = self.projects_temp[_id]
@@ -1832,12 +2027,19 @@ class AlaskaServer(Alaska):
     def test_set_vars(self, _id, close=True):
         """
         Set project variables for testing.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         # project to test
         proj = self.projects_temp[_id]
 
         self.broadcast(_id, '{}: beginning set vars test'.format(_id))
-        self.respond(_id, '{}: check server console for more details'.format(_id))
+        self.respond(_id, ('{}: check server console for '
+                           + 'more details').format(_id))
 
         if close:
             self.close(_id)
@@ -1860,7 +2062,7 @@ class AlaskaServer(Alaska):
             elif all('mt' in read for read in sample.reads):
                 sample.meta['chars']['genotype'] = 'mt'
         proj.factors = [
-            {'name':'genotype', 'values':['wt', 'mt']}
+            {'name': 'genotype', 'values': ['wt', 'mt']}
         ]
         proj.controls = [
             {'name': 'genotype', 'value': 'wt'}
@@ -1871,13 +2073,19 @@ class AlaskaServer(Alaska):
         self.set_proj(_id, close=False)
         self.finalize_proj(_id, close=False)
 
-
     def test_qc(self, _id, close=True):
         """
         For testing quality control.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         self.broadcast(_id, '{}: beginning quality control test'.format(_id))
-        self.respond(_id, '{}: check server console for more details'.format(_id))
+        self.respond(_id, ('{}: check server console for '
+                           + 'more details').format(_id))
 
         if close:
             self.close(_id)
@@ -1885,16 +2093,23 @@ class AlaskaServer(Alaska):
         self.test_set_vars(_id, close=False)
         self.qc(_id, close=False)
 
-
     def test_read_quant(self, _id, close=True):
         """
         For testing read quantification.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if not self.exists(_id):
             raise Exception('{}: does not exist'.format(_id))
 
-        self.broadcast(_id, '{}: beginning read quantification test'.format(_id))
-        self.respond(_id, '{}: check server console for more details'.format(_id))
+        self.broadcast(_id, ('{}: beginning read '
+                             + 'quantification test').format(_id))
+        self.respond(_id, ('{}: check server console '
+                           + 'for more details').format(_id))
 
         if close:
             self.close(_id)
@@ -1903,16 +2118,22 @@ class AlaskaServer(Alaska):
         self.test_qc(_id, close=False)
         self.read_quant(_id, close=False)
 
-
     def test_diff_exp(self, _id, close=True):
         """
         For testing differential expresion analysis.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if not self.exists(_id):
             raise Exception('{}: does not exist'.format(_id))
 
         self.broadcast(_id, '{}: beginning diff. expression test'.format(_id))
-        self.respond(_id, '{}: check server console for more details'.format(_id))
+        self.respond(_id, ('{}: check server console for '
+                           + 'more details').format(_id))
 
         if close:
             self.close(_id)
@@ -1920,13 +2141,18 @@ class AlaskaServer(Alaska):
         self.test_read_quant(_id, close=False)
         self.diff_exp(_id, close=False)
 
-
     def test_all(self, _id):
         """
         For testing both read quant and differential expression.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+
+        Returns: None
         """
         self.broadcast(_id, '{}: beginnning test everything'.format(_id))
-        self.respond(_id, '{}: check server console for more details'.format(_id))
+        self.respond(_id, ('{}: check server console for '
+                           + 'more details').format(_id))
         self.close(_id)
 
         self.test_set_vars(_id, close=False)
@@ -1935,6 +2161,12 @@ class AlaskaServer(Alaska):
     def is_online(self, _id, close=True):
         """
         Check if server is online.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         self.respond(_id, 'true')
 
@@ -1945,6 +2177,10 @@ class AlaskaServer(Alaska):
         """
         Calculates the estimated time left until the queue is exhausted.
         The returned decimal is in minutes.
+
+        Arguments: None
+
+        Returns: (float) estimated time left in minutes
         """
         # estimated time to exhaust queue
         time = 0
@@ -1964,14 +2200,24 @@ class AlaskaServer(Alaska):
     def get_queue(self, _id, close=True):
         """
         Gets the current queue status of the server.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         def broadcast_job_info(job):
             self.broadcast(_id, 'Job: {}'.format(job.id))
             self.broadcast(_id, '\tproject: {}'.format(job.proj_id))
             self.broadcast(_id, '\tanalysis: {}'.format(job.name))
-            self.broadcast(_id, '\tcreated: {}'.format(job.datetime_created.strftime(Alaska.DATETIME_FORMAT)))
+            self.broadcast(_id, '\tcreated: {}'.format(
+                           job.datetime_created.strftime(
+                                                Alaska.DATETIME_FORMAT)))
             if job.datetime_started is not None:
-                self.broadcast(_id, '\tstarted: {}'.format(job.datetime_started.strftime(Alaska.DATETIME_FORMAT)))
+                self.broadcast(_id, '\tstarted: {}'.format(
+                               job.datetime_started.strftime(
+                                                    Alaska.DATETIME_FORMAT)))
 
         # number of jobs in queue
         count = self.queue.qsize()
@@ -1992,16 +2238,22 @@ class AlaskaServer(Alaska):
         time = self.calc_queue_exhaust()
         self.broadcast(_id, 'WARNING: these are crude estimates')
         self.broadcast(_id, 'Queue size: {}'.format(count))
-        self.broadcast(_id, 'Estimated time to exhaust queue: {} mins'.format(time))
+        self.broadcast(_id, ('Estimated time to exhaust queue: '
+                             + '{} mins').format(time))
 
         if close:
             self.close(_id)
 
     def get_var(self, _id):
         """
-        Returns the requested variable.
+        Responds with the requested variable.
         The id is the variable.
         Period (.) is the separator.
+
+        Arguments:
+        _id -- (str) representation of the variable to get
+
+        Returns: None
         """
         split = _id.split('.')
 
@@ -2022,10 +2274,15 @@ class AlaskaServer(Alaska):
 
         self.close(_id)
 
-
     def reset(self, _id=None, close=True):
         """
         Resets the server to initial state.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id is not None and close:
             self.close(_id)
@@ -2052,6 +2309,12 @@ class AlaskaServer(Alaska):
     def cleanup(self, _id=None, close=True):
         """
         Cleans up projects saves and jobs.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+        close -- (bool) whether or not to close the connection (default: True)
+
+        Returns: None
         """
         if _id is not None and close:
             self.close(_id)
@@ -2071,7 +2334,8 @@ class AlaskaServer(Alaska):
                 try:
                     ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
                     if ftp.status != 'running':
-                        self.out('WARNING: container {} is not running'.format(Alaska.DOCKER_FTP_TAG))
+                        self.out(('WARNING: container {} is not '
+                                  + 'running').format(Alaska.DOCKER_FTP_TAG))
 
                     cmd = 'pure-pw userdel {}'.format(fname)
                     out = ftp.exec_run(cmd)
@@ -2079,15 +2343,17 @@ class AlaskaServer(Alaska):
                     cmd = 'pure-pw mkdb'
                     out = ftp.exec_run(cmd)
                 except docker.errors.NotFound as e:
-                    self.out('WARNING: container {} does not exist'.format(Alaska.DOCKER_FTP_TAG))
-                except:
+                    self.out(('WARNING: container {} does not '
+                              + 'exist').format(Alaska.DOCKER_FTP_TAG))
+                except Exception as e:
                     traceback.print_exc()
 
         self.out('INFO: cleaning up raw reads')
         for proj_id, proj in self.projects.items():
             try:
                 email = proj.meta['corresponding']['email']
-                proj_dt  = dt.datetime.strptime(proj.datetime, Alaska.DATETIME_FORMAT)
+                proj_dt = dt.datetime.strptime(proj.datetime,
+                                               Alaska.DATETIME_FORMAT)
                 to_remove = proj_dt + dt.timedelta(days=Alaska.RAW_DURATION)
                 delta = to_remove - dt.datetime.now()
                 seconds = delta.total_seconds()
@@ -2096,23 +2362,33 @@ class AlaskaServer(Alaska):
                 days = hours / 24   # Days left until reads are removed
 
                 if days < 0:
-                    self.out('INFO: cleaning up raw reads for project {}'.format(proj_id))
+                    self.out(('INFO: cleaning up raw reads for project '
+                              + '{}').format(proj_id))
                     shutil.rmtree(proj.raw_dir)
-                elif days < Alaska.RAW_NOTIFY_2 and email and proj.notifications == 1:
-                    self.out('INFO: sending notification for project {}'.format(proj_id))
+
+                elif days < Alaska.RAW_NOTIFY_2 and email \
+                     and proj.notifications == 1:
+                    self.out(('INFO: sending notification for project '
+                              + '{}').format(proj_id))
                     subject = 'Raw read removal notification'
-                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY_2)
-                    self.send_email(email, subject, msg, proj_id)
-                    proj.notifications += 1
-                elif days < Alaska.RAW_NOTIFY and email and proj.notifications == 0:
-                    self.out('INFO: sending notification for project {}'.format(proj_id))
-                    subject = 'Raw read removal notification'
-                    msg = 'Raw reads for project {} will be removed in {} days.'.format(proj_id, Alaska.RAW_NOTIFY)
+                    msg = ('Raw reads for project {} will be removed in '
+                           + '{} days.').format(proj_id, Alaska.RAW_NOTIFY_2)
                     self.send_email(email, subject, msg, proj_id)
                     proj.notifications += 1
 
-            except:
-                self.out('ERROR: can not clean up raw reads of {}'.format(proj_id))
+                elif days < Alaska.RAW_NOTIFY and email \
+                     and proj.notifications == 0:
+                    self.out(('INFO: sending notification for project '
+                              + '{}').format(proj_id))
+                    subject = 'Raw read removal notification'
+                    msg = ('Raw reads for project {} will be removed in '
+                           + '{} days.').format(proj_id, Alaska.RAW_NOTIFY)
+                    self.send_email(email, subject, msg, proj_id)
+                    proj.notifications += 1
+
+            except Exception as e:
+                self.out(('ERROR: can not clean up raw reads of '
+                          + '{}').format(proj_id))
                 traceback.print_exc()
 
         # Then, deal with jobs.
@@ -2124,7 +2400,7 @@ class AlaskaServer(Alaska):
                     path = '{}/{}'.format(Alaska.JOBS_DIR, fname)
                     self.out('INFO: removing job {}'.format(path))
                     os.remove(path)
-                except:
+                except Exception as e:
                     self.out('ERROR: can not clean up job {}'.format(job))
                     traceback.print_exc()
 
@@ -2140,7 +2416,7 @@ class AlaskaServer(Alaska):
                 self.out('INFO: removing save {}'.format(path))
                 os.remove(path)
                 del files[0]
-            except:
+            except Exception as e:
                 self.out('ERROR: can not clean up save {}'.format(path))
                 traceback.print_exc()
 
@@ -2155,7 +2431,7 @@ class AlaskaServer(Alaska):
                 self.out('INFO: removing log {}'.format(path))
                 os.remove(path)
                 del files[0]
-            except:
+            except Exception as e:
                 self.out('ERROR: can not clean up log {}'.format(path))
                 traceback.print_exc()
 
@@ -2167,7 +2443,7 @@ class AlaskaServer(Alaska):
                 cont_id = lst[1]
                 open_dt = lst[2]
 
-                # Calculate time delta between when it was last accessed and now.
+                # Calculate timedelta between when it was last accessed and now
                 delta = dt.datetime.now() - open_dt
                 seconds = delta.total_seconds()
                 minutes = seconds / 60
@@ -2175,16 +2451,22 @@ class AlaskaServer(Alaska):
                 days = hours / 24
 
                 if days > Alaska.SHI_DURATION:
-                    self.out('INFO: terminating sleuth server on container {} for project {}'.format(cont_id, proj_id))
+                    self.out(('INFO: terminating sleuth server on container '
+                              + '{} for project {}').format(cont_id, proj_id))
                     self.DOCKER.containers.get(cont_id).remove(force=True)
-            except:
-                self.out('ERROR: can not terminate sleuth container {}'.format(cont_id))
+            except Exception as e:
+                self.out(('ERROR: can not terminate sleuth container '
+                          + '{}').format(cont_id))
                 traceback.print_exc()
-
 
     def save(self, _id=None):
         """
         Saves its current state.
+
+        Arguments:
+        _id   -- (str) ZeroMQ socket id that sent this request
+
+        Returns: None
         """
         path = self.SAVE_DIR
         datetime = dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
@@ -2193,7 +2475,7 @@ class AlaskaServer(Alaska):
         if not self.state_lock.acquire():
             raise Exception('ERROR: failed to acquire state lock')
 
-        ### hide variables that should not be written to JSON
+        # hide variables that should not be written to JSON
         _datetime = self.datetime
         _projects = self.projects
         _samples = self.samples
@@ -2219,21 +2501,22 @@ class AlaskaServer(Alaska):
         for __id, project in self.projects.items():
             try:
                 project.save()
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to save project {}'.format(__id))
                 traceback.print_exc()
 
         for __id, project_temp in self.projects_temp.items():
             try:
                 project_temp.save(Alaska.TEMP_DIR)
-            except:
-                self.out('ERROR: failed to save temporary project {}'.format(__id))
+            except Exception as e:
+                self.out(('ERROR: failed to save temporary project '
+                          + '{}').format(__id))
                 traceback.print_exc()
 
         for __id, job in self.jobs.items():
             try:
                 job.save()
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to save job {}'.format(__id))
                 traceback.print_exc()
 
@@ -2241,50 +2524,51 @@ class AlaskaServer(Alaska):
             for species, obj_2 in obj_1.items():
                 try:
                     obj_2.save()
-                except:
-                    self.out('ERROR: failed to save organism {}_{}'.format(genus, species))
+                except Exception as e:
+                    self.out(('ERROR: failed to save organism '
+                              + '{}_{}').format(genus, species))
                     traceback.print_exc()
 
         # delete / replace
         try:
             self.datetime = self.datetime.strftime(Alaska.DATETIME_FORMAT)
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert datetime')
             traceback.print_exc()
 
         try:
             self.projects = list(self.projects.keys())
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert projects')
             traceback.print_exc()
 
         try:
             self.samples = list(self.samples.keys())
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert samples')
             traceback.print_exc()
 
         try:
             self.projects_temp = list(self.projects_temp.keys())
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert temporary projects')
             traceback.print_exc()
 
         try:
             self.samples_temp = list(self.samples_temp.keys())
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert temporary samples')
             traceback.print_exc()
 
         try:
             self.queue = [job.id for job in list(self.queue.queue)]
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert queue')
             traceback.print_exc()
 
         try:
             self.jobs = list(self.jobs.keys())
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert jobs')
             traceback.print_exc()
 
@@ -2296,14 +2580,15 @@ class AlaskaServer(Alaska):
                 try:
                     converted = list(_organisms[genus][species].refs.keys())
                     self.organisms[genus][species] = converted
-                except:
-                    self.out('ERROR: failed to convert organism {}_{}'.format(genus, species))
+                except Exception as e:
+                    self.out(('ERROR: failed to convert organism '
+                              + '{}_{}').format(genus, species))
                     traceback.print_exc()
 
         try:
             if self.current_job is not None:
                 self.current_job = self.current_job.id
-        except:
+        except Exception as e:
             self.out('ERROR: failed to convert current job')
             traceback.print_exc()
 
@@ -2356,11 +2641,22 @@ class AlaskaServer(Alaska):
     def load(self, _id=None, newest=False):
         """
         Loads state from JSON.
+
+        Arguments:
+        _id    -- (str) ZeroMQ socket id that sent this request
+        newest -- (bool) whether or not to simply load the newest save
+                         or the "best" save (default: False)
+
+        Returns: None
         """
         def get_valid_projects():
             """
             Helper function to retrieve list of valid projects from 'projects'
             folder.
+
+            Arguments: None
+
+            Returns: (list) of valid projects
             """
             # First, get the list of all valid projects from the 'projects'
             # directory.
@@ -2373,13 +2669,19 @@ class AlaskaServer(Alaska):
 
                 if os.path.isfile('{}/{}.json'.format(path, folder)):
                     projects.append(folder)
-            self.out('INFO: detected {} finalized project folders'.format(len(projects)))
+            self.out(('INFO: detected {} finalized project '
+                      + 'folders').format(len(projects)))
 
             return projects
 
         def get_most_recent_json(files):
             """
             Helper function that returns the filename of the most recent json.
+
+            Arguments:
+            files -- (list) of save json files
+
+            Returns: (str) filename of chosen JSON, None if no JSON found
             """
             projects = get_valid_projects()
 
@@ -2410,6 +2712,11 @@ class AlaskaServer(Alaska):
             This function excludes save files that can not be opened or those
             that have some projects missing. The save file returned by this
             function will ALWAYS load successfully.
+
+            Arguments:
+            files -- (list) of save json files
+
+            Returns: (str) filename of chosen JSON
             """
             projects = get_valid_projects()
 
@@ -2425,12 +2732,14 @@ class AlaskaServer(Alaska):
 
                         # Check if every project in this save exists in the
                         # projects folder.
-                        if not all(proj in projects for proj in loaded['projects']):
-                            self.out('INFO: skipping {} due to mising project(s)'.format(fname))
+                        if not all(proj in projects
+                                   for proj in loaded['projects']):
+                            self.out(('INFO: skipping {} due to mising '
+                                      + 'project(s)').format(fname))
                             continue
 
-                        n = len(loaded['projects']) + len(loaded['samples'])\
-                                                        + len(loaded['jobs'])
+                        n = len(loaded['projects']) + len(loaded['samples']) \
+                                                    + len(loaded['jobs'])
 
                         if max_n < n:
                             candidates = [fname]
@@ -2439,8 +2748,9 @@ class AlaskaServer(Alaska):
                             candidates.append(fname)
 
                         jsons[fname] = len(loaded['projects'])
-                except:
-                    self.out('INFO: skipping {} due to an unknown error'.format(fname))
+                except Exception as e:
+                    self.out(('INFO: skipping {} due to an unknown '
+                              + 'error').format(fname))
                     traceback.print_exc()
                     continue
 
@@ -2456,18 +2766,11 @@ class AlaskaServer(Alaska):
         if newest:
             fname = get_most_recent_json(files)
         else:
-            fname = get_best_json(files);
+            fname = get_best_json(files)
 
         if fname is None:
             self.out('WARNING: no valid save states to load...aborting')
             return
-
-
-        # self.out('INFO: locking all threads to load server state')
-        # lock = threading.Lock()
-        # lock.acquire()
-
-
 
         self.out('INFO: loading {}'.format(fname))
         with open('{}/{}'.format(path, fname), 'r') as f:
@@ -2483,24 +2786,27 @@ class AlaskaServer(Alaska):
                     with self.queue.mutex:
                         self.queue.queue.clear()
                 elif key == 'datetime':
-                    setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
+                    setattr(self, key, dt.datetime.strptime(item,
+                            Alaska.DATETIME_FORMAT))
                 else:
                     setattr(self, key, item)
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to load {}:{}'.format(key, item))
                 traceback.print_exc()
 
-        #### create necessary objects & assign
+        # create necessary objects & assign
         for genus, dict_1 in self.organisms.items():
             for species, dict_2 in dict_1.items():
                 try:
-                    self.out('INFO: loading organism {}_{}'.format(genus, species))
+                    self.out('INFO: loading organism {}_{}'.format(genus,
+                                                                   species))
                     # make new species
                     org = AlaskaOrganism(genus, species)
                     org.load()
                     self.organisms[genus][species] = org
-                except:
-                    self.out('ERROR: failed to load organism {}_{}'.format(genus, species))
+                except Exception as e:
+                    self.out(('ERROR: failed to load organism '
+                              + '{}_{}').format(genus, species))
                     traceback.print_exc()
 
         _projects = {}
@@ -2512,7 +2818,7 @@ class AlaskaServer(Alaska):
                 ap.load()
                 _projects[__id] = ap
                 self.samples = {**self.samples, **ap.samples}
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to load project {}'.format(__id))
                 traceback.print_exc()
         self.projects = _projects
@@ -2526,45 +2832,52 @@ class AlaskaServer(Alaska):
                 ap.load(self.TEMP_DIR)
                 _projects_temp[__id] = ap
                 self.samples_temp = {**self.samples_temp, **ap.samples}
-            except:
-                self.out('ERROR: failed to load temporary project {}'.format(__id))
+            except Exception as e:
+                self.out(('ERROR: failed to load temporary project '
+                          + '{}').format(__id))
                 traceback.print_exc()
         self.projects_temp = _projects_temp
-
 
         # Then, load projects that are not in the save but have a folder.
         for file in os.listdir(Alaska.PROJECTS_DIR):
             if file.startswith('AP') and file not in self.projects \
-                and file not in self.projects_temp:
+               and file not in self.projects_temp:
                 path = '{}/{}'.format(Alaska.PROJECTS_DIR, file)
                 proj_json = '{}/{}.json'.format(path, file)
                 temp_json = '{}/{}/{}.json'.format(path, Alaska.TEMP_DIR, file)
 
                 if os.path.isfile(proj_json):
                     try:
-                        self.out('INFO: loading unsaved project {}'.format(file))
+                        self.out(('INFO: loading unsaved project '
+                                  + '{}').format(file))
                         ap = AlaskaProject(file)
                         ap.load()
 
-                        if all(sample not in self.samples for sample in ap.samples):
+                        if all(sample not in self.samples
+                               for sample in ap.samples):
                             self.projects[file] = ap
                             self.samples = {**self.samples, **ap.samples}
-                    except:
-                        self.out('ERROR: failed to load unsaved project {}'.format(file))
+                    except Exception as e:
+                        self.out(('ERROR: failed to load unsaved project '
+                                  + '{}').format(file))
                         traceback.print_exc()
 
                 elif os.path.isfile(temp_json):
                     try:
-                        self.out('INFO: loading unsaved temporary project {}'.format(file))
+                        self.out(('INFO: loading unsaved temporary project '
+                                  + '{}').format(file))
                         ap = AlaskaProject(file)
                         ap.load(Alaska.TEMP_DIR)
 
-                        if all(sample not in self.samples_temp for sample in ap.samples):
+                        if all(sample not in self.samples_temp
+                               for sample in ap.samples):
                             self.projects_temp[file] = ap
-                            self.samples_temp = {**self.samples_temp, **ap.samples}
+                            self.samples_temp = {**self.samples_temp,
+                                                 **ap.samples}
 
-                    except:
-                        self.out('ERROR: failed to load unsaved temporary project {}'.format(file))
+                    except Exception as e:
+                        self.out(('ERROR: failed to load unsaved temporary '
+                                  + 'project {}').format(file))
                         traceback.print_exc()
 
         _jobs = {}
@@ -2574,7 +2887,7 @@ class AlaskaServer(Alaska):
                 job = AlaskaJob(__id)
                 job.load()
                 _jobs[__id] = job
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to load job {}'.format(__id))
                 traceback.print_exc()
         self.jobs = _jobs
@@ -2589,37 +2902,39 @@ class AlaskaServer(Alaska):
                     job = AlaskaJob(__id)
                     job.load()
                     self.jobs[__id] = job
-                except:
-                    self.out('ERROR: failed to load unsaved job {}'.format(file))
+                except Exception as e:
+                    self.out(('ERROR: failed to load unsaved job '
+                              + '{}').format(file))
                     traceback.print_exc()
 
         if self.current_job is not None:
             try:
-                self.out('INFO: unfinished job {} was detected'.format(self.current_job))
+                self.out(('INFO: unfinished job {} was '
+                          + 'detected').format(self.current_job))
                 self.current_job = self.jobs[self.current_job]
                 self.queue.put(self.current_job)
-                self.out('INFO: {} added to first in queue'.format(self.current_job.id))
-            except:
-                self.out('ERROR: failed to queue unfinished job {}'.format(self.current_job))
+                self.out(('INFO: {} added to first in '
+                          + 'queue').format(self.current_job.id))
+            except Exception as e:
+                self.out(('ERROR: failed to queue unfinished job '
+                          + '{}').format(self.current_job))
                 traceback.print_exc()
 
         for __id in _queue:
             try:
                 self.out('INFO: adding {} to queue'.format(__id))
                 self.queue.put(self.jobs[__id])
-            except:
+            except Exception as e:
                 self.out('ERROR: failed to add {} to queue'.format(__id))
                 traceback.print_exc()
 
-        # self.out('INFO: loaded, unlocking threads')
-        # lock.release()
-
         self.close(_id)
+
 
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Start server with given arguments.')
+    parser = argparse.ArgumentParser(description='Start server.')
     parser.add_argument('--force', action='store_true')
     parser.add_argument('--no-load', action='store_true')
     args = parser.parse_args()
@@ -2636,7 +2951,7 @@ if __name__ == '__main__':
         signal.signal(signal.SIGILL, server.stop)
 
         # Start the server.
-        server.start(force=True)
+        server.start()
     except KeyboardInterrupt:
         print('\nINFO: interrupt received, stopping...')
     finally:

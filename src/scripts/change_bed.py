@@ -1,3 +1,7 @@
+"""
+Used to change chromosome labels in bed file.
+"""
+
 with open('c_elegans_235.bed') as f:
     for line in f:
         replaced = line.replace('chr', '', 1)

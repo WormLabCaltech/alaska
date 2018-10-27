@@ -24,18 +24,34 @@ import datetime as dt
 from Alaska import Alaska
 from AlaskaDocker import AlaskaDocker
 
+
 class AlaskaJob(Alaska):
     """
-    AlaskaJob.
+    AlaskaJob. Alaska uses this object for qc, kallisto, sleuth computations.
+
+    Methods:
+    run
+    finished
+    save
+    load
     """
 
     def __init__(self, _id, name=None, proj_id=None, img_tag=None, cmd=None, **args):
         """
         Constructor.
+
+        Arguments:
+        _id     -- (str) job id (default: None)
+        name    -- (str) job name (default: None)
+        proj_id -- (str) id of project this job is associated with
+                         (default: None)
+        img_tag -- (str) Docker image tag
+        cmd     -- (str) command
+        args    -- additional arguments to pass into AlaskaDocker.run
         """
-        self.id = _id # job id
+        self.id = _id
         self.name = name
-        self.proj_id = proj_id # project associated with this job
+        self.proj_id = proj_id
         self.docker = AlaskaDocker(img_tag)
         self.docker_cmd = cmd
         self.docker_args = args
@@ -44,35 +60,43 @@ class AlaskaJob(Alaska):
         self.datetime_finished = None
         self.run_duration = None
 
-        # self.save()
-
     def run(self):
         """
-        Work to do.
+        Run docker image with set commands and arguments.
+
+        Arguments: None
+
+        Returns: None
         """
         self.datetime_started = dt.datetime.now()
-
         self.docker.run(self.docker_cmd, **self.docker_args)
-
         self.save()
 
     def finished(self):
         """
         Notifies that the job is done.
+
+        Arguments: None
+
+        Returns: None
         """
         self.datetime_finished = dt.datetime.now()
-
         self.docker.terminate()
 
         # calculate run duration (in minutes)
         delta = self.datetime_finished - self.datetime_started
         self.run_duration = delta.total_seconds() / 60
 
-        self.save() # save job info
+        self.save()  # save job info
 
     def save(self, folder=None):
         """
         Saves job information to JSON.
+
+        Arguments:
+        folder -- (str) path to folder to save JSON (default: Alaska.JOBS_dIR)
+
+        Returns: None
         """
         if folder is None: # if folder not given, save to project root
             path = Alaska.JOBS_DIR
@@ -85,11 +109,14 @@ class AlaskaJob(Alaska):
         _datetime_finished = self.datetime_finished
 
         if self.datetime_created is not None:
-            self.datetime_created = self.datetime_created.strftime(Alaska.DATETIME_FORMAT)
+            self.datetime_created = self.datetime_created.strftime(
+                                    Alaska.DATETIME_FORMAT)
         if self.datetime_started is not None:
-            self.datetime_started = self.datetime_started.strftime(Alaska.DATETIME_FORMAT)
+            self.datetime_started = self.datetime_started.strftime(
+                                    Alaska.DATETIME_FORMAT)
         if self.datetime_finished is not None:
-            self.datetime_finished = self.datetime_finished.strftime(Alaska.DATETIME_FORMAT)
+            self.datetime_finished = self.datetime_finished.strftime(
+                                     Alaska.DATETIME_FORMAT)
 
         with open('{}/{}.json'.format(path, self.id), 'w') as f:
             json.dump(self.__dict__, f, default=self.encode_json, indent=4)
@@ -99,9 +126,14 @@ class AlaskaJob(Alaska):
         self.datetime_started = _datetime_started
         self.datetime_finished = _datetime_finished
 
-    def load(self, folder=None, proj=None):
+    def load(self, folder=None):
         """
         Load job from JSON.
+
+        Arguments:
+        folder -- (str) path to folder to load JSON (default: Alaska.JOBS_DIR)
+
+        Returns: None
         """
         if folder is None:
             path = Alaska.JOBS_DIR
@@ -119,6 +151,7 @@ class AlaskaJob(Alaska):
             if key == 'docker':
                 self.docker = AlaskaDocker(item['img_tag'])
             elif key.startswith('datetime') and item is not None:
-                setattr(self, key, dt.datetime.strptime(item, Alaska.DATETIME_FORMAT))
+                setattr(self, key, dt.datetime.strptime(item,
+                        Alaska.DATETIME_FORMAT))
             else:
                 setattr(self, key, item)
