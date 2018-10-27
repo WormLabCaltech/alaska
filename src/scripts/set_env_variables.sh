@@ -25,7 +25,7 @@ DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin/alaska"
 # Port mappings & networking.
 DOCKER_CGI_PORT="80:80"
 
-# Declare array varables for required images, containers, volumes, and networks.
+# Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
     "$DOCKER_ALASKA_TAG"
     "$DOCKER_REQUEST_TAG"
@@ -57,7 +57,10 @@ SAMBAMBA_VER="0.6.6"
 
 # Note: some bioconda packages require python2, which is why
 #       there is also a link for miniconda 2.
-MINICONDA2_URL="https://repo.continuum.io/miniconda/Miniconda2-$MINICONDA_VER-Linux-x86_64.sh"
-MINICONDA3_URL="https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-Linux-x86_64.sh"
-KALLISTO_URL="https://github.com/pachterlab/kallisto/releases/download/v$KALLISTO_VER/kallisto_linux-v$KALLISTO_VER.tar.gz"
+MINICONDA2_URL="https://repo.continuum.io/miniconda/Miniconda2-$MINICONDA_VER-\
+Linux-x86_64.sh"
+MINICONDA3_URL="https://repo.continuum.io/miniconda/Miniconda3-$MINICONDA_VER-\
+Linux-x86_64.sh"
+KALLISTO_URL="https://github.com/pachterlab/kallisto/releases/download/\
+v$KALLISTO_VER/kallisto_linux-v$KALLISTO_VER.tar.gz"
 ####### END VARIABLE DEFINITIONS #######

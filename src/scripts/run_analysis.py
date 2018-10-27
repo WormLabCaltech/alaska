@@ -24,23 +24,35 @@ import multiprocessing as mp
 from multiprocessing import Process
 import subprocess as sp
 
+
 def print_with_flush(s='', **kwargs):
     """
     Prints the given string and passes on additional kwargs to the builtin
     print function. This function flushes stdout immediately.
+
+    Arguments:
+    s      -- (str) to print
+    kwargs -- additional arguments to pass to print()
+
+    Returns: None
     """
     print(s, **kwargs)
     sys.stdout.flush()
 
+
 def load_proj(_id):
     """
     Loads the project json into dictionary object.
+
+    Arguments:
+    _id
     """
     # Read json.
     with open(_id, 'r') as f:
         loaded = json.load(f)
 
     return loaded
+
 
 def run_sys(cmd, prefix=''):
     """

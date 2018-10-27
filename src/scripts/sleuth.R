@@ -42,8 +42,10 @@ mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
                          biomart = 'metazoa_mart',
                          dataset = 'celegans_eg_gene')
 print('#Fetching bioMart info (2/2)')
-t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id',
-                            'external_gene_name'), mart = mart)
+t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id',
+                                     'ensembl_gene_id',
+                                     'external_gene_name'),
+                                     mart = mart)
 print('#Renaming genes')
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
@@ -61,7 +63,8 @@ output_dir <- opt$o
 
 #get ids
 print('# Reading analysis matrix')
-s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE, stringsAsFactors= FALSE)
+s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE,
+                  stringsAsFactors= FALSE)
 
 # Determine the number of factors.
 conditions = vector()
@@ -125,8 +128,10 @@ for (i in 1:length(conditions)) {
       next
     }
 
-    print(paste('# Computing wald test on condition ', condition, ':', name, sep=''))
-    so <- sleuth_wt(so, which_beta=paste(condition, name, sep=''), which_model='full')
+    print(paste('# Computing wald test on condition ', condition, ':', name,
+                sep=''))
+    so <- sleuth_wt(so, which_beta=paste(condition, name, sep=''),
+                    which_model='full')
   }
 }
 
@@ -143,9 +148,12 @@ for (i in 1:length(conditions)) {
       next
     }
 
-    print(paste('# Writing Wald test sleuth table for ', condition, ':', name, sep=''))
-    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full', test_type='wt', show_all=FALSE)
-    output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv', sep='')
+    print(paste('# Writing Wald test sleuth table for ', condition, ':', name,
+                sep=''))
+    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full',
+                                    test_type='wt', show_all=FALSE)
+    output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv',
+                        sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
@@ -196,9 +204,11 @@ saveRDS(so, file=so_file)
 #   # Ignore WT geneotype
 #   if (!grepl(genotypes[1], genotype)) {
 #     # String for current progress
-#     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
+#     progress <- paste('(', match(genotype, genotypes)-1, '/',
+                        length(genotypes)-1, ')')
 #     print(paste('#Computing Wald test on ', genotype, progress))
-#     so <- sleuth_wt(so, which_beta = paste('condition', genotype, sep=''), which_model = 'full')
+#     so <- sleuth_wt(so, which_beta = paste('condition', genotype, sep=''),
+                      which_model = 'full')
 #   }
 # }
 #
@@ -207,13 +217,15 @@ saveRDS(so, file=so_file)
 # for (genotype in genotypes) {
 #   if(!grepl(genotypes[1], genotype)) {
 #     # '(current index/total length)'
-#     progress <- paste('(', match(genotype, genotypes)-1, '/', length(genotypes)-1, ')')
+#     progress <- paste('(', match(genotype, genotypes)-1, '/',
+                        length(genotypes)-1, ')')
 #
 #     # 'betasX.csv'
 #     output_file <- paste(substring(genotype, 3), '.csv', sep='')
 #
 #     print(paste('#Writing ', genotype, 'results to', output_file, progress))
-#     results_table <- sleuth_results(so, paste('condition', genotype, sep=''), 'full', test_type='wt')
+#     results_table <- sleuth_results(so, paste('condition', genotype, sep=''),
+                                      'full', test_type='wt')
 #     write.csv(results_table, paste(output_dir, output_file, sep='/'))
 #   }
 # }
@@ -229,5 +241,6 @@ saveRDS(so, file=so_file)
 #
 # if (opt$shiny) {
 #   print('#Starting shiny web server')
-#   sleuth_live(so, options=list(port=42427, launch.browser=FALSE, host='0.0.0.0'))
+#   sleuth_live(so, options=list(port=42427, launch.browser=FALSE,
+                host='0.0.0.0'))
 # }

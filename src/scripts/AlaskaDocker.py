@@ -19,14 +19,27 @@ import docker
 from Alaska import Alaska
 from threading import Thread
 
+
 class AlaskaDocker(Alaska):
     """
-    AlaskaDocker.
+    AlaskaDocker. An abstraction around the Docker Python API.
+    Used to call qc, kallisto, and sleuth Docker images.
+
+    Methods:
+    run
+    out_listener
+    hook
+    terminate
     """
 
     def __init__(self, img_tag):
         """
-        Constructor. Takes docker image tag and volumes as argument.
+        Constructor.
+
+        Arguments:
+        img_tag -- (str) Docker tag of image
+
+        Returns: None
         """
         self.img_tag = img_tag
         self.id = ''
@@ -35,11 +48,17 @@ class AlaskaDocker(Alaska):
 
     def run(self, cmd, **args):
         """
-        Start container with arguments.
+        Start container with the given.
+
+        Arguments:
+        cmd  -- (str) command to run on Docker image
+        args -- arguments to pass to the docker.client.containers.run method
+
+        Returns: None
         """
         client = docker.from_env()
         container = client.containers.run(self.img_tag, cmd, detach=True,
-                        auto_remove=False, **args)
+                                          auto_remove=False, **args)
         self.id = container.short_id
         self.running = True
 
@@ -49,17 +68,25 @@ class AlaskaDocker(Alaska):
 
     def out_listener(self):
         """
-        Listens container output and records.
+        Listens container output and records it.
+
+        Arguments: None
+
+        Returns: None
         """
-        for l in self.hook():
-            l = l.decode(Alaska.ENCODING).strip()
-            self.output += l
+        for line in self.hook():
+            line = line.decode(Alaska.ENCODING).strip()
+            self.output += line
 
         self.running = False
 
     def hook(self):
         """
         Hooks onto stdout of container.
+
+        Arguments: None
+
+        Returns: None
         """
         client = docker.from_env()
         container = client.containers.get(self.id)
@@ -69,9 +96,11 @@ class AlaskaDocker(Alaska):
     def terminate(self):
         """
         Force terminates container.
+
+        Arguments: None
+
+        Returns: None
         """
         client = docker.from_env()
         container = client.containers.get(self.id)
         container.remove(force=True)
-
-
