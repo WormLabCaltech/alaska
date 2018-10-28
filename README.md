@@ -2,6 +2,8 @@
 
 RNA-sequencing (RNA-seq) provides a way to quantify differential gene expression and is used to discover novel gene functions and pathways. Although the molecular biology behind RNA-seq is fully understood, analysis of the data remains a significant bottleneck. Here, we introduce a RNA-seq framework that will allow analysis within hours of an RNA-seq experiment.
 
+Alpha version available at [http://alaska.caltech.edu](http://alaska.caltech.edu)
+
 ## Getting Started
 These instructions will install the Alaska server on your local machine for development and testing purposes. Everything has only been tested on Ubuntu 16.04.
 
