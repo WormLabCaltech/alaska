@@ -719,119 +719,116 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        try:
-            # find deepest directory
-            for root, dirs, files in os.walk(Alaska.ORGS_DIR):
-                # first, check if indices are already there.
-                # if they are, there is no need to check the reference
-                # files nor remake the indices.
-                if Alaska.IDX_DIR in dirs or Alaska.REF_DIR in dirs:
-                    # make sure index folder is present
-                    ref_dir = '{}/{}'.format(root, Alaska.REF_DIR)
-                    idx_dir = '{}/{}'.format(root, Alaska.IDX_DIR)
-                    if not os.path.isdir(idx_dir):
-                        os.mkdir(idx_dir)
+        # find deepest directory
+        for root, dirs, files in os.walk(Alaska.ORGS_DIR):
+            # first, check if indices are already there.
+            # if they are, there is no need to check the reference
+            # files nor remake the indices.
+            if Alaska.IDX_DIR in dirs or Alaska.REF_DIR in dirs:
+                # make sure index folder is present
+                ref_dir = '{}/{}'.format(root, Alaska.REF_DIR)
+                idx_dir = '{}/{}'.format(root, Alaska.IDX_DIR)
+                if not os.path.isdir(idx_dir):
+                    os.mkdir(idx_dir)
 
-                    # First, parse variables.
-                    split = root.split('/')
-                    genus = split[-3]
-                    species = split[-2]
-                    ver = split[-1]
-                    folder = '{}/{}/{}/{}'.format(Alaska.ORGS_DIR,
-                                                  genus, species, ver)
+                # First, parse variables.
+                split = root.split('/')
+                genus = split[-3]
+                species = split[-2]
+                ver = split[-1]
+                folder = '{}/{}/{}/{}'.format(Alaska.ORGS_DIR,
+                                              genus, species, ver)
 
-                    # Check if this is a new organism.
-                    if genus not in self.organisms \
-                       or species not in self.organisms[genus] \
-                       or ver not in self.organisms[genus][species]:
-                        self.out('INFO: detected new organism - {}_{}_{}'.format(
-                            genus, species, ver
-                        ))
+                # Check if this is a new organism.
+                if genus not in self.organisms \
+                   or species not in self.organisms[genus] \
+                   or ver not in self.organisms[genus][species].refs:
+                    self.out('INFO: detected new organism - {}_{}_{}'.format(
+                        genus, species, ver
+                    ))
 
-                        # parse reference variables
-                        # reference folder MUST contain only three files
-                        if len(os.listdir(ref_dir)) is not 3:
-                            self.out(('INFO: {}/{}/{} does not have only two '
-                                      + 'files...skipping').format(genus,
-                                                                   species, ver))
-                            continue
+                    # parse reference variables
+                    # reference folder MUST contain only three files
+                    if len(os.listdir(ref_dir)) is not 3:
+                        self.out(('INFO: {}/{}/{} does not have only two '
+                                  + 'files...skipping').format(genus,
+                                                               species, ver))
+                        continue
 
-                        # make sure all the files we need exists
-                        # those are: dna, cdna, and bed
-                        # dna must be named: <genus>_<species>_<version>_dna ...
-                        # cdna must be named: <genus>_<species>_<version>_cdna ...
-                        # bed must be named: <genus>_<species>_<version>.bed
-                        dna = None
-                        cdna = None
-                        bed = None
-                        prefix = '{}_{}_{}'.format(genus[0], species, ver)
-                        for fname in os.listdir(ref_dir):
-                            if fname.startswith('{}_dna'.format(prefix)):
-                                dna = fname
-                            elif fname.startswith('{}_cdna'.format(prefix)):
-                                cdna = fname
-                            elif fname.startswith('{}.bed'.format(prefix)):
-                                bed = fname
-                        if dna is None or cdna is None or bed is None:
-                            self.out(('INFO: {}/{}/{} does not have correct '
-                                      + 'files').format(genus, species, ver))
-                            continue
+                    # make sure all the files we need exists
+                    # those are: dna, cdna, and bed
+                    # dna must be named: <genus>_<species>_<version>_dna ...
+                    # cdna must be named: <genus>_<species>_<version>_cdna ...
+                    # bed must be named: <genus>_<species>_<version>.bed
+                    dna = None
+                    cdna = None
+                    bed = None
+                    prefix = '{}_{}_{}'.format(genus[0], species, ver)
+                    for fname in os.listdir(ref_dir):
+                        if fname.startswith('{}_dna'.format(prefix)):
+                            dna = fname
+                        elif fname.startswith('{}_cdna'.format(prefix)):
+                            cdna = fname
+                        elif fname.startswith('{}.bed'.format(prefix)):
+                            bed = fname
+                    if dna is None or cdna is None or bed is None:
+                        self.out(('INFO: {}/{}/{} does not have correct '
+                                  + 'files').format(genus, species, ver))
+                        continue
 
-                        # genus exists?
-                        if genus not in self.organisms:
-                            # make genus
-                            self.organisms[genus] = {}
+                    # genus exists?
+                    if genus not in self.organisms:
+                        # make genus
+                        self.organisms[genus] = {}
 
-                        # species exists?
-                        if species not in self.organisms[genus]:
-                            # make new organism
-                            org = AlaskaOrganism(genus, species)
-                            self.organisms[genus][species] = org
+                    # species exists?
+                    if species not in self.organisms[genus]:
+                        # make new organism
+                        org = AlaskaOrganism(genus, species)
+                        self.organisms[genus][species] = org
 
-                        if ver not in self.organisms[genus][species].refs:
-                            # make new version
-                            self.organisms[genus][species].add_new_ref(ver,
-                                                                       dna,
-                                                                       cdna,
-                                                                       bed)
+                    if ver not in self.organisms[genus][species].refs:
+                        # make new version
+                        self.organisms[genus][species].add_new_ref(ver,
+                                                                   dna,
+                                                                   cdna,
+                                                                   bed)
 
-                    # now, we check which index needs to be made
-                    ref = self.organisms[genus][species].refs[ver]
-                    need_bt2 = True
-                    need_kal = True
-                    bt2_log = '{}/bowtie2_log.txt'.format(root)
-                    kal_log = '{}/kallisto_log.txt'.format(root)
+                # now, we check which index needs to be made
+                ref = self.organisms[genus][species].refs[ver]
+                need_bt2 = True
+                need_kal = True
+                bt2_log = '{}/bowtie2_log.txt'.format(root)
+                kal_log = '{}/kallisto_log.txt'.format(root)
 
-                    if os.path.isfile(bt2_log):
-                        with open(bt2_log, 'r') as bt2:
-                            lines = bt2.readlines()
-                            if len(lines) > 0:
-                                lastline = lines[-1]
-                                if '# success' in lastline:
-                                    need_bt2 = False
+                if os.path.isfile(bt2_log):
+                    with open(bt2_log, 'r') as bt2:
+                        lines = bt2.readlines()
+                        if len(lines) > 0:
+                            lastline = lines[-1]
+                            if '# success' in lastline:
+                                need_bt2 = False
 
-                    if os.path.isfile(kal_log):
-                        with open(kal_log, 'r') as kal:
-                            lines = kal.readlines()
-                            if len(lines) > 0:
-                                lastline = lines[-1]
-                                if '# success' in lastline:
-                                    need_kal = False
+                if os.path.isfile(kal_log):
+                    with open(kal_log, 'r') as kal:
+                        lines = kal.readlines()
+                        if len(lines) > 0:
+                            lastline = lines[-1]
+                            if '# success' in lastline:
+                                need_kal = False
 
-                    # we need to make one or more indices
-                    if need_bt2 or need_kal:
-                        self.make_idx(genus, species, ver, bt2=need_bt2,
-                                      kal=need_kal)
+                # we need to make one or more indices
+                if need_bt2 or need_kal:
+                    self.make_idx(genus, species, ver, bt2=need_bt2,
+                                  kal=need_kal)
 
-                    # once made, populate AlaskaReference object appropriately
-                    ref = self.organisms[genus][species].refs[ver]
-                    for f in os.listdir('{}/{}'.format(folder, self.IDX_DIR)):
-                        if f.endswith('.idx'):
-                            ref.kallisto_idx = f
-                        elif f.endswith('.bt2'):
-                            ref.bowtie_idx.append(f)
-        except:
-            traceback.print_exc()
+                # once made, populate AlaskaReference object appropriately
+                ref = self.organisms[genus][species].refs[ver]
+                for f in os.listdir('{}/{}'.format(folder, self.IDX_DIR)):
+                    if f.endswith('.idx'):
+                        ref.kallisto_idx = f
+                    elif f.endswith('.bt2'):
+                        ref.bowtie_idx.append(f)
 
     def make_idx(self, genus, species, ver, bt2=True, kal=True):
         """
