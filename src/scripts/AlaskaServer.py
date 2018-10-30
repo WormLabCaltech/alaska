@@ -244,18 +244,15 @@ class AlaskaServer(Alaska):
                 p.start()
 
             while self.RUNNING:
-                try:
-                    request = self.SOCKET.recv_multipart()
+                request = self.SOCKET.recv_multipart()
 
-                    # if save/load, don't use thread
-                    if request[1] == b'\x94' or request[1] == b'\x95':
-                        self.decode(request)
-                    else:
-                        t = Thread(target=self.decode, args=(request,))
-                        t.daemon = True
-                        t.start()
-                except Exception as e:
-                    traceback.print_exc()
+                # if save/load, don't use thread
+                if request[1] == b'\x94' or request[1] == b'\x95':
+                    self.decode(request)
+                else:
+                    t = Thread(target=self.decode, args=(request,))
+                    t.daemon = True
+                    t.start()
 
             self.stop(code=1)
 
