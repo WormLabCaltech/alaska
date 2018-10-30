@@ -235,7 +235,11 @@ class AlaskaServer(Alaska):
                 self.load()
 
             self.out('INFO: updating organisms')
-            self.update_orgs()
+            # Organism update takes a while...so it should be done on
+            # a new thread.
+            org_p = Thread(target=self.update_orgs)
+            org_p.daemon = True
+            org_p.start()
 
             self.out('INFO: starting {} workers'.format(self.workers_n))
             for i in range(self.workers_n):
