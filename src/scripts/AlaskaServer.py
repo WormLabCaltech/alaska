@@ -244,15 +244,18 @@ class AlaskaServer(Alaska):
                 p.start()
 
             while self.RUNNING:
-                request = self.SOCKET.recv_multipart()
+                try:
+                    request = self.SOCKET.recv_multipart()
 
-                # if save/load, don't use thread
-                if request[1] == b'\x94' or request[1] == b'\x95':
-                    self.decode(request)
-                else:
-                    t = Thread(target=self.decode, args=(request,))
-                    t.daemon = True
-                    t.start()
+                    # if save/load, don't use thread
+                    if request[1] == b'\x94' or request[1] == b'\x95':
+                        self.decode(request)
+                    else:
+                        t = Thread(target=self.decode, args=(request,))
+                        t.daemon = True
+                        t.start()
+                except Exception as e:
+                    traceback.print_exc()
 
             self.stop(code=1)
 
@@ -716,6 +719,7 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
+        print('here')
         # find deepest directory
         for root, dirs, files in os.walk(Alaska.ORGS_DIR):
             # first, check if indices are already there.
@@ -874,6 +878,7 @@ class AlaskaServer(Alaska):
 
         self.out(('INFO: starting docker container with {} core '
                   + 'allocation').format(self.CPUS))
+
         cont = AlaskaDocker(Alaska.DOCKER_QC_TAG)
         cont.run(cmd, working_dir=wdir,
                  volumes=volumes,
