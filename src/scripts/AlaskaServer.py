@@ -586,6 +586,7 @@ class AlaskaServer(Alaska):
             self.out(''.join(traceback.format_exception(None,
                                                         e, e.__traceback__)),
                      override=True)
+            traceback.print_exc()
             self.close(_id)
 
     def respond(self, to, msg):
