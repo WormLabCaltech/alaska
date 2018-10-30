@@ -230,12 +230,12 @@ class AlaskaServer(Alaska):
             p.daemon = True
             p.start()
 
-            self.out('INFO: updating organisms')
-            self.update_orgs()
-
             # Load if there is at least one save.
             if len(os.listdir(Alaska.SAVE_DIR)) > 0:
                 self.load()
+
+            self.out('INFO: updating organisms')
+            self.update_orgs()
 
             self.out('INFO: starting {} workers'.format(self.workers_n))
             for i in range(self.workers_n):
@@ -719,7 +719,6 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        print('here')
         # find deepest directory
         for root, dirs, files in os.walk(Alaska.ORGS_DIR):
             # first, check if indices are already there.
