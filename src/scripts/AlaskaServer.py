@@ -230,12 +230,16 @@ class AlaskaServer(Alaska):
             p.daemon = True
             p.start()
 
-            self.out('INFO: updating organisms')
-            self.update_orgs()
-
             # Load if there is at least one save.
             if len(os.listdir(Alaska.SAVE_DIR)) > 0:
                 self.load()
+
+            self.out('INFO: updating organisms')
+            # Organism update takes a while...so it should be done on
+            # a new thread.
+            org_p = Thread(target=self.update_orgs)
+            org_p.daemon = True
+            org_p.start()
 
             self.out('INFO: starting {} workers'.format(self.workers_n))
             for i in range(self.workers_n):
@@ -586,6 +590,7 @@ class AlaskaServer(Alaska):
             self.out(''.join(traceback.format_exception(None,
                                                         e, e.__traceback__)),
                      override=True)
+            traceback.print_exc()
             self.close(_id)
 
     def respond(self, to, msg):
@@ -739,7 +744,7 @@ class AlaskaServer(Alaska):
                 # Check if this is a new organism.
                 if genus not in self.organisms \
                    or species not in self.organisms[genus] \
-                   or ver not in self.organisms[genus][species]:
+                   or ver not in self.organisms[genus][species].refs:
                     self.out('INFO: detected new organism - {}_{}_{}'.format(
                         genus, species, ver
                     ))
@@ -874,6 +879,7 @@ class AlaskaServer(Alaska):
 
         self.out(('INFO: starting docker container with {} core '
                   + 'allocation').format(self.CPUS))
+
         cont = AlaskaDocker(Alaska.DOCKER_QC_TAG)
         cont.run(cmd, working_dir=wdir,
                  volumes=volumes,
