@@ -528,6 +528,16 @@ class AlaskaProject(Alaska):
             raise Exception('{}: error occurred while connecting to FTP'
                             .format(self.id))
 
+    def remove(self):
+        """
+        Removes this project.
+
+        Arguments: None
+
+        Returns: None
+        """
+        shutil.rmtree(self.dir)
+
     def save(self, folder=None):
         """
         Save project to JSON.
