@@ -1083,11 +1083,15 @@ class AlaskaServer(Alaska):
         msg = MIMEText(full_msg, 'html')
         msg['Subject'] = subject
         msg['From'] = fr
+        conn = None
         try:
             conn = smtplib.SMTP('localhost')
             conn.sendmail(fr, to, msg.as_string())
+        except Exception as e:
+            traceback.print_exc()
         finally:
-            conn.quit()
+            if conn is not None:
+                conn.quit()
 
     def exists(self, _id):
         """
