@@ -17,6 +17,7 @@ __status__ = "alpha"
 
 import os
 import json
+import shutil
 import ftplib
 import tarfile
 import pandas as pd
