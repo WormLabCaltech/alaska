@@ -5108,14 +5108,10 @@ $(document).ready(function() {
     get_server_status();
 
     // initialize tooltips
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
-    });
+    $('[data-toggle="tooltip"]').tooltip()
 
     // initialize popovers
-    $(function () {
-      $('[data-toggle="popover"]').popover()
-    })
+    $('[data-toggle="popover"]').popover()
 
     // Add on click handler for start project button.
     $('#new_proj_btn').click(new_proj);
