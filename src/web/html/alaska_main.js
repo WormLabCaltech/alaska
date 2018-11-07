@@ -1752,6 +1752,7 @@ function set_factor_card_to_sample_listener(factor_card,
         remove_from_form(form_group, common_form_class_name);
         remove_from_form(form_group, specific_form_class_name);
       } else {
+        checkbox.prop('disabled', false);
         refresh_checkbox(checkbox);
       }
       enable_disable_row(checkbox);
