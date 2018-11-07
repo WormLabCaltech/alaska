@@ -368,6 +368,13 @@ class AlaskaServer(Alaska):
                         # remove job because it is stale
                         path = '{}/{}/{}.json'.format(Alaska.ROOT_PATH,
                                                       Alaska.JOBS_DIR, job.id)
+
+                        # first, remove job from project
+                        proj_id = job.proj_id
+                        if job.id in self.projects[proj_id].jobs:
+                            self.projects[job.proj_id].jobs.remove(job.id)
+
+                        # Then, remove the file
                         if os.path.isfile(path):
                             os.remove(path)
                         del self.jobs[job.id]
@@ -1129,30 +1136,34 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        # TODO: change checking to catching exceptions
-        self.out('{}: loading'.format(_id))
+        self.broadcast(_id, '{}: loading'.format(_id))
 
         # check if given project id is already loaded
         if self.exists(_id):
             raise Exception('{}: already exists and is loaded'.format(_id))
 
         # check if directory exists
-        path = './{}/{}/'.format(Alaska.PROJECTS_DIR, _id)
-        if not os.path.exists(path) and os.path.isdir(path):
+        path = '{}/{}'.format(Alaska.PROJECTS_DIR, _id)
+        if not (os.path.exists(path) and os.path.isdir(path)):
             raise Exception('{}: could not be found'.format(_id))
 
-        # if project is not loaded but exists, load it
-        # TODO: what if project id or sample id exists?
+        # We can tell whether or not a project is temporary by checking whether
+        # the project JSON is in the project directory.
         ap = AlaskaProject(_id)
-        ap.load()
+        proj_json = '{}/{}.json'.format(path, _id)
+        temp_json = '{}/{}/{}.json'.format(path, Alaska.TEMP_DIR, _id)
+        if os.path.isfile(proj_json):
+            ap.load()
 
-        # add project and samples to dictionary
-        if ap.progress > 2:
             self.projects[_id] = ap
             self.samples = {**self.samples, **ap.samples}
-        else:
+        elif os.path.isfile(temp_json):
+            ap.load(folder=Alaska.TEMP_DIR)
+
             self.projects_temp[_id] = ap
             self.samples_temp = {**self.samples_temp, **ap.samples}
+        else:
+            raise Exception('{}: JSON can not be found')
 
         msg = '{}: successfully loaded'.format(_id)
 
@@ -1452,6 +1463,7 @@ class AlaskaServer(Alaska):
 
         new_proj.progress = Alaska.PROGRESS['finalized']
         new_proj.save()
+        new_proj.temp = False
 
         # copy analysis script to project folder.
         self.copy_script(_id, Alaska.ANL_SCRIPT)
@@ -2326,33 +2338,34 @@ class AlaskaServer(Alaska):
             self.close(_id)
 
         # First, deal with projects.
-        self.out('INFO: cleaning up projects')
-        for fname in os.listdir(Alaska.PROJECTS_DIR):
-            if fname not in self.projects and fname not in self.projects_temp:
-                path = '{}/{}'.format(Alaska.PROJECTS_DIR, fname)
-                self.out('INFO: removing folder {}'.format(path))
-                shutil.rmtree(path)
-
-                # Then, if an ftp account was created, remove that too.
-                if fname in self.ftp:
-                    del self.ftp[fname]
-
-                try:
-                    ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-                    if ftp.status != 'running':
-                        self.out(('WARNING: container {} is not '
-                                  + 'running').format(Alaska.DOCKER_FTP_TAG))
-
-                    cmd = 'pure-pw userdel {}'.format(fname)
-                    out = ftp.exec_run(cmd)
-
-                    cmd = 'pure-pw mkdb'
-                    out = ftp.exec_run(cmd)
-                except docker.errors.NotFound as e:
-                    self.out(('WARNING: container {} does not '
-                              + 'exist').format(Alaska.DOCKER_FTP_TAG))
-                except Exception as e:
-                    traceback.print_exc()
+        # 10/29 Project cleanup is buggy, let's turn this off for now.
+        # self.out('INFO: cleaning up projects')
+        # for fname in os.listdir(Alaska.PROJECTS_DIR):
+        #     if fname not in self.projects and fname not in self.projects_temp:
+        #         path = '{}/{}'.format(Alaska.PROJECTS_DIR, fname)
+        #         self.out('INFO: removing folder {}'.format(path))
+        #         shutil.rmtree(path)
+        #
+        #         # Then, if an ftp account was created, remove that too.
+        #         if fname in self.ftp:
+        #             del self.ftp[fname]
+        #
+        #         try:
+        #             ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+        #             if ftp.status != 'running':
+        #                 self.out(('WARNING: container {} is not '
+        #                           + 'running').format(Alaska.DOCKER_FTP_TAG))
+        #
+        #             cmd = 'pure-pw userdel {}'.format(fname)
+        #             out = ftp.exec_run(cmd)
+        #
+        #             cmd = 'pure-pw mkdb'
+        #             out = ftp.exec_run(cmd)
+        #         except docker.errors.NotFound as e:
+        #             self.out(('WARNING: container {} does not '
+        #                       + 'exist').format(Alaska.DOCKER_FTP_TAG))
+        #         except Exception as e:
+        #             traceback.print_exc()
 
         self.out('INFO: cleaning up raw reads')
         for proj_id, proj in self.projects.items():
@@ -2404,6 +2417,8 @@ class AlaskaServer(Alaska):
             if job not in self.jobs and job not in self.stale_jobs:
                 try:
                     path = '{}/{}'.format(Alaska.JOBS_DIR, fname)
+
+                    # Remove it from the jobs directory AND the project
                     self.out('INFO: removing job {}'.format(path))
                     os.remove(path)
                 except Exception as e:
@@ -2643,6 +2658,32 @@ class AlaskaServer(Alaska):
         self.cleanup()
 
         self.close(_id)
+
+    def new_load(self, _id=None):
+        """
+        New load function.
+        This function loads everything by iterating through the root Alaska
+        directory structure. Unlike the old load(), this method reduces the
+        reliance on the server save state JSON, which ended up being unreliable
+        and difficult to debug.
+
+        Arguments:
+        _id -- (str) ZeroMQ socket id that sent this request (default: None)
+
+        Returns: None
+        """
+        # IMPORTANT: The loading order matters!
+        # Jobs must be the first to be loaded first.
+
+        # Then, let's load organisms.
+
+        # Finally, let's load all the projects.
+
+        # Once everything's loaded, let's load back the server state.
+        # This includes: the current job and the queue
+
+        pass
+
 
     def load(self, _id=None, newest=False):
         """
