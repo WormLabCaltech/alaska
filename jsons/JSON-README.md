@@ -70,4 +70,3 @@ This section describes each field in the JSON: its purpose, its use and how it s
 * **SRA_center_code**: SRA center code. Not necessary and user-editable.
 * **email**: Email of the individual submitting the project. This is how the user is notified that analysis is finished.
 * **datetime**: The date and time this project was created. For internal use.
-
