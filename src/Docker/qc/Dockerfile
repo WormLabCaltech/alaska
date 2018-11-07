@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     bzip2 \
     software-properties-common \
     python-software-properties \
-    curl
+    curl \
+    fontconfig
 
 ##### MINICONDA (PYTHON) INSTALLATION #####
 # fetch miniconda installation script

@@ -1749,12 +1749,10 @@ function set_factor_card_to_sample_listener(factor_card,
 
       if (val == factor_name) {
         checkbox.prop('disabled', true);
-        remove_from_form(form_group, common_form_class_name);
-        remove_from_form(form_group, specific_form_class_name);
       } else {
         checkbox.prop('disabled', false);
-        refresh_checkbox(checkbox);
       }
+      refresh_checkbox(checkbox);
       enable_disable_row(checkbox);
     }
   });
@@ -1901,7 +1899,7 @@ function enable_disable_row(checkbox) {
     var selects = form_group.find('select');
     var buttons = form_group.find('button');
 
-    if (checkbox.prop('checked')) {
+    if (checkbox.prop('checked') && !checkbox.prop('disabled')) {
       // Enable everything.
       inputs.prop('disabled', false);
       textareas.prop('disabled', false);
@@ -2219,7 +2217,11 @@ function refresh_checkbox(checkbox) {
 
   // If this is a click event.
   // Deal with read type specially.
-  if (checkbox.prop('checked')) {
+  if (checkbox.prop('disabled')) {
+    // If the checkbox is disabled, remove from both forms!
+    remove_from_form(form_group, common_form_class_name);
+    remove_from_form(form_group, specific_form_class_name);
+  } else if (checkbox.prop('checked')) {
     if (class_name == 'sample_read_type_group'
         && parseInt(form_group.find('input:radio:checked').val()) == 2) {
       copy_to_form(form_group, specific_form_class_name, false);
@@ -2826,7 +2828,7 @@ function set_common_meta_inputs(card, inputs) {
     var checkbox = form_group.find('input:checkbox');
     var type = common_meta_classes_to_functions[class_name];
 
-    if (class_name in inputs && !checkbox.prop('disabled')) {
+    if (class_name in inputs) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
 
       // Check the checkbox.
@@ -4850,6 +4852,7 @@ var common_meta_order = [
   'sample_life-stage_group',
   'sample_tissue_group',
   'sample_characteristics_group',
+  'sample_sequencing_platform_group',
   'sample_sequenced_molecules_group',
   'sample_read_type_group',
   'sample_specific_characteristics_group'
