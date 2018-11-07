@@ -17,6 +17,7 @@ __status__ = "alpha"
 
 import os
 import json
+import shutil
 import ftplib
 import tarfile
 import pandas as pd
@@ -527,6 +528,16 @@ class AlaskaProject(Alaska):
         except Exception as e:
             raise Exception('{}: error occurred while connecting to FTP'
                             .format(self.id))
+
+    def remove(self):
+        """
+        Removes this project.
+
+        Arguments: None
+
+        Returns: None
+        """
+        shutil.rmtree(self.dir)
 
     def save(self, folder=None):
         """

@@ -100,7 +100,7 @@ class Alaska():
     DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest'
     DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest'
     DOCKER_SERVER_TAG = 'alaska_server'
-    DOCKER_FTP_TAG = 'ftpd_server'  # TODO: change this
+    DOCKER_FTP_TAG = 'alaska_ftp'
 
     # TESTING VARIABLES
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',

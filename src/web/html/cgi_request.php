@@ -11,6 +11,8 @@ function cgi_request($action, $id) {
       $cmd .= ' --id ' . $id;
     }
 
+    $cmd .= ' 2>&1';
+
     # now, run the command and get output
     if (is_executable($script_path)) {
       echo shell_exec($cmd);

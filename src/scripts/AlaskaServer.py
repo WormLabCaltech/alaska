@@ -911,6 +911,82 @@ class AlaskaServer(Alaska):
             genus, species, ver
         ))
 
+    def make_ftp(self, _id):
+        """
+        Makes the given ftp user with id and a random pw.
+        Returns the pw.
+
+        Arguments:
+        _id -- (str) ftp user id
+
+        Returns: None
+        """
+        # First check if this id already has an ftp, if it does,
+        # just return that.
+        if _id in self.ftp:
+            return self.ftp[_id]
+
+        # check if ftp container is running
+        try:
+            ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+            if ftp.status != 'running':
+                raise Exception(_id, ('WARNING: container {} is not '
+                                + 'running').format(Alaska.DOCKER_FTP_TAG))
+
+            pw = self.rand_str(Alaska.FTP_PW_L)
+
+            cmd = ('/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m '
+                   + '-u ftpuser -d /alaska/root/'
+                   + '{}/{}/{}"').format(pw, pw, _id,
+                                         Alaska.PROJECTS_DIR,
+                                         _id,
+                                         Alaska.RAW_DIR)
+            out = ftp.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception(('{}: FTP user creation exited with '
+                                 + 'non-zero status.').format(_id))
+
+            cmd = ('/bin/bash -c "pure-pw usermod '
+                   + '{} -n {} -N {} -m"').format(_id,
+                                                  Alaska.FTP_COUNT_LIMIT,
+                                                  Alaska.FTP_SIZE_LIMIT)
+            out = ftp.exec_run(cmd)
+            exit_code = out[0]
+            if exit_code != 0:
+                raise Exception(('{}: FTP user modification exited with '
+                                 + 'non-zero status.').format(__id))
+
+            self.ftp[_id] = pw
+
+        # This exception is raised if the docker container isn't found.
+        except docker.errors.NotFound as e:
+            self.broadcast(_id, ('WARNING: container {} does '
+                           + 'not exist').format(Alaska.DOCKER_FTP_TAG))
+        except Exception as e:
+            traceback.print_exc()
+
+        # return password
+        return pw
+
+    def remove_ftp(self, _id):
+        """
+        Removes ftp account.
+        """
+        try:
+            ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
+            if ftp.status != 'running':
+                raise Exception(('WARNING: container {} is not '
+                                 + 'running').format(Alaska.DOCKER_FTP_TAG))
+
+            cmd = 'pure-pw userdel {} -m'.format(_id)
+            out = ftp.exec_run(cmd)
+        except docker.errors.NotFound as e:
+            self.out(('WARNING: container {} does not '
+                      + 'exist').format(Alaska.DOCKER_FTP_TAG))
+        except Exception as e:
+            traceback.print_exc()
+
     def new_proj(self, _id, close=True):
         """
         Creates a new project.
@@ -921,50 +997,6 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        def make_ftp(__id, ftp):
-            """
-            Makes the given ftp user with id and a random pw.
-            Returns the pw.
-
-            Arguments:
-            __id -- (str) ftp user id
-            ftp  -- (docker.container) ftp docker container
-
-            Returns: None
-            """
-            pw = self.rand_str(Alaska.FTP_PW_L)
-
-            cmd = ('/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m '
-                   + '-u ftpuser -d /home/ftpusers/'
-                   + '{}/{}/{}/{}"').format(pw, pw, __id,
-                                            Alaska.DOCKER_DATA_VOLUME,
-                                            Alaska.PROJECTS_DIR,
-                                            __id,
-                                            Alaska.RAW_DIR)
-            out = ftp.exec_run(cmd)
-            exit_code = out[0]
-            if exit_code != 0:
-                raise Exception(('{}: FTP user creation exited with '
-                                 + 'non-zero status.').format(__id))
-
-            cmd = ('/bin/bash -c "pure-pw usermod '
-                   + '{} -n {} -N {} -m"').format(__id,
-                                                  Alaska.FTP_COUNT_LIMIT,
-                                                  Alaska.FTP_SIZE_LIMIT)
-            out = ftp.exec_run(cmd)
-            exit_code = out[0]
-            if exit_code != 0:
-                raise Exception(('{}: FTP user modification exited with '
-                                 + 'non-zero status.').format(__id))
-
-            cmd = 'pure-pw mkdb'
-            out = ftp.exec_run(cmd)
-            exit_code = out[0]
-            if exit_code != 0:
-                raise Exception('{}: FTP mkdb failed.'.format(__id))
-
-            # return password
-            return pw
 
         ids = list(self.projects.keys()) + list(self.projects_temp.keys())
         __id = self.rand_str_except(Alaska.PROJECT_L, ids)
@@ -992,24 +1024,10 @@ class AlaskaServer(Alaska):
         os.makedirs(f)
         self.broadcast(_id, '{}: new project created'.format(__id))
 
-        # check if ftp container is running
-        try:
-            ftp = self.DOCKER.containers.get(Alaska.DOCKER_FTP_TAG)
-            if ftp.status != 'running':
-                self.broadcast(_id, ('WARNING: container {} is not '
-                               + 'running').format(Alaska.DOCKER_FTP_TAG))
-
-            # once we know that the ftp is running,
-            pw = make_ftp(__id, ftp)
-
-            # add to global variable
-            self.ftp[__id] = pw
-
-            self.broadcast(_id, ('{}: ftp user created with '
-                           + 'password {}').format(__id, pw))
-        except docker.errors.NotFound as e:
-            self.broadcast(_id, ('WARNING: container {} does '
-                           + 'not exist').format(Alaska.DOCKER_FTP_TAG))
+        # Make ftp
+        pw = self.make_ftp(__id)
+        self.broadcast(_id, ('{}: ftp user created with '
+                       + 'password {}').format(__id, pw))
 
         if close:
             self.close(_id)
@@ -1078,11 +1096,15 @@ class AlaskaServer(Alaska):
         msg = MIMEText(full_msg, 'html')
         msg['Subject'] = subject
         msg['From'] = fr
+        conn = None
         try:
             conn = smtplib.SMTP('localhost')
             conn.sendmail(fr, to, msg.as_string())
+        except Exception as e:
+            traceback.print_exc()
         finally:
-            conn.quit()
+            if conn is not None:
+                conn.quit()
 
     def exists(self, _id):
         """
@@ -1211,21 +1233,35 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        proj = None
         if self.exists_temp(_id):
+            proj = self.projects_temp[_id]
             del self.projects_temp[_id]
         elif self.exists_var(_id):
+            proj = self.projects[_id]
             del self.projects[_id]
 
-        # Remove folders.
-        shutil.rmtree('{}/{}'.format(Alaska.PROJECTS_DIR, _id),
-                      ignore_errors=True)
+        # Remove proj
+        proj.remove()
+
+        # check if the project has any samples
+        for sample_id in proj.samples:
+            if sample_id in self.samples:
+                del self.samples[sample_id]
+
+            if sample_id in self.samples_temp:
+                del self.samples_temp[sample_id]
+
+        # finally, remove project
+        del proj
+
+        # If the project also has an ftp user, remove that too
+        if _id in self.ftp:
+            self.remove_ftp(_id)
 
         self.broadcast(_id, '{}: removed'.format(_id))
 
         if close:
             self.close(_id)
-
 
     def fetch_reads(self, _id, close=True):
         """
@@ -2338,6 +2374,16 @@ class AlaskaServer(Alaska):
             self.close(_id)
 
         # First, deal with projects.
+#         self.out('INFO: cleaning up projects')
+#         for fname in os.listdir(Alaska.PROJECTS_DIR):
+#             if fname not in self.projects and fname not in self.projects_temp:
+#                 path = '{}/{}'.format(Alaska.PROJECTS_DIR, fname)
+#                 self.out('INFO: removing folder {}'.format(path))
+#                 shutil.rmtree(path)
+
+#                 # Then, if an ftp account was created, remove that too.
+#                 if fname in self.ftp:
+#                     del self.ftp[fname]
         # 10/29 Project cleanup is buggy, let's turn this off for now.
         # self.out('INFO: cleaning up projects')
         # for fname in os.listdir(Alaska.PROJECTS_DIR):

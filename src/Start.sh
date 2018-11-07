@@ -41,7 +41,15 @@ done
 #### Now, we can ensure Alaska was properly installed.
 # Let's go on to start the server.
 
-# First, check if the container is already running.
+# First, start ftp if it isn't running already
+if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_FTP_TAG) != "true" ]]
+then
+    printf "%s\n" "$DOCKER_FTP_TAG is not running."
+    printf "%s\n" "Starting container."
+    docker start $DOCKER_FTP_TAG
+fi
+
+# Then, check if the alaska_server container is already running.
 if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_ALASKA_TAG) == "true" ]]
 then
     printf "%s\n" "Alaska is already running. What would you like to do?"
@@ -81,3 +89,11 @@ else
         * ) ;;
     esac
 fi
+
+# Check if user would like to attach to the alaska_server stdout.
+printf "%s\n" "Would you like to attach to the $DOCKER_ALASKA_TAG stdout? (Y/N)"
+read -p ">" choice
+case "$choice" in
+    Y|y ) docker attach $DOCKER_ALASKA_TAG;;
+    * ) ;;
+esac

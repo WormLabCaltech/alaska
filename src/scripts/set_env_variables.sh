@@ -4,11 +4,13 @@
 # This script is to be called with the 'source' prefix.
 
 ####### DEFINE VARIABLES #######
-# Docker image tags.
+# Docker tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
 DOCKER_DATA_VOLUME="alaska_data_volume"
 DOCKER_CGI_VOLUME="alaska_cgi_volume"
+DOCKER_FTP_VOLUME="alaska_ftp_volume"
 DOCKER_ALASKA_TAG="alaska_server"
+DOCKER_FTP_TAG="alaska_ftp"
 DOCKER_REQUEST_TAG="alaska_request"
 DOCKER_QC_TAG="alaska_qc"
 DOCKER_KALLISTO_TAG="alaska_kallisto"
@@ -21,13 +23,16 @@ DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
 DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_VOLUME:/alaska/scripts"
 DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
 DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin/alaska"
+DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="80:80"
+DOCKER_FTP_PORT="21:21"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
     "$DOCKER_ALASKA_TAG"
+    "$DOCKER_FTP_TAG"
     "$DOCKER_REQUEST_TAG"
     "$DOCKER_QC_TAG"
     "$DOCKER_KALLISTO_TAG"
@@ -36,12 +41,14 @@ declare -a images=(
 )
 declare -a containers=(
     "$DOCKER_ALASKA_TAG"
+    "$DOCKER_FTP_TAG"
     "$DOCKER_CGI_TAG"
 )
 declare -a volumes=(
     "$DOCKER_SCRIPT_VOLUME"
     "$DOCKER_DATA_VOLUME"
     "$DOCKER_CGI_VOLUME"
+    "$DOCKER_FTP_VOLUME"
 )
 
 # Software version control.
