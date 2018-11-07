@@ -2,6 +2,8 @@
 
 RNA-sequencing (RNA-seq) provides a way to quantify differential gene expression and is used to discover novel gene functions and pathways. Although the molecular biology behind RNA-seq is fully understood, analysis of the data remains a significant bottleneck. Here, we introduce a RNA-seq framework that will allow analysis within hours of an RNA-seq experiment.
 
+Alpha version available at [http://alaska.caltech.edu](http://alaska.caltech.edu)
+
 ## Getting Started
 These instructions will install the Alaska server on your local machine for development and testing purposes. Everything has only been tested on Ubuntu 16.04.
 
@@ -218,17 +220,17 @@ The entire pipeline can be tested by issuing the following commands:
 ```
 
 ## Planned features
-- [ ] **Server** Deploy server
-- [ ] **Portal** Working portal
+- [x] **Server** Deploy server
+- [x] **Portal** Working portal
 - [x] **Server** Dynamic port allocation for Shiny web app
-- [ ] **Server** Multithread some Quality Control scripts
-- [ ] **Server** Allow users to download analyses results
+- [x] **Server** Multithread some Quality Control scripts
+- [x] **Server** Allow users to download analyses results
 - [ ] **Server** Ability to copy past samples to a new project
 - [ ] **Server** Better raw read validation
-- [ ] **Server** More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
+- [x] **Server** More data visualization tools (perhaps [Enrichment Analysis](https://github.com/dangeles/TissueEnrichmentAnalysis))
 - [ ] **Server** Standardized metadata
 - [ ] **Server** Better metadata-validation
-- [ ] **Server** Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
+- [x] **Server** Automatic submission to [GEO](https://www.ncbi.nlm.nih.gov/geo/)
 
 ## Software Details
 Alaska packages a variety of software into one simple pipeline. They are listed in this section.
@@ -248,23 +250,11 @@ Alaska packages a variety of software into one simple pipeline. They are listed 
 * [Sleuth](http://pachterlab.github.io/sleuth/)
 
 ## Authors & Contributors
-* **Kyung Hoi (Joseph) Min** - *Server design & programming*
+* **Kyung Hoi (Joseph) Min** - *Server, portal design & programming*
 * **Raymond Lee** - *Server management*
-* **Juancarlos Chan** - *Portal design & programming*
+* **Juancarlos Chan** - *Testing environment*
 * **David Angeles**
 * **Paul W. Sternberg**
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-
-
-
-
-
-
-
-
-
-
-

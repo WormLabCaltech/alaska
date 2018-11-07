@@ -577,15 +577,19 @@ class AlaskaProject(Alaska):
             raise Exception('{}: JSON id {} does not match object id'
                             .format(self.id, loaded['id']))
 
-        for key, item in loaded.items():
-            if key == 'samples':
-                # AlaskaSample object must be created for samples
-                samples = {}
-                for _id, vals in item.items():
-                    sample = AlaskaSample(_id)
-                    sample.__dict__ = vals
-                    samples[_id] = sample
-                # set samples
-                self.samples = samples
-            else:
-                setattr(self, key, item)
+        try:
+            for key, item in loaded.items():
+                if key == 'samples':
+                    # AlaskaSample object must be created for samples
+                    samples = {}
+                    for _id, vals in item.items():
+                        sample = AlaskaSample(_id)
+                        sample.__dict__ = vals
+                        samples[_id] = sample
+                    # set samples
+                    self.samples = samples
+                else:
+                    setattr(self, key, item)
+        except Exception as e:
+            traceback.print_exc()
+            raise Exception('Error occurred while unpacking {}'.format(key))
