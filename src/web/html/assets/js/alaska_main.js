@@ -1830,6 +1830,14 @@ function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
 }
 
 /**
+ * Enable all popover and tooltips in the given element.
+ */
+function enable_popovers_tooltips(ele) {
+  ele.find('[data-toggle="tooltip"]').tooltip();
+  ele.find('[data-toggle="popover"]').popover();
+}
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
@@ -1877,6 +1885,9 @@ function set_proj_meta_input() {
   if (Object.keys(proj.samples).length < 8) {
     factor_show_radio.prop('disabled', true);
   }
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(proj_form);
 }
 
 /**
@@ -2329,6 +2340,9 @@ function set_common_meta_input(cb) {
     $('#meta_footer').show();
     scroll_to_ele(meta);
   });
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(common_form);
 }
 
 /*******************************************************************/
@@ -3772,6 +3786,9 @@ function set_samples_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(sample_form);
 }
 
 /**
