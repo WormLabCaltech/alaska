@@ -1752,6 +1752,7 @@ function set_factor_card_to_sample_listener(factor_card,
         remove_from_form(form_group, common_form_class_name);
         remove_from_form(form_group, specific_form_class_name);
       } else {
+        checkbox.prop('disabled', false);
         refresh_checkbox(checkbox);
       }
       enable_disable_row(checkbox);
@@ -2811,7 +2812,7 @@ function set_common_meta_inputs(card, inputs) {
     var checkbox = form_group.find('input:checkbox');
     var type = common_meta_classes_to_functions[class_name];
 
-    if (class_name in inputs) {
+    if (class_name in inputs && !checkbox.prop('disabled')) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
 
       // Check the checkbox.
@@ -5107,14 +5108,10 @@ $(document).ready(function() {
     get_server_status();
 
     // initialize tooltips
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
-    });
+    $('[data-toggle="tooltip"]').tooltip();
 
     // initialize popovers
-    $(function () {
-      $('[data-toggle="popover"]').popover()
-    })
+    $('[data-toggle="popover"]').popover();
 
     // Add on click handler for start project button.
     $('#new_proj_btn').click(new_proj);
