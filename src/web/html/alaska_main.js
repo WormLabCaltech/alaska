@@ -2812,7 +2812,7 @@ function set_common_meta_inputs(card, inputs) {
     var checkbox = form_group.find('input:checkbox');
     var type = common_meta_classes_to_functions[class_name];
 
-    if (class_name in inputs) {
+    if (class_name in inputs && !checkbox.prop('disabled')) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
 
       // Check the checkbox.
