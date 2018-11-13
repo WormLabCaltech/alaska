@@ -362,7 +362,7 @@
                     <small id="proj_design_help" class="form-text text-muted">Hover your mouse on each choice to learn more. A minimum of 8 samples are required for 2-factor design.</small>
                 </div>
                 <div class="col-sm-9 experimental_design_inputs">
-                    <div class="custom-control custom-radio custom-control-inline" tabindex="0" data-toggle="popover" data-trigger="hover focus" data-content="A 1-factor design contrasts a control sample with a single experimental sample." data-placement="bottom">
+                    <div class="custom-control custom-radio custom-control-inline" tabindex="0" data-toggle="popover" data-trigger="hover focus" data-content="A 1-factor design finds the differentially expressed transcripts between an experimentally perturbed sample (for example, a mutant strain) and a reference sample (often the wild-type strain). This is the most common experimental design for RNA-seq." data-placement="bottom">
                         <input type="radio" id="proj_design_1_radio" name="proj_design" class="custom-control-input" checked="" value="1">
                         <label class="custom-control-label active" for="proj_design_1_radio">1-factor</label>
                     </div>
@@ -371,12 +371,12 @@
                         <label class="custom-control-label" for="proj_design_2_radio">2-factor</label>
                     </div>
                     <div class="card mt-3 factor_card">
-                        <h6 class="card-header">Factor 1</h6>
+                        <h6 class="card-header">Contrast Factor 1</h6>
                         <div class="card-body">
                             <div class="form-group row factor_name_group">
                                 <div class="col-sm-4">
                                     <legend class="col-form-label">Name<span class="text-danger">*</span></legend>
-                                    <small class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                    <small class="form-text text-muted">e.g. 'Strain' if you wanted to compare between two nematode strains; 'Life-Stage' if you wanted to find the differentially expressed genes between L1 and L2 larvae.</small>
                                 </div>
                                 <div class="col d-flex factor_name_inputs">
                                     <select class="custom-select mr-2">
@@ -390,8 +390,8 @@
                             </div>
                             <div class="form-group row factor_values_group">
                                 <div class="col-sm-4">
-                                    <legend class="col-form-label">All possible values<span class="text-danger">*</span></legend>
-                                    <small class="form-text text-muted">Leave blank if you don’t have one.</small>
+                                    <legend class="col-form-label">Factor Values<span class="text-danger">*</span></legend>
+                                    <small class="form-text text-muted">e.g. If 'Life-Stage' was selected as the Name above, and you uploaded reads from L1 and L2 animals, you would input 'L1' and 'L2' into these fields. Please see FAQ if you have more than 2 values.</small>
                                 </div>
                                 <div class="col factor_values_inputs">
                                     <div class="d-flex factor_values_row">

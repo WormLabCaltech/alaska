@@ -1860,7 +1860,7 @@ function set_proj_meta_input() {
   var factor_hide_radio = design_group.find('#proj_design_1_radio');
   var factor_show_radio = design_group.find('#proj_design_2_radio');
   var div_to_toggle = factor_card.clone(true);
-  div_to_toggle.children('h6').text('Factor 2');
+  div_to_toggle.children('h6').text('Contrast Factor 2');
   div_to_toggle.addClass('collapse');
   design_inputs.append(div_to_toggle);
   set_radio_collapse_toggle(factor_hide_radio, factor_show_radio, div_to_toggle);
