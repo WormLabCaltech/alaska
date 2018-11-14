@@ -1362,9 +1362,15 @@ function read_proj() {
 /**
  * Save project to temporary json.
  */
-function save_proj(callback) {
+function save_proj(callback, ...args) {
   save_all_meta_inputs();
-  write_proj(callback);
+
+  if (callback != null) {
+    args.unshift(callback);
+    write_proj.apply(this, args);
+  } else {
+    write_proj();
+  }
 }
 
 /**
@@ -1749,12 +1755,10 @@ function set_factor_card_to_sample_listener(factor_card,
 
       if (val == factor_name) {
         checkbox.prop('disabled', true);
-        remove_from_form(form_group, common_form_class_name);
-        remove_from_form(form_group, specific_form_class_name);
       } else {
         checkbox.prop('disabled', false);
-        refresh_checkbox(checkbox);
       }
+      refresh_checkbox(checkbox);
       enable_disable_row(checkbox);
     }
   });
@@ -1830,6 +1834,33 @@ function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
 }
 
 /**
+ * Enable all popover and tooltips in the given element.
+ */
+function enable_popovers_tooltips(ele) {
+  ele.find('[data-toggle="tooltip"]').tooltip();
+  ele.find('[data-toggle="popover"]').popover();
+}
+
+/**
+ * Show 'Saved!' tooltip of button and automatically hide it after some delay.
+ * Then, execute func
+ */
+function show_saved(btn, func, ...args) {
+  btn.tooltip('show');
+
+  // Function to hide and enable button.
+  function reset_btn(btn, ele) {
+    btn.tooltip('hide');
+    btn.prop('disabled', false);
+
+    func.apply(this, args);
+  }
+
+  // Schedule tooltip to be hidden.
+  setTimeout(reset_btn, 1000, btn);
+}
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
@@ -1854,7 +1885,7 @@ function set_proj_meta_input() {
   var factor_hide_radio = design_group.find('#proj_design_1_radio');
   var factor_show_radio = design_group.find('#proj_design_2_radio');
   var div_to_toggle = factor_card.clone(true);
-  div_to_toggle.children('h6').text('Factor 2');
+  div_to_toggle.children('h6').text('Contrast Factor 2');
   div_to_toggle.addClass('collapse');
   design_inputs.append(div_to_toggle);
   set_radio_collapse_toggle(factor_hide_radio, factor_show_radio, div_to_toggle);
@@ -1864,19 +1895,29 @@ function set_proj_meta_input() {
   set_factor_to_sample_listeners(factor_hide_radio, factor_show_radio, design_inputs);
 
   proj_form.find('.save_btn').click(function () {
-    save_proj();
+    var btn = $(this);
 
-    var header = $('#sample_meta_header');
-    header.show();
-    $('#sample_meta_common').show();
-    scroll_to_ele(header);
+    // Disable this button.
+    btn.prop('disabled', true);
 
+    // Function to show next form.
+    function show_next_form() {
+      var header = $('#sample_meta_header');
+      header.show();
+      $('#sample_meta_common').show();
+      scroll_to_ele(header);
+    }
+
+    save_proj(show_saved, btn, show_next_form);
   });
 
   // Disable 2-factor design if there are less than 8 samples.
   if (Object.keys(proj.samples).length < 8) {
     factor_show_radio.prop('disabled', true);
   }
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(proj_form);
 }
 
 /**
@@ -1890,7 +1931,7 @@ function enable_disable_row(checkbox) {
     var selects = form_group.find('select');
     var buttons = form_group.find('button');
 
-    if (checkbox.prop('checked')) {
+    if (checkbox.prop('checked') && !checkbox.prop('disabled')) {
       // Enable everything.
       inputs.prop('disabled', false);
       textareas.prop('disabled', false);
@@ -2208,7 +2249,11 @@ function refresh_checkbox(checkbox) {
 
   // If this is a click event.
   // Deal with read type specially.
-  if (checkbox.prop('checked')) {
+  if (checkbox.prop('disabled')) {
+    // If the checkbox is disabled, remove from both forms!
+    remove_from_form(form_group, common_form_class_name);
+    remove_from_form(form_group, specific_form_class_name);
+  } else if (checkbox.prop('checked')) {
     if (class_name == 'sample_read_type_group'
         && parseInt(form_group.find('input:radio:checked').val()) == 2) {
       copy_to_form(form_group, specific_form_class_name, false);
@@ -2322,13 +2367,24 @@ function set_common_meta_input(cb) {
 
   // Set save & apply button.
   common_form.find('.save_btn').click(function () {
-    save_proj();
+    var btn = $(this);
 
-    var meta = $('#sample_meta')
-    meta.show();
-    $('#meta_footer').show();
-    scroll_to_ele(meta);
+    btn.prop('disabled', true);
+
+    // Function to show next form.
+    function show_next_form() {
+      var meta = $('#sample_meta')
+      meta.show();
+      $('#meta_footer').show();
+      scroll_to_ele(meta);
+    }
+
+    save_proj(show_saved, btn, show_next_form);
+
   });
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(common_form);
 }
 
 /*******************************************************************/
@@ -2812,7 +2868,7 @@ function set_common_meta_inputs(card, inputs) {
     var checkbox = form_group.find('input:checkbox');
     var type = common_meta_classes_to_functions[class_name];
 
-    if (class_name in inputs && !checkbox.prop('disabled')) {
+    if (class_name in inputs) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
 
       // Check the checkbox.
@@ -3763,7 +3819,12 @@ function set_samples_meta_input() {
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
-    save_changes_btn.click(save_proj);
+    save_changes_btn.click(function () {
+        var btn = $(this);
+        btn.prop('disabled', true);
+
+        save_proj(show_saved, btn);
+    });
 
     // Append new form.
     $('#sample_card').append(new_sample_form);
@@ -3772,6 +3833,9 @@ function set_samples_meta_input() {
   // Then, set the button handler.
   var dropdown = $('#sample_choices');
   set_choose_sample_button(dropdown, sample_forms);
+
+  // Enable popovers and tooltips.
+  enable_popovers_tooltips(sample_form);
 }
 
 /**
@@ -4392,13 +4456,14 @@ function write_object_to_temp(obj, fname, callback) {
  * Writes the global proj variable as json to the project temp
  * directory.
  */
-function write_proj(callback) {
+function write_proj(callback, ...args) {
   var target = 'jsonify.php';
   var data = {
     id: proj_id,
     json: JSON.stringify(proj, null, 4)
   };
-  send_ajax_request(target, data, callback, false);
+  first_args = [target, data, callback, false];
+  send_ajax_request.apply(this, first_args.concat(args));
 }
 
 /******* Server output parsers ************************************/
@@ -4833,6 +4898,7 @@ var common_meta_order = [
   'sample_life-stage_group',
   'sample_tissue_group',
   'sample_characteristics_group',
+  'sample_sequencing_platform_group',
   'sample_sequenced_molecules_group',
   'sample_read_type_group',
   'sample_specific_characteristics_group'

@@ -76,7 +76,7 @@ class Alaska():
     RAW_NOTIFY_2 = 1            # notify when there is 1 day left
     RAW_DURATION = 10           # keep reads for a max 10 days
     CPUS = '1-3'                # processing CPUs (for Docker)
-    NTHREADS = 3                # number of threads for processing
+    NTHREADS = 1                # number of threads for processing
 
     # SUPPORTED EXTENSIONS
     RAW_EXT = ('.fastq.gz', '.fastq')  # supported raw read extensions
