@@ -1362,9 +1362,15 @@ function read_proj() {
 /**
  * Save project to temporary json.
  */
-function save_proj(callback) {
+function save_proj(callback, ...args) {
   save_all_meta_inputs();
-  write_proj(callback);
+
+  if (callback != null) {
+    args.unshift(callback);
+    write_proj.apply(this, args);
+  } else {
+    write_proj();
+  }
 }
 
 /**
@@ -1836,6 +1842,25 @@ function enable_popovers_tooltips(ele) {
 }
 
 /**
+ * Show 'Saved!' tooltip of button and automatically hide it after some delay.
+ * Then, execute func
+ */
+function show_saved(btn, func, ...args) {
+  btn.tooltip('show');
+
+  // Function to hide and enable button.
+  function reset_btn(btn, ele) {
+    btn.tooltip('hide');
+    btn.prop('disabled', false);
+
+    func.apply(this, args);
+  }
+
+  // Schedule tooltip to be hidden.
+  setTimeout(reset_btn, 1000, btn);
+}
+
+/**
  * Set project meta input.
  */
 function set_proj_meta_input() {
@@ -1870,13 +1895,20 @@ function set_proj_meta_input() {
   set_factor_to_sample_listeners(factor_hide_radio, factor_show_radio, design_inputs);
 
   proj_form.find('.save_btn').click(function () {
-    save_proj();
+    var btn = $(this);
 
-    var header = $('#sample_meta_header');
-    header.show();
-    $('#sample_meta_common').show();
-    scroll_to_ele(header);
+    // Disable this button.
+    btn.prop('disabled', true);
 
+    // Function to show next form.
+    function show_next_form() {
+      var header = $('#sample_meta_header');
+      header.show();
+      $('#sample_meta_common').show();
+      scroll_to_ele(header);
+    }
+
+    save_proj(show_saved, btn, show_next_form);
   });
 
   // Disable 2-factor design if there are less than 8 samples.
@@ -2335,12 +2367,20 @@ function set_common_meta_input(cb) {
 
   // Set save & apply button.
   common_form.find('.save_btn').click(function () {
-    save_proj();
+    var btn = $(this);
 
-    var meta = $('#sample_meta')
-    meta.show();
-    $('#meta_footer').show();
-    scroll_to_ele(meta);
+    btn.prop('disabled', true);
+
+    // Function to show next form.
+    function show_next_form() {
+      var meta = $('#sample_meta')
+      meta.show();
+      $('#meta_footer').show();
+      scroll_to_ele(meta);
+    }
+
+    save_proj(show_saved, btn, show_next_form);
+
   });
 
   // Enable popovers and tooltips.
@@ -3779,7 +3819,12 @@ function set_samples_meta_input() {
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
-    save_changes_btn.click(save_proj);
+    save_changes_btn.click(function () {
+        var btn = $(this);
+        btn.prop('disabled', true);
+
+        save_proj(show_saved, btn);
+    });
 
     // Append new form.
     $('#sample_card').append(new_sample_form);
@@ -4411,13 +4456,14 @@ function write_object_to_temp(obj, fname, callback) {
  * Writes the global proj variable as json to the project temp
  * directory.
  */
-function write_proj(callback) {
+function write_proj(callback, ...args) {
   var target = 'jsonify.php';
   var data = {
     id: proj_id,
     json: JSON.stringify(proj, null, 4)
   };
-  send_ajax_request(target, data, callback, false);
+  first_args = [target, data, callback, false];
+  send_ajax_request.apply(this, first_args.concat(args));
 }
 
 /******* Server output parsers ************************************/
