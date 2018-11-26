@@ -21,8 +21,7 @@ RUN apt-get update && apt-get install -y \
     bzip2 \
     software-properties-common \
     python-software-properties \
-    curl \
-    fontconfig
+    curl
 
 ##### MINICONDA (PYTHON) INSTALLATION #####
 # fetch miniconda installation script
@@ -42,6 +41,7 @@ RUN conda config --add channels conda-forge
 RUN conda config --add channels bioconda
 
 # install software
+RUN conda install fontconfig
 RUN conda install conda-forge::openjdk
 RUN conda install bowtie2==$BOWTIE2_VER
 RUN conda install samtools==$SAMTOOLS_VER

@@ -1,8 +1,7 @@
 #!/usr/bin/env Rscript
-
 library('sleuth')
-library('optparse')
 library('files')
+library('optparse')
 
 # command line arguments
 option_list <- list(
@@ -28,10 +27,6 @@ if(length(opt$d) == 0) {
   stop('Directory must not be empty')
 }
 
-#if(lenght(opt$o) == 0) {
-#  stop('Output directory cannot be empty')
-#}
-
 if(!file.exists(opt$d)) {
   stop('Directory must exist')
 }
@@ -44,12 +39,16 @@ mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
 print('#Fetching bioMart info (2/2)')
 t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id',
                                      'ensembl_gene_id',
-                                     'external_gene_name'),
-                                     mart = mart)
+                                     'external_gene_name',
+                                     'description',
+                                     'transcript_biotype'),
+                      mart = mart)
+
 print('#Renaming genes')
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
-                     ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
-t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
+                          ens_gene = ensembl_gene_id,
+                          ext_gene = external_gene_name)
+# t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 
 #point to your directory
 base_dir <- opt$d
@@ -63,7 +62,8 @@ output_dir <- opt$o
 
 #get ids
 print('# Reading analysis matrix')
-s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'), header = TRUE,
+s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'),
+                  header = TRUE,
                   stringsAsFactors= FALSE)
 
 # Determine the number of factors.
@@ -75,6 +75,7 @@ for (column_name in colnames(s2c)) {
 
   conditions <- c(conditions, column_name)
 }
+
 # Determine number of names for each condition.
 condition_names <- list()
 for (i in 1:length(conditions)) {
@@ -97,13 +98,13 @@ print('# Creating Sleuth object.')
 so <- sleuth_prep(s2c, target_mapping = t2g, extra_bootstrap_summary = TRUE)
 
 # Fit reduced model.
-print('# Fitting reduced model.')
-if (length(conditions) == 1) {
-  condition <- '~1'
-} else {
-  condition <- paste('~', conditions[1], sep='')
-}
-so <- sleuth_fit(so, eval(parse(text=condition)), 'reduced')
+# print('# Fitting reduced model.')
+# if (length(conditions) == 1) {
+#   condition <- '~1'
+# } else {
+#   condition <- paste('~', conditions[1], sep='')
+# }
+# so <- sleuth_fit(so, eval(parse(text=condition)), 'reduced')
 
 # Fit full model.
 print('# Fitting full model.')
@@ -112,13 +113,11 @@ if (length(conditions) == 1) {
 } else {
   condition <- paste('~', conditions[1], '+', conditions[2], sep='')
 }
-so <- sleuth_fit(so, eval(parse(text=condition)), 'full')
+so <- sleuth_fit(so, eval(parse(text=condition)), fit_name='full')
 
 models(so)
 
-print('# Performing likelihood ratio test.')
-so <- sleuth_lrt(so, 'reduced', 'full')
-
+print('# Performing Wald tests.')
 for (i in 1:length(conditions)) {
   condition <- conditions[i]
   condition_name <- condition_names[[i]]
@@ -130,33 +129,39 @@ for (i in 1:length(conditions)) {
 
     print(paste('# Computing wald test on condition ', condition, ':', name,
                 sep=''))
-    so <- sleuth_wt(so, which_beta=paste(condition, name, sep=''),
-                    which_model='full')
-  }
-}
+    beta = paste(condition, name, sep='')
+    so <- sleuth_wt(so, which_beta=beta, which_model='full')
 
-
-print('# Writing likelihood ratio test sleuth table.')
-sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all=FALSE)
-write.csv(sleuth_table, paste(output_dir, 'sleuth_table_lrt.csv', sep='/'))
-for (i in 1:length(conditions)) {
-  condition <- conditions[i]
-  condition_name <- condition_names[[i]]
-
-  for (name in condition_name) {
-    if (startsWith(name, 'a_')) {
-      next
-    }
-
-    print(paste('# Writing Wald test sleuth table for ', condition, ':', name,
-                sep=''))
-    results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full',
-                                    test_type='wt', show_all=FALSE)
+    # Write results.
+    results_table <- sleuth_results(so, beta, 'full', test_type='wt')
     output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv',
                         sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
+
+
+# print('# Writing likelihood ratio test sleuth table.')
+# sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all=FALSE)
+# write.csv(sleuth_table, paste(output_dir, 'sleuth_table_lrt.csv', sep='/'))
+# for (i in 1:length(conditions)) {
+#   condition <- conditions[i]
+#   condition_name <- condition_names[[i]]
+#
+#   for (name in condition_name) {
+#     if (startsWith(name, 'a_')) {
+#       next
+#     }
+#
+#     print(paste('# Writing Wald test sleuth table for ', condition, ':', name,
+#                 sep=''))
+#     results_table <- sleuth_results(so, paste(condition, name, sep=''), 'full',
+#                                     test_type='wt', show_all=FALSE)
+#     output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv',
+#                         sep='')
+#     write.csv(results_table, paste(output_dir, output_file, sep='/'))
+#   }
+# }
 
 print('#Writing sleuth object.')
 so_file = paste(output_dir, 'so.rds', sep='/')

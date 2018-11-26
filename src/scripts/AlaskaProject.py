@@ -107,11 +107,11 @@ class AlaskaProject(Alaska):
                 path = '{}/{}/{}'.format(Alaska.ROOT_PATH, root, fname)
                 folder = root.replace(self.raw_dir, '')
                 filename = fname
-                size = os.path.getsize(path) / (1024 ** 2)
+                size = os.path.getsize(path)
                 read = {
                     'folder': folder,
                     'filename': fname,
-                    'size': '{} MB'.format(round(size, 1)),
+                    'size': '{} bytes'.format(size),
                     'path': path
                 }
                 reads.append(read)
@@ -171,7 +171,7 @@ class AlaskaProject(Alaska):
                     md5 = None
 
                     read = {}
-                    read['size'] = round(size / (1024 ** 2), 1)
+                    read['size'] = size
                     read['md5'] = md5
 
                     reads[path] = read
