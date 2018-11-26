@@ -1902,7 +1902,7 @@ class AlaskaServer(Alaska):
         ports = {
             42427: port
         }
-        cmd = 'Rscript {} --args --alaska'.format(Alaska.SHI_SCRIPT)
+        cmd = 'Rscript {} --args alaska'.format(Alaska.SHI_SCRIPT)
         ###############################
 
         cont = AlaskaDocker(Alaska.DOCKER_SLEUTH_TAG)
