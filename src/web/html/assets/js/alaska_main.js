@@ -5193,8 +5193,6 @@ $(document).ready(function() {
         console.log('testing: true');
         testing = true;
       }
-      // Enable all testing elements.
-      $('.testing').show();
     }
     // If we are given an id, we need to resume where we left off with that
     // project.
@@ -5205,5 +5203,7 @@ $(document).ready(function() {
       get_proj_status();
     }
   }
-
+  
+  // Enable all testing elements.
+  $('.testing').show();
 });
