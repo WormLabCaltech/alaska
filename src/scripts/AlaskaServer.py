@@ -1423,7 +1423,8 @@ class AlaskaServer(Alaska):
             orgs[genus] = {}
 
             for species, org in item.items():
-                orgs[genus][species] = list(org.refs.keys())
+                orgs[genus][species] = sorted(list(org.refs.keys()),
+                                              reverse=True)
 
         # dump as a json list
         self.respond(_id, json.dumps(orgs, indent=4))
