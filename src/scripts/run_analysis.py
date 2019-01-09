@@ -255,12 +255,19 @@ def run_qc(proj, nthreads):
         # define necessary variables
         name = proj['samples'][_id]['name']
         path = '1_qc/{}'.format(name)
-        org = proj['samples'][_id]['organism'].split('_')
-        ver = str(proj['samples'][_id]['ref_ver'])
-        bed_path = '/alaska/root/organisms/{}/{}/{}/reference'.format(org[0], org[1], ver)
-        bed_path += '/{}_{}_{}.bed'.format(org[0][0], org[1], ver)
-        bt2_idx = '{}_{}_{}'.format(org[0][0], org[1], ver)
-        bt2_path = '/alaska/root/organisms/{}/{}/{}/index/{}'.format(org[0], org[1], ver, bt2_idx)
+        org = proj['samples'][_id]['organism']
+        genus = org['genus']
+        species = org['species']
+        version = org['version']
+        bed_path = '/alaska/root/organisms/{}/{}/{}/reference'.format(genus,
+                                                                      species,
+                                                                      version)
+        bed_path += '/{}_{}_{}.bed'.format(genus[0], species, version)
+        bt2_idx = '{}_{}_{}'.format(genus[0], species, version)
+        bt2_path = '/alaska/root/organisms/{}/{}/{}/index/{}'.format(genus,
+                                                                     species,
+                                                                     version,
+                                                                     bt2_idx)
 
         # Align with bowtie2
         if (proj['samples'][_id]['type'] == 1):
@@ -343,10 +350,14 @@ def run_kallisto(proj, nthreads):
         args = ['kallisto', 'quant']
 
         # first find the index
-        org = proj['samples'][_id]['organism'].split('_')
-        ver = str(proj['samples'][_id]['ref_ver'])
-        idx_path = '/alaska/root/organisms/{}/{}/{}/index'.format(org[0], org[1], ver)
-        idx_path += '/{}_{}_{}.idx'.format(org[0][0], org[1], ver)
+        org = proj['samples'][_id]['organism']
+        genus = org['genus']
+        species = org['species']
+        version = org['version']
+        idx_path = '/alaska/root/organisms/{}/{}/{}/index'.format(genus,
+                                                                  species,
+                                                                  version)
+        idx_path += '/{}_{}_{}.idx'.format(genus[0], species, version)
         args += ['-i', idx_path]
 
         # find the output directory

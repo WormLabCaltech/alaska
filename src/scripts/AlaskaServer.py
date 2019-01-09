@@ -1418,15 +1418,15 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
-        orgs = []
+        orgs = {}
         for genus, item in self.organisms.items():
+            orgs[genus] = {}
+
             for species, org in item.items():
-                for ref in org.refs:
-                    name = '{}_{}'.format(org.full, ref)
-                    orgs.append(name)
+                orgs[genus][species] = list(org.refs.keys())
 
         # dump as a json list
-        self.respond(_id, json.dumps(sorted(orgs), indent=4))
+        self.respond(_id, json.dumps(orgs, indent=4))
 
         if close:
             self.close(_id)

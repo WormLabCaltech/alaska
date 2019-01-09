@@ -36,8 +36,9 @@ class AlaskaSample(Alaska):
         self.name = name
         self.type = 1       # 1: single-end, 2: pair-end
         self.pairs = []
-        self.organism = ''
-        self.ref_ver = ''   # kallisto index for this sample
+        self.organism = {'genus'  : None,
+                         'species': None,
+                         'version': None}
         self.length = 0     # used for single-end
         self.stdev = 0      # used for single-end
         self.bootstrap_n = 100  # number of bootstraps to perform

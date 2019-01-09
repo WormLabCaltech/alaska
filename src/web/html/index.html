@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html style="background-color:#3f6075;">
 
+<!--HTML HEADER-->
+<!--TODO: Consolidate and comment these later. Remove unused imports.-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -593,9 +595,15 @@
                         <label for="sample_share_organism" class="col-form-label">Organism</label>
                         <small id="sample_share_organism_help" class="form-text text-muted">Please select the reference organism.</small>
                     </div>
-                    <div class="col-sm-5">
-                        <select class="custom-select sample_organism_select" id="sample_share_organism" required>
-                            <option selected disabled hidden value="">Please select an organism.</option>
+                    <div class="col d-flex sample_organism_inputs">
+                        <select class="custom-select mr-2 col-sm-4">
+                            <option selected hidden disabled>Genus</option>
+                        </select>
+                        <select class="custom-select mr-2 col-sm-4" disabled>
+                            <option selected hidden disabled>Species</option>
+                        </select>
+                        <select class="custom-select mr-3 col-sm-2" disabled>
+                            <option selected hidden disabled>Version</option>
                         </select>
                     </div>
                 </div>
@@ -663,7 +671,8 @@
                     </div>
                     <div class="col-sm-3 pl-0">
                         <legend class="col-form-label">Misc. characteristics</legend>
-                        <small id="sample_share_characteristics_help" class="form-text text-muted">Additional shared characteristics.</small>
+                        <small id="sample_share_characteristics_help" class="form-text text-muted">Additional shared characteristics. Input additional
+                        sample characteristics that are shared by all samples and have not been mentioned above.</small>
                     </div>
                     <div id="sample_share_characteristics" class="col sample_characteristics_inputs">
                         <div class="d-flex">
@@ -850,7 +859,10 @@
                         </div>
                     </div>
                     <div class="card mb-4 sample_specific_card">
-                        <h5 class="card-header alert-dark">Sample-specific Metadata</h5>
+                        <div class="card-header alert-dark">
+                            <h5>Sample-specific Metadata</h5>
+                            <small class="form-text text-muted">Fields shown here are specific for each sample. These are fields that are NOT checked in the above Common Metadata Form.</small>
+                        </div>
                         <div class="card-body">
                             <form novalidate class="sample_specific_form">
                                 <div class="form-group row sample_specific_characteristics_group">
@@ -883,6 +895,7 @@
                         <div class="card-header alert-dark">
                             <h5 class="d-inline">Common Metadata</h5>
                             <button class="btn btn-secondary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#sample_share_collapse_SAMPLEID">Show / Hide</button>
+                            <small class="form-text text-muted">Fields shown here are direct copies of the checked fields in the above Common Metadata Form.</small>
                         </div>
                         <div class="collapse" id="sample_share_collapse_SAMPLEID">
                             <div class="card-body">

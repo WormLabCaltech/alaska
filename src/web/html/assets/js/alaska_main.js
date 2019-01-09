@@ -1085,32 +1085,125 @@ function set_sample_name_input(proj) {
 }
 
 /**
+ * Sets the organisms inputs listeners.
+ */
+function set_organisms_inputs_listeners(organisms, genus_select, species_select,
+                                        version_select) {
+  // Set input listener for the genus select, so that if the genus is
+  // changed, the species select is enabled/disabled accordingly.
+  genus_select.change({
+    'organisms': organisms,
+    'species_select': species_select
+  }, function(e) {
+    var select = $(this);
+    var organisms = e.data.organisms;
+    var species_select = e.data.species_select;
+
+    // Get currently selected genus.
+    var genus = select.val();
+
+    // If the selected genus is not null or empty, set the species select.
+    if (genus != null && genus != '' && genus in organisms) {
+      // Enable the select.
+      species_select.prop('disabled', false);
+
+      // Remove all elements already in the select.
+      species_select.children('option:not(:disabled)').remove();
+
+      // Then, add the correct elements.
+      for (var species in organisms[genus]) {
+        var option = $('<option>', {text: species});
+        species_select.append(option);
+      }
+    } else {
+      // Otherwise, disable the species select.
+      species_select.prop('disabled', true);
+    }
+
+    // Reset choice.
+    species_select.children('option:disabled').prop('selected', true);
+
+    // Fire change on species select.
+    // species_select.change()
+  });
+
+  // Set input listener for the version select, so that if the species is changed,
+  // the version select is enabled/disabled accordingly.
+  species_select.change({
+    'organisms': organisms,
+    'genus_select': genus_select,
+    'version_select': version_select
+  }, function(e) {
+    var select = $(this);
+    var organisms = e.data.organisms;
+    var genus_select = e.data.genus_select;
+    var version_select = e.data.version_select;
+
+    // Get currently selected genus.
+    var genus = genus_select.val();
+    var species = select.val();
+
+    // If the selected genus is not null or empty, set the species select.
+    if (genus != null && genus != '' && genus in organisms
+        && species != null && species != '' && species in organisms[genus]) {
+      // Enable the select.
+      version_select.prop('disabled', false);
+
+      // Remove all elements already in the select.
+      version_select.children('option:not(:disabled)').remove();
+
+      // Then, add the correct elements.
+      for (var i = 0; i < organisms[genus][species].length; i++) {
+        var version = organisms[genus][species][i]
+        var option = $('<option>', {text: version});
+        version_select.append(option);
+      }
+    } else {
+      // Otherwise, disable the species select.
+      version_select.prop('disabled', true);
+    }
+
+    // Reset choice.
+    version_select.children('option:disabled').prop('selected', true);
+  });
+}
+
+/**
  * Populates the given select with the global organisms variable.
  */
-function populate_organisms_select(select, organisms) {
-  for (var i = 0; i < organisms.length; i++) {
-    var option = $('<option>', {text: organisms[i]});
-    select.append(option);
+function populate_organisms_inputs(inputs, organisms) {
+  // Extract genus, species, and version selects.
+  var genus_select = inputs.children('select:nth-of-type(1)');
+  var species_select = inputs.children('select:nth-of-type(2)');
+  var version_select = inputs.children('select:nth-of-type(3)');
+
+  // Add all the genus's to the genus select.
+  for (var genus in organisms) {
+    var option = $('<option>', {text: genus});
+    genus_select.append(option);
   }
+
+  set_organisms_inputs_listeners(organisms, genus_select, species_select,
+                                      version_select);
 }
 
 /**
  * Sets the internal list of available organisms.
  */
-function set_organisms_select(select, cb) {
+function set_organisms_select(inputs, cb) {
   var target = 'cgi_request.php';
   var data = {
     action: 'get_organisms'
   };
   if (typeof cb === 'function') {
-    function callback(out, select, cb) {
-      parse_organisms(out, select);
+    function callback(out, inputs, cb) {
+      parse_organisms(out, inputs);
       cb();
     }
-    send_ajax_request(target, data, callback, true, select, cb);
+    send_ajax_request(target, data, callback, true, inputs, cb);
   } else {
     var callback = parse_organisms;
-    send_ajax_request(target, data, callback, true, select);
+    send_ajax_request(target, data, callback, true, inputs);
   }
 }
 
@@ -1702,6 +1795,97 @@ function set_values_of_fluid_rows(div, vals) {
   }
 }
 
+/**
+ * Gets values from organisms dropdowns as a dictionary of genus, species, and
+ * version.
+ */
+function get_values_from_organism_dropdowns(div) {
+  var inputs = div.find('.sample_organism_inputs');
+  var genus_select = inputs.children('select:nth-of-type(1)');
+  var species_select = inputs.children('select:nth-of-type(2)');
+  var version_select = inputs.children('select:nth-of-type(3)');
+
+  // Get values.
+  var genus = genus_select.val();
+  var species = species_select.val();
+  var version = version_select.val();
+
+  // Construct dictionary.
+  var organism = {
+    'genus': genus,
+    'species': species,
+    'version': version
+  };
+
+  return organism;
+}
+
+/**
+ * Sets values of organism dropdowns.
+ */
+function set_values_of_organism_dropdowns(div, vals) {
+  var inputs = div.find('.sample_organism_inputs');
+  var genus_select = inputs.children('select:nth-of-type(1)');
+  var species_select = inputs.children('select:nth-of-type(2)');
+  var version_select = inputs.children('select:nth-of-type(3)');
+
+  // Get values.
+  var genus = vals.genus;
+  var species = vals.species;
+  var version = vals.version;
+
+  // Set genus dropdown.
+  var found = false;
+  var options = genus_select.children('option:not(:disabled)');
+  if (genus == null || genus == '') {
+    genus_select.children('option:disabled').prop('selected', true);
+  } else {
+    options.each(function () {
+      var option = $(this);
+      var this_val = option.val();
+
+      if (genus == this_val) {
+        option.prop('selected', true);
+        return false;
+      }
+    });
+  }
+  genus_select.change();
+
+  // Set species dropdown.
+  var options = species_select.children('option:not(:disabled)');
+  if (species == null || species == '') {
+    species_select.children('option:disabled').prop('selected', true);
+  } else {
+    options.each(function () {
+      var option = $(this);
+      var this_val = option.val();
+
+      if (species == this_val) {
+        option.prop('selected', true);
+        return false;
+      }
+    });
+  }
+  species_select.change();
+
+  // Set version dropdown.
+  var options = version_select.children('option:not(:disabled)');
+  if (version == null || version == '') {
+    version_select.children('option:disabled').prop('selected', true);
+  } else {
+    options.each(function () {
+      var option = $(this);
+      var this_val = option.val();
+
+      if (version == this_val) {
+        option.prop('selected', true);
+        return false;
+      }
+    });
+  }
+  version_select.change();
+}
 
 
 /**
@@ -1925,6 +2109,7 @@ function set_proj_meta_input() {
  */
 function enable_disable_row(checkbox) {
     var form_group = checkbox.parent().parent().parent();
+    var class_name = get_custom_class(form_group);
 
     var inputs = form_group.find('input:not(:checkbox)');
     var textareas = form_group.find('textarea');
@@ -1937,7 +2122,9 @@ function enable_disable_row(checkbox) {
       textareas.prop('disabled', false);
       selects.prop('disabled', false);
       // Then, fire change event for selects.
-      selects.change();
+      if (class_name != 'sample_organism_group') {
+        selects.change();
+      }
       buttons.prop('disabled', false);
     } else {
       // Disable everything.
@@ -1991,12 +2178,14 @@ function remove_from_form(form_group, from_form_class_name) {
 function copy_to_form(form_group, to_form_class_name, disable) {
   var class_name = get_custom_class(form_group);
   var index = common_meta_order.indexOf(class_name);
+  var select = form_group.find('select');
 
   // If there is a select, we must save the select values.
-  var select = form_group.find('select').eq(0);
-  if (select.length > 0) {
-    var selected = select.children('option:selected').val();
-  }
+  // var selects = form_group.find('select');
+  // var selected = [];
+  // selects.each(function () {
+  //   selected.push($(this).val());
+  // });
 
   for (var id in sample_forms) {
     var form = sample_forms[id];
@@ -2028,9 +2217,49 @@ function copy_to_form(form_group, to_form_class_name, disable) {
     copy.children('div:first').removeClass('pl-0');
     copy.find('input,select,button,textarea').prop('disabled', disable);
 
-    // Deal with select.
-    var copy_select = copy.find('select').eq(0);
-    if (copy_select.length > 0) {
+    // Select the correct organism.
+    if (class_name == 'sample_organism_group') {
+      var group_name = common_meta_classes_to_functions[class_name];
+      var input = getters_and_setters[group_name].get(form_group)
+
+      var genus_select = copy.find('select:nth-of-type(1)');
+      var species_select = copy.find('select:nth-of-type(2)');
+      var version_select = copy.find('select:nth-of-type(3)');
+
+      // Set input listeners.
+      set_organisms_inputs_listeners(organisms, genus_select, species_select,
+                                      version_select);
+
+      genus_select.children('option:not(:disabled)').each(function () {
+        var option = $(this);
+        var this_val = option.val();
+
+        if (input.genus == this_val) {
+          option.prop('selected', true);
+          return false;
+        }
+      });
+      species_select.children('option:not(:disabled)').each(function () {
+        var option = $(this);
+        var this_val = option.val();
+
+        if (input.species == this_val) {
+          option.prop('selected', true);
+          return false;
+        }
+      });
+      version_select.children('option:not(:disabled)').each(function () {
+        var option = $(this);
+        var this_val = option.val();
+
+        if (input.version == this_val) {
+          option.prop('selected', true);
+          return false;
+        }
+      });
+    } else if (select.length > 0) {
+      var selected = select.val();
+      var copy_select = copy.find('select');
       var options = copy_select.children('option:not(:disabled)');
       options.each(function () {
         var option = $(this);
@@ -2040,6 +2269,19 @@ function copy_to_form(form_group, to_form_class_name, disable) {
         }
       });
     }
+
+    // Deal with select.
+    // var copy_selects = copy.find('select');
+    // copy_selects.each(function (index, value) {
+    //   var options = $(this).children('option:not(:disabled)');
+    //   options.each(function () {
+    //     var option = $(this);
+    //     if (option.val() == selected) {
+    //       option.prop('selected', true);
+    //       return false;
+    //     }
+    //   });
+    // });
 
     // If this is a read type class, we have to do some additional work.
     if (class_name == 'sample_read_type_group') {
@@ -2199,7 +2441,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       }
     }
 
-    if (!disable) {
+    if (!disable && class_name != 'sample_organism_group') {
       copy.find('select').change();
     }
   }
@@ -2313,7 +2555,7 @@ function set_common_checkboxes(form) {
  * individual input forms.
  */
 function set_shared_inputs(form, cb) {
-  var organism_select = form.find('.sample_organism_select');
+  var organism_inputs = form.find('.sample_organism_inputs');
   var lifestage_dropdown = form.find('.sample_life-stage_inputs');
   var tissue_dropdown = form.find('.sample_tissue_inputs');
   var chars_inputs = form.find('.sample_characteristics_inputs');
@@ -2322,7 +2564,7 @@ function set_shared_inputs(form, cb) {
   var sequenced_molecules_dropdown = form.find('.sample_sequenced_molecules_'
                                                + 'inputs');
 
-  set_organisms_select(organism_select, cb);
+  set_organisms_select(organism_inputs, cb);
   set_custom_dropdown(lifestage_dropdown, life_stages);
   set_custom_dropdown(tissue_dropdown, tissues);
   set_fluid_input_rows(chars_inputs);
@@ -2345,8 +2587,22 @@ function set_common_meta_input(cb) {
   common_form = $('#sample_common_form');
   var form = common_form.children('form');
 
+  // Construct new callback function so that the dropdowns to select organism
+  // fires change for genus/species/version before change for copying the
+  // field to sample meta.
+  if (typeof cb == 'function') {
+    function callback() {
+      set_common_checkboxes(form);
+      cb();
+    }
+  } else {
+    function callback() {
+      set_common_checkboxes(form);
+    }
+  }
+
   // Set shared inputs.
-  set_shared_inputs(form, cb);
+  set_shared_inputs(form, callback);
 
   // All samples must have even number of reads for the paired-end radio
   // to be active.
@@ -2361,9 +2617,6 @@ function set_common_meta_input(cb) {
   if (!even) {
     form.find('input:radio[value=2]').prop('disabled', true);
   }
-
-  // Set checkboxes.
-  set_common_checkboxes(form);
 
   // Set save & apply button.
   common_form.find('.save_btn').click(function () {
@@ -2800,6 +3053,10 @@ var getters_and_setters = {
   read_type: {
     get: get_values_from_read_type,
     set: set_values_of_read_type
+  },
+  organism: {
+    get: get_values_from_organism_dropdowns,
+    set: set_values_of_organism_dropdowns
   }
 };
 var proj_meta_classes_to_functions = {
@@ -2817,7 +3074,7 @@ var common_meta_classes_to_functions = {
   sample_rna_extraction_group: 'group_textarea',
   sample_library_preparation_group: 'group_textarea',
   sample_miscellaneous_group: 'group_textarea',
-  sample_organism_group: 'group_dropdown',
+  sample_organism_group: 'organism',
   sample_organism_strain_group: 'group_textbox',
   'sample_life-stage_group': 'group_custom_dropdown',
   sample_tissue_group: 'group_custom_dropdown',
@@ -3082,7 +3339,6 @@ function validate_common_meta_inputs(inputs, common_form) {
         case 'sample_growth_conditions_group':
         case 'sample_rna_extraction_group':
         case 'sample_library_preparation_group':
-        case 'sample_organism_group':
         case 'sample_life-stage_group':
         case 'sample_tissue_group':
         case 'sample_sequenced_molecules_group':
@@ -3092,6 +3348,16 @@ function validate_common_meta_inputs(inputs, common_form) {
             valid = false;
             failed_fields[class_name].push('Can not be empty or blank.');
           }
+          break;
+
+        case 'sample_organism_group':
+          if (val.genus == null || val.genus == '' || val.species == null
+              || val.species == '' || val.version == null
+              || val.version == '') {
+              form_inputs.addClass('is-invalid');
+              valid = false;
+              faild_filds[class_name].push('Organism must be selected completely.');
+            }
           break;
 
         case 'sample_read_type_group':
@@ -3596,14 +3862,7 @@ function convert_sample_meta_inputs(card) {
         break;
 
       case 'sample_organism_group':
-        var split = input.split('_');
-
-        if (split.length >= 3) {
-          var organism = split[0] + '_' + split[1];
-          var ref_ver = split.slice(2).join('_');
-          obj['organism'] = organism;
-          obj['ref_ver'] = ref_ver;
-        }
+        obj['organism'] = input;
         break;
 
       case 'sample_organism_strain_group':
@@ -3639,6 +3898,7 @@ function convert_sample_meta_inputs(card) {
         break;
     }
   }
+
   return obj;
 }
 
@@ -4619,15 +4879,15 @@ function parse_infer_samples(out, button, spinner, width) {
   }
 }
 
-function parse_organisms(out, select) {
-  var split = out.split('[');
-  var split2 = split[1].split(']');
-  var dump = '[' + split2[0] + ']';
+function parse_organisms(out, inputs) {
+  var split = out.substring(out.indexOf('{'));
+  var split2 = split.split('END');
+  var dump = split2[0];
 
-  var organisms = JSON.parse(dump);
+  organisms = JSON.parse(dump);
 
   // Set the dropdowns.
-  populate_organisms_select(select, organisms);
+  populate_organisms_inputs(inputs, organisms);
 }
 
 function parse_read_proj(out) {
@@ -4737,7 +4997,7 @@ function parse_sleuth_server(out, btn, spinner, width) {
   }
 
   if (out.includes('already open')) {
-    open_sleuth_window(port, btn, spinner, width);
+    setTimeout(open_sleuth_window, 1500, port, btn, spinner, width);
   } else {
     setTimeout(open_sleuth_window, 8000, port, btn, spinner, width);
   }
@@ -4787,7 +5047,6 @@ var current_sample_form;
 var sample_forms = {};
 var names_to_ids;
 var sorted_names;
-var organisms;
 var import_export_dropdown;
 var proj_contributor_fields = [];
 var proj_factor_0_fields = [];
@@ -4941,7 +5200,11 @@ var test_common_inputs = {
     "sample_rna_extraction_group": "shared rna extraction",
     "sample_library_preparation_group": "shared library prep",
     "sample_miscellaneous_group": "shared misc",
-    "sample_organism_group": "caenorhabditis_elegans_235",
+    "sample_organism_group": {
+      'genus': 'caenorhabditis',
+      'species': 'elegans',
+      'version': '266'
+    },
     "sample_organism_strain_group": "shared strain",
     "sample_life-stage_group": "Young Adult",
     "sample_tissue_group": "Whole Organism (Multi-worm)",
@@ -4990,7 +5253,11 @@ var test_samples_inputs = {
       "sample_rna_extraction_group": "shared rna extraction",
       "sample_library_preparation_group": "shared library prep",
       "sample_miscellaneous_group": "shared misc",
-      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_group": {
+        'genus': 'caenorhabditis',
+        'species': 'elegans',
+        'version': '266'
+      },
       "sample_organism_strain_group": "shared strain",
       "sample_life-stage_group": "Young Adult",
       "sample_tissue_group": "Whole Organism (Multi-worm)",
@@ -5033,7 +5300,11 @@ var test_samples_inputs = {
       "sample_rna_extraction_group": "shared rna extraction",
       "sample_library_preparation_group": "shared library prep",
       "sample_miscellaneous_group": "shared misc",
-      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_group": {
+        'genus': 'caenorhabditis',
+        'species': 'elegans',
+        'version': '266'
+      },
       "sample_organism_strain_group": "shared strain",
       "sample_life-stage_group": "Young Adult",
       "sample_tissue_group": "Whole Organism (Multi-worm)",
@@ -5080,7 +5351,11 @@ var test_samples_inputs = {
       "sample_rna_extraction_group": "shared rna extraction",
       "sample_library_preparation_group": "shared library prep",
       "sample_miscellaneous_group": "shared misc",
-      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_group": {
+        'genus': 'caenorhabditis',
+        'species': 'elegans',
+        'version': '266'
+      },
       "sample_organism_strain_group": "shared strain",
       "sample_life-stage_group": "Young Adult",
       "sample_tissue_group": "Whole Organism (Multi-worm)",
@@ -5127,7 +5402,11 @@ var test_samples_inputs = {
       "sample_rna_extraction_group": "shared rna extraction",
       "sample_library_preparation_group": "shared library prep",
       "sample_miscellaneous_group": "shared misc",
-      "sample_organism_group": "caenorhabditis_elegans_235",
+      "sample_organism_group": {
+        'genus': 'caenorhabditis',
+        'species': 'elegans',
+        'version': '266'
+      },
       "sample_organism_strain_group": "shared strain",
       "sample_life-stage_group": "Young Adult",
       "sample_tissue_group": "Whole Organism (Multi-worm)",
@@ -5203,7 +5482,7 @@ $(document).ready(function() {
       get_proj_status();
     }
   }
-  
+
   // Enable all testing elements.
   $('.testing').show();
 });
