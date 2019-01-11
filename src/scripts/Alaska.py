@@ -103,7 +103,7 @@ class Alaska():
     DOCKER_FTP_TAG = 'ftpd_server'
 
     # FTP root path
-    FTP_ROOT_PATH = '/home/ftpusers/alaska_data_volume'
+    FTP_ROOT_PATH = '/alaska/root'
 
     # TESTING VARIABLES
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
