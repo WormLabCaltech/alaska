@@ -100,7 +100,7 @@ class Alaska():
     DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest'
     DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest'
     DOCKER_SERVER_TAG = 'alaska_server'
-    DOCKER_FTP_TAG = 'ftpd_server'
+    DOCKER_FTP_TAG = 'alaska_ftp'
 
     # FTP root path
     FTP_ROOT_PATH = '/alaska/root'
