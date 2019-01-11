@@ -936,12 +936,11 @@ class AlaskaServer(Alaska):
             pw = self.rand_str(Alaska.FTP_PW_L)
 
             cmd = ('/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m '
-                   + '-u ftpuser -d {}'
+                   + '-u ftpuser -d /alaska/root/'
                    + '{}/{}/{}"').format(pw, pw, _id,
                                          Alaska.PROJECTS_DIR,
                                          _id,
-                                         Alaska.RAW_DIR,
-                                         Alaska.FTP_ROOT_PATH)
+                                         Alaska.RAW_DIR)
             out = ftp.exec_run(cmd)
             exit_code = out[0]
             if exit_code != 0:
@@ -1803,9 +1802,8 @@ class AlaskaServer(Alaska):
                                          + 'running').format(
                                          Alaska.DOCKER_FTP_TAG))
 
-                cmd = 'pure-pw usermod {} -d {}/{}/{}'.format(
+                cmd = 'pure-pw usermod {} -d /alaska/root/{}/{}'.format(
                       _id,
-                      Alaska.FTP_ROOT_PATH,
                       Alaska.PROJECTS_DIR,
                       _id)
                 out = ftp.exec_run(cmd)
