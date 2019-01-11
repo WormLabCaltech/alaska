@@ -28,6 +28,7 @@ DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
 # Port mappings & networking.
 DOCKER_CGI_PORT="80:80"
 DOCKER_FTP_PORT="21:21"
+DOCKER_FTP_PORTS="30000-30009:30000-30009"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
