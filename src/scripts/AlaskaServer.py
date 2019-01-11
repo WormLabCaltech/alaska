@@ -1802,9 +1802,8 @@ class AlaskaServer(Alaska):
                                          + 'running').format(
                                          Alaska.DOCKER_FTP_TAG))
 
-                cmd = 'pure-pw usermod {} -d /home/ftpusers/{}/{}/{}'.format(
+                cmd = 'pure-pw usermod {} -d /alaska/root/{}/{}'.format(
                       _id,
-                      Alaska.DOCKER_DATA_VOLUME,
                       Alaska.PROJECTS_DIR,
                       _id)
                 out = ftp.exec_run(cmd)
