@@ -936,7 +936,7 @@ class AlaskaServer(Alaska):
             pw = self.rand_str(Alaska.FTP_PW_L)
 
             cmd = ('/bin/bash -c "(echo {}; echo {}) | pure-pw useradd {} -m '
-                   + '-u ftpuser -d "{}/{}/{}/{}"').format(pw, pw, _id,
+                   + '-u ftpuser -d {}/{}/{}/{}"').format(pw, pw, _id,
                                          Alaska.FTP_ROOT_PATH,
                                          Alaska.PROJECTS_DIR,
                                          _id,
