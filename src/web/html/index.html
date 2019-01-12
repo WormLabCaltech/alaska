@@ -1308,9 +1308,10 @@
         <h5 class="card-header">2. Preparing your reads for upload</h5>
         <div class="card-body">
             <p class="card-text">Alaska accepts <mark><code>.fastq</code></mark> or <mark><code>.fastq.gz</code></mark> files in both compressed or non-compressed folders. The recommended compression format for folders is <mark><code>.tar.gz</code></mark>. For more information on supported formats, please check our FAQ page <a class="text-warning" href="faq.html#faq_extensions" target="_blank">here</a>.</p>
+            <p class="card-text"><strong>Please make sure your samples are in one of the supported directory structures!</strong></p>
             <p class="card-text text-center">
                 <!--See example button trigger for modal-->
-                <button id="read_example_btn" class="btn btn-warning mt-2" type="button" data-toggle="modal" data-target="#read_example_modal">See examples</button>
+                <button id="read_example_btn" class="btn btn-warning mt-2" type="button" data-toggle="modal" data-target="#read_example_modal">View supported structures</button>
             </p>
             <!--Read example modal-->
             <div class="modal fade" id="read_example_modal" tabindex="-1" role="dialog">
@@ -1416,7 +1417,9 @@
             <p class="card-text">When you reach this step, click the button below for details on how to upload.</p>
             <p class="card-text text-center">
                 <!--FTP button trigger for modal-->
-                <button id="ftp_info_btn" class="btn btn-danger mt-2" type="button" data-toggle="modal" data-target="#ftp_info_modal">View FTP details</button>
+                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="Please view the supported directory structures first.">
+                    <button id="ftp_info_btn" class="btn btn-danger mt-2" type="button" data-toggle="modal" data-target="#ftp_info_modal" style="pointer-events: none;" disabled>View FTP info</button>
+                </span>
             </p>
             <!--FTP modal-->
             <div class="modal fade" id="ftp_info_modal" tabindex="-1" role="dialog">
@@ -1462,8 +1465,13 @@
                         <polyline class="path check" fill="none" stroke="#97e570" stroke-width="14" stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 "/>
                     </svg>
                 </div>
-            </button></p>
-            <p class="card-text text-center"><button id="fetch_reads_btn" class="btn btn-primary mt-2" type="button">Fetch reads</button></p>
+            </button>
+          </p>
+          <p class="card-text text-center">
+              <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="Please view FTP info first.">
+                  <button button id="fetch_reads_btn" class="btn btn-primary mt-2" type="button" style="pointer-events: none;" disabled>Fetch reads</button>
+              </span>
+          </p>
         </div>
     </div>
 </div></div>
