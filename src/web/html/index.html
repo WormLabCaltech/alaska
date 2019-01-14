@@ -349,13 +349,13 @@
                 </div>
                 <div class="col contributors_inputs">
                     <div class="d-flex contributor_row">
-                        <input type="text" class="form-control col-sm-3 mr-2" required>
-                        <button class="btn btn-primary" type="button">Add</button>
+                        <input type="text" class="form-control col-sm-4 mr-2" placeholder="Input contributor here" required>
+                        <button class="btn btn-primary" data-toggle="tooltip" data-trigger="manual" data-placement="top" title="You can't add a blank contributor." type="button">Add this contributor</button>
                     </div>
                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
                     <div class="collapse mt-1 contributor_row" style="display:none">
-                        <input type="text" class="form-control col-sm-3 mr-2">
-                        <button class="btn btn-danger" type="button">Remove</button>
+                        <input type="text" class="form-control col-sm-4 mr-2" readonly>
+                        <button class="btn btn-danger" type="button">Remove this contributor</button>
                     </div>
                 </div>
             </div>
@@ -396,7 +396,7 @@
                                         <option selected hidden disabled>Please select.</option>
                                     </select>
                                     <div class="pl-0 col-sm-6">
-                                        <input type="text" class="form-control" disabled>
+                                        <input type="text" class="form-control" placeholder="If &#34;other&#34; selected." disabled>
                                     </div>
                                 </div>
 
@@ -404,19 +404,16 @@
                             <div class="form-group row factor_values_group">
                                 <div class="col-sm-4">
                                     <legend class="col-form-label">Factor Values<span class="text-danger">*</span></legend>
-                                    <small class="form-text text-muted">e.g. If 'Life-Stage' was selected as the Name above, and you uploaded reads from L1 and L2 animals, you would input 'L1' and 'L2' into these fields. Please see FAQ if you have more than 2 values.</small>
+                                    <small class="form-text text-muted">e.g. If 'Life-Stage' was selected as the Name above, and you uploaded reads from L1 and L2 animals, you would input 'L1' and 'L2' into these fields. You MUST have at least two factor values.</small>
                                 </div>
                                 <div class="col factor_values_inputs">
                                     <div class="d-flex factor_values_row">
-                                        <input type="text" class="form-control col-sm-6 mr-2" required>
-                                        <button class="btn btn-primary" type="button">Add value</button>
-                                    </div>
-                                    <div class="d-flex mt-1 factor_values_row">
-                                        <input type="text" class="form-control col-sm-6 mr-2" required>
+                                        <input type="text" class="form-control col-sm-6 mr-2" placeholder="Input value here" required>
+                                        <button class="btn btn-primary" data-toggle="tooltip" data-trigger="manual" data-placement="top" title="You can't add a blank value." type="button">Add value</button>
                                     </div>
                                     <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
                                     <div class="mt-1 collapse factor_values_row" style="display:none">
-                                        <input type="text" class="form-control col-sm-6 mr-2">
+                                        <input type="text" class="form-control col-sm-6 mr-2" readonly>
                                         <button class="btn btn-danger" type="button">Remove</button>
                                     </div>
                                 </div>
@@ -638,7 +635,7 @@
                             <option selected hidden disabled>Please select.</option>
                         </select>
                         <div class="pl-0 col-sm-5">
-                            <input type="text" class="form-control" disabled>
+                            <input type="text" class="form-control" placeholder="Input here if &#34;other&#34; selected." disabled>
                         </div>
                     </div>
                 </div>
@@ -658,7 +655,7 @@
                             <option selected hidden disabled>Please select.</option>
                         </select>
                         <div class="pl-0 col-sm-5">
-                            <input type="text" class="form-control" disabled>
+                            <input type="text" class="form-control" placeholder="Input here if &#34;other&#34; selected." disabled>
                         </div>
                     </div>
                 </div>
@@ -686,8 +683,8 @@
                         </div>
                         <!--Hidden element for additional contributors. NOTE: MUST CHANGE DISPLAY TO FLEX WHEN SHOWING-->
                         <div class="mt-1 sample_characteristics_row" style="display:none">
-                            <input type="text" class="form-control col-sm-4 mr-2" required>
-                            <input type="text" class="form-control col-sm-6 mr-2" required>
+                            <input type="text" class="form-control col-sm-4 mr-2" readonly>
+                            <input type="text" class="form-control col-sm-6 mr-2" readonly>
                             <button class="btn btn-danger" type="button">Remove</button>
                         </div>
                     </div>
@@ -726,7 +723,7 @@
                             <option selected hidden disabled>Please select.</option>
                         </select>
                         <div class="pl-0 col-sm-5">
-                            <input type="text" class="form-control" disabled>
+                            <input type="text" class="form-control" placeholder="Input here if &#34;other&#34; selected." disabled>
                         </div>
                     </div>
                 </div>

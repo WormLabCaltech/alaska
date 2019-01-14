@@ -1514,11 +1514,25 @@ function set_radio_collapse_toggle(radio_hide, radio_show, div_to_toggle) {
  */
 function add_contributor() {
   var btn = $(this);
-  var grandparent = btn.parent().parent();
+  var parent = btn.parent();
+  var input = parent.children('input');
+  var contributor = input.val();
+
+  if (contributor == null || contributor == '') {
+    btn.tooltip('show');
+    return;
+  }
+
+  // Reset input.
+  input.val('');
+
+  var grandparent = parent.parent();
   var div = grandparent.children('div[style*="display:none"]');
 
   // Make a copy of this new div.
   var new_div = div.clone();
+  var new_input = new_div.children('input');
+  new_input.val(contributor);
 
   // Set up remove button.
   new_div.children('button').click(remove_contributor);
@@ -1566,6 +1580,8 @@ function remove_input_row() {
   var btn = $(this);
 
   var div = btn.parent();
+  var inputs = div.children('input');
+  inputs.val('');
 
   // Set it up so that this div is destroyed when it is hidden.
   div.on('hidden.bs.collapse', function () {
@@ -1574,6 +1590,9 @@ function remove_input_row() {
 
   // Then, hide the div so that it is destroyed.
   div.collapse('hide');
+
+  // Fire change for these inputs.
+  btn.change();
 }
 
 /**
@@ -1581,14 +1600,38 @@ function remove_input_row() {
  */
 function add_input_row() {
   var btn = $(this);
-  var grandparent = btn.parent().parent();
+  var parent = btn.parent();
+  var inputs = parent.children('input');
+
+  // Get input values. Note that there may be more than one input.
+  var input_vals = [];
+  inputs.each(function () {
+      input_vals.push($(this).val());
+      $(this).val('');
+  });
+
+  // If any of the inputs are empty, don't add the new row.
+  for (var i = 0; i < input_vals.length; i++) {
+      if (input_vals[i] == null || input_vals[i] == '') {
+        btn.tooltip('show');
+        return;
+      }
+  }
+
+  var grandparent = parent.parent();
   var div = grandparent.children('div[style*="display:none"]');
 
   // Clone a new row.
   var new_div = div.clone(true);
 
+  // Set the input values.
+  new_div.children('input').each(function () {
+    $(this).val(input_vals.shift());
+  });
+
   // Set up remove button.
-  new_div.children('button').click(remove_input_row);
+  var remove_btn = new_div.children('button');
+  remove_btn.click(remove_input_row);
 
   // Then, add it to the DOM and show it.
   grandparent.append(new_div);
@@ -1597,6 +1640,9 @@ function add_input_row() {
 
   // Show the new contributor row.
   new_div.collapse('show');
+
+  // Fire change for these inputs.
+  remove_btn.change();
 }
 
 /**
@@ -1761,7 +1807,10 @@ function get_values_from_fluid_rows(div) {
         }
       });
 
-      values.push(col_values);
+      // Push to array only if there is at least one element.
+      if (col_values.length > 0) {
+        values.push(col_values);
+      }
     }
   });
 
@@ -1770,6 +1819,7 @@ function get_values_from_fluid_rows(div) {
 
 /**
  * Sets the values inputed to fluid input rows.
+ * This function assumes the rows are in their initial state.
  */
 function set_values_of_fluid_rows(div, vals) {
   var rows = div.children('div:not([style*="display:none"])');
@@ -1794,30 +1844,43 @@ function set_values_of_fluid_rows(div, vals) {
     }
   });
 
+  var inputs = first_row.children('input');
   var add_btn = first_row.children('button');
 
   // Then, add the number of rows we need.
-  while (default_rows.length < vals.length) {
-    add_btn.click();
-    var new_div = div.children('div:not([style*="display:none"]):last');
-    default_rows.push(new_div);
-  }
-
-  // Finally, populate the text inputs.
   for (var i = 0; i < vals.length; i++) {
-    var row = default_rows[i];
-    var row_vals = vals[i];
-    var row_inputs = row.children('input');
+    var j = 0;
+    var val = vals[i];
 
-    for (var j = 0; j < row_vals.length; j++) {
-      var input = row_inputs.eq(j);
-      var val = row_vals[j];
+    inputs.each(function () {
+      $(this).val(val[j]);
+      j++;
+    });
 
-      if (val != null && val != '') {
-        input.val(val);
-      }
-    }
+    add_btn.click();
   }
+
+  // while (default_rows.length < vals.length) {
+  //   add_btn.click();
+  //   var new_div = div.children('div:not([style*="display:none"]):last');
+  //   default_rows.push(new_div);
+  // }
+  //
+  // // Finally, populate the text inputs.
+  // for (var i = 0; i < vals.length; i++) {
+  //   var row = default_rows[i];
+  //   var row_vals = vals[i];
+  //   var row_inputs = row.children('input');
+  //
+  //   for (var j = 0; j < row_vals.length; j++) {
+  //     var input = row_inputs.eq(j);
+  //     var val = row_vals[j];
+  //
+  //     if (val != null && val != '') {
+  //       input.val(val);
+  //     }
+  //   }
+  // }
 }
 
 /**
@@ -1923,7 +1986,7 @@ function set_factor_card_to_sample_listener(factor_card,
   var values_div = factor_card.find('.factor_values_inputs');
 
   var name_inputs = name_div.find('select,input');
-  var values_inputs = values_div.find('select,input');
+  var values_inputs = values_div.find('select,input,button');
 
   // If name changes, the factor name also changes for each sample.
   name_inputs.change({
@@ -3156,6 +3219,9 @@ function set_common_meta_inputs(card, inputs) {
       // Check the checkbox.
       checkbox.prop('checked', false);
       checkbox.click();
+
+      // Fire change for inputs.
+      form_group.find('button').change();
     } else {
       // Unselect the checkbox.
       checkbox.prop('checked', true);
@@ -3738,10 +3804,10 @@ function fill_with_test_metadata() {
  */
 function set_all_meta_inputs() {
   var proj_inputs = $('#proj');
+  var common_inputs = $('#sample_common_form');
   read_object_from_temp('proj_inputs', function (obj, form) {
     set_proj_meta_inputs(form, obj);
 
-    var common_inputs = $('#sample_common_form');
     read_object_from_temp('common_inputs', function (obj, form) {
       set_common_meta_inputs(form, obj);
 
@@ -3757,6 +3823,9 @@ function set_all_meta_inputs() {
 
   // Re-fire factor change.
   proj_inputs.find('.proj_experimental_design_group').find('select').change();
+  setTimeout(function () {
+    common_inputs.find('.sample_characteristics_group').find('button').change();
+  }, 4000);
 }
 
 /**
