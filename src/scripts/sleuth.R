@@ -31,25 +31,6 @@ if(!file.exists(opt$d)) {
   stop('Directory must exist')
 }
 
-#gene info for sleuth
-print('#Fetching bioMart info (1/2)')
-mart <- biomaRt::useMart(host = 'metazoa.ensembl.org',
-                         biomart = 'metazoa_mart',
-                         dataset = 'celegans_eg_gene')
-print('#Fetching bioMart info (2/2)')
-t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id',
-                                     'ensembl_gene_id',
-                                     'external_gene_name',
-                                     'description',
-                                     'transcript_biotype'),
-                      mart = mart)
-
-print('#Renaming genes')
-t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
-                          ens_gene = ensembl_gene_id,
-                          ext_gene = external_gene_name)
-# t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
-
 #point to your directory
 base_dir <- opt$d
 
@@ -59,12 +40,42 @@ kallisto <- opt$k
 # directory to save results
 output_dir <- opt$o
 
+#gene info for sleuth
+# print('#Fetching bioMart info (1/2)')
+# mart <- biomaRt::useMart('parasite_mart',
+#                          dataset = 'wbps_gene',
+#                          host = 'parasite.wormbase.org')
+#
+# print('#Fetching bioMart info (2/2)')
+# t2g <- biomaRt::getBM(mart = mart,
+#                       filters = c('species_id_1010'),
+#                       values = c('elegaprjna13758'),
+#                       attributes = c('wbps_transcript_id',
+#                                      'wbps_gene_id',
+#                                      'external_gene_id',
+#                                      'description',
+#                                      'transcript_biotype'),
+#                       verbose = TRUE)
+
+# Fetch annotations
+print('#Fetching annotations')
+t2g <- read.table(file.path(base_dir, 'annotations.tsv'),
+                  header = FALSE,
+                  stringsAsFactors = FALSE,
+                  col.names=c('target_id', 'ens_gene', 'ext_gene',
+                              'description', 'transcript_biotype'))
+
+# print('#Renaming genes')
+# t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
+#                           ens_gene = ensembl_gene_id,
+#                           ext_gene = external_gene_name)
+# t2g <- dplyr::select(t2g, c('target_id', 'ens_gene', 'ext_gene'))
 
 #get ids
 print('# Reading analysis matrix')
 s2c <- read.table(file.path(base_dir, 'rna_seq_info.txt'),
                   header = TRUE,
-                  stringsAsFactors= FALSE)
+                  stringsAsFactors = FALSE)
 
 # Determine the number of factors.
 conditions = vector()

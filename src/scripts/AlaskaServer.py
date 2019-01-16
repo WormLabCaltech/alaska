@@ -758,8 +758,8 @@ class AlaskaServer(Alaska):
 
                     # parse reference variables
                     # reference folder MUST contain only three files
-                    if len(os.listdir(ref_dir)) is not 3:
-                        self.out(('INFO: {}/{}/{} does not have only two '
+                    if len(os.listdir(ref_dir)) is not 4:
+                        self.out(('INFO: {}/{}/{} does not have only four '
                                   + 'files...skipping').format(genus,
                                                                species, ver))
                         continue
@@ -772,6 +772,7 @@ class AlaskaServer(Alaska):
                     dna = None
                     cdna = None
                     bed = None
+                    annotation = None
                     prefix = '{}_{}_{}'.format(genus[0], species, ver)
                     for fname in os.listdir(ref_dir):
                         if fname.startswith('{}_dna'.format(prefix)):
@@ -780,7 +781,10 @@ class AlaskaServer(Alaska):
                             cdna = fname
                         elif fname.startswith('{}.bed'.format(prefix)):
                             bed = fname
-                    if dna is None or cdna is None or bed is None:
+                        elif fname.startswith('{}_annotation'.format(prefix)):
+                            annotation = fname
+                    print(dna, cdna, bed, annotation)
+                    if any(ele is None for ele in [dna, cdna, bed, annotation]):
                         self.out(('INFO: {}/{}/{} does not have correct '
                                   + 'files').format(genus, species, ver))
                         continue
@@ -801,7 +805,8 @@ class AlaskaServer(Alaska):
                         self.organisms[genus][species].add_new_ref(ver,
                                                                    dna,
                                                                    cdna,
-                                                                   bed)
+                                                                   bed,
+                                                                   annotation)
 
                 # now, we check which index needs to be made
                 ref = self.organisms[genus][species].refs[ver]
@@ -833,11 +838,15 @@ class AlaskaServer(Alaska):
 
                 # once made, populate AlaskaReference object appropriately
                 ref = self.organisms[genus][species].refs[ver]
+                kallisto_idx = None
+                bowtie_idx = []
                 for f in os.listdir('{}/{}'.format(folder, self.IDX_DIR)):
                     if f.endswith('.idx'):
-                        ref.kallisto_idx = f
+                        kallisto_idx = f
                     elif f.endswith('.bt2'):
-                        ref.bowtie_idx.append(f)
+                        bowtie_idx.append(f)
+                ref.kallisto_idx = kallisto_idx
+                ref.bowtie_idx = bowtie_idx
 
     def make_idx(self, genus, species, ver, bt2=True, kal=True):
         """
@@ -1723,6 +1732,21 @@ class AlaskaServer(Alaska):
         self.copy_script(_id, Alaska.ANL_SCRIPT)
         self.copy_script(_id, Alaska.SLE_SCRIPT)
         self.copy_script(_id, Alaska.SHI_SCRIPT, dst=proj.diff_dir)
+
+        # Copy annotation file.
+        org = proj.samples[list(proj.samples.keys())[0]].organism
+        genus = org['genus']
+        species = org['species']
+        version = org['version']
+        org_path = os.path.join(Alaska.ORGS_DIR, genus, species, version,
+                        Alaska.REF_DIR,
+                        self.organisms[genus][species].refs[version].annotation)
+        ann_new = os.path.join(proj.diff_dir, 'annotations.tsv')
+        print(org_path)
+        print(ann_new)
+        if os.path.isfile(ann_new):
+            os.remove(ann_new)
+        shutil.copy2(org_path, ann_new)
 
         # check if diff. exp. is already queued
         qu = list(self.queue.queue)

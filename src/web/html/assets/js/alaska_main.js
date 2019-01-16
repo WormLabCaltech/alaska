@@ -71,27 +71,6 @@ function goto_ftp_info() {
   var callback = parse_ftp_info;
   send_ajax_request(target, data, callback, true);
 
-  // Set click handler for "View supported structures" button and
-  // "View FTP info" button.
-  $('#read_example_btn').click(function () {
-    // Enable View FTP info button
-    var btn = $('#ftp_info_btn');
-    btn.css('pointer-events', 'auto');
-    btn.prop('disabled', false);
-
-    // Dispose tooltip.
-    btn.parent().tooltip('dispose');
-  });
-
-  $('#ftp_info_btn').click(function () {
-    // Enable fetch reads button
-    var btn = $('#fetch_reads_btn');
-    btn.css('pointer-events', 'auto');
-    btn.prop('disabled', false);
-
-    // Dispose tooltip.
-    btn.parent().tooltip('dispose');
-  });
 }
 
 /**
@@ -868,6 +847,28 @@ function show_ftp_info(id, pw) {
     history.pushState(null, '', '/?id=' + id);
   }
   $('#proj_url').text(window.location.href);
+
+  // Set click handler for "View supported structures" button and
+  // "View FTP info" button.
+  $('#read_example_btn').click(function () {
+    // Enable View FTP info button
+    var btn = $('#ftp_info_btn');
+    btn.css('pointer-events', 'auto');
+    btn.prop('disabled', false);
+
+    // Dispose tooltip.
+    btn.parent().tooltip('dispose');
+  });
+
+  $('#ftp_info_btn').click(function () {
+    // Enable fetch reads button
+    var btn = $('#fetch_reads_btn');
+    btn.css('pointer-events', 'auto');
+    btn.prop('disabled', false);
+
+    // Dispose tooltip.
+    btn.parent().tooltip('dispose');
+  });
 
   // Show the div.
   ftp_div.show();

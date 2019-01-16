@@ -45,7 +45,7 @@ class AlaskaOrganism(Alaska):
         self.refs = {}
         self.path = '{}/{}/{}'.format(Alaska.ORGS_DIR, genus, species)
 
-    def add_new_ref(self, ver, dna, cdna, bed):
+    def add_new_ref(self, ver, dna, cdna, bed, annotation):
         """
         Adds a new reference object to the dictionary of references.
 
@@ -57,7 +57,7 @@ class AlaskaOrganism(Alaska):
 
         Returns: None
         """
-        ref = AlaskaReference(ver, dna, cdna, bed)
+        ref = AlaskaReference(ver, dna, cdna, bed, annotation)
         self.refs[ver] = ref
 
     def save(self, folder=None):
@@ -103,9 +103,10 @@ class AlaskaOrganism(Alaska):
                     dna = obj['dna']
                     cdna = obj['cdna']
                     bed = obj['bed']
+                    annotation = obj['annotation']
                     kallisto_idx = obj['kallisto_idx']
                     bowtie_idx = obj['bowtie_idx']
 
-                    ref = AlaskaReference(ver, dna, cdna, bed, kallisto_idx,
-                                          bowtie_idx)
+                    ref = AlaskaReference(ver, dna, cdna, bed, annotation,
+                                          kallisto_idx, bowtie_idx)
                     self.refs[ver] = ref

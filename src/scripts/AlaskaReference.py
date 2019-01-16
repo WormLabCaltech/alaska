@@ -21,7 +21,8 @@ class AlaskaReference(Alaska):
     """
     AlaskaReference class.
     """
-    def __init__(self, version, dna, cdna, bed, kallisto_idx='', bowtie_idx=[]):
+    def __init__(self, version, dna, cdna, bed, annotation,
+                 kallisto_idx='', bowtie_idx=[]):
         """
         AlaskaReference constructor.
         See implementation for member variables.
@@ -40,5 +41,6 @@ class AlaskaReference(Alaska):
         self.dna = dna
         self.cdna = cdna
         self.bed = bed
+        self.annotation = annotation
         self.kallisto_idx = kallisto_idx
         self.bowtie_idx = bowtie_idx
