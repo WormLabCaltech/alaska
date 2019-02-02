@@ -9,6 +9,7 @@ docker create -it --name="$DOCKER_FTP_TAG" \
               -v $DOCKER_FTP_MOUNT \
               -p $DOCKER_FTP_PORT \
               -p $DOCKER_FTP_PORTS \
+              -e $DOCKER_FTP_ENV \
               --restart unless-stopped \
               $DOCKER_FTP_TAG
 

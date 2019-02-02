@@ -12,7 +12,6 @@ DOCKER_FTP_VOLUME="alaska_ftp_volume"
 DOCKER_ALASKA_TAG="alaska_server"
 DOCKER_FTP_TAG="alaska_ftp"
 DOCKER_FTP_BASE="stilliard/pure-ftpd:hardened"
-DOCKER_FTP_COMMAND='/run.sh -c 10 -C 10 -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -R -P $PUBLICHOST -p 30000:30009 -s -A -j -Z -H -4 -E -R -G -X -x'
 DOCKER_REQUEST_TAG="alaska_request"
 DOCKER_QC_TAG="alaska_qc"
 DOCKER_KALLISTO_TAG="alaska_kallisto"
@@ -31,6 +30,7 @@ DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
 DOCKER_CGI_PORT="80:80"
 DOCKER_FTP_PORT="21:21"
 DOCKER_FTP_PORTS="30000-30009:30000-30009"
+DOCKER_FTP_ENV="PUBLICHOST=bagua.caltech.edu"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
