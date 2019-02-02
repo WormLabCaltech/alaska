@@ -30,7 +30,9 @@ DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
 DOCKER_CGI_PORT="80:80"
 DOCKER_FTP_PORT="21:21"
 DOCKER_FTP_PORTS="30000-30009:30000-30009"
-DOCKER_FTP_ENV="PUBLICHOST=bagua.caltech.edu"
+DOCKER_FTP_ENV1="PUBLICHOST=bagua.caltech.edu"
+DOCKER_FTP_ENV2="ADDED_FLAGS=-d -d"
+DOCKER_FTP_ENV3="ADDED_FLAGS=-O w3c:/var/log/pure-ftpd/transfer.log"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
