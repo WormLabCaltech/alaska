@@ -15,6 +15,7 @@ docker build -t $DOCKER_QC_TAG \
              --build-arg SAMBAMBA_VER="$SAMBAMBA_VER" \
              --build-arg KALLISTO_VER="$KALLISTO_VER" \
              --build-arg KALLISTO_URL="$KALLISTO_URL" \
+             --force-rm \
              --no-cache \
              Docker/qc/
 

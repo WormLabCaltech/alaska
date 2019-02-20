@@ -9,6 +9,7 @@ docker build -t $DOCKER_SLEUTH_TAG \
              --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
              --build-arg SLEUTH_VER="$SLEUTH_VER" \
              --no-cache \
+             --force-rm \
              Docker/sleuth/
 
 # exit with return value of the above command

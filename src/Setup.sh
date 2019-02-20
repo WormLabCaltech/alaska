@@ -125,7 +125,7 @@ if [ $exit_code -ne 0 ]; then
     exit $exit_code
 fi
 
-# cgi container
+# ftp container
 Docker/ftp/build_container.sh
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
