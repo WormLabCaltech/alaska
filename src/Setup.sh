@@ -37,14 +37,29 @@ then
     esac
 fi
 
+# Then, check if the ftp container is already running.
+if [[ $(docker inspect -f '{{.State.Running}}' $DOCKER_FTP_TAG) == "true" ]]
+then
+    printf "%s\n" "$DOCKER_FTP_TAG is currently running."
+    printf "%s\n" "The container must be stopped before rebuilding any images."
+    printf "%s\n" "Would you like to proceed? (Y/N)"
+    read -p ">" choice
+    case "$choice" in
+        Y|y ) docker stop $DOCKER_FTP_TAG;;
+        * ) exit 0;;
+    esac
+fi
+
 # remove old containers
 docker container rm --force $DOCKER_ALASKA_TAG
 docker container rm --force $DOCKER_CGI_TAG
+docker container rm --force $DOCKER_FTP_TAG
 
 # make data volumes
 docker volume create --name $DOCKER_SCRIPT_VOLUME
 docker volume create --name $DOCKER_DATA_VOLUME
 docker volume create --name $DOCKER_CGI_VOLUME
+docker volume create --name $DOCKER_FTP_VOLUME
 
 # build alaska image
 Docker/alaska/build_image.sh
@@ -107,5 +122,13 @@ Docker/cgi/build_container.sh
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
     printf "%s\n" "Failed to build $DOCKER_CGI_TAG container."
+    exit $exit_code
+fi
+
+# ftp container
+Docker/ftp/build_container.sh
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    printf "%s\n" "Failed to build $DOCKER_FTP_TAG container."
     exit $exit_code
 fi

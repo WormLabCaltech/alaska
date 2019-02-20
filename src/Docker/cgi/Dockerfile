@@ -2,6 +2,11 @@
 # UBUNTU VERSION: 16.04 (xenial)
 FROM ubuntu:xenial
 
+# Timezone
+ARG TIMEZONE=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && \
+    echo $TIMEZONE > /etc/timezone
+
 ##### DEPENDECIES #####
 RUN apt-get update && apt-get install -y \
     lsb-release \
