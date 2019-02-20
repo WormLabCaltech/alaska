@@ -4,9 +4,8 @@ FROM ubuntu:xenial
 
 # Timezone
 ARG TIMEZONE=America/Los_Angeles
-RUN echo $TIMEZONE > /etc/timezone \
-    && rm -f /etc/localtime \
-    && dpkg-reconfigure -f noninteractive tzdata
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && \
+    echo $TIMEZONE > /etc/timezone
 
 # versions
 ARG MINICONDA_VER=4.5.1

@@ -4,9 +4,8 @@ FROM stilliard/pure-ftpd:hardened
 
 # Timezone
 ARG TIMEZONE=America/Los_Angeles
-RUN echo $TIMEZONE > /etc/timezone \
-    && rm -f /etc/localtime \
-    && dpkg-reconfigure -f noninteractive tzdata
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && \
+    echo $TIMEZONE > /etc/timezone
 
 # Copy startup script.
 COPY ftp_startup.sh ftp_startup.sh
