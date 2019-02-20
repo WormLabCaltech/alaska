@@ -5,6 +5,7 @@ source scripts/set_env_variables.sh
 
 # build cgi image
 docker build -t $DOCKER_CGI_TAG \
+             --build-arg TIMEZONE=$TIMEZONE \
              --no-cache \
              Docker/cgi/
 

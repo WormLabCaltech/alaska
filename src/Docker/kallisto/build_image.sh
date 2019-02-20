@@ -4,6 +4,7 @@ source scripts/set_env_variables.sh
 
 # build kallisto image
 docker build -t $DOCKER_KALLISTO_TAG \
+             --build-arg TIMEZONE="$TIMEZONE" \
              --build-arg MINICONDA_VER="$MINICONDA_VER" \
              --build-arg MINICONDA3_URL="$MINICONDA3_URL" \
              --build-arg KALLISTO_VER="$KALLISTO_VER" \

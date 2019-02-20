@@ -3,6 +3,9 @@
 # These include: Update.sh, Setup.sh, and Start.sh
 # This script is to be called with the 'source' prefix.
 
+# Timezone for all containers.
+TIMEZONE="America/Los_Angeles"
+
 ####### DEFINE VARIABLES #######
 # Docker tags.
 DOCKER_SCRIPT_VOLUME="alaska_script_volume"
@@ -24,21 +27,19 @@ DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
 DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_VOLUME:/alaska/scripts"
 DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
 DOCKER_CGI_MOUNT="$DOCKER_CGI_VOLUME:/usr/lib/cgi-bin/alaska"
-# DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
-DOCKER_FTP_MOUNT="ftppswd:/etc/pure-ftpd"
+DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
+# DOCKER_FTP_MOUNT="ftppswd:/etc/pure-ftpd"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="80:80"
 DOCKER_FTP_PORT="21:21"
 DOCKER_FTP_PORTS="30000-30009:30000-30009"
-DOCKER_FTP_ENV1="PUBLICHOST=bagua.caltech.edu"
-DOCKER_FTP_ENV2="ADDED_FLAGS=-d -d"
-DOCKER_FTP_ENV3="ADDED_FLAGS=-O w3c:/var/log/pure-ftpd/transfer.log"
+DOCKER_FTP_HOST="PUBLICHOST=alaska.caltech.edu"
+DOCKER_FTP_FLAGS="ADDED_FLAGS=-d -d -O w3c:/var/log/pure-ftpd/transfer.log -c 25 -C 10"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
     "$DOCKER_ALASKA_TAG"
-    "$DOCKER_FTP_TAG"
     "$DOCKER_REQUEST_TAG"
     "$DOCKER_QC_TAG"
     "$DOCKER_KALLISTO_TAG"

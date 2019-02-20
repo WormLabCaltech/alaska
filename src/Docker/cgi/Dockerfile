@@ -2,6 +2,12 @@
 # UBUNTU VERSION: 16.04 (xenial)
 FROM ubuntu:xenial
 
+# Timezone
+ARG TIMEZONE=America/Los_Angeles
+RUN echo $TIMEZONE > /etc/timezone \
+    && rm -f /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata
+
 ##### DEPENDECIES #####
 RUN apt-get update && apt-get install -y \
     lsb-release \

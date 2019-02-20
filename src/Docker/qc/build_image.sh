@@ -4,6 +4,7 @@ source scripts/set_env_variables.sh
 
 # build qc image
 docker build -t $DOCKER_QC_TAG \
+             --build-arg TIMEZONE="$TIMEZONE" \
              --build-arg MINICONDA_VER="$MINICONDA_VER" \
              --build-arg MINICONDA2_URL="$MINICONDA2_URL" \
              --build-arg BOWTIE2_VER="$BOWTIE2_VER" \

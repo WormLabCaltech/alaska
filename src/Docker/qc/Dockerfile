@@ -2,6 +2,12 @@
 # UBUNTU VERSION: 16.04 (xenial)
 FROM ubuntu:xenial
 
+# Timezone
+ARG TIMEZONE=America/Los_Angeles
+RUN echo $TIMEZONE > /etc/timezone \
+    && rm -f /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata
+
 # versions
 # Note: rseqc requires python2
 ARG MINICONDA_VER=4.5.1
