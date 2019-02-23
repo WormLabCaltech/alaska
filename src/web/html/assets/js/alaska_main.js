@@ -1273,6 +1273,12 @@ function show_sample_form(id, form) {
       current_sample_form.off('hidden.bs.collapse');
     });
 
+    // Hide all the open popovers.
+    for (var i = 0; i < shown_popovers.length; i++) {
+      var popover = shown_popovers[i];
+      popover.popover('hide');
+    }
+
     current_sample_form.collapse('hide');
   }
   else {
@@ -1652,7 +1658,7 @@ function add_input_row() {
  * Sets functionality for adding/removing input rows.
  */
 function set_fluid_input_rows(div) {
-  var button = div.find('button:first');
+  var button = div.find('.add_btn');
 
   // Set up the add button.
   button.click(add_input_row);
@@ -4171,8 +4177,9 @@ function set_samples_meta_input() {
     set_reads_table(id, new_sample_form);
 
     // Characteristics.
-    set_fluid_input_rows(new_sample_form.find('.sample_specific_'
-                                              + 'characteristics_group'));
+    var char_group = new_sample_form.find('.sample_specific_'
+                                          + 'characteristics_group');
+    set_fluid_input_rows(char_group.find('.sample_characteristics_inputs'));
 
     // Save changes button.
     var save_changes_btn = new_sample_form.find('.save_btn');
@@ -4182,6 +4189,12 @@ function set_samples_meta_input() {
 
         save_proj(show_saved, btn);
     });
+
+    // Set up copy buttons.
+    var copy_btns = new_sample_form.find('.copy_btn');
+    copy_btns.each(function () {
+      set_copy_btn($(this), id);
+    })
 
     // Append new form.
     $('#sample_card').append(new_sample_form);
@@ -4193,6 +4206,107 @@ function set_samples_meta_input() {
 
   // Enable popovers and tooltips.
   enable_popovers_tooltips(sample_form);
+}
+
+/**
+ * Set up copy button to show a popover.
+ */
+function set_copy_btn(copy_btn, id_to_ignore) {
+  // Extract the data-group HTML attribute.
+  var group = copy_btn.data('group');
+
+  // This is the DOM element that will be placed as the content of the div.
+  var wrapper = $('<div>');
+  var content = $('<div class="btn-group-toggle" data-toggle="buttons" '
+                  + 'data-group=' + group + '></div>');
+
+  // This is a template of the label and input to copy.
+  var label = $('<label class="btn btn-sm btn-outline-primary mr-2"></label>');
+  var input = $('<input type="checkbox" name="copy" autocomplete="off">');
+
+  // Loop through each sample and make a button for each, except the one
+  // corresponding to id_to_ignore.
+  for (var i = 0; i < sorted_names.length; i++) {
+    var name = sorted_names[i];
+    var id = names_to_ids[name];
+
+    if (id != id_to_ignore) {
+      // Make a copy of the input and label and set attributes.
+      var label_copy = label.clone();
+      var input_copy = input.clone();
+      input_copy.val(id);
+
+      label_copy.append(input_copy);
+      label_copy.append(name);
+      content.append(label_copy);
+    }
+  }
+  // Add button to actually do the copying.
+  wrapper.append(content);
+  wrapper.append($('<hr>'));
+  wrapper.append($('<button class="btn btn-warning copy_btn" ' +
+                   'data-group=' + group + '>Copy to selected samples</button>'))
+
+  // Set up the popover.
+  // Note that we need to add a listener for when the popover if shown to
+  // appropriately implement the actual copy functionality.
+  copy_btn.popover({
+    'title': 'Please select the samples to copy this input to',
+    'content': wrapper.html(),
+    // We can't set the trigger to be 'focus' because then the buttons within
+    // the popover are not clickable.
+    // 'trigger': 'focus',
+    'html': true
+  }).on('shown.bs.popover', function (e) {
+    var popover = $('#' + $(e.target).attr('aria-describedby'));
+    popover.find('.copy_btn').click(copy_input);
+
+    // Add this popover as one of the shown popovers.
+    // When the current sample form is changed, we also have to loop through
+    // this list to close all opened popovers.
+    shown_popovers.push($(this));
+  });
+}
+
+/**
+ * Helper function that actually implements the copying.
+ * This function is called by the copy button located WITHIN THE POPOVER.
+ */
+function copy_input() {
+  var copy_btn = $(this);
+  var popover_body = copy_btn.parents('.popover-body')
+  var group = copy_btn.data('group');
+
+  // Get the input to copy.
+  var input_group = current_sample_form.find('.' + group);
+  var group_type = sample_meta_classes_to_functions[group];
+  var val = getters_and_setters[group_type].get(input_group);
+
+  // Construct a list of sample ids to copy it to.
+  var ids_to_copy = [];
+  var active_labels = popover_body.find('label.active');
+  active_labels.each(function () {
+    var label = $(this);
+    var checkbox = label.children('input');
+    ids_to_copy.push(checkbox.val());
+  });
+
+  // Output list of selected ids for debugging.
+  console.log(ids_to_copy);
+
+  // Copy the value to these samples.
+  for (var i = 0; i < ids_to_copy.length; i++) {
+    var id = ids_to_copy[i];
+    var sample_form = sample_forms[id];
+
+    var input_group_to_copy = sample_form.find('.' + group);
+    getters_and_setters[group_type].set(input_group_to_copy, val);
+  }
+
+  // Finally, disable this button to let the user know the values have
+  // been copied.
+  copy_btn.text('Copied!');
+  copy_btn.prop('disabled', true);
 }
 
 /**
@@ -5138,6 +5252,7 @@ var ftp_pw;
 var raw_reads_div;
 var controls_modal;
 var dropdown_items = {};
+var shown_popovers = [];
 var proj_form;
 var common_form;
 var current_sample_form;
