@@ -3456,7 +3456,7 @@ function validate_common_meta_inputs(inputs, common_form) {
               || val.version == '') {
               form_inputs.addClass('is-invalid');
               valid = false;
-              faild_filds[class_name].push('Organism must be selected completely.');
+              failed_fields[class_name].push('Organism must be selected completely.');
             }
           break;
 
@@ -3692,7 +3692,7 @@ function add_check_meta_details(modal_body, details_div, title_class,
   var title = new_details_div.children('div:first');
   title.addClass(title_class);
   title.children('i').addClass(title_icon_class);
-  title.children('h5').text(title_text);
+  title.append(title_text);
 
   var details_list = new_details_div.children('ul');
   for (var class_name in failed_inputs) {
