@@ -2726,7 +2726,41 @@
                   id="refetch_reads_btn_2">Re-fetch reads</button></div>
       </div>
     </div>
-  </div><!-- Generic error message div -->
+  </div>
+  <!-- Popup bocked error message modal. -->
+  <div class="modal fade"
+       id="popup_modal"
+       tabindex="-1"
+       role="dialog"
+       data-backdrop="static"
+       data-keyboard="false">
+    <div class="modal-dialog"
+         role="document">
+      <div class="modal-content">
+        <div class="modal-header alert-warning">
+          <h5 class="modal-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            Popup blocked!
+          </h5>
+        </div>
+        <div class="modal-body text-dark">
+          <p>
+            Alaska attempted to open a new webpage to display the Sleuth
+            web server, but the popup was blocked your browser. Please
+            enable popups and try again, or click on the link below to access
+            Sleuth.
+          </p>
+          <a id="sleuth_url" target='_blank'></a>
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Generic error message div -->
   <div class="modal fade"
        id="error_modal"
        tabindex="-1"
