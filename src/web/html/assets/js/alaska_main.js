@@ -5204,7 +5204,19 @@ function parse_sleuth_server(out, btn, spinner, width) {
     btn.width(width);
 
     var url = 'http://' + window.location.hostname + ':' + port + '/';
-    window.open(url, '_blank');
+    var win = window.open(url, '_blank');
+
+    // Check if popup has been blocked. If it has, notify the user
+    // to allow popups, or to click on a link that will direct them to the
+    // sleuth page.
+    if (win == null || typeof(win) == 'undefined') {
+      var modal = $('#popup_modal');
+      url_element = modal.find('#sleuth_url');
+      url_element.text(url);
+      url_element.attr('href', url);
+
+      modal.modal('show');
+    }
   }
 
   if (out.includes('already open')) {
