@@ -1066,7 +1066,7 @@ class AlaskaServer(Alaska):
         datetime = (dt.datetime.now().strftime(Alaska.DATETIME_FORMAT)
                     + ' Pacific Time')
         url = 'http://alaska.caltech.edu:81/?id=' + _id
-        fr = 'noreply@alaska.caltech.edu'
+        fr = '{}@alaska.caltech.edu'.format(_id)
 
         # Footer that is appended to every email.
         if _id in self.ftp:

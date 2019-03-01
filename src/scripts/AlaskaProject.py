@@ -283,6 +283,10 @@ class AlaskaProject(Alaska):
 
         Returns: None
         """
+        # Write the SOFT format seq_info.txt
+        out = 'seq_info.txt'
+        self.write_soft(out)
+
         # Make a new archive.
         geo_arch = '{}/{}'.format(self.dir, Alaska.GEO_ARCH)
         with tarfile.open(geo_arch, 'w:gz') as tar:
@@ -308,10 +312,6 @@ class AlaskaProject(Alaska):
                     full_path = '{}/{}'.format(self.diff_dir, file)
                     arcname = file
                     tar.add(full_path, arcname=arcname)
-
-            # Then, write the SOFT format seq_info.txt
-            out = 'seq_info.txt'
-            self.write_soft(out)
 
             # Add the softfile.
             full_path = '{}/{}'.format(self.dir, out)
