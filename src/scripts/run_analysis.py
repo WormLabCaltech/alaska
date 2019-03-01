@@ -100,9 +100,9 @@ def archive(out, source_dir):
     with tarfile.open(out, 'w:gz') as tar:
         if isinstance(source_dir, str):
             tar.add(source_dir, arcname=os.path.sep)
-        else:
+        elif isinstance(source_dir, list):
             for d in source_dir:
-                tar.add(d, arcname=os.path.sep)
+                tar.add(d)
 
 ######### These functions must be here to allow multiprocessing.
 def read_distribution(_id, bed_path):
@@ -459,7 +459,7 @@ def run_sleuth(proj):
     print_with_flush('# all analyses finished, archiving entire project')
     dirs_to_archive = []
     for d in os.listdir():
-        if d != '_temp' and d != '0_raw_reads' and not d.endswith('.tar.gz'):
+        if os.path.isdir(d) and d not in ['_temp', '0_raw_reads']:
             dirs_to_archive.append(d)
     archive(proj['id'] + '.tar.gz', dirs_to_archive)
     print_with_flush('# done')

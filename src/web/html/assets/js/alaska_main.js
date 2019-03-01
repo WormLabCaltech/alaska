@@ -502,7 +502,7 @@ function set_progress(status) {
     set_progress_badge(elements.diff_status_badge, 'queued');
     set_progress_bar_quant();
   } else {
-    st_progress_bar_diff();
+    set_progress_bar_diff();
   }
 
   if (status >= progress.diff_finished) {
