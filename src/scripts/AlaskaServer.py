@@ -1083,7 +1083,8 @@ class AlaskaServer(Alaska):
                  FTP port: 21<br> \
                  FTP username: {}<br> \
                  FTP password: {}<br> \
-                 This message was sent to {} at {}.</p> \
+                 This message was sent to {} at {}.<br> \
+                 <b>Please do not reply to this email.</b></p> \
                 </body> \
             </html> \
             '.format(msg, _id, url, url, _id, self.ftp[_id], to, datetime)
@@ -1097,7 +1098,8 @@ class AlaskaServer(Alaska):
                  <hr> \
                  <p>Project ID: {}<br> \
                  Unique URL: <a href="{}">{}</a><br> \
-                 This message was sent to {} at {}.</p> \
+                 This message was sent to {} at {}.<br> \
+                 <b>Please do not reply to this email.</b></p> \
                 </body> \
             </html> \
             '.format(msg, _id, url, url, to, datetime)
