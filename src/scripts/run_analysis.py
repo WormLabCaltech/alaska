@@ -100,9 +100,9 @@ def archive(out, source_dir):
     with tarfile.open(out, 'w:gz') as tar:
         if isinstance(source_dir, str):
             tar.add(source_dir, arcname=os.path.sep)
-        else:
+        elif isinstance(source_dir, list):
             for d in source_dir:
-                tar.add(d, arcname=d)
+                tar.add(d)
 
 ######### These functions must be here to allow multiprocessing.
 def read_distribution(_id, bed_path):
