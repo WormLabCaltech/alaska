@@ -191,14 +191,26 @@
                 <tr>
                   <td colspan="5"
                       class="align-middle bg-secondary border-white p-0">
-                    <div class="collapse m-3 p-0"
-                         ,
+                    <div class="collapse m-3 p-0 text-light"
                          id="qc_output_collapse">
-                      <textarea class="form-control text-monospace"
-                                rows="20"
-                                id="qc_textarea"
-                                style="font-size:0.8em"
-                                readonly></textarea>
+                      <!-- Div to display all the commands that have been
+                           run. -->
+                      <div>
+                        <h4 class="mb-0">Commands</h4>
+                        <small>
+                          This is the list of all commands run by the server.
+                        </small>
+                        <ul id="qc_list">
+                        </ul>
+                      </div>
+                      <div>
+                        <h4>Live output</h4>
+                        <textarea class="form-control text-monospace"
+                                  rows="20"
+                                  id="qc_textarea"
+                                  style="font-size:0.8em"
+                                  readonly></textarea>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -226,14 +238,26 @@
                 <tr>
                   <td colspan="5"
                       class="align-middle bg-secondary border-white p-0">
-                    <div class="collapse m-3 p-0"
-                         ,
+                    <div class="collapse m-3 p-0 text-light"
                          id="quant_output_collapse">
-                      <textarea class="form-control text-monospace"
-                                rows="20"
-                                id="quant_textarea"
-                                style="font-size:0.8em"
-                                readonly></textarea>
+                         <!-- Div to display all the commands that have been
+                              run. -->
+                         <div>
+                           <h4 class="mb-0">Commands</h4>
+                           <small>
+                             This is the list of all commands run by the server.
+                           </small>
+                           <ul id="quant_list">
+                           </ul>
+                         </div>
+                         <div>
+                           <h4>Live output</h4>
+                           <textarea class="form-control text-monospace"
+                                     rows="20"
+                                     id="quant_textarea"
+                                     style="font-size:0.8em"
+                                     readonly></textarea>
+                         </div>
                     </div>
                   </td>
                 </tr>
@@ -272,14 +296,25 @@
                   <td colspan="5"
                       class="align-middle bg-secondary border-white p-0">
                     <div class="collapse m-3 p-0"
-                         ,
                          id="diff_output_collapse">
-                      <textarea class="form-control text-monospace"
-                                id="diff_textarea"
-                                rows="20"
-                                id="diff_textarea"
-                                style="font-size:0.8em"
-                                readonly></textarea>
+                         <!-- Div to display all the commands that have been
+                              run. -->
+                         <div>
+                           <h4 class="mb-0">Commands</h4>
+                           <small>
+                             This is the list of all commands run by the server.
+                           </small>
+                           <ul id="diff_list">
+                           </ul>
+                         </div>
+                         <div>
+                           <h4>Live output</h4>
+                           <textarea class="form-control text-monospace"
+                                     rows="20"
+                                     id="diff_textarea"
+                                     style="font-size:0.8em"
+                                     readonly></textarea>
+                         </div>
                     </div>
                   </td>
                 </tr>
