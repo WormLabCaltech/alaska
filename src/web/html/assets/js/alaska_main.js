@@ -248,17 +248,17 @@ function goto_progress(status) {
   }
 }
 
-function get_output(type, textarea) {
+function get_output(type, textarea, ul) {
   var target = 'get_output.php';
   var data = {
     'type': type,
     'id': proj_id
   };
   var callback = parse_output_textarea;
-  send_ajax_request(target, data, callback, true, textarea);
+  send_ajax_request(target, data, callback, true, textarea, ul);
 }
 
-function set_output_listener_for_collapse(collapse, type, textarea, badge,
+function set_output_listener_for_collapse(collapse, type, textarea, ul, badge,
                                           t=1000) {
   collapse.on('show.bs.collapse', {
     'type': type,
@@ -273,9 +273,9 @@ function set_output_listener_for_collapse(collapse, type, textarea, badge,
 
     // Set up interval only when the process is running.
     if (badge.hasClass('badge-info') && output_intervals[type] == null) {
-      output_intervals[type] = setInterval(get_output, t, type, textarea);
+      output_intervals[type] = setInterval(get_output, t, type, textarea, ul);
     } else {
-      get_output(type, textarea);
+      get_output(type, textarea, ul);
     }
   });
   collapse.on('hide.bs.collapse', {
@@ -297,6 +297,11 @@ function set_output_listeners(progress_container) {
   var qc_output_collapse = progress_container.find('#qc_output_collapse');
   var quant_output_collapse = progress_container.find('#quant_output_collapse');
   var diff_output_collapse = progress_container.find('#diff_output_collapse');
+
+  var qc_ul = progress_container.find('#qc_list');
+  var quant_ul = progress_container.find('#quant_list');
+  var diff_ul = progress_container.find('#diff_list');
+
   var qc_textarea = progress_container.find('#qc_textarea');
   var quant_textarea = progress_container.find('#quant_textarea');
   var diff_textarea = progress_container.find('#diff_textarea');
@@ -306,11 +311,11 @@ function set_output_listeners(progress_container) {
   var diff_status_badge = progress_container.find('#diff_status_badge');
 
   set_output_listener_for_collapse(qc_output_collapse, 'qc', qc_textarea,
-                                   qc_status_badge);
+                                   qc_ul, qc_status_badge);
   set_output_listener_for_collapse(quant_output_collapse, 'quant',
-                                   quant_textarea, quant_status_badge);
+                                   quant_textarea, quant_ul, quant_status_badge);
   set_output_listener_for_collapse(diff_output_collapse, 'diff', diff_textarea,
-                                   diff_status_badge);
+                                   diff_ul, diff_status_badge);
 }
 
 /**
@@ -5185,9 +5190,26 @@ function update_proj_status(out) {
 }
 
 
-function parse_output_textarea(out, textarea) {
+function parse_output_textarea(out, textarea, ul) {
   textarea.val(out);
   textarea.scrollTop(textarea[0].scrollHeight);
+
+  // Replace contents of the ul with the commands (lines that start with '##')
+  var ul_id = ul.attr('id');
+  var new_ul = $('<ul>');
+  new_ul.attr('id', ul_id);
+
+  // Loop through each line of the output.
+  var split = out.split('\n');
+  for (var i = 0 ; i < split.length; i++) {
+    var line = split[i];
+    if (line.startsWith('##')) {
+      new_ul.append($('<li>' + line.substring(3, line.length) + '</li>'));
+    }
+  }
+
+  // Replace.
+  ul.replaceWith(new_ul);
 }
 
 function parse_sleuth_server(out, btn, spinner, width) {
@@ -5279,6 +5301,7 @@ var sample_characteristic_fields = {};
 var sample_pair_fields = {};
 var chars_to_samples = {};
 var chars_details_to_samples = {};
+var commands = {};
 var progress = {
     'diff_error':     -12,
     'quant_error':     -9,
