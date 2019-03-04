@@ -5204,6 +5204,10 @@ function parse_output_textarea(out, textarea, ul) {
   for (var i = 0 ; i < split.length; i++) {
     var line = split[i];
     if (line.startsWith('##')) {
+      // Allow the browser to line break any time after a slash '/' or comma ','
+      line = line.replace(new RegExp('/', 'g'), '/<wbr>');
+      line = line.replace(new RegExp(',', 'g'), ',<wbr>');
+
       new_ul.append($('<li>' + line.substring(3, line.length) + '</li>'));
     }
   }
