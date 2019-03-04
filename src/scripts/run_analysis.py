@@ -59,7 +59,7 @@ def run_sys(cmd, prefix=''):
     Runs a system command and echos all output.
     This function blocks until command execution is terminated.
     """
-    print_with_flush('# ' + ' '.join(cmd))
+    print_with_flush('## ' + ' '.join(cmd))
     output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         # while p.poll() is None:
