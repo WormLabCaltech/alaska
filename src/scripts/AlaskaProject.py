@@ -70,6 +70,11 @@ class AlaskaProject(Alaska):
         self.controls = []
         self.factors = []
 
+        # Booleans that tell whether or not to perform enrichment / epistasis
+        # analyses.
+        self.enrichment = True
+        self.epistasis = False
+
         self.progress = 0       # int to denote current analysis progress
         self.notifications = 0  # number of raw read deletion notifications sent
 

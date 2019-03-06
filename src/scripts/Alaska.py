@@ -77,6 +77,11 @@ class Alaska():
     RAW_DURATION = 10           # keep reads for a max 10 days
     CPUS = '1-3'                # processing CPUs (for Docker)
     NTHREADS = 1                # number of threads for processing
+    NTHREADS = 3                # number of threads for processing
+
+    # VARIABLES FOR FURTHER ANALYSES
+    ENRICHMENT_ORGS = [('caenorhabditis', 'elegans')]
+    EPISTASIS_FACTOR_NUM = 2
 
     # SUPPORTED EXTENSIONS
     RAW_EXT = ('.fastq.gz', '.fastq')  # supported raw read extensions

@@ -388,6 +388,9 @@ def run_kallisto(proj, nthreads):
         else:
             print_with_flush('unrecognized sample type!')
 
+        # Add bias correction flag
+        args += ['--bias']
+
         _id = name
 
         run_sys(args, prefix=_id)
@@ -447,12 +450,17 @@ def run_sleuth(proj):
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
     # args += ['--shiny']
-
     run_sys(args)
+
+    # Run tissue enrichment only if it is flagged to do so
     path = '3_diff_exp'
-    print_with_flush('# sleuth finished, starting enrichment analysis')
-    run_tea(path)
-    print_with_flush('# enrichment analysis finished, archiving')
+    if proj['enrichment']:
+        print_with_flush('# sleuth finished, starting enrichment analysis')
+        run_tea(path)
+        print_with_flush('# enrichment analysis finished, archiving')
+    else:
+        print_with_flush('# this organisms is not whitelisted for enrichment '
+                         + 'analysis, archiving')
     archive(path + '.tar.gz', path)
 
     # Archive all
