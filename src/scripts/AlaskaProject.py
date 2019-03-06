@@ -291,7 +291,7 @@ class AlaskaProject(Alaska):
             """
             # factor string
             factor_str = None
-            if design == 1:
+            if self.design == 1:
                 factor_str = 'single'
             else:
                 factor_str = 'two'
