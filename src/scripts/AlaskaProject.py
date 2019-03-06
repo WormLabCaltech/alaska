@@ -351,7 +351,7 @@ class AlaskaProject(Alaska):
                          'Enrichment Suite.\n')
             if self.epistasis:
                 info += ('Alaska performed epistasis analyses as first '
-                         'presented in\n(cite hypoxia paper).\n')
+                         'presented in\nhttps://doi.org/10.1073/pnas.1712387115.\n')
 
             return info
 
