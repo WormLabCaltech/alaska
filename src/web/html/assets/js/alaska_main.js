@@ -366,6 +366,9 @@ function set_progress(status) {
 
     // Show error modal.
     error_modal.modal('show');
+
+    // Clear progress update interval.
+    clearInterval(project_progress_interval);
   }
 
   ids = [
@@ -5687,9 +5690,6 @@ var test_samples_inputs = {
 // Global variables for holding interval ids.
 var project_progress_interval;
 var output_intervals = {};
-var qc_output_interval;
-var quant_output_interval;
-var diff_output_interval;
 
 // Global variable to indicate if this is a testing environment.
 var testing = false;
