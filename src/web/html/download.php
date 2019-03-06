@@ -27,7 +27,8 @@ switch ($type) {
     $file = $id . ".tar.gz";
     break;
   case 'info':
-    $file = 'alaska_info.txt'
+    $file = 'alaska_info.txt';
+    break;
 }
 
 $path = $path . "/" . $file;
