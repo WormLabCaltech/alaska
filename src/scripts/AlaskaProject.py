@@ -309,8 +309,8 @@ class AlaskaProject(Alaska):
 
                 arg = '-b {} --bias'.format(sample.bootstrap_n)
                 if sample.type == 1:
-                    arg += '--single -l {} -s {}'.format(sample.length,
-                                                         sample.stdev)
+                    arg += ' --single -l {} -s {}'.format(sample.length,
+                                                          sample.stdev)
                 args += '{}({}):\t{}\n'.format(sample_id, name, arg)
 
             # Construct dictionary for string formatting.
