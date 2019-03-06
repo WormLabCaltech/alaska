@@ -348,10 +348,12 @@ class AlaskaProject(Alaska):
             # Add more info if enrichment analysis was performed.
             if self.enrichment:
                 info += ('Enrichment analysis was performed using the WormBase '
-                         'Enrichment Suite.\n')
+                         'Enrichment Suite.\n'
+                         'https://doi.org/10.1186/s12859-016-1229-9\n'
+                         'https://www.wormbase.org/tools/enrichment/tea/tea.cgi\n')
             if self.epistasis:
                 info += ('Alaska performed epistasis analyses as first '
-                         'presented in\nhttps://doi.org/10.1073/pnas.1712387115.\n')
+                         'presented in\nhttps://doi.org/10.1073/pnas.1712387115\n')
 
             return info
 
