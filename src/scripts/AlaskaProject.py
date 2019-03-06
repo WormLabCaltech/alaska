@@ -311,7 +311,7 @@ class AlaskaProject(Alaska):
                 if sample.type == 1:
                     arg += '--single -l {} -s {}'.format(sample.length,
                                                          sample.stdev)
-                args += '{}({})\t{}\n'.format(sample_id, name, arg)
+                args += '{}({}):\t{}\n'.format(sample_id, name, arg)
 
             # Construct dictionary for string formatting.
             format_dict = {'proj_id': self.id,
