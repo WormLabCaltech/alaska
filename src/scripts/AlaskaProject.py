@@ -280,6 +280,86 @@ class AlaskaProject(Alaska):
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir),
                   sep=' ', index=True)
 
+    def write_info(self):
+        """
+        Writes an information txt file about this project to the project root
+        directory.
+        """
+        def get_info_str():
+            """
+            Helper function to get the string to write to the file.
+            """
+            # factor string
+            factor_str = None
+            if design == 1:
+                factor_str = 'single'
+            else:
+                factor_str = 'two'
+
+            # arguments string
+            args = ''
+            genus = ''
+            species = ''
+            version = ''
+            for sample_id, sample in self.samples.items():
+                name = sample.name
+                genus = sample.organism['genus']
+                species = sample.organism['species']
+                version = sample.organism['version']
+
+                arg = '-b {} --bias'.format(sample.bootstrap_n)
+                if sample.type == 1:
+                    arg += '--single -l {} -s {}'.format(sample.length,
+                                                         sample.stdev)
+                args += '{}({})\t{}\n'.format(sample_id, name, arg)
+
+            # Construct dictionary for string formatting.
+            format_dict = {'proj_id': self.id,
+                           'datetime': self.datetime,
+                           'n_samples': len(self.samples),
+                           'factor_str': factor_str,
+                           'qc_list': ','.join(Alaska.QC_LIST),
+                           'qc_agg': Alaska.QC_AGGREGATE,
+                           'quant': Alaska.QUANT,
+                           'diff': Alaska.DIFF,
+                           'quant_args': args,
+                           'genus': genus,
+                           'species': species,
+                           'version': version,
+                           'diff_test': Alaska.DIFF_TEST}
+
+            info = ('alaska_info.txt for {proj_id}\n'
+                    'This project was created on {datetime} PST with '
+                    '{n_samples} samples.\n\n'
+                    'RNA-seq data was analyzed using Alaska using the '
+                    '{factor_str}-factor design option. Briefly, Alaska '
+                    'performs quality control using {qc_list} and outputs '
+                    'a summary report generated using {qc_agg}. Read '
+                    'quantification and differential expression analysis of '
+                    'transcripts were performed using {quant} and {diff}. '
+                    '{quant} was run using the following flags for each '
+                    'sample:\n{quant_args}\n'
+                    'Reads were aligned using {genus} {species} genome '
+                    'version {version} as provided by Wormbase.\n\n'
+                    'Differential expression analysis with {diff} were '
+                    'performed using a {diff_test} corrected for '
+                    'multiple-testing.\n\n').format(**format_dict)
+
+            # Add more info if enrichment analysis was performed.
+            if self.enrichment:
+                info += ('Enrichment analysis was performed using the WormBase '
+                         'Enrichment Suite\n\n')
+            if self.epistasis:
+                info += ('Alaska performed epistasis analyses as first '
+                         'presented in (cite hypoxia paper).')
+
+        # Get the info string.
+        info = get_info_str()
+
+        # Write the text file.
+        with open('{}/alaska_info.txt'.format(self.dir), 'w') as f:
+            f.write(info)
+
     def prepare_submission(self):
         """
         Prepares files for GEO submission.
