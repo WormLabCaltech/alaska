@@ -384,7 +384,6 @@ function set_progress(status) {
     'diff_download_btn',
     'diff_output_collapse',
     'all_download_btn',
-    'info_download_btn',
     'geo_compile_modal_btn',
     'geo_submit_modal_btn'
   ];
@@ -408,7 +407,6 @@ function set_progress(status) {
       elements.diff_server_btn.prop('disabled', false);
       elements.diff_download_btn.prop('disabled', false);
       elements.all_download_btn.prop('disabled', false);
-      elements.info_download_btn.prop('disabled', false);
     case progress.diff_started:
       elements.diff_output_btn.prop('disabled', false);
     case progress.diff_queued:
@@ -447,7 +445,6 @@ function set_progress(status) {
       elements.diff_download_btn.prop('disabled', true);
       elements.diff_server_btn.prop('disabled', true);
       elements.all_download_btn.prop('disabled', true);
-      elements.info_download_btn.prop('disabled', true);
       elements.geo_compile_modal_btn.prop('disabled', true);
       elements.geo_submit_modal_btn.prop('disabled', true);
       break;
