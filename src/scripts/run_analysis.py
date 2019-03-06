@@ -171,6 +171,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to call bowtie2 alignment.
         """
+        upto = 2 * (10 ** 5)
         args = ['bowtie2', '-x', bt2_path]
 
         # single/paired-end
@@ -186,10 +187,32 @@ def run_qc(proj, nthreads):
             args += ['-2', ','.join(m2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
-        args += ['-u', str(2 * (10 ** 5))]
+        args += ['-u', str(upto)]
         args += ['--threads', str(nthreads)]
         args += ['--verbose']
-        run_sys(args, prefix=_id)
+        output = run_sys(args, prefix=_id)
+
+        # Write bowtie stderr output.
+        first = '{} reads; of these:'.format(_id, upto)
+        last = 'overall alignment rate'
+        found = False
+        bt2_info = ''
+        for line in output.split('\n'):
+            if line.startswith(_id):
+                line = line.split(': ')[1]
+
+                if first in line:
+                    found = True
+
+                if found:
+                    bt2_info += line + '\n'
+
+                if last in line:
+                    break
+
+        # Write the file.
+        with open('{}/{}_bowtie2.txt'.format(path, _id), 'w') as f:
+            f.write(bt2_info)
 
     def samtools_sort(_id):
         """
