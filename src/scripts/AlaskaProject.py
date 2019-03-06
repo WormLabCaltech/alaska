@@ -333,7 +333,7 @@ class AlaskaProject(Alaska):
                     '{n_samples} samples.\n\n'
                     'RNA-seq data was analyzed using Alaska using the '
                     '{factor_str}-factor design option.\nBriefly, Alaska '
-                    'performs quality control using {qc_list} and outputs\n'
+                    'performs quality control using \n{qc_list} and outputs\n'
                     'a summary report generated using {qc_agg}. Read '
                     'quantification and\ndifferential expression analysis of '
                     'transcripts were performed using\n{quant} and {diff}. '
