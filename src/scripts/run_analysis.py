@@ -208,7 +208,7 @@ def run_qc(proj, nthreads):
                 break
 
         # Write the file.
-        with open('{}/{}_bowtie2.txt'.format(path, _id), 'w') as f:
+        with open('{}/{}_sorted.txt'.format(path, _id), 'w') as f:
             f.write(bt2_info)
 
     def samtools_sort(_id):
