@@ -236,7 +236,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to run multiqc.
         """
-        args = ['multiqc', '.', '--ignore' '*.sam']
+        args = ['multiqc', '.', '--ignore', '*.sam']
         run_sys(args, prefix=_id)
 
     ########## HELPER FUNCTIONS END HERE ###########
