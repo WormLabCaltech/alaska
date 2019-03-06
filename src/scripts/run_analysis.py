@@ -186,11 +186,10 @@ def run_qc(proj, nthreads):
             args += ['-2', ','.join(m2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
-        args += ['-u', str(1 * (10 ** 5))]
+        args += ['-u', str(2 * (10 ** 5))]
         args += ['--threads', str(nthreads)]
         args += ['--verbose']
         run_sys(args, prefix=_id)
-
 
     def samtools_sort(_id):
         """
@@ -237,7 +236,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to run multiqc.
         """
-        args = ['multiqc', '.']
+        args = ['multiqc', '.', '--ignore *.sam']
         run_sys(args, prefix=_id)
 
     ########## HELPER FUNCTIONS END HERE ###########

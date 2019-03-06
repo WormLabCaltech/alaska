@@ -353,6 +353,8 @@ class AlaskaProject(Alaska):
                 info += ('Alaska performed epistasis analyses as first '
                          'presented in (cite hypoxia paper).')
 
+            return info
+
         # Get the info string.
         info = get_info_str()
 
