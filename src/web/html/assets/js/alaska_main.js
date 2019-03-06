@@ -5202,7 +5202,7 @@ function parse_output_textarea(out, textarea, ul) {
 
   // Replace contents of the ul with the commands (lines that start with '##')
   var ul_id = ul.attr('id');
-  var new_ul = $('<ul>');
+  var new_ul = $('<ul style="font-size:0.8em">');
   new_ul.attr('id', ul_id);
 
   // Loop through each line of the output.
