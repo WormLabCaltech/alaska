@@ -318,12 +318,12 @@ class AlaskaProject(Alaska):
                            'datetime': self.datetime,
                            'n_samples': len(self.samples),
                            'factor_str': factor_str,
-                           'qc_list': ','.join(Alaska.QC_LIST),
+                           'qc_list': ', '.join(Alaska.QC_LIST),
                            'qc_agg': Alaska.QC_AGGREGATE,
                            'quant': Alaska.QUANT,
                            'diff': Alaska.DIFF,
                            'quant_args': args,
-                           'genus': genus,
+                           'genus': genus.capitalize(),
                            'species': species,
                            'version': version,
                            'diff_test': Alaska.DIFF_TEST}
@@ -332,26 +332,26 @@ class AlaskaProject(Alaska):
                     'This project was created on {datetime} PST with '
                     '{n_samples} samples.\n\n'
                     'RNA-seq data was analyzed using Alaska using the '
-                    '{factor_str}-factor design option. Briefly, Alaska '
-                    'performs quality control using {qc_list} and outputs '
+                    '{factor_str}-factor design option.\nBriefly, Alaska '
+                    'performs quality control using {qc_list} and outputs\n'
                     'a summary report generated using {qc_agg}. Read '
-                    'quantification and differential expression analysis of '
-                    'transcripts were performed using {quant} and {diff}. '
-                    '{quant} was run using the following flags for each '
+                    'quantification and\ndifferential expression analysis of '
+                    'transcripts were performed using\n{quant} and {diff}. '
+                    '{quant} was run using the\nfollowing flags for each '
                     'sample:\n{quant_args}\n'
-                    'Reads were aligned using {genus} {species} genome '
-                    'version {version} as provided by Wormbase.\n\n'
-                    'Differential expression analysis with {diff} were '
-                    'performed using a {diff_test} corrected for '
+                    'Reads were aligned using\n{genus} {species} genome '
+                    'version {version}\nas provided by Wormbase.\n\n'
+                    'Differential expression analyses with {diff} were '
+                    'performed using a\n{diff_test} corrected for '
                     'multiple-testing.\n\n').format(**format_dict)
 
             # Add more info if enrichment analysis was performed.
             if self.enrichment:
                 info += ('Enrichment analysis was performed using the WormBase '
-                         'Enrichment Suite\n\n')
+                         'Enrichment Suite.\n')
             if self.epistasis:
                 info += ('Alaska performed epistasis analyses as first '
-                         'presented in (cite hypoxia paper).')
+                         'presented in\n(cite hypoxia paper).\n')
 
             return info
 
