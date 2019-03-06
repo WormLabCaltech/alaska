@@ -193,7 +193,7 @@ def run_qc(proj, nthreads):
         output = run_sys(args, prefix=_id)
 
         # Write bowtie stderr output.
-        first = '{} reads; of these'.format(_id, upto)
+        first = '{} reads; of these'.format(upto)
         last = 'overall alignment rate'
         found = False
         bt2_info = ''
