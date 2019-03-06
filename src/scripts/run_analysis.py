@@ -193,13 +193,13 @@ def run_qc(proj, nthreads):
         output = run_sys(args, prefix=_id)
 
         # Write bowtie stderr output.
-        first = '{} reads; of these:'.format(_id, upto)
+        first = '{} reads'.format(_id, upto)
         last = 'overall alignment rate'
         found = False
         bt2_info = ''
         for line in output.split('\n'):
             if line.startswith(_id):
-                line = line.split(': ')[1]
+                line = line[len(_id) + 2:]
 
                 if first in line:
                     found = True
