@@ -59,7 +59,7 @@ def run_sys(cmd, prefix=''):
     Runs a system command and echos all output.
     This function blocks until command execution is terminated.
     """
-    print_with_flush('# ' + ' '.join(cmd))
+    print_with_flush('## ' + ' '.join(cmd))
     output = ''
     with sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, bufsize=1, universal_newlines=True) as p:
         # while p.poll() is None:
@@ -171,6 +171,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to call bowtie2 alignment.
         """
+        upto = 2 * (10 ** 5)
         args = ['bowtie2', '-x', bt2_path]
 
         # single/paired-end
@@ -186,11 +187,29 @@ def run_qc(proj, nthreads):
             args += ['-2', ','.join(m2)]
 
         args += ['-S', '{}/{}_alignments.sam'.format(path, _id)]
-        args += ['-u', str(1 * (10 ** 5))]
+        args += ['-u', str(upto)]
         args += ['--threads', str(nthreads)]
         args += ['--verbose']
-        run_sys(args, prefix=_id)
+        output = run_sys(args, prefix=_id)
 
+        # Write bowtie stderr output.
+        first = '{} reads; of these'.format(upto)
+        last = 'overall alignment rate'
+        found = False
+        bt2_info = ''
+        for line in output.split('\n'):
+            if first in line:
+                found = True
+
+            if found:
+                bt2_info += line + '\n'
+
+            if last in line:
+                break
+
+        # Write the file.
+        with open('{}/{}_sorted.txt'.format(path, _id), 'w') as f:
+            f.write(bt2_info)
 
     def samtools_sort(_id):
         """
@@ -237,7 +256,7 @@ def run_qc(proj, nthreads):
         """
         Helper function to run multiqc.
         """
-        args = ['multiqc', '.']
+        args = ['multiqc', '.', '--ignore', '*.sam', '--ignore', 'qc_out.txt']
         run_sys(args, prefix=_id)
 
     ########## HELPER FUNCTIONS END HERE ###########
@@ -388,6 +407,9 @@ def run_kallisto(proj, nthreads):
         else:
             print_with_flush('unrecognized sample type!')
 
+        # Add bias correction flag
+        args += ['--bias']
+
         _id = name
 
         run_sys(args, prefix=_id)
@@ -447,12 +469,17 @@ def run_sleuth(proj):
     args += ['-k', './2_alignment']
     args += ['-o', './3_diff_exp']
     # args += ['--shiny']
-
     run_sys(args)
+
+    # Run tissue enrichment only if it is flagged to do so
     path = '3_diff_exp'
-    print_with_flush('# sleuth finished, starting enrichment analysis')
-    run_tea(path)
-    print_with_flush('# enrichment analysis finished, archiving')
+    if proj['enrichment']:
+        print_with_flush('# sleuth finished, starting enrichment analysis')
+        run_tea(path)
+        print_with_flush('# enrichment analysis finished, archiving')
+    else:
+        print_with_flush('# this organisms is not whitelisted for enrichment '
+                         + 'analysis, archiving')
     archive(path + '.tar.gz', path)
 
     # Archive all

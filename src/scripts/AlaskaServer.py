@@ -1509,9 +1509,15 @@ class AlaskaServer(Alaska):
             del self.samples_temp[__id]
         del self.projects_temp[_id]
 
+        # Set epistasis and enrichment flags.
+        for sample_id, sample in new_proj.samples.items():
+            for pair in Alaska.ENRICHMENT_ORGS:
+                org_pair = (sample.organism['genus'], sample.organism['species'])
+                new_proj.enrichment = new_proj.enrichment and pair == org_pair
+        new_proj.epistasis = len(new_proj.factors) == Alaska.EPISTASIS_FACTOR_NUM
+
         new_proj.progress = Alaska.PROGRESS['finalized']
         new_proj.save()
-        new_proj.temp = False
 
         # copy analysis script to project folder.
         self.copy_script(_id, Alaska.ANL_SCRIPT)
@@ -1764,6 +1770,7 @@ class AlaskaServer(Alaska):
 
         # write sleuth matrix and bash script
         proj.write_matrix()
+        proj.write_info()
         self.broadcast(_id, '{}: wrote sleuth design matrix'.format(_id))
 
         self.broadcast(_id, '{}: creating new job'.format(_id))

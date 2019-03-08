@@ -62,6 +62,21 @@ class Alaska():
     SLE_SCRIPT = 'sleuth.R'
     SHI_SCRIPT = 'open_sleuth_server.R'
 
+    # VARIABLES FOR PROJECT INFO
+    BOWTIE2   = "Bowtie2 (v2.3.4)"
+    SAMTOOLS  = "Samtools (v1.7)"
+    RSEQC     = "RSeQC (v2.6.4)"
+    FASTQC    = "FastQC (v0.11.6)"
+    MULTIQC   = "MultiQC (v1.4)"
+    KALLISTO  = "Kallisto (v0.44.0)"
+    SLEUTH    = "Sleuth (v0.30.0)"
+
+    QC_LIST = [BOWTIE2, SAMTOOLS, RSEQC, FASTQC]
+    QC_AGGREGATE = MULTIQC
+    QUANT = KALLISTO
+    DIFF = SLEUTH
+    DIFF_TEST = 'Wald Test'
+
     # NUMBER VARIABLES
     SAVE_MAX = 20               # maximum number of saves to keep
     SHI_DURATION = 1            # how long sleuth servers should be kept open
@@ -76,7 +91,11 @@ class Alaska():
     RAW_NOTIFY_2 = 1            # notify when there is 1 day left
     RAW_DURATION = 10           # keep reads for a max 10 days
     CPUS = '1-3'                # processing CPUs (for Docker)
-    NTHREADS = 1                # number of threads for processing
+    NTHREADS = 3                # number of threads for processing
+
+    # VARIABLES FOR FURTHER ANALYSES
+    ENRICHMENT_ORGS = [('caenorhabditis', 'elegans')]
+    EPISTASIS_FACTOR_NUM = 2
 
     # SUPPORTED EXTENSIONS
     RAW_EXT = ('.fastq.gz', '.fastq')  # supported raw read extensions

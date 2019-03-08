@@ -16,23 +16,22 @@ $path = "/alaska/root/projects/" . $id;
 switch ($type) {
   case 'qc':
     $file = "1_qc.tar.gz";
-    $path = $path . "/" . $file;
     break;
   case 'quant':
     $file = "2_alignment.tar.gz";
-    $path = $path . "/" . $file;
     break;
   case 'diff':
     $file = "3_diff_exp.tar.gz";
-    $path = $path . "/" . $file;
     break;
   case 'all':
     $file = $id . ".tar.gz";
-    $path = $path . "/" . $id . ".tar.gz";
+    break;
+  case 'info':
+    $file = 'alaska_info.txt';
     break;
 }
 
-
+$path = $path . "/" . $file;
 # Sanity check, and then read.
 if (is_readable($path)) {
   header("Cache-Control: public");
