@@ -5344,8 +5344,23 @@ var factor_names_to_class_names = {
   'life-stage':         'sample_life-stage_group',
   'tissue':             'sample_tissue_group'
 };
+// Life stages defined in issue #20
 var life_stages = [
-  'L1', 'L2', 'L3', 'L4', 'Young Adult', 'Adult', 'Embryo', 'Mixed'
+  '1-cell embryo',
+  '2-cell embryo',
+  '4-cell embryo',
+  'Embryo',
+  'L1',
+  'L1 arrest',
+  'L2',
+  'L2d',
+  'Dauer',
+  'L3',
+  'L4',
+  'Young Adult',
+  'Adult',
+  'Post-reproductive stage adult',
+  '7-days post-L4 adult'
 ];
 var tissues = [
   'Whole Organism (Multi-worm)',
