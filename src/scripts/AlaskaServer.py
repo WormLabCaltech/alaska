@@ -758,11 +758,11 @@ class AlaskaServer(Alaska):
 
                     # parse reference variables
                     # reference folder MUST contain only three files
-                    if len(os.listdir(ref_dir)) is not 4:
-                        self.out(('INFO: {}/{}/{} does not have only four '
-                                  + 'files...skipping').format(genus,
-                                                               species, ver))
-                        continue
+                    # if len(os.listdir(ref_dir)) is not 4:
+                    #     self.out(('INFO: {}/{}/{} does not have only four '
+                    #               + 'files...skipping').format(genus,
+                    #                                            species, ver))
+                    #     continue
 
                     # make sure all the files we need exists
                     # those are: dna, cdna, and bed

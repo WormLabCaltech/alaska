@@ -29,9 +29,9 @@ def rename_files(dirpath, filenames):
     print('Renaming {}'.format(dirpath))
 
     dirpath_split = dirpath.split(os.path.sep)
-    organism_prefix = '{}_{}_{}'.format(dirpath_split[-3][0],
-                                        dirpath_split[-2],
-                                        dirpath_split[-1])
+    organism_prefix = '{}_{}_{}'.format(dirpath_split[-4][0],
+                                        dirpath_split[-3],
+                                        dirpath_split[-2])
     annotation_new = '{}_annotation.tsv'.format(organism_prefix)
     bed_new = '{}.bed'.format(organism_prefix)
     dna_new = '{}_dna.fa.gz'.format(organism_prefix)
