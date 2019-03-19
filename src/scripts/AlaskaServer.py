@@ -848,6 +848,9 @@ class AlaskaServer(Alaska):
                 ref.kallisto_idx = kallisto_idx
                 ref.bowtie_idx = bowtie_idx
 
+                # Then, save the json for this organism.
+                self.organisms[genus][species].save()
+
     def make_idx(self, genus, species, ver, bt2=True, kal=True):
         """
         Runs docker containers to make indices (both for kallisto and bowtie2)
