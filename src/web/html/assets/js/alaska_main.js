@@ -1157,17 +1157,18 @@ function set_organisms_inputs_listeners(organisms, genus_select, species_select,
         species_select.append(option);
       }
     } else {
-      // Otherwise, disable the species select.
       species_select.prop('disabled', true);
-      version_select.prop('disabled', true);
     }
+
+    // Disable version select.
+    version_select.prop('disabled', true);
 
     // Reset choice.
     species_select.children('option:disabled').prop('selected', true);
     version_select.children('option:disabled').prop('selected', true);
 
     // Fire change on species select.
-    // species_select.change()
+    // species_select.change();
   });
 
   // Set input listener for the version select, so that if the species is changed,
@@ -1202,7 +1203,6 @@ function set_organisms_inputs_listeners(organisms, genus_select, species_select,
         version_select.append(option);
       }
     } else {
-      // Otherwise, disable the species select.
       version_select.prop('disabled', true);
     }
 
@@ -1225,9 +1225,6 @@ function populate_organisms_inputs(inputs, organisms) {
     var option = $('<option>', {text: genus});
     genus_select.append(option);
   }
-  // Disable the species and version selects.
-  species_select.prop('disabled', true);
-  version_select.prop('disbaled', true);
 
   set_organisms_inputs_listeners(organisms, genus_select, species_select,
                                       version_select);
@@ -2236,10 +2233,7 @@ function enable_disable_row(checkbox) {
       inputs.prop('disabled', false);
       textareas.prop('disabled', false);
       selects.prop('disabled', false);
-      // Then, fire change event for selects.
-      if (class_name != 'sample_organism_group') {
-        selects.change();
-      }
+      selects.change();
       buttons.prop('disabled', false);
     } else {
       // Disable everything.
