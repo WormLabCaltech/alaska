@@ -1132,11 +1132,13 @@ function set_organisms_inputs_listeners(organisms, genus_select, species_select,
   // changed, the species select is enabled/disabled accordingly.
   genus_select.change({
     'organisms': organisms,
-    'species_select': species_select
+    'species_select': species_select,
+    'version_select': version_select
   }, function(e) {
     var select = $(this);
     var organisms = e.data.organisms;
     var species_select = e.data.species_select;
+    var version_select = e.data.version_select;
 
     // Get currently selected genus.
     var genus = select.val();
@@ -1157,10 +1159,12 @@ function set_organisms_inputs_listeners(organisms, genus_select, species_select,
     } else {
       // Otherwise, disable the species select.
       species_select.prop('disabled', true);
+      version_select.prop('disabled', true);
     }
 
     // Reset choice.
     species_select.children('option:disabled').prop('selected', true);
+    version_select.children('option:disabled').prop('selected', true);
 
     // Fire change on species select.
     // species_select.change()
