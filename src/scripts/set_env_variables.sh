@@ -32,10 +32,13 @@ DOCKER_FTP_MOUNT="$DOCKER_FTP_VOLUME:/etc/pure-ftpd"
 
 # Port mappings & networking.
 DOCKER_CGI_PORT="80:80"
+# FTP
 DOCKER_FTP_PORT="21:21"
-DOCKER_FTP_PORTS="30000-30009:30000-30009"
+DOCKER_FTP_PASV="30000:30099"
+DOCKER_FTP_PORTS="30000-30099:30000-30099"
 DOCKER_FTP_HOST="PUBLICHOST=alaska.caltech.edu"
-DOCKER_FTP_FLAGS="ADDED_FLAGS=-d -d -O w3c:/var/log/pure-ftpd/transfer.log -c 25 -C 10"
+DOCKER_FTP_FLAGS="ADDED_FLAGS=-d -d -O w3c:/var/log/pure-ftpd/transfer.log"
+DOCKER_FTP_FLAGS="$DOCKER_FTP_FLAGS -c 50 -C 10 -p $DOCKER_FTP_PASV"
 
 # Declare array varables for required images, containers, volumes, and networks
 declare -a images=(
