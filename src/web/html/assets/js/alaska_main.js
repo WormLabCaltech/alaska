@@ -1225,6 +1225,9 @@ function populate_organisms_inputs(inputs, organisms) {
     var option = $('<option>', {text: genus});
     genus_select.append(option);
   }
+  // Disable the species and version selects.
+  species_select.prop('disabled', true);
+  version_select.prop('disbaled', true);
 
   set_organisms_inputs_listeners(organisms, genus_select, species_select,
                                       version_select);
