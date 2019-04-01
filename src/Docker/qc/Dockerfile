@@ -50,7 +50,6 @@ RUN conda install fontconfig
 RUN conda install conda-forge::openjdk
 RUN conda install bowtie2==$BOWTIE2_VER
 RUN conda install samtools==$SAMTOOLS_VER
-RUN conda install sambamba==$SAMBAMBA_VER
 RUN conda install fastqc==$FASTQC_VER
 RUN conda install rseqc==$RSEQC_VER
 RUN conda install multiqc==$MULTIQC_VER
