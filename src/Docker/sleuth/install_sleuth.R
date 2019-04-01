@@ -19,6 +19,7 @@ install.packages("ggplot2", repos="http://cran.us.r-project.org")
 install.packages("dplyr", repos="http://cran.us.r-project.org")
 install.packages("optparse", repos="http://cran.us.r-project.org")
 install.packages("files", repos="http://cran.us.r-project.org")
+install.packages("gridExtra", repos="http://cran.us.r-project.org")
 
 # biomart
 source("http://bioconductor.org/biocLite.R")
