@@ -3,7 +3,7 @@
 source scripts/set_env_variables.sh
 
 # build request image
-docker build -t $DOCKER_SLEUTH_TAG \
+docker build -t "$DOCKER_SLEUTH_TAG:$VERSION" \
              --build-arg TIMEZONE="$TIMEZONE" \
              --build-arg MINICONDA_VER="$MINICONDA_VER" \
              --build-arg MINICONDA3_URL="$MINICONDA3_URL" \

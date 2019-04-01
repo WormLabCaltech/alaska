@@ -3,7 +3,7 @@
 source scripts/set_env_variables.sh
 
 # build qc image
-docker build -t $DOCKER_QC_TAG \
+docker build -t "$DOCKER_QC_TAG:$VERSION" \
              --build-arg TIMEZONE="$TIMEZONE" \
              --build-arg MINICONDA_VER="$MINICONDA_VER" \
              --build-arg MINICONDA2_URL="$MINICONDA2_URL" \

@@ -31,7 +31,7 @@ class Alaska():
     encode_json
     __repr__
     """
-    VERSION = 'dev'             # alaska version
+    VERSION = 'beta-1'          # alaska version
     ENCODING = 'utf-8'          # encoding for decoding byte literals
     DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'   # datetime format
 
@@ -63,12 +63,12 @@ class Alaska():
     SHI_SCRIPT = 'open_sleuth_server.R'
 
     # VARIABLES FOR PROJECT INFO
-    BOWTIE2   = "Bowtie2 (v2.3.4)"
-    SAMTOOLS  = "Samtools (v1.7)"
-    RSEQC     = "RSeQC (v2.6.4)"
-    FASTQC    = "FastQC (v0.11.6)"
-    MULTIQC   = "MultiQC (v1.4)"
-    KALLISTO  = "Kallisto (v0.44.0)"
+    BOWTIE2   = "Bowtie2 (v2.3.5)"
+    SAMTOOLS  = "Samtools (v1.9)"
+    RSEQC     = "RSeQC (v3.0.0)"
+    FASTQC    = "FastQC (v0.11.8)"
+    MULTIQC   = "MultiQC (v1.7)"
+    KALLISTO  = "Kallisto (v0.45.0)"
     SLEUTH    = "Sleuth (v0.30.0)"
 
     QC_LIST = [BOWTIE2, SAMTOOLS, RSEQC, FASTQC]
@@ -115,14 +115,15 @@ class Alaska():
     # DOOCKER VARIABLES
     DOCKER_SCRIPT_VOLUME = 'alaska_script_volume'
     DOCKER_DATA_VOLUME = 'alaska_data_volume'
-    DOCKER_QC_TAG = 'alaska_qc:latest'
-    DOCKER_KALLISTO_TAG = 'alaska_kallisto:latest'
-    DOCKER_SLEUTH_TAG = 'alaska_sleuth:latest'
+    DOCKER_QC_TAG = 'alaska_qc:{}'.format(VERSION)
+    DOCKER_KALLISTO_TAG = 'alaska_kallisto:{}'.format(VERSION)
+    DOCKER_SLEUTH_TAG = 'alaska_sleuth:{}'.format(VERSION)
+    # These are containers, so the version isn't included.
     DOCKER_SERVER_TAG = 'alaska_server'
     DOCKER_FTP_TAG = 'alaska_ftp'
 
     # FTP root path
-    FTP_ROOT_PATH = '/home/ftpusers/alaska_data_volume'
+    FTP_ROOT_PATH = '/alaska/root'
 
     # TESTING VARIABLES
     TEST_RAW_READS_MINIMUM = ['test_samples/raw/minimum/mt1',
@@ -161,6 +162,8 @@ class Alaska():
         'test_read_quant':      b'\x50',
         'test_diff_exp':        b'\x51',
         'test_all':             b'\x52',
+        'remove_jobs_proj':     b'\x86',
+        'stop_current_job':     b'\x87',
         'get_var':              b'\x88',  # get contents of variable
         'reset':                b'\x89',
         'cleanup':              b'\x90',
