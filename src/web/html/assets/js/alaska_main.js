@@ -1474,13 +1474,13 @@ function set_paired_end_listener(id, form) {
   var paired = form.find('#' + new_paired_id);
 
   // Set listener for click.
-  single_radio.click({'paired': paired}, function (e) {
+  single_radio.change({'paired': paired}, function (e) {
     var paired = e.data.paired;
     if (this.checked) {
       paired.collapse('hide');
     }
   });
-  paired_radio.click({'paired': paired}, function (e) {
+  paired_radio.change({'paired': paired}, function (e) {
     var paired = e.data.paired;
     if (this.checked) {
       paired.collapse('show');
@@ -1519,13 +1519,13 @@ function save_proj(callback, ...args) {
  * Sets a 2-radio toggle to show/hide a collapse.
  */
 function set_radio_collapse_toggle(radio_hide, radio_show, div_to_toggle) {
-  radio_hide.click({'div': div_to_toggle}, function (e) {
+  radio_hide.change({'div': div_to_toggle}, function (e) {
     var div = e.data.div;
     if (this.checked) {
       div.collapse('hide');
     }
   });
-  radio_show.click({'div': div_to_toggle}, function (e) {
+  radio_show.change({'div': div_to_toggle}, function (e) {
     var div = e.data.div;
     if (this.checked) {
       div.collapse('show');
@@ -2051,8 +2051,6 @@ function set_factor_card_to_sample_listener(factor_card,
 
       if (val == factor_name) {
         checkbox.prop('disabled', true);
-      } else {
-        checkbox.prop('disabled', false);
       }
       refresh_checkbox(checkbox);
       enable_disable_row(checkbox);
@@ -2109,7 +2107,7 @@ function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
 
   // Also, depending on which radio is selected (i.e. what design the
   // experiment is), we need to show or hide the second factor.
-  design_1_radio.click(function () {
+  design_1_radio.change(function () {
     if (this.checked) {
       for (var id in sample_forms) {
         var sample_form = sample_forms[id];
@@ -2118,7 +2116,7 @@ function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
       }
     }
   });
-  design_2_radio.click(function () {
+  design_2_radio.change(function () {
     if (this.checked) {
       for (var id in sample_forms) {
         var sample_form = sample_forms[id];
@@ -2408,7 +2406,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
       var paired_row = paired_collapse.find('div[style*="display:none"]');
 
       // Set up the single-end read listener.
-      radio_1.click({
+      radio_1.change({
         'single_collapse': single_collapse,
         'paired_collapse': paired_collapse
       }, function (e) {
@@ -2477,7 +2475,7 @@ function copy_to_form(form_group, to_form_class_name, disable) {
         });
 
         // Set up paired-end listener.
-        radio_2.click({
+        radio_2.change({
           'single_collapse': single_collapse,
           'paired_collapse': paired_collapse
         }, function (e) {
@@ -3045,6 +3043,7 @@ function set_values_of_experimental_design(form_group, vals) {
     radio_1.click();
   } else if (!radio_2.prop('disabled')) {
     radio_2.click();
+    factor_cards.eq(1).collapse('show');
     set_values_of_factor_card(factor_cards.eq(1), vals[1]);
   }
 }
@@ -3237,12 +3236,15 @@ function set_common_meta_inputs(card, inputs) {
     if (class_name in inputs) {
       getters_and_setters[type].set(form_group, inputs[class_name]);
 
-      // Check the checkbox.
-      checkbox.prop('checked', false);
-      checkbox.click();
+      // The organism selects should not be enabled/disabled
+      if (type != 'organism') {
+        // Check the checkbox.
+        checkbox.prop('checked', false);
+        checkbox.click();
 
-      // Fire change for inputs.
-      form_group.find('button').change();
+        // Fire change for inputs.
+        form_group.find('button').change();
+      }
     } else {
       // Unselect the checkbox.
       checkbox.prop('checked', true);
@@ -4233,7 +4235,7 @@ function set_copy_btn(copy_btn, id_to_ignore) {
                   + 'data-group=' + group + '></div>');
 
   // This is a template of the label and input to copy.
-  var label = $('<label class="btn btn-sm btn-outline-primary mr-2"></label>');
+  var label = $('<label class="btn btn-sm btn-outline-primary mr-2 mb-1"></label>');
   var input = $('<input type="checkbox" name="copy" autocomplete="off">');
 
   // Loop through each sample and make a button for each, except the one
