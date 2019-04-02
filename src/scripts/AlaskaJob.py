@@ -89,6 +89,13 @@ class AlaskaJob(Alaska):
 
         self.save()  # save job info
 
+    def terminate(self):
+        '''
+        Forcibly terminates the job.
+        '''
+        self.docker.terminate()
+        self.finished()
+
     def save(self, folder=None):
         """
         Saves job information to JSON.

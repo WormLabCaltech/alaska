@@ -719,6 +719,41 @@ class AlaskaServer(Alaska):
         if close:
             self.close(to)
 
+    def remove_jobs_proj(self, _id=None):
+        '''
+        Remove all jobs related to the given project regardless of whether the
+        job is running or is in the queue.
+        '''
+        self.broadcast(_id, '{}: removing from queue'.format(_id))
+        if not self.exists_var(_id):
+            raise Exception('{}: either the project does not exist or has not '
+                            + 'started analysis')
+
+        # Deal with queue first.
+        for ele in list(self.queue.queue):
+            if ele.proj_id == _id:
+                self.stale_jobs.append(ele.id)
+
+        # Then, deal with whether the job is currently running.
+        if self.current_job is not None and self.current_job.proj_id == _id:
+            self.stop_current_job()
+
+        self.broadcast(_id, '{}: removed from queue'.format(_id))
+
+    def stop_current_job(self, _id=None):
+        '''
+        Stops the currently running job.
+        '''
+        # Check if there is in fact a currently running job.
+        if self.current_job is None:
+            raise Exception('No jobs running.')
+
+        try:
+            self.current_job.terminate()
+        except:
+            pass
+        self.current_job = None
+
     def update_orgs(self, _id=None):
         """
         Updates organisms.

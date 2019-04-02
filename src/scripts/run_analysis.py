@@ -231,27 +231,6 @@ def run_qc(proj, nthreads):
         args += ['-@', str(nthreads-1)]
         run_sys(args, prefix=_id)
 
-    def sambamba_sort(_id):
-        """
-        Helper function to call samtools to sort .bam
-        """
-        sam_path = '{}_alignments.sam'.format(_id)
-        args = ['sambamba', 'sort', sam_path]
-        sorted_bam = '{}_sorted.bam'.format(_id)
-        args += ['-o', sorted_bam]
-        args += ['-t', str(nthreads-1)]
-        args += ['-m', '2G']
-        run_sys(args, prefix=_id)
-
-    def sambamba_index(_id):
-        """
-        Helper function to call samtools to index .bam
-        """
-        args = ['sambamba', 'index', '{}_sorted.bam'.format(_id)]
-        args += ['-t', str(nthreads-1)]
-        args += ['-p']
-        run_sys(args, prefix=_id)
-
     def multiqc(_id=''):
         """
         Helper function to run multiqc.
@@ -260,6 +239,10 @@ def run_qc(proj, nthreads):
         run_sys(args, prefix=_id)
 
     ########## HELPER FUNCTIONS END HERE ###########
+    # First, make sure that environment variables are set.
+    os.environ['LC_ALL'] = 'C.UTF-8'
+    os.environ['LANG'] = 'C.UTF-8'
+
     print_with_flush('{} samples detected...'.format(len(proj['samples'])), end='')
     for _id in proj['samples']:
         print_with_flush('{}({})'.format(_id, proj['samples'][_id]['name']), end=' ')

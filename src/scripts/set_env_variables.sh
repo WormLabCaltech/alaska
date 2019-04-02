@@ -3,6 +3,10 @@
 # These include: Update.sh, Setup.sh, and Start.sh
 # This script is to be called with the 'source' prefix.
 
+# Alaska version.
+# This version will also match with the image versions!
+VERSION="beta-1"
+
 # Timezone for all containers.
 TIMEZONE="America/Los_Angeles"
 
@@ -22,7 +26,6 @@ DOCKER_SLEUTH_TAG="alaska_sleuth"
 DOCKER_CGI_TAG="alaska_cgi"
 
 # Mounting points.
-DOCKER_TIME_MOUNT="/etc/localtime:/etc/localtime:ro"
 DOCKER_SOCKET_MOUNT="/var/run/docker.sock:/var/run/docker.sock"
 DOCKER_SCRIPT_MOUNT="$DOCKER_SCRIPT_VOLUME:/alaska/scripts"
 DOCKER_DATA_MOUNT="$DOCKER_DATA_VOLUME:/alaska/root"
@@ -62,15 +65,14 @@ declare -a volumes=(
 )
 
 # Software version control.
-MINICONDA_VER="4.5.4"
-BOWTIE2_VER="2.3.4"
-SAMTOOLS_VER="1.7"
-RSEQC_VER="2.6.4"
-FASTQC_VER="0.11.6"
-MULTIQC_VER="1.4"
-KALLISTO_VER="0.44.0"
+MINICONDA_VER="4.5.12"
+BOWTIE2_VER="2.3.5"
+SAMTOOLS_VER="1.9"
+RSEQC_VER="3.0.0"
+FASTQC_VER="0.11.8"
+MULTIQC_VER="1.7"
+KALLISTO_VER="0.45.0"
 SLEUTH_VER="0.30.0"
-SAMBAMBA_VER="0.6.6"
 
 # Note: some bioconda packages require python2, which is why
 #       there is also a link for miniconda 2.

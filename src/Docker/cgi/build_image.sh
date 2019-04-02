@@ -4,7 +4,7 @@
 source scripts/set_env_variables.sh
 
 # build cgi image
-docker build -t $DOCKER_CGI_TAG \
+docker build -t "$DOCKER_CGI_TAG:$VERSION" \
              --build-arg TIMEZONE=$TIMEZONE \
              --force-rm \
              --no-cache \
