@@ -484,6 +484,17 @@ class AlaskaProject(Alaska):
             f.write(format_attribute('Sample_source_name',
                                      sample.meta['chars']['tissue']))
 
+            # Convert organism dictionary, which contains the genus, species,
+            # and reference version, to standard NCBI taxonomy, which is just
+            # a string of the genus and species.
+            # https://www.ncbi.nlm.nih.gov/Taxonomy/taxonomyhome.html/
+            taxonomy = '{} {}'.format(sample.organism['genus'].capitalize(),
+                                      sample.organism['species'])
+            f.write(format_attribute('Sample_organism', taxonomy))
+
+            f.write(format_attribute('Sample_genome_build',
+                                     sample.organism['version']))
+
             to_exclude = [
                 'growth conditions',
                 'library preparation',
@@ -503,7 +514,10 @@ class AlaskaProject(Alaska):
             f.write(format_attribute('Sample_library_construction_protocol',
                     sample.meta['chars']['library preparation']))
             f.write(format_attribute('Sample_library_strategy', 'RNA-Seq'))
+
+            # TODO
             f.write(format_attribute('Sample_data_processing', ''))
+
             f.write(format_attribute('Sample_description',
                     sample.meta['description']))
 
