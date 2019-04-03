@@ -483,8 +483,6 @@ class AlaskaProject(Alaska):
             f.write(format_attribute('Sample_title', sample.name))
             f.write(format_attribute('Sample_source_name',
                                      sample.meta['chars']['tissue']))
-            f.write(format_attribute('Sample_organism',
-                    sample.organism.replace('_', ' ').capitalize()))
 
             to_exclude = [
                 'growth conditions',
