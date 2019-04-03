@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \
     curl \
-    software-properties-common
+    software-properties-common \
+    tzdata
 
 ##### MINICONDA (PYTHON) INSTALLATION #####
 # fetch miniconda installation script
