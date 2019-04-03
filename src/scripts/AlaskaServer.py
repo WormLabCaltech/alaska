@@ -719,6 +719,41 @@ class AlaskaServer(Alaska):
         if close:
             self.close(to)
 
+    def remove_jobs_proj(self, _id=None):
+        '''
+        Remove all jobs related to the given project regardless of whether the
+        job is running or is in the queue.
+        '''
+        self.broadcast(_id, '{}: removing from queue'.format(_id))
+        if not self.exists_var(_id):
+            raise Exception('{}: either the project does not exist or has not '
+                            + 'started analysis')
+
+        # Deal with queue first.
+        for ele in list(self.queue.queue):
+            if ele.proj_id == _id:
+                self.stale_jobs.append(ele.id)
+
+        # Then, deal with whether the job is currently running.
+        if self.current_job is not None and self.current_job.proj_id == _id:
+            self.stop_current_job()
+
+        self.broadcast(_id, '{}: removed from queue'.format(_id))
+
+    def stop_current_job(self, _id=None):
+        '''
+        Stops the currently running job.
+        '''
+        # Check if there is in fact a currently running job.
+        if self.current_job is None:
+            raise Exception('No jobs running.')
+
+        try:
+            self.current_job.terminate()
+        except:
+            pass
+        self.current_job = None
+
     def update_orgs(self, _id=None):
         """
         Updates organisms.
@@ -1247,6 +1282,7 @@ class AlaskaServer(Alaska):
 
         Returns: None
         """
+        proj = None
         if self.exists_temp(_id):
             proj = self.projects_temp[_id]
             del self.projects_temp[_id]
@@ -1255,22 +1291,28 @@ class AlaskaServer(Alaska):
             del self.projects[_id]
 
         # Remove proj
-        proj.remove()
+        if proj is not None:
+            proj.remove()
 
-        # check if the project has any samples
-        for sample_id in proj.samples:
-            if sample_id in self.samples:
-                del self.samples[sample_id]
+            # check if the project has any samples
+            for sample_id in proj.samples:
+                if sample_id in self.samples:
+                    del self.samples[sample_id]
 
-            if sample_id in self.samples_temp:
-                del self.samples_temp[sample_id]
+                if sample_id in self.samples_temp:
+                    del self.samples_temp[sample_id]
 
-        # finally, remove project
-        del proj
+            # finally, remove project
+            del proj
 
-        # If the project also has an ftp user, remove that too
-        if _id in self.ftp:
-            self.remove_ftp(_id)
+            # If the project also has an ftp user, remove that too
+            if _id in self.ftp:
+                self.remove_ftp(_id)
+
+        # Remove project folder.
+        # We don't simply use proj.dir because this project may not exist,
+        # but the folder might.
+        shutil.rmtree('{}/{}'.format(Alaska.PROJECTS_DIR, _id))
 
         self.broadcast(_id, '{}: removed'.format(_id))
 
@@ -2983,10 +3025,12 @@ class AlaskaServer(Alaska):
                         ap = AlaskaProject(file)
                         ap.load()
 
-                        if all(sample not in self.samples
-                               for sample in ap.samples):
+                        if all(sample not in self.samples for sample in ap.samples) \
+                           and all(sample not in self.samples_temp for sample in ap.samples):
                             self.projects[file] = ap
                             self.samples = {**self.samples, **ap.samples}
+                        else:
+                            raise Exception('Some samples have duplicate ids.')
                     except Exception as e:
                         self.out(('ERROR: failed to load unsaved project '
                                   + '{}').format(file))
@@ -2999,11 +3043,13 @@ class AlaskaServer(Alaska):
                         ap = AlaskaProject(file)
                         ap.load(Alaska.TEMP_DIR)
 
-                        if all(sample not in self.samples_temp
-                               for sample in ap.samples):
+                        if all(sample not in self.samples for sample in ap.samples) \
+                           and all(sample not in self.samples_temp for sample in ap.samples):
                             self.projects_temp[file] = ap
                             self.samples_temp = {**self.samples_temp,
                                                  **ap.samples}
+                        else:
+                            raise Exception('Some samples have duplicate ids.')
 
                     except Exception as e:
                         self.out(('ERROR: failed to load unsaved temporary '
