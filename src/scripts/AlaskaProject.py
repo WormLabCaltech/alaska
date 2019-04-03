@@ -278,7 +278,7 @@ class AlaskaProject(Alaska):
             df = pd.concat([df, col], axis=1, sort=True)
 
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir),
-                  sep=' ', index=True)
+                  sep=' ', index=True, index_label='sample')
 
     def write_info(self):
         """
