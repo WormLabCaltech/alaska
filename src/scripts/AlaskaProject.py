@@ -67,8 +67,8 @@ class AlaskaProject(Alaska):
         self.raw_reads = {}
         self.samples = {}
         self.design = 1  # 1: single-factor, 2: two-factor
-        self.controls = []
-        self.factors = []
+        self.controls = {}
+        self.factors = {}
 
         # Booleans that tell whether or not to perform enrichment / epistasis
         # analyses.
@@ -254,11 +254,8 @@ class AlaskaProject(Alaska):
         df.set_index('sample', inplace=True)
 
         # Add a column for each factor.
-        for i in range(self.design):
+        for control_name, control_value in self.controls.items():
             column = []
-            control = self.controls[i]
-            control_name = control['name']
-            control_value = control['value']
 
             for sample_id, sample in self.samples.items():
                 name = sample.name
@@ -280,85 +277,91 @@ class AlaskaProject(Alaska):
         df.to_csv('{}/rna_seq_info.txt'.format(self.diff_dir),
                   sep=' ', index=True)
 
+    def get_info_str(self, only=None):
+        """
+        Helper function to get the string to write to the file.
+        """
+        # factor string
+        factor_str = None
+        if self.design == 1:
+            factor_str = 'single'
+        else:
+            factor_str = 'two'
+
+        # arguments string
+        args = ''
+        genus = ''
+        species = ''
+        version = ''
+        for sample_id, sample in self.samples.items():
+            # If we want to only include a single sample.
+            if only and sample_id != only:
+                continue
+
+            name = sample.name
+            genus = sample.organism['genus']
+            species = sample.organism['species']
+            version = sample.organism['version']
+
+            arg = '-b {} --bias'.format(sample.bootstrap_n)
+            if sample.type == 1:
+                arg += ' --single -l {} -s {}'.format(sample.length,
+                                                      sample.stdev)
+            args += '{}({}):\t{}.\n'.format(sample_id, name, arg)
+
+        # Construct dictionary for string formatting.
+        format_dict = {'factor_str': factor_str,
+                       'qc_list': ', '.join(Alaska.QC_LIST),
+                       'qc_agg': Alaska.QC_AGGREGATE,
+                       'quant': Alaska.QUANT,
+                       'diff': Alaska.DIFF,
+                       'quant_args': args,
+                       'genus': genus.capitalize(),
+                       'species': species,
+                       'version': version,
+                       'diff_test': Alaska.DIFF_TEST}
+
+        info = ('RNA-seq data was analyzed with Alaska using the '
+                '{factor_str}-factor design option.\nBriefly, Alaska '
+                'performs quality control using\n{qc_list} and outputs\n'
+                'a summary report generated using {qc_agg}. Read '
+                'quantification and\ndifferential expression analysis of '
+                'transcripts were performed using\n{quant} and {diff}. '
+                '{quant} was run using the\nfollowing flags for each '
+                'sample:\n{quant_args}\n'
+                'Reads were aligned using\n{genus} {species} genome '
+                'version {version}\nas provided by Wormbase.\n\n'
+                'Differential expression analyses with {diff} were '
+                'performed using a\n{diff_test} corrected for '
+                'multiple-testing.\n\n').format(**format_dict)
+
+        # Add more info if enrichment analysis was performed.
+        if self.enrichment:
+            info += ('Enrichment analysis was performed using the WormBase '
+                     'Enrichment Suite:\n'
+                     'https://doi.org/10.1186/s12859-016-1229-9\n'
+                     'https://www.wormbase.org/tools/enrichment/tea/tea.cgi\n')
+        if self.epistasis:
+            info += ('Alaska performed epistasis analyses as first '
+                     'presented in\nhttps://doi.org/10.1073/pnas.1712387115\n')
+
+        return info
+
     def write_info(self):
         """
         Writes an information txt file about this project to the project root
         directory.
         """
-        def get_info_str():
-            """
-            Helper function to get the string to write to the file.
-            """
-            # factor string
-            factor_str = None
-            if self.design == 1:
-                factor_str = 'single'
-            else:
-                factor_str = 'two'
+        format_dict = {'proj_id': self.id,
+                       'datetime': self.datetime,
+                       'n_samples': len(self.samples)}
 
-            # arguments string
-            args = ''
-            genus = ''
-            species = ''
-            version = ''
-            for sample_id, sample in self.samples.items():
-                name = sample.name
-                genus = sample.organism['genus']
-                species = sample.organism['species']
-                version = sample.organism['version']
-
-                arg = '-b {} --bias'.format(sample.bootstrap_n)
-                if sample.type == 1:
-                    arg += ' --single -l {} -s {}'.format(sample.length,
-                                                          sample.stdev)
-                args += '{}({}):\t{}\n'.format(sample_id, name, arg)
-
-            # Construct dictionary for string formatting.
-            format_dict = {'proj_id': self.id,
-                           'datetime': self.datetime,
-                           'n_samples': len(self.samples),
-                           'factor_str': factor_str,
-                           'qc_list': ', '.join(Alaska.QC_LIST),
-                           'qc_agg': Alaska.QC_AGGREGATE,
-                           'quant': Alaska.QUANT,
-                           'diff': Alaska.DIFF,
-                           'quant_args': args,
-                           'genus': genus.capitalize(),
-                           'species': species,
-                           'version': version,
-                           'diff_test': Alaska.DIFF_TEST}
-
-            info = ('alaska_info.txt for {proj_id}\n'
-                    'This project was created on {datetime} PST with '
-                    '{n_samples} samples.\n\n'
-                    'RNA-seq data was analyzed using Alaska using the '
-                    '{factor_str}-factor design option.\nBriefly, Alaska '
-                    'performs quality control using \n{qc_list} and outputs\n'
-                    'a summary report generated using {qc_agg}. Read '
-                    'quantification and\ndifferential expression analysis of '
-                    'transcripts were performed using\n{quant} and {diff}. '
-                    '{quant} was run using the\nfollowing flags for each '
-                    'sample:\n{quant_args}\n'
-                    'Reads were aligned using\n{genus} {species} genome '
-                    'version {version}\nas provided by Wormbase.\n\n'
-                    'Differential expression analyses with {diff} were '
-                    'performed using a\n{diff_test} corrected for '
-                    'multiple-testing.\n\n').format(**format_dict)
-
-            # Add more info if enrichment analysis was performed.
-            if self.enrichment:
-                info += ('Enrichment analysis was performed using the WormBase '
-                         'Enrichment Suite.\n'
-                         'https://doi.org/10.1186/s12859-016-1229-9\n'
-                         'https://www.wormbase.org/tools/enrichment/tea/tea.cgi\n')
-            if self.epistasis:
-                info += ('Alaska performed epistasis analyses as first '
-                         'presented in\nhttps://doi.org/10.1073/pnas.1712387115\n')
-
-            return info
+        info = ('alaska_info.txt for {proj_id}\n'
+                'This project was created on {datetime} PST with '
+                '{n_samples} samples.\n\n').format(**format_dict)
 
         # Get the info string.
-        info = get_info_str()
+        info += self.get_info_str()
 
         # Write the text file.
         with open('{}/alaska_info.txt'.format(self.dir), 'w') as f:
@@ -451,7 +454,33 @@ class AlaskaProject(Alaska):
             f.write(format_indicator('SERIES', self.id))
             f.write(format_attribute('Series_title', self.meta['title']))
             f.write(format_attribute('Series_summary', self.meta['abstract']))
-            f.write(format_attribute('Series_overall_design', ''))
+
+            formatting = {'n_factors': len(self.factors),
+                          'factors': ', '.join(list(self.factors.keys())),
+                          'n_samples': len(self.samples)}
+            design = ('The experiment was designed as a {n_factors}-factor '
+                      '({factors}) contrast experiment with {n_samples} samples. ') \
+                      .format(**formatting)
+
+            for factor_name, factor_control in self.controls.items():
+                design += ('For factor {factor_name}, the control was '
+                           + '{factor_control}. ') \
+                           .format(**{'factor_name': factor_name,
+                                      'factor_control': factor_control})
+
+                factor_values = self.factors[factor_name].copy()
+                factor_values.remove(factor_control)
+                if len(factor_values) > 1:
+                    design += ('The test values for this factor were: '
+                               '{}. ').format(', '.join(factor_values))
+                else:
+                    design += ('The test value for this factor was '
+                               '{}. ').format(factor_values[0])
+
+            design += ('The experimental design matrix is enclosed as '
+                       'rna_seq_info.txt.')
+
+            f.write(format_attribute('Series_overall_design', design))
 
             for cont in self.meta['contributors']:
                 f.write(format_attribute('Series_contributor', cont))
@@ -515,8 +544,9 @@ class AlaskaProject(Alaska):
                     sample.meta['chars']['library preparation']))
             f.write(format_attribute('Sample_library_strategy', 'RNA-Seq'))
 
-            # TODO
-            f.write(format_attribute('Sample_data_processing', ''))
+            info = self.get_info_str(only=sample.id)
+            info = info.replace('\n\n', ' ').replace('\n', ' ').replace('\t', ' ')
+            f.write(format_attribute('Sample_data_processing', info))
 
             f.write(format_attribute('Sample_description',
                     sample.meta['description']))
