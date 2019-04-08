@@ -173,6 +173,9 @@ function goto_progress(status) {
 
   // Set compile button.
   progress_container.find('#geo_compile_btn').click(function () {
+    // Hide modal.
+    $('#geo_compile_modal').modal('hide');
+
     // Set loading spinner.
     var btn = $('#geo_compile_modal_btn');
     var spinner = btn.children('.loading_spinner');

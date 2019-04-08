@@ -409,7 +409,7 @@ def run_sleuth(proj):
     Assumes that the design matrix is already present in the directory.
     Once sleuth is finished, runs TEA.
     """
-    def run_tea(d):
+    def run_tea(d, q_threshold=0.05):
         """
         Runs TEA on sleuth output.
         """
@@ -431,18 +431,31 @@ def run_sleuth(proj):
         print_with_flush('# entering 3_diff_exp')
         os.chdir(d)
         for file in os.listdir():
-            if file.startswith('sleuth_table') and file.endswith('.csv') and not file.endswith(('tissue.csv', 'phenotype.csv', 'go.csv')):
+            if file.startswith('sleuth_table') \
+              and file.endswith('.csv') \
+              and not file.endswith(('tissue.csv', 'phenotype.csv', 'go.csv')):
                 df = pd.read_csv(file, index_col=0)
-                gene_list = df[df.qval < 0.05].ens_gene
+                gene_list = df[df.qval < q_threshold].ens_gene
                 name = os.path.splitext(file)[0]
 
+                if len(gene_list) == 0:
+                    print_with_flush(('# there are no genes with q < {} in '
+                                     + '{}!').format(q_threshold, file))
+                    print_with_flush('# this means there are no significantly '
+                                     + 'differentially-expressed genes for '
+                                     + 'this set of conditions.')
+                    continue
+
                 for analysis in analyses:
-                    print_with_flush('# performing {} enrichment analysis for {}'.format(analysis, file))
+                    print_with_flush(('# performing {} enrichment analysis '
+                                      + 'for {}').format(analysis, file))
                     title = '{}_{}'.format(name, analysis)
                     fname = '{}.csv'.format(title)
                     df_dict = tea.fetch_dictionary(analysis)
-                    df_results = tea.enrichment_analysis(gene_list, df_dict, aname=fname, save=True)
-                    tea.plot_enrichment_results(df_results, analysis=analysis, title=title, save=True)
+                    df_results = tea.enrichment_analysis(gene_list, df_dict,
+                                                         aname=fname, save=True)
+                    tea.plot_enrichment_results(df_results, analysis=analysis,
+                                                title=title, save=True)
         os.chdir(wdir)
         print_with_flush('# returned to root')
 
