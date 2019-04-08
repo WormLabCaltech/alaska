@@ -3889,18 +3889,16 @@ function convert_proj_meta_inputs(card) {
       case 'proj_experimental_design_group':
         obj['design'] = input.length;
 
-        var factors = [];
+        var factors = {};
         for (var i = 0; i < input.length; i++) {
-          var factor = {};
-          factor['name'] = input[i].name;
+          name = input[i].name;
 
           var values = [];
           for (var j = 0; j < input[i].values.length; j++) {
             var value = input[i].values[j][0];
             values.push(value);
           }
-          factor['values'] = values;
-          factors.push(factor);
+          factors[name] = values;
         }
         obj['factors'] = factors;
         break;
@@ -4410,7 +4408,8 @@ function set_choose_controls_modal(modal, factors) {
   // First, let's set the header.
   var header = modal.find('.choose_controls_header');
   var form = modal.find('.proj_control_form');
-  header.text(header.text().replace('FACTOR', factors.length + '-factor'));
+  header.text(header.text().replace('FACTOR', Object.keys(factors).length
+                                              + '-factor'));
 
   // Set up common listener first.
   var validate_btn = modal.find('#validate_controls_btn');
@@ -4444,11 +4443,10 @@ function set_choose_controls_modal(modal, factors) {
 
   // Set up each factor.
   var control_groups = [];
-  for (var i = 0; i < factors.length; i++) {
-    var factor_num = i + 1;
-    var factor = factors[i];
-    var factor_name = factor.name;
-    var factor_values = factor.values;
+  var factor_num = 0;
+  for (var factor_name in factors) {
+    factor_num++;
+    var factor_values = factors[factor_name];
     var new_control_group = control_group.clone(true);
     control_groups.push(new_control_group);
 
@@ -4483,12 +4481,11 @@ function set_choose_controls_modal(modal, factors) {
     'tooltip': start_tooltip
   }, function (e) {
     var valid = true;
-    var controls = [];
+    var controls = {};
     var control_groups = e.data.control_groups;
 
     for (var i = 0; i < control_groups.length; i++) {
       var control_group = control_groups[i];
-      var control = {};
 
       // Get the name and selected value from the control group.
       var name_input = control_group.find('input:text:disabled');
@@ -4503,9 +4500,7 @@ function set_choose_controls_modal(modal, factors) {
         valid = false;
       } else {
         value_select.removeClass('is-invalid');
-        control['name'] = name;
-        control['value'] = value;
-        controls.push(control);
+        controls[name] = value;
 
         // Add the list of project that match this control.
         var samples_group = control_group.find('.proj_control_samples_group');
