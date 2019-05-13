@@ -409,7 +409,7 @@ def run_sleuth(proj):
     Assumes that the design matrix is already present in the directory.
     Once sleuth is finished, runs TEA.
     """
-    def run_tea(d, q_threshold=0.05):
+    def run_tea(parent, sleuth, out, q_threshold=0.05):
         """
         Runs TEA on sleuth output.
         """
@@ -429,14 +429,14 @@ def run_sleuth(proj):
         # Load sleuth results.
         wdir = os.getcwd()
         print_with_flush('# entering 3_diff_exp')
-        os.chdir(d)
-        for file in os.listdir():
-            if file.startswith('sleuth_table') \
-              and file.endswith('.csv') \
-              and not file.endswith(('tissue.csv', 'phenotype.csv', 'go.csv')):
-                df = pd.read_csv(file, index_col=0)
+        os.chdir(parent)
+        print_with_flush('# creating {} directory'.format(out))
+        os.makedirs(out, exist_ok=True)
+        for file in os.listdir(sleuth):
+            if file.endswith('.csv'):
+                df = pd.read_csv(os.path.join(sleuth, file), index_col=0)
                 gene_list = df[df.qval < q_threshold].ens_gene
-                name = os.path.splitext(file)[0]
+                name = os.path.splitext(os.path.basename(file))[0]
 
                 if len(gene_list) == 0:
                     print_with_flush(('# there are no genes with q < {} in '
@@ -449,11 +449,13 @@ def run_sleuth(proj):
                 for analysis in analyses:
                     print_with_flush(('# performing {} enrichment analysis '
                                       + 'for {}').format(analysis, file))
-                    title = '{}_{}'.format(name, analysis)
-                    fname = '{}.csv'.format(title)
+                    fname = '{}_{}'.format(name.replace('betas_wt', out), analysis)
+                    title = os.path.join(out, fname)
                     df_dict = tea.fetch_dictionary(analysis)
                     df_results = tea.enrichment_analysis(gene_list, df_dict,
-                                                         aname=fname, save=True)
+                                                         aname=title + '.csv',
+                                                         save=True,
+                                                         show=False)
                     tea.plot_enrichment_results(df_results, analysis=analysis,
                                                 title=title, save=True)
         os.chdir(wdir)
@@ -463,20 +465,20 @@ def run_sleuth(proj):
     args += ['./sleuth.R']
     args += ['-d', './3_diff_exp']
     args += ['-k', './2_alignment']
-    args += ['-o', './3_diff_exp']
+    args += ['-o', './3_diff_exp/betas']
     # args += ['--shiny']
     run_sys(args)
 
     # Run tissue enrichment only if it is flagged to do so
-    path = '3_diff_exp'
+    parent, sleuth, out = '3_diff_exp', 'betas', 'enrichment'
     if proj['enrichment']:
         print_with_flush('# sleuth finished, starting enrichment analysis')
-        run_tea(path)
+        run_tea(parent, sleuth, out)
         print_with_flush('# enrichment analysis finished, archiving')
     else:
         print_with_flush('# this organisms is not whitelisted for enrichment '
                          + 'analysis, archiving')
-    archive(path + '.tar.gz', path)
+    archive(parent + '.tar.gz', parent)
 
     # Archive all
     print_with_flush('# all analyses finished, archiving entire project')

@@ -39,6 +39,7 @@ kallisto <- opt$k
 
 # directory to save results
 output_dir <- opt$o
+dir.create(output_dir, showWarnings=FALSE)
 
 #gene info for sleuth
 # print('#Fetching bioMart info (1/2)')
@@ -86,6 +87,7 @@ for (column_name in colnames(s2c)) {
 
   conditions <- c(conditions, column_name)
 }
+print(conditions)
 
 # Determine number of names for each condition.
 condition_names <- list()
@@ -94,6 +96,7 @@ for (i in 1:length(conditions)) {
   vec <- sort(unique(s2c[, condition]))
   condition_names[[i]] <- c(vec)
 }
+print(condition_names)
 
 print(paste('# ', length(conditions), ' conditions detected', sep=''))
 if (length(conditions) > 2) {
@@ -106,7 +109,15 @@ s2c <- dplyr::mutate(s2c, path=file.path(kallisto, sample))
 print(s2c)
 
 print('# Creating Sleuth object.')
-so <- sleuth_prep(s2c, target_mapping = t2g, extra_bootstrap_summary = TRUE)
+if (length(conditions) == 1) {
+  prep_condition <- paste('~', conditions[1], sep='')
+} else {
+  # ~condition_1+condition_2+condition_1*condition_2
+  prep_condition <- paste('~', conditions[1], '+', conditions[2], '+',
+                          conditions[1], '*', conditions[2], sep='')
+}
+so <- sleuth_prep(s2c, eval(parse(text=prep_condition)),
+                  target_mapping = t2g, extra_bootstrap_summary = TRUE)
 
 # Fit reduced model.
 # print('# Fitting reduced model.')
@@ -117,18 +128,23 @@ so <- sleuth_prep(s2c, target_mapping = t2g, extra_bootstrap_summary = TRUE)
 # }
 # so <- sleuth_fit(so, eval(parse(text=condition)), 'reduced')
 
-# Fit full model.
-print('# Fitting full model.')
+# Fit model.
+print('# Fitting model(s).')
 if (length(conditions) == 1) {
   condition <- paste('~', conditions[1], sep='')
 } else {
+  # Fit interaction model.
+  print('# Fitting interaction model.')
+  so <- sleuth_fit(so, eval(parse(text=prep_condition)), fit_name='interaction')
+
   condition <- paste('~', conditions[1], '+', conditions[2], sep='')
 }
+print('# Fitting full model.')
 so <- sleuth_fit(so, eval(parse(text=condition)), fit_name='full')
 
 models(so)
 
-print('# Performing Wald tests.')
+print('# Performing Wald tests on full model.')
 for (i in 1:length(conditions)) {
   condition <- conditions[i]
   condition_name <- condition_names[[i]]
@@ -138,18 +154,83 @@ for (i in 1:length(conditions)) {
       next
     }
 
-    print(paste('# Computing wald test on condition ', condition, ':', name,
-                sep=''))
-    beta = paste(condition, name, sep='')
+    print(paste('# Computing wald test on condition ', condition, ':', name, sep=''))
+    beta <- paste(condition, name, sep='')
     so <- sleuth_wt(so, which_beta=beta, which_model='full')
 
     # Write results.
     results_table <- sleuth_results(so, beta, 'full', test_type='wt')
-    output_file = paste('sleuth_table_wt_', condition, '_', name, '.csv',
-                        sep='')
+    output_file <- paste('betas_wt_', condition, '-', name, '.csv', sep='')
     write.csv(results_table, paste(output_dir, output_file, sep='/'))
   }
 }
+
+if (length(conditions) > 1) {
+  print('# Performing Wald tests on interaction model.')
+  for (i in 1:length(conditions)) {
+    condition <- conditions[i]
+    condition_name <- condition_names[[i]]
+
+    for (name in condition_name) {
+      if (startsWith(name, 'a_')) {
+        next
+      }
+
+      print(paste('# Computing wald test on condition ', condition, ':', name,
+                  sep=''))
+      beta = paste(condition, name, sep='')
+      so <- sleuth_wt(so, which_beta=beta, which_model='interaction')
+
+      # Write results.
+      results_table <- sleuth_results(so, beta, 'interaction', test_type='wt')
+      output_file = paste('betas_wt_', condition, '-', name, '.csv',
+                          sep='')
+      write.csv(results_table, paste(output_dir, output_file, sep='/'))
+    }
+  }
+
+  # Compute pairwise interactions.
+  for (i in 1:length(conditions)) {
+    condition <- conditions[i]
+    condition_name <- condition_names[[i]]
+
+    for (name in condition_name) {
+      if (startsWith(name, 'a_') | i+1 > length(conditions)) {
+        next
+      }
+
+      for (j in (i+1):length(conditions)) {
+        condition2 <- conditions[j]
+        condition2_name <- condition_names[[j]]
+
+        for (name2 in condition2_name) {
+          if (startsWith(name2, 'a_') | name == name2) {
+            next
+          }
+
+          print(paste('# Computing wald test on condition ', condition, ':', name,
+                      ' with ', condition2, ':', name2, sep=''))
+          beta = paste(condition, name, ':', condition2, name2, sep='')
+          so <- sleuth_wt(so, which_beta=beta, which_model='interaction')
+
+          # Write results.
+          results_table <- sleuth_results(so, beta, 'interaction', test_type='wt')
+          output_file = paste('betas_wt_', condition, '-', name, '.csv',
+                              sep='')
+          write.csv(results_table, paste(output_dir, output_file, sep='/'))
+        }
+      }
+    }
+  }
+
+
+  # LRT on full and interaction models
+  print('# Performing LRT on full and interaction models.')
+  so <- sleuth_lrt(so, 'full', 'interaction')
+  results_table <- sleuth_results(so, 'full:interaction', test_type='lrt')
+  write.csv(results_table, paste(output_dir, 'lrt.csv', sep='/'))
+}
+
 
 
 # print('# Writing likelihood ratio test sleuth table.')
@@ -175,5 +256,5 @@ for (i in 1:length(conditions)) {
 # }
 
 print('#Writing sleuth object.')
-so_file = paste(output_dir, 'so.rds', sep='/')
+so_file = paste(base_dir, 'so.rds', sep='/')
 saveRDS(so, file=so_file)

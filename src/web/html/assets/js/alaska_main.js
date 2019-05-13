@@ -270,12 +270,14 @@ function set_output_listener_for_collapse(collapse, type, textarea, ul, badge,
     'type': type,
     'badge': badge,
     'textarea': textarea,
-    't': t
+    't': t,
+    'ul': ul
   }, function (e) {
     var type = e.data.type;
     var badge = e.data.badge;
     var textarea = e.data.textarea;
     var t = e.data.t;
+    var ul = e.data.ul;
 
     // Set up interval only when the process is running.
     if (badge.hasClass('badge-info') && output_intervals[type] == null) {
@@ -2008,8 +2010,11 @@ function set_values_of_organism_dropdowns(div, vals) {
  * the values of the factor card.
  */
 function set_factor_card_to_sample_listener(factor_card,
-                                            sample_factor_group_class_name) {
+                                            sample_factor_group_class_name,
+                                            other_factor_card,
+                                            prefix) {
   var name_div = factor_card.find('.factor_name_inputs');
+  var other_name_div = other_factor_card.find('.factor_name_inputs');
   var values_div = factor_card.find('.factor_values_inputs');
 
   var name_inputs = name_div.find('select,input');
@@ -2017,11 +2022,13 @@ function set_factor_card_to_sample_listener(factor_card,
 
   // If name changes, the factor name also changes for each sample.
   name_inputs.change({
+    'prefix': prefix,
     'name_div': name_div,
     'class_name': sample_factor_group_class_name
   }, function (e) {
     var name_div = e.data.name_div;
     var class_name = e.data.class_name;
+    var prefix = e.data.prefix;
 
     for (var id in sample_forms) {
       var sample_form = sample_forms[id];
@@ -2029,15 +2036,25 @@ function set_factor_card_to_sample_listener(factor_card,
       var factor_group = sample_form.find('.' + class_name);
       var label = factor_group.find('label');
       var name = get_value_from_custom_dropdown(name_div);
-      label.text('Factor 1: ' + name);
+      label.text(prefix + name);
     }
   });
 
   // To enable, disable preset factor names.
-  name_div.find('select').change(function () {
-    var select = $(this);
+  name_div.find('select').change({
+    'other_factor_card': other_factor_card
+  }, function (e) {
+    var select = $(this).filter(':visible');
     var selected = select.children('option:not(:disabled):selected');
+    var other_factor_card = e.data.other_factor_card;
+    var other_name_div = other_factor_card.find('.factor_name_inputs');
+    var other_select = other_name_div.find('select:visible')
+
+    var other_selected = other_select.children('option:not(:disabled):selected');
     var val = selected.val();
+    var other_val = other_selected.val();
+
+    console.log('other_val: ' + other_val);
 
     // Skip if null.
     if (val == null) {
@@ -2052,7 +2069,7 @@ function set_factor_card_to_sample_listener(factor_card,
       var common_form_class_name = 'sample_common_form';
       var specific_form_class_name = 'sample_specific_form';
 
-      if (val == factor_name) {
+      if (val == factor_name || other_val == factor_name) {
         checkbox.prop('disabled', true);
       } else {
         checkbox.prop('disabled', false);
@@ -2107,8 +2124,10 @@ function set_factor_to_sample_listeners(design_1_radio, design_2_radio,
   var factor_1_card = design_inputs.children('.factor_card:first');
   var factor_2_card = design_inputs.children('.factor_card:last');
 
-  set_factor_card_to_sample_listener(factor_1_card, 'sample_factors_1_group');
-  set_factor_card_to_sample_listener(factor_2_card, 'sample_factors_2_group');
+  set_factor_card_to_sample_listener(factor_1_card, 'sample_factors_1_group',
+                                     factor_2_card, 'Factor 1: ');
+  set_factor_card_to_sample_listener(factor_2_card, 'sample_factors_2_group',
+                                     factor_1_card, 'Factor 2: ');
 
   // Also, depending on which radio is selected (i.e. what design the
   // experiment is), we need to show or hide the second factor.
@@ -3227,6 +3246,17 @@ function set_proj_meta_inputs(card, inputs) {
     }
   }
 
+  // If Two-factor, show the 2-factor card.
+  if ('proj_experimental_design_group' in inputs) {
+    if (inputs['proj_experimental_design_group'].length == 1) {
+      $('#proj_design_1_radio').prop('checked', true);
+      $('#proj_design_1_radio').click();
+    } else {
+      $('#proj_design_2_radio').prop('checked', true);
+      $('#proj_design_2_radio').click();
+    }
+  }
+
   // Then, fire some changes.
   card.find('input:text,select').change();
 }
@@ -3250,6 +3280,17 @@ function set_common_meta_inputs(card, inputs) {
       // Unselect the checkbox.
       checkbox.prop('checked', true);
       checkbox.click();
+    }
+  }
+
+  // Deal read type.
+  if ('sample_read_type_group' in inputs) {
+    if (inputs['sample_read_type_group'].type == 1) {
+      $('#sample_share_read_type_single').prop('checked', true);
+      $('#sample_share_read_type_single').click();
+    } else {
+      $('#sample_share_read_type_paired').prop('checked', true);
+      $('#sample_share_read_type_paired').click();
     }
   }
 }
@@ -3630,9 +3671,9 @@ function validate_sample_meta_inputs(inputs, sample_form) {
             }
           } else if (type == 2) {
             var reads = {};
-            for (var i = 0; i < reads.pairs.length; i++) {
-              for (var j = 0; j < reads.pairs[i].length; j++) {
-                var read = reads.pairs[i][j];
+            for (var i = 0; i < val.pairs.length; i++) {
+              for (var j = 0; j < val.pairs[i].length; j++) {
+                var read = val.pairs[i][j];
                 var select = form_group.find('option[value="' + read +'"]');
 
                 if (!(read in reads)) {

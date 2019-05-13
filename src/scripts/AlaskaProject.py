@@ -399,11 +399,12 @@ class AlaskaProject(Alaska):
                     tar.add(full_path, arcname=arcname)
 
             # Add differential expression results.
-            for file in os.listdir(self.diff_dir):
-                if not file.endswith(('out.txt', '.rds', '.R')):
-                    full_path = '{}/{}'.format(self.diff_dir, file)
-                    arcname = file
-                    tar.add(full_path, arcname=arcname)
+            for root, dirs, files in os.walk(self.diff_dir):
+                for file in files:
+                    if not file.endswith(('out.txt', '.rds', '.R')):
+                        full_path = os.path.join(root, file)
+                        arcname = file
+                        tar.add(full_path, arcname=arcname)
 
             # Add the softfile.
             full_path = '{}/{}'.format(self.dir, out)
