@@ -341,9 +341,9 @@ class AlaskaProject(Alaska):
                      'Enrichment Suite:\n'
                      'https://doi.org/10.1186/s12859-016-1229-9\n'
                      'https://www.wormbase.org/tools/enrichment/tea/tea.cgi\n')
-        if self.epistasis:
-            info += ('Alaska performed epistasis analyses as first '
-                     'presented in\nhttps://doi.org/10.1073/pnas.1712387115\n')
+        # if self.epistasis:
+        #     info += ('Alaska performed epistasis analyses as first '
+        #              'presented in\nhttps://doi.org/10.1073/pnas.1712387115\n')
 
         return info
 
@@ -401,7 +401,7 @@ class AlaskaProject(Alaska):
             # Add differential expression results.
             for root, dirs, files in os.walk(self.diff_dir):
                 for file in files:
-                    if not file.endswith(('out.txt', '.rds', '.R')):
+                    if not file.endswith(('out.txt', '.rds', '.R', '.svg')):
                         full_path = os.path.join(root, file)
                         arcname = file
                         tar.add(full_path, arcname=arcname)
@@ -491,9 +491,10 @@ class AlaskaProject(Alaska):
 
             supplementary = []
             diff_files = os.listdir(self.diff_dir)
-            for diff_file in diff_files:
-                if not diff_file.endswith(('out.txt', '.rds', '.R')):
-                    supplementary.append(diff_file)
+            for root, dirs, files in os.walk(self.diff_dir):
+                for file in files:
+                    if not file.endswith(('out.txt', '.rds', '.R', '.svg')):
+                        supplementary.append(file)
 
             for file in supplementary:
                 f.write(format_attribute('Series_supplementary_file', file))
@@ -605,7 +606,7 @@ class AlaskaProject(Alaska):
                         ext = os.path.splitext(basename)[1]
                         files.append(arcname)
                         types.append(ext)
-                        md5s.append(sample.reads[read])
+                        md5s.append(sample.reads[read]['md5'])
 
                     f.write(format_attribute(
                             'Sample_raw_file_name_run' + run, ', '.join(files)))

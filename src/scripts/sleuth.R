@@ -215,7 +215,7 @@ if (length(conditions) > 1) {
 
           # Write results.
           results_table <- sleuth_results(so, beta, 'interaction', test_type='wt')
-          output_file = paste('betas_wt_', condition, '-', name, '.csv',
+          output_file = paste('betas_', condition, '-', name, '.csv',
                               sep='')
           write.csv(results_table, paste(output_dir, output_file, sep='/'))
         }
@@ -228,7 +228,7 @@ if (length(conditions) > 1) {
   print('# Performing LRT on full and interaction models.')
   so <- sleuth_lrt(so, 'full', 'interaction')
   results_table <- sleuth_results(so, 'full:interaction', test_type='lrt')
-  write.csv(results_table, paste(output_dir, 'lrt.csv', sep='/'))
+  write.csv(results_table, paste(output_dir, 'betas_interaction.csv', sep='/'))
 }
 
 

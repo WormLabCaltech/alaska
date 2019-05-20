@@ -1559,7 +1559,7 @@ class AlaskaServer(Alaska):
             for pair in Alaska.ENRICHMENT_ORGS:
                 org_pair = (sample.organism['genus'], sample.organism['species'])
                 new_proj.enrichment = new_proj.enrichment and pair == org_pair
-        new_proj.epistasis = len(new_proj.factors) == Alaska.EPISTASIS_FACTOR_NUM
+        # new_proj.epistasis = len(new_proj.factors) == Alaska.EPISTASIS_FACTOR_NUM
 
         new_proj.progress = Alaska.PROGRESS['finalized']
         new_proj.save()
