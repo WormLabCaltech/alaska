@@ -937,7 +937,8 @@ class AlaskaServer(Alaska):
         cont = AlaskaDocker(Alaska.DOCKER_QC_TAG)
         cont.run(cmd, working_dir=wdir,
                  volumes=volumes,
-                 cpuset_cpus=self.CPUS)
+                 cpuset_cpus=self.CPUS,
+                 remove=True)
         self.out('INFO: container started with id {}'.format(cont.id))
         self.org_update_id = cont.id
 
@@ -1987,7 +1988,8 @@ class AlaskaServer(Alaska):
         cont = AlaskaDocker(Alaska.DOCKER_SLEUTH_TAG)
         cont.run(cmd, working_dir=wdir,
                  volumes=volumes,
-                 ports=ports)
+                 ports=ports,
+                 remove=True)
         cont_id = cont.id
         self.out(('INFO: shiny app container started with '
                   + 'id {}').format(cont_id))

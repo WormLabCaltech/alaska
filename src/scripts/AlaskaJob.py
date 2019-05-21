@@ -55,6 +55,7 @@ class AlaskaJob(Alaska):
         self.docker = AlaskaDocker(img_tag)
         self.docker_cmd = cmd
         self.docker_args = args
+        self.docker_args['remove'] = True
         self.datetime_created = dt.datetime.now()
         self.datetime_started = None
         self.datetime_finished = None
